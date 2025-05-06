@@ -55,6 +55,8 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Piano_H7/piano_h7.cpp
+    Piano_H7/ft6336.cpp
+    Piano_H7/st7796.cpp
 )
 
 # Add include paths

@@ -1,5 +1,5 @@
 {
     "files.associations": {
-        "piano_h7.h": "c"
+        "piano_h7.hpp": "cpp"
     }
 }

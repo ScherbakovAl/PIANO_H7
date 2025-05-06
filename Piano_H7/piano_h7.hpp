@@ -6,8 +6,8 @@
  */
 
 #pragma once
- // #include "st7796.h"
- // #include "ft6336.h"
+ #include "st7796.h"
+ #include "ft6336.h"
  // #include "lvgl.h"
 
 
