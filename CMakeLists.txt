@@ -101,6 +101,10 @@ set(
     LV_CONF_BUILD_DISABLE_DEMOS ON
 )
 
+set(
+    BUILD_SHARED_LIBS ON
+)
+
 add_subdirectory(
     Piano_H7/lvgl
 )

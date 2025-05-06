@@ -208,8 +208,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -294,9 +293,22 @@
                   "type": "tabset",
                   "id": "EDITORS",
                   "weight": 32.87866163073159,
+                  "selected": 1,
                   "enableDeleteWhenEmpty": false,
                   "enableClose": false,
                   "children": [
+                    {
+                      "type": "tab",
+                      "id": "#d6a80808-ceb8-4975-80c2-ccb395425bfe",
+                      "name": "Settings",
+                      "component": "editor",
+                      "config": {
+                        "objectPath": "[display_piano.eez-project]:/settings",
+                        "subObjectPath": "[display_piano.eez-project]:/settings",
+                        "permanent": false
+                      },
+                      "icon": "material:settings"
+                    },
                     {
                       "type": "tab",
                       "id": "#b41b4a1f-e4de-49e9-9652-52a50d5a0d0e",
@@ -308,7 +320,8 @@
                       },
                       "icon": "svg:page"
                     }
-                  ]
+                  ],
+                  "active": true
                 }
               ]
             },
@@ -1367,15 +1380,16 @@
     "[display_piano.eez-project]:/userPages/6[flow-state]": {
       "selection": {
         "0": {
+          "0": {
+            "$selected": true
+          },
           "1": {},
           "2": {
             "0": {}
           },
           "3": {},
           "4": {},
-          "5": {
-            "$selected": true
-          },
+          "5": {},
           "6": {},
           "7": {},
           "8": {},
