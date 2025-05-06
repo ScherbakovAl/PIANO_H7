@@ -95,14 +95,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 # )
 set(
     LV_CONF_BUILD_DISABLE_EXAMPLES ON
-)
-
-set(
     LV_CONF_BUILD_DISABLE_DEMOS ON
-)
-
-set(
     BUILD_SHARED_LIBS ON
+    LV_CONF_BUILD_DISABLE_THORVG_INTERNAL ON
 )
 
 add_subdirectory(
