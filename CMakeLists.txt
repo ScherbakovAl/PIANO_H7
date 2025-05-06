@@ -44,7 +44,9 @@ enable_language(C CXX ASM)
 add_executable(${CMAKE_PROJECT_NAME})
 
 # Add STM32CubeMX generated sources
-add_subdirectory(cmake/stm32cubemx)
+add_subdirectory(
+    cmake/stm32cubemx
+)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -57,12 +59,17 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7/piano_h7.cpp
     Piano_H7/ft6336.cpp
     Piano_H7/st7796.cpp
+    Piano_H7/ui/images.c
+    Piano_H7/ui/screens.c
+    Piano_H7/ui/styles.c
+    Piano_H7/ui/ui.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Piano_H7
+    Piano_H7/ui
 )
 
 # Add project symbols (macros)
@@ -73,6 +80,32 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
     # Add user defined libraries
 )
+
+#LVGL
+#######################################################
+# set(
+#     LV_CONF_PATH "lv_conf.h"
+#     CACHE STRING "" FORCE
+# )
+
+# set(
+#     LV_CONF_INCLUDE_SIMPLE ON
+# )
+set(
+    LV_CONF_BUILD_DISABLE_EXAMPLES ON
+)
+
+set(
+    LV_CONF_BUILD_DISABLE_DEMOS ON
+)
+
+add_subdirectory(
+    Piano_H7/lvgl
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    lvgl::lvgl
+)
+#######################################################

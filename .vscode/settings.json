@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "piano_h7.hpp": "cpp"
+        "piano_h7.hpp": "cpp",
+        "lv_tick.h": "c",
+        "lvgl.h": "c",
+        "lv_conf_internal.h": "c",
+        "lv_init.h": "c",
+        "st7796.h": "c"
     }
 }

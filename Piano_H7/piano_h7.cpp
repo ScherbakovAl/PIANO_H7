@@ -6,10 +6,10 @@
  */
 
 #include "piano_h7.hpp"
-// #include "string"
- // #include "ui.h"
+ // #include "string"
+#include "ui.h"
+#include "main.h"
 
-/*
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
 #define BUFF_SIZE (480 * 40 * BYTES_PER_PIXEL)
 static lv_color16_t buf_1[BUFF_SIZE];
@@ -19,7 +19,7 @@ lv_display_t* disp;
 lv_indev_t* indev;
 lv_obj_t* btn;
 lv_obj_t* label_btn;
-*/
+
 void h7() {
 
 	// LCD init
@@ -32,32 +32,32 @@ void h7() {
 	FT6336_Init();
 
 	// LVGL init
-	// LL_TIM_EnableCounter(TIM4); // для LVGL
-	// LL_TIM_EnableIT_UPDATE(TIM4);
-	// lv_init();
+	LL_TIM_EnableCounter(TIM4); // для LVGL
+	LL_TIM_EnableIT_UPDATE(TIM4);
+	lv_init();
 
-	// // DISP start
-	// disp = lv_display_create(480, 320);
-	// lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
-	// lv_display_set_flush_cb(disp, my_flush_cb);
-	// lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1),
-	// 	LV_DISPLAY_RENDER_MODE_PARTIAL);
+	// DISP start
+	disp = lv_display_create(480, 320);
+	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
+	lv_display_set_flush_cb(disp, my_flush_cb);
+	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1),
+		LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-	// // TOUCH start
-	// LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
-	// indev = lv_indev_create();
-	// lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-	// lv_indev_set_read_cb(indev, my_input_read);
-	// // -----
+	// TOUCH start
+	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
+	indev = lv_indev_create();
+	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+	lv_indev_set_read_cb(indev, my_input_read);
+	// -----
 
-	// ui_init();
+	ui_init();
 
-	// while (1) {
-	// 	lv_timer_handler();
-	// 	ui_tick();
-	// }
+	while (1) {
+		lv_timer_handler();
+		ui_tick();
+	}
 }
-/*
+
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	//	GPIOC->BSRR = 0x80; // pC7
@@ -762,4 +762,3 @@ void char_correction(int x, plus_minus pm) {
 	check_max_min();
 	lv_chart_refresh(objects.chart);
 }
-*/
