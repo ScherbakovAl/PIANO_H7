@@ -7,8 +7,8 @@
             "intelliSenseMode": "${default}",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}",
-                "Piano_H7"
+                "${workspaceFolder}"
+                // "Piano_H7"
             ]
         }
     ]

@@ -8,7 +8,7 @@
 #pragma once
 #include "st7796.h"
 #include "ft6336.h"
-#include "lvgl.h"
+ #include "lvgl.h"
 
 
 #ifdef __cplusplus
@@ -16,7 +16,7 @@ extern "C" {
 
 	//#include "deque"
 	//using sdfg = int;
-
+/*
 	const int allChipCount = 26;
 	const int allKeys = allChipCount / 2 * 7;
 	int32_t compsCHART_ON_1[allKeys] = { };
@@ -34,9 +34,10 @@ extern "C" {
 	int divis = 1000000000;
 	int s1_s2 = 1;
 	int top_bot = 0;
-
+*/
 	void h7();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
+	/*
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void manual_edit_on();
 	void manual_edit_off();
@@ -76,8 +77,8 @@ extern "C" {
 	enum plus_minus {
 		plus, minus
 	};
-
 	void char_correction(int x, plus_minus pm);
+	*/
 }
 #endif // extern "C"
 
