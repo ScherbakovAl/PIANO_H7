@@ -36,7 +36,7 @@ extern "C" {
 	int top_bot = 0;
 
 	void h7();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void manual_edit_on();

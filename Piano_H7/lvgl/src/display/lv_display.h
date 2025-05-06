@@ -78,7 +78,7 @@ typedef enum {
     LV_SCR_LOAD_ANIM_OUT_BOTTOM,
 } lv_screen_load_anim_t;
 
-typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
+typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map);
 typedef void (*lv_display_flush_wait_cb_t)(lv_display_t * disp);
 
 /**********************

@@ -59,17 +59,17 @@ void h7() {
 	}
 }
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
-void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
+void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	//	GPIOC->BSRR = 0x80; // pC7
 	//	GPIOC->BSRR = 0x800000; // pC7
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	int height = area->y2 - area->y1 + 1;
 	int width = area->x2 - area->x1 + 1;
 	for (int i = 0; i < width * height; i++) {
-		LCD_Send_Data_16((uint16_t *)color_p);
+		LCD_Send_Data_16(color_p);
 		++color_p;
 	}
-	//	Send_DMA_Data16(color_p, width  * height);
+		// Send_DMA_Data8(color_p, width  * height);
 
 	lv_display_flush_ready(disp);
 	//	GPIOC->BSRR = 0x80; // pC7
