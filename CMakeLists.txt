@@ -59,10 +59,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7/piano_h7.cpp
     Piano_H7/ft6336.cpp
     Piano_H7/st7796.cpp
-    # Piano_H7/ui/images.c
-    # Piano_H7/ui/screens.c
-    # Piano_H7/ui/styles.c
     Piano_H7/ui/ui.c
+    Piano_H7/ui/screens.c
+    Piano_H7/ui/images.c
+    Piano_H7/ui/styles.c
 )
 
 # Add include paths

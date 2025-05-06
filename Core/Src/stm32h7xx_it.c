@@ -15,9 +15,9 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
+  /* USER CODE END Header */
 
-/* Includes ------------------------------------------------------------------*/
+  /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
@@ -42,7 +42,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+extern volatile int touchpad_pressed;
+extern lv_display_t* disp;
+extern void DMA2_Stream1_TransferComplete();
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,7 +75,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
+  while (1)
   {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
@@ -231,8 +233,8 @@ void DMA1_Stream2_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
-	LL_TIM_ClearFlag_UPDATE(TIM4);
-	lv_tick_inc(1);
+  LL_TIM_ClearFlag_UPDATE(TIM4);
+  lv_tick_inc(1);
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -251,7 +253,14 @@ void EXTI15_10_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
     /* USER CODE BEGIN LL_EXTI_LINE_15 */
-
+    if (LL_TIM_IsEnabledCounter(TIM6))
+    {
+      LL_TIM_SetCounter(TIM6, 0);
+    }
+    else {
+      LL_TIM_EnableCounter(TIM6);
+      touchpad_pressed = 1;
+    }
     /* USER CODE END LL_EXTI_LINE_15 */
   }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
@@ -265,7 +274,14 @@ void EXTI15_10_IRQHandler(void)
 void SPI3_IRQHandler(void)
 {
   /* USER CODE BEGIN SPI3_IRQn 0 */
-
+  // GPIOC->BSRR = 0x80; // pC7
+  // GPIOC->BSRR = 0x800000; // pC7
+  // LL_SPI_DisableIT_TXP(SPI3);
+  // LL_SPI_ClearFlag_EOT(SPI3);
+  // LL_SPI_ClearFlag_TXTF(SPI3);
+  // LL_SPI_ClearFlag_SUSP(SPI3);
+  // LL_mDelay(3);
+  // lv_display_flush_ready(disp);
   /* USER CODE END SPI3_IRQn 0 */
   /* USER CODE BEGIN SPI3_IRQn 1 */
 
@@ -278,7 +294,8 @@ void SPI3_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-
+  LL_TIM_ClearFlag_UPDATE(TIM6);
+  touchpad_pressed = 0;
   /* USER CODE END TIM6_DAC_IRQn 0 */
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
@@ -291,7 +308,12 @@ void TIM6_DAC_IRQHandler(void)
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
-
+  // LL_DMA_ClearFlag_TC1(DMA2);
+  // flag_DMA_STREAM1_bsy = 1;
+  // GPIOC->BSRR = 0x200; // pC9
+  // GPIOC->BSRR = 0x2000000; // pC9
+  // LL_mDelay(2);
+  // lv_display_flush_ready(disp);
   /* USER CODE END DMA2_Stream1_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 

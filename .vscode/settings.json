@@ -5,6 +5,7 @@
         "lvgl.h": "c",
         "lv_conf_internal.h": "c",
         "lv_init.h": "c",
-        "st7796.h": "c"
+        "st7796.h": "c",
+        "vars.h": "c"
     }
 }
