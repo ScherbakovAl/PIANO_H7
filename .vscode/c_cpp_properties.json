@@ -8,7 +8,6 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}"
-                // "Piano_H7"
             ]
         }
     ]

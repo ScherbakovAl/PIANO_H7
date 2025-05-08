@@ -5,11 +5,8 @@
  *      Author: sche
  */
 
- // #include "main.h"
- // #include "stm32h7xx_ll_spi.h"
 #include "piano_h7.hpp"
- // #include "string"
-#include "ui.h"
+
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
 #define BUFF_SIZE (480 * 10 * BYTES_PER_PIXEL)
@@ -51,13 +48,46 @@ void h7() {
 	lv_indev_set_read_cb(indev, my_input_read);
 	// -----
 
+	// GUI start
+
 	ui_init();
-	
+
+	// USB init
+	LL_TIM_EnableCounter(TIM2); // счётчик
+	tud_init(BOARD_TUD_RHPORT);
+	// tusb_init();
+
+	LL_mDelay(500);
+	{
+		uint8_t const cable_num = 0;
+		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
+		const int bufsize = sizeof(note_buf);
+		tud_midi_stream_write(cable_num, note_buf, bufsize);
+		LL_mDelay(1);
+	}
+	{
+		uint8_t const cable_num = 0;
+		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
+		const int bufsize = sizeof(note_buf);
+		tud_midi_stream_write(cable_num, note_buf, bufsize);
+		LL_mDelay(1);
+	}
+
 	while (1) {
+		if (TIM2->CNT > 400000) {
+			TIM2->CNT = 0;
+			uint8_t const cable_num = 0;
+			uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
+			const int bufsize = sizeof(note_buf);
+			tud_midi_stream_write(cable_num, note_buf, bufsize);
+
+		}
+		tud_task();
 		lv_timer_handler();
 		ui_tick();
 	}
 }
+
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	//	GPIOC->BSRR = 0x80; // pC7
@@ -69,7 +99,7 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 		LCD_Send_Data_16(color_p);
 		++color_p;
 	}
-		// Send_DMA_Data8(color_p, width  * height);
+	// Send_DMA_Data8(color_p, width  * height);
 
 	lv_display_flush_ready(disp);
 	//	GPIOC->BSRR = 0x80; // pC7

@@ -17,6 +17,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+# set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
+# set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -29,11 +31,16 @@ set(CMAKE_PROJECT_NAME Piano_H7)
 # Include toolchain file
 include("cmake/gcc-arm-none-eabi.cmake")
 
+
+# tinyUSB
+include("tinyusb/src/CMakeLists.txt")
+
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
+
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Enable CMake support for ASM and C languages
@@ -47,11 +54,19 @@ add_executable(${CMAKE_PROJECT_NAME})
 add_subdirectory(
     cmake/stm32cubemx
 )
+# Add linked libraries
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    stm32cubemx
+    # Add user defined libraries
+)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined library search paths
 )
+
+# tinyUSB
+tinyusb_target_add(${CMAKE_PROJECT_NAME})
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
@@ -63,6 +78,11 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7/ui/screens.c
     Piano_H7/ui/images.c
     Piano_H7/ui/styles.c
+    # tinyUSB
+    Piano_H7/usb_descriptors.c
+    tinyusb/src/tusb.c
+    tinyusb/src/portable/synopsys/dwc2/dcd_dwc2.c
+    tinyusb/src/portable/synopsys/dwc2/dwc2_common.c
 )
 
 # Add include paths
@@ -70,6 +90,9 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     Piano_H7
     Piano_H7/ui
+    # tinyUSB
+    tinyusb/src
+    tinyusb/hw/bsp
 )
 
 # Add project symbols (macros)
@@ -77,29 +100,8 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
 )
 
-# Add linked libraries
-target_link_libraries(${CMAKE_PROJECT_NAME}
-    stm32cubemx
-    # Add user defined libraries
-)
-
-#LVGL
+# LVGL
 #######################################################
-# set(
-#     LV_CONF_PATH "lv_conf.h"
-#     CACHE STRING "" FORCE
-# )
-
-# set(
-#     LV_CONF_INCLUDE_SIMPLE ON
-# )
-set(
-    LV_CONF_BUILD_DISABLE_EXAMPLES ON
-    LV_CONF_BUILD_DISABLE_DEMOS ON
-    BUILD_SHARED_LIBS ON
-    LV_CONF_BUILD_DISABLE_THORVG_INTERNAL ON
-)
-
 add_subdirectory(
     Piano_H7/lvgl
 )
@@ -107,4 +109,3 @@ add_subdirectory(
 target_link_libraries(${CMAKE_PROJECT_NAME}
     lvgl::lvgl
 )
-#######################################################

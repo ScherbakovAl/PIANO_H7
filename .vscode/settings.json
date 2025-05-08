@@ -6,6 +6,16 @@
         "lv_conf_internal.h": "c",
         "lv_init.h": "c",
         "st7796.h": "c",
-        "vars.h": "c"
-    }
+        "vars.h": "c",
+        "tusb_option.h": "c",
+        "stm32h7xx_hal.h": "c",
+        "board.h": "c",
+        "tusb_config.h": "c",
+        "tusb.h": "c",
+        "dcd.h": "c",
+        "fsdev_stm32.h": "c",
+        "usb_descriptors.h": "c",
+        "dwc2_common.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": true
 }
