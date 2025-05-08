@@ -19,6 +19,38 @@ set(CMAKE_CXX_EXTENSIONS ON)
 
 # set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 # set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
+# set(CMAKE_C_FLAGS_RELEASE "")
+
+# set(CMAKE_CXX_FLAGS_RELEASE "
+# -fno-rtti #
+# -fno-exeptions #
+# -fno-threadsafe-statics #
+# -fdata-sections #
+# -ffunction-sections #
+#  --specs=nano.specs #
+# -mfpu=fpv5-d16
+# -mfloat-abi=hard
+# -mthumb
+# -fno-cxa-atexit
+# -fno_strict_aliasing
+# -flto #? !!!!! оптимизация на весь код, как единая единица трансляции
+# ")
+# set(TARGET_FLAGS "
+# -fno-rtti #
+# -fno-exeptions #
+# -fno-threadsafe-statics #
+# -fdata-sections #
+# -ffunction-sections #
+#  --specs=nano.specs #
+# -mfpu=fpv5-d16
+# -mfloat-abi=hard
+# -mthumb
+# -fno-cxa-atexit
+# -fno_strict_aliasing
+# -flto # ? !!!!! оптимизация на весь код, как единая единица трансляции
+# ")
+# set(CMAKE_C_LINK_FLAGS "")
+# set(CMAKE_CXX_LINK_FLAGS "")
 
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
