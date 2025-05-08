@@ -7,6 +7,9 @@
 
 #include "piano_h7.hpp"
 
+ // #include "deque"
+ // using sdfg = int;
+ // std::deque<int> rt;
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
 #define BUFF_SIZE (480 * 10 * BYTES_PER_PIXEL)

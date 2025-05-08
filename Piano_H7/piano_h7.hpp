@@ -16,8 +16,6 @@
 #ifdef __cplusplus
 extern "C" {
 
-	// #include "deque"
-	//using sdfg = int;
 
 	const int allChipCount = 26;
 	const int allKeys = allChipCount / 2 * 7;
