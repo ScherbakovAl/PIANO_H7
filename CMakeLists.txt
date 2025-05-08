@@ -17,41 +17,6 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-# set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
-# set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
-# set(CMAKE_C_FLAGS_RELEASE "")
-
-# set(CMAKE_CXX_FLAGS_RELEASE "
-# -fno-rtti #
-# -fno-exeptions #
-# -fno-threadsafe-statics #
-# -fdata-sections #
-# -ffunction-sections #
-#  --specs=nano.specs #
-# -mfpu=fpv5-d16
-# -mfloat-abi=hard
-# -mthumb
-# -fno-cxa-atexit
-# -fno_strict_aliasing
-# -flto #? !!!!! оптимизация на весь код, как единая единица трансляции
-# ")
-# set(TARGET_FLAGS "
-# -fno-rtti #
-# -fno-exeptions #
-# -fno-threadsafe-statics #
-# -fdata-sections #
-# -ffunction-sections #
-#  --specs=nano.specs #
-# -mfpu=fpv5-d16
-# -mfloat-abi=hard
-# -mthumb
-# -fno-cxa-atexit
-# -fno_strict_aliasing
-# -flto # ? !!!!! оптимизация на весь код, как единая единица трансляции
-# ")
-# set(CMAKE_C_LINK_FLAGS "")
-# set(CMAKE_CXX_LINK_FLAGS "")
-
 # Define the build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
@@ -63,6 +28,15 @@ set(CMAKE_PROJECT_NAME Piano_H7)
 # Include toolchain file
 include("cmake/gcc-arm-none-eabi.cmake")
 
+# set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
+# set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
+
+set(FLaGSGS "-fno-rtti -fno-exeptions -fno-threadsafe-statics -fdata-sections -ffunction-sections --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fno-cxa-atexit -fno_strict_aliasing -flto")
+set(TARGET_FLAGS FLaGSGS)
+set(CMAKE_C_FLAGS_RELEASE FLaGSGS)
+set(CMAKE_CXX_FLAGS_RELEASE FLaGSGS)
+set(CMAKE_C_LINK_FLAGS FLaGSGS)
+set(CMAKE_CXX_LINK_FLAGS FLaGSGS)
 
 # tinyUSB
 include("tinyusb/src/CMakeLists.txt")
