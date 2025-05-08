@@ -49,7 +49,6 @@ void h7() {
 	// -----
 
 	// GUI start
-
 	ui_init();
 
 	// USB init
@@ -57,41 +56,19 @@ void h7() {
 	tud_init(BOARD_TUD_RHPORT);
 	// tusb_init();
 
-	LL_mDelay(500);
-	{
-		uint8_t const cable_num = 0;
-		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
-		const int bufsize = sizeof(note_buf);
-		tud_midi_stream_write(cable_num, note_buf, bufsize);
-		LL_mDelay(1);
-	}
-	{
-		uint8_t const cable_num = 0;
-		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
-		const int bufsize = sizeof(note_buf);
-		tud_midi_stream_write(cable_num, note_buf, bufsize);
-		LL_mDelay(1);
-	}
+	LL_mDelay(300);
+	send_test_midi();
 
 	while (1) {
-		if (TIM2->CNT > 400000) {
-			TIM2->CNT = 0;
-			uint8_t const cable_num = 0;
-			uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
-			const int bufsize = sizeof(note_buf);
-			tud_midi_stream_write(cable_num, note_buf, bufsize);
-
-		}
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
+		send_test_midi();
 	}
 }
 
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
-	//	GPIOC->BSRR = 0x80; // pC7
-	//	GPIOC->BSRR = 0x800000; // pC7
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	int height = area->y2 - area->y1 + 1;
 	int width = area->x2 - area->x1 + 1;
@@ -102,10 +79,18 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	// Send_DMA_Data8(color_p, width  * height);
 
 	lv_display_flush_ready(disp);
-	//	GPIOC->BSRR = 0x80; // pC7
-	//	GPIOC->BSRR = 0x800000; // pC7
 }
 
+void send_test_midi() {
+	if (TIM2->CNT > 3000000) {
+		TIM2->CNT = 0;
+		uint8_t const cable_num = 0;
+		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
+		const int bufsize = sizeof(note_buf);
+		tud_midi_stream_write(cable_num, note_buf, bufsize);
+
+	}
+}
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #include "vars.h"
 #include <string>
