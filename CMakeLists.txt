@@ -45,7 +45,7 @@ set(CMAKE_CXX_FLAGS_INIT "-fsanitize=undefined")
 
 
 # tinyUSB
-include("tinyusb/src/CMakeLists.txt")
+include("Piano_H7/tinyusb/src/CMakeLists.txt")
 
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
@@ -92,9 +92,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7/ui/styles.c
     # tinyUSB
     Piano_H7/usb_descriptors.c
-    tinyusb/src/tusb.c
-    tinyusb/src/portable/synopsys/dwc2/dcd_dwc2.c
-    tinyusb/src/portable/synopsys/dwc2/dwc2_common.c
+    Piano_H7/tinyusb/src/tusb.c
+    Piano_H7/tinyusb/src/portable/synopsys/dwc2/dcd_dwc2.c
+    Piano_H7/tinyusb/src/portable/synopsys/dwc2/dwc2_common.c
 )
 
 # Add include paths
@@ -103,8 +103,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7
     Piano_H7/ui
     # tinyUSB
-    tinyusb/src
-    tinyusb/hw/bsp
+    Piano_H7/tinyusb/src
+    Piano_H7/tinyusb/hw/bsp
 )
 
 # Add project symbols (macros)
