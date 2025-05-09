@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.28.1)
 # User is free to modify the file as much as necessary
 #
 
-
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # Setup compiler settings
 set(CMAKE_C_STANDARD 17)
@@ -38,7 +38,6 @@ set(CMAKE_CXX_FLAGS_RELEASE FLaGSGS)
 set(CMAKE_C_LINK_FLAGS FLaGSGS)
 set(CMAKE_CXX_LINK_FLAGS FLaGSGS)
 # -fsanitize=undefined ???????
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # tinyUSB
 include("tinyusb/src/CMakeLists.txt")
