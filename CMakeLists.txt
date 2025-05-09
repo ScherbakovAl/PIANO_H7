@@ -32,14 +32,17 @@ include("cmake/gcc-arm-none-eabi.cmake")
 # set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 
 set(FLaGSGS "-fno-rtti -fno-exeptions -fno-threadsafe-statics -fdata-sections -ffunction-sections --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fno-cxa-atexit -fno_strict_aliasing -flto
-# -march=native #?
+# -march=native # ?
+# -fsanitize=undefined # ?
 ")
 set(TARGET_FLAGS FLaGSGS)
 set(CMAKE_C_FLAGS_RELEASE FLaGSGS)
 set(CMAKE_CXX_FLAGS_RELEASE FLaGSGS)
 set(CMAKE_C_LINK_FLAGS FLaGSGS)
 set(CMAKE_CXX_LINK_FLAGS FLaGSGS)
-# -fsanitize=undefined ???????
+set(CMAKE_C_FLAGS_INIT "-fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_INIT "-fsanitize=undefined")
+
 
 # tinyUSB
 include("tinyusb/src/CMakeLists.txt")
@@ -50,7 +53,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 
-message("Build type: " ${CMAKE_BUILD_TYPE})
+message("> > > >>>>>>>>>>>>> Build type: " ${CMAKE_BUILD_TYPE} " <<<<<<<<<<<<<<<<< < < < <")
 
 # Enable CMake support for ASM and C languages
 # enable_language(C ASM)

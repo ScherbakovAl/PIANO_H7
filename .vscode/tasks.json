@@ -19,6 +19,8 @@
             "args": [
                 "--connect",
                 "port=swd",
+                "sn=24003800070000574B31534E", // чёрный
+                // "sn=7400410007000059334D524E", // синий
                 "--download",
                 "${command:cmake.launchTargetPath}",
                 "-hardRst",
