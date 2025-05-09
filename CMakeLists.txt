@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.28.1)
 # User is free to modify the file as much as necessary
 #
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # Setup compiler settings
 set(CMAKE_C_STANDARD 17)
@@ -31,7 +31,9 @@ include("cmake/gcc-arm-none-eabi.cmake")
 # set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 # set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 
-set(FLaGSGS "-fno-rtti -fno-exeptions -fno-threadsafe-statics -fdata-sections -ffunction-sections --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fno-cxa-atexit -fno_strict_aliasing -flto")
+set(FLaGSGS "-fno-rtti -fno-exeptions -fno-threadsafe-statics -fdata-sections -ffunction-sections --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -fno-cxa-atexit -fno_strict_aliasing -flto
+# -march=native #?
+")
 set(TARGET_FLAGS FLaGSGS)
 set(CMAKE_C_FLAGS_RELEASE FLaGSGS)
 set(CMAKE_CXX_FLAGS_RELEASE FLaGSGS)
