@@ -38,6 +38,7 @@ set(CMAKE_CXX_FLAGS_RELEASE FLaGSGS)
 set(CMAKE_C_LINK_FLAGS FLaGSGS)
 set(CMAKE_CXX_LINK_FLAGS FLaGSGS)
 # -fsanitize=undefined ???????
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # tinyUSB
 include("tinyusb/src/CMakeLists.txt")
