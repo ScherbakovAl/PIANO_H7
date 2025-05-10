@@ -626,35 +626,35 @@ extern "C" void action_cursor_plus10(lv_event_t* e) {
 }
 
 extern "C" void action_add_1(lv_event_t* e) {
-	char_correction(1, plus);
+	chart_correction(1, plus);
 }
 
 extern "C" void action_add_10(lv_event_t* e) {
-	char_correction(10, plus);
+	chart_correction(10, plus);
 }
 
 extern "C" void action_add_100(lv_event_t* e) {
-	char_correction(100, plus);
+	chart_correction(100, plus);
 }
 
 extern "C" void action_add_1000(lv_event_t* e) {
-	char_correction(1000, plus);
+	chart_correction(1000, plus);
 }
 
 extern "C" void action_sub_1(lv_event_t* e) {
-	char_correction(1, minus);
+	chart_correction(1, minus);
 }
 
 extern "C" void action_sub_10(lv_event_t* e) {
-	char_correction(10, minus);
+	chart_correction(10, minus);
 }
 
 extern "C" void action_sub_100(lv_event_t* e) {
-	char_correction(100, minus);
+	chart_correction(100, minus);
 }
 
 extern "C" void action_sub_1000(lv_event_t* e) {
-	char_correction(1000, minus);
+	chart_correction(1000, minus);
 }
 
 extern "C" void action_save_calibration(lv_event_t* e) {
@@ -895,7 +895,7 @@ void check_max_min() {
 	s2_off_max = std::to_string(m_m.off.s2.max);
 }
 
-void char_correction(int x, plus_minus pm) {
+void chart_correction(int x, plus_minus pm) {
 
 	if (lv_scr_act() == objects.chart_manual_edit_on_disp) {
 		if (fl_on == 1)

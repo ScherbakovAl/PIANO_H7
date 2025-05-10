@@ -132,7 +132,7 @@ extern "C" {
 	void comp_to_chart();
 	void chart_to_comp();
 	void start_chart();
-	void char_correction(int x, plus_minus pm);
+	void chart_correction(int x, plus_minus pm);
 	void check_max_min();
 }
 #endif // extern "C"
