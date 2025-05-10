@@ -7,9 +7,8 @@
 
 #include "piano_h7.hpp"
 
- // #include "deque"
- // using sdfg = int;
- // std::deque<int> rt;
+//  #include "deque"
+//  std::deque<int> rt;
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
 #define BUFF_SIZE (480 * 10 * BYTES_PER_PIXEL)
@@ -126,24 +125,6 @@ void h7() {
 	}
 } // h7
 
-// (1uS)
-void pause(int p) {
-	TIM2->CNT = 0;
-	while (TIM2->CNT < p) {
-	}
-}
-
-int convert8x2to16(uint8_t a, uint8_t b) {
-	return a << 8 | b;
-}
-
-conv16to8x2 convert16to8x2(int a) {
-	conv16to8x2 r;
-	r.a = (a & 0xff << 8) >> 8;
-	r.b = a & 0xff;
-	return r;
-}
-
 void sync() {
 	LL_USART_DisableDMAReq_RX(UART4);
 	TIM3->CNT = 0;
@@ -180,56 +161,6 @@ void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot,
 	UART4_Receive_Settings();
 	pause(1);
 	LL_USART_EnableDMAReq_RX(UART4);
-}
-
-void SaveToMemory() {
-	SCB_DisableICache();
-	SCB_DisableDCache();
-	HAL_FLASH_Unlock();
-
-	FLASH_Erase_Sector(FLASH_SECTOR_2, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
-
-	uint32_t Addr = Flash_Address;
-	for (uint32_t i = 0; i < 25; i++) {
-		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[0][0]) != HAL_OK) {
-			HAL_FLASH_Lock();
-			return;
-		}
-		Addr += 0x20;
-		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[4][0]) != HAL_OK) {
-			HAL_FLASH_Lock();
-			return;
-		}
-		Addr += 0x20;
-	}
-	// замок на запись (по адресу Flash_Address + 0x640)
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory[0]) != HAL_OK) {
-		HAL_FLASH_Lock();
-		return;
-	}
-
-	HAL_FLASH_Lock();
-	SCB_EnableICache();
-	SCB_EnableDCache();
-}
-
-void ReadOnMemory() {
-	if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory[0]) {
-		SaveToMemory();
-	}
-	else {
-		uint32_t l = 0;
-		for (uint32_t i = 0; i < allChipCount; ++i) { // с нулевого номера считывать?
-			for (uint32_t j = 0; j < 8; ++j) {
-				for (uint32_t k = 0; k < 2; ++k) {
-					comparator[i].comp[j][k] =
-						*(volatile uint32_t*)(Flash_Address
-							+ (l * sizeof(uint32_t)));
-					++l;
-				}
-			}
-		}
-	}
 }
 
 // UART Send-Recive
@@ -280,6 +211,98 @@ void DMA1_RX(void) {
 }
 //---------------------------------
 
+void SaveToMemory() {
+	SCB_DisableICache();
+	SCB_DisableDCache();
+	HAL_FLASH_Unlock();
+
+	FLASH_Erase_Sector(FLASH_SECTOR_2, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
+
+	uint32_t Addr = Flash_Address;
+	for (uint32_t i = 0; i < 25; i++) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[0][0]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[4][0]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+	}
+	// замок на запись (по адресу Flash_Address + 0x640)
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory[0]) != HAL_OK) {
+		HAL_FLASH_Lock();
+		return;
+	}
+
+	HAL_FLASH_Lock();
+	SCB_EnableICache();
+	SCB_EnableDCache();
+}
+
+void ReadOnMemory() {
+	if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory[0]) {
+		SaveToMemory();
+	}
+	else {
+		uint32_t l = 0;
+		for (uint32_t i = 0; i < allChipCount; ++i) { // с нулевого номера считывать?
+			for (uint32_t j = 0; j < 8; ++j) {
+				for (uint32_t k = 0; k < 2; ++k) {
+					comparator[i].comp[j][k] =
+						*(volatile uint32_t*)(Flash_Address
+							+ (l * sizeof(uint32_t)));
+					++l;
+				}
+			}
+		}
+	}
+}
+//---------------------------------
+
+// (1uS)
+void pause(int p) {
+	TIM2->CNT = 0;
+	while (TIM2->CNT < p) {
+	}
+}
+
+int convert8x2to16(uint8_t a, uint8_t b) {
+	return a << 8 | b;
+}
+
+conv16to8x2 convert16to8x2(int a) {
+	conv16to8x2 r;
+	r.a = (a & 0xff << 8) >> 8;
+	r.b = a & 0xff;
+	return r;
+}
+//---------------------------------
+
+void send_test_midi() { // for test
+	if (TIM2->CNT > 3000000) {
+		TIM2->CNT = 0;
+		uint8_t const cable_num = 0;
+		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
+		const int bufsize = sizeof(note_buf);
+		tud_midi_stream_write(cable_num, note_buf, bufsize);
+	}
+}
+
+void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
+	if (touchpad_pressed) {
+		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+		data->point.x = TP.point1_x;
+		data->point.y = TP.point1_y;
+		data->state = LV_INDEV_STATE_PRESSED;
+	}
+	else {
+		data->state = LV_INDEV_STATE_RELEASED;
+	}
+}
+
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
@@ -294,17 +317,8 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	lv_display_flush_ready(disp);
 }
 
-void send_test_midi() {
-	if (TIM2->CNT > 3000000) {
-		TIM2->CNT = 0;
-		uint8_t const cable_num = 0;
-		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
-		const int bufsize = sizeof(note_buf);
-		tud_midi_stream_write(cable_num, note_buf, bufsize);
-	}
-}
-
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
+// LVGL
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
 #include "vars.h"
 #include <string>
 
@@ -751,18 +765,6 @@ extern "C" void action_div_sub_100000(lv_event_t* e) {
 }
 
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-
-void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
-	if (touchpad_pressed) {
-		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
-		data->point.x = TP.point1_x;
-		data->point.y = TP.point1_y;
-		data->state = LV_INDEV_STATE_PRESSED;
-	}
-	else {
-		data->state = LV_INDEV_STATE_RELEASED;
-	}
-}
 
 void comp_to_chart() {
 	int c = 0; // 0 <> allChipCount
