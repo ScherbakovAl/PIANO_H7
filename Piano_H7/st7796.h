@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include "spi.h"
 
-//#define WHITE       0xFFFF
+ //#define WHITE       0xFFFF
 #define BLACK      	0x0000
 #define BLUE       	0x001F
 #define BRED        0XF81F
@@ -45,10 +45,10 @@ struct lcd_dev {
 	uint16_t setycmd;
 };
 
-void Send_DMA_Data8(uint8_t *buff, uint16_t dataSize);
-void Send_DMA_Data16(uint16_t *buff, uint16_t dataSize);
+void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize);
+void Send_DMA_Data16(uint16_t* buff, uint16_t dataSize);
 void LCD_Send_Data_8(uint8_t data);
-void LCD_Send_Data_16(uint16_t *Data);
+void LCD_Send_Data_16(uint16_t* Data);
 void LCD_Send_Data_16_(uint16_t Data);
 void LCD_WR_REG(uint8_t data);
 void LCD_WR_DATA(uint8_t data);
@@ -58,8 +58,7 @@ void LCD_direction(uint8_t direction);
 void LCD_Clear(uint16_t Color);
 void LCD_rect_test(int x1, int x2, int y1, int y2, uint16_t Color);
 void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos);
-void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
-		uint16_t yEnd);
+void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd, uint16_t yEnd);
 void LCD_RESET(void);
 void LCD_Init(void);
 

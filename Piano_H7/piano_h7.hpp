@@ -16,13 +16,12 @@
 #ifdef __cplusplus
 extern "C" {
 
-
 	const int allChipCount = 26;
 	const int allKeys = allChipCount / 2 * 7;
-	int32_t compsCHART_ON_1[allKeys] = { };
-	int32_t compsCHART_ON_2[allKeys] = { };
-	int32_t compsCHART_OFF_1[allKeys] = { };
-	int32_t compsCHART_OFF_2[allKeys] = { };
+	int32_t compsCHART_ON_1[allKeys] = {};
+	int32_t compsCHART_ON_2[allKeys] = {};
+	int32_t compsCHART_OFF_1[allKeys] = {};
+	int32_t compsCHART_OFF_2[allKeys] = {};
 	int on_green_max = 3515;
 	int on_green_min = 3495;
 	int on_red_max = 1010;
@@ -51,22 +50,26 @@ extern "C" {
 	int fl_disp = 0;
 
 	struct comps {
-		int comp[8][2] = { { 3500, 1005 }, { 3501, 1000 }, { 3502, 1001 }, { 3503, 1000 }, { 3504, 1000 }, { 3505, 1000 }, { 3506, 1000 }, { 0, 0 } };
+		int comp[8][2] = { {3500, 1005}, {3501, 1000}, {3502, 1001}, {3503, 1000}, {3504, 1000}, {3505, 1000}, {3506, 1000}, {0, 0} };
 	};
+
 	int def[2] = { 3500, 1000 };
 
 	struct min_max {
 		int max = 0;
 		int min = 4095;
 	};
+
 	struct s1s2 {
 		min_max s1;
 		min_max s2;
 	};
+
 	struct on_off_s1_s2_min_max {
 		s1s2 on;
 		s1s2 off;
 	};
+
 	on_off_s1_s2_min_max m_m;
 	void check_max_min();
 
@@ -76,10 +79,11 @@ extern "C" {
 	void chart_to_comp();
 	void start_chart();
 	enum plus_minus {
-		plus, minus
+		plus,
+		minus
 	};
-	void char_correction(int x, plus_minus pm);
 
+	void char_correction(int x, plus_minus pm);
 }
 #endif // extern "C"
 

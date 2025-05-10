@@ -43,7 +43,6 @@ void h7() {
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1),
 		LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-
 	// TOUCH start
 	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
 	indev = lv_indev_create();
@@ -91,7 +90,6 @@ void send_test_midi() {
 		uint8_t note_buf[] = { 0xB0, 0x58, 125, 0x90, 0x3E, 0x36, 0xB0, 0x58, 125, 0x80, 0x3E, 0x36 };
 		const int bufsize = sizeof(note_buf);
 		tud_midi_stream_write(cable_num, note_buf, bufsize);
-
 	}
 }
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -630,7 +628,7 @@ void start_chart() {
 		c1 = lv_chart_add_cursor(objects.chart, lv_color_make(250, 250, 250),
 			LV_DIR_VER);
 		lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
-		lv_obj_set_style_line_width(objects.chart, 0, LV_PART_ITEMS); // толщина линий на графике
+		lv_obj_set_style_line_width(objects.chart, 0, LV_PART_ITEMS);  // толщина линий на графике
 		lv_obj_set_style_size(objects.chart, 2, 3, LV_PART_INDICATOR); // размер точек на графике
 		lv_obj_add_state(objects.s1_s2_on, 16);
 		lv_obj_add_state(objects.s1_s2_off, 16);
@@ -689,42 +687,32 @@ void char_correction(int x, plus_minus pm) {
 
 	if (lv_scr_act() == objects.chart_manual_edit_on_disp) {
 		if (fl_on == 1)
-			pm == plus_minus::plus ?
-			compsCHART_ON_1[cursor] += x : compsCHART_ON_1[cursor] -= x;
+			pm == plus_minus::plus ? compsCHART_ON_1[cursor] += x : compsCHART_ON_1[cursor] -= x;
 		if (fl_on == 2)
-			pm == plus_minus::plus ?
-			compsCHART_ON_2[cursor] += x : compsCHART_ON_2[cursor] -= x;
+			pm == plus_minus::plus ? compsCHART_ON_2[cursor] += x : compsCHART_ON_2[cursor] -= x;
 	}
 	else if (lv_scr_act() == objects.chart_manual_edit_off_disp) {
 		if (fl_off == 1)
-			pm == plus_minus::plus ?
-			compsCHART_OFF_1[cursor] += x : compsCHART_OFF_1[cursor] -=
-			x;
+			pm == plus_minus::plus ? compsCHART_OFF_1[cursor] += x : compsCHART_OFF_1[cursor] -= x;
 		if (fl_off == 2)
-			pm == plus_minus::plus ?
-			compsCHART_OFF_2[cursor] += x : compsCHART_OFF_2[cursor] -=
-			x;
+			pm == plus_minus::plus ? compsCHART_OFF_2[cursor] += x : compsCHART_OFF_2[cursor] -= x;
 	}
 	else if (lv_scr_act() == objects.chart_graph_resize) {
 		if (fl_disp) { // 0 = on, 1 = off
 			if (s1_s2) { // 0 = green, 1 = red
 				if (top_bot) { // 0 = top, 1 = bottom
-					pm == plus_minus::minus ? off_red_min += x : off_red_min -=
-						x;
+					pm == plus_minus::minus ? off_red_min += x : off_red_min -= x;
 				}
 				else {
-					pm == plus_minus::minus ? off_red_max += x : off_red_max -=
-						x;
+					pm == plus_minus::minus ? off_red_max += x : off_red_max -= x;
 				}
 			}
 			else {
 				if (top_bot) {
-					pm == plus_minus::minus ?
-						off_green_min += x : off_green_min -= x;
+					pm == plus_minus::minus ? off_green_min += x : off_green_min -= x;
 				}
 				else {
-					pm == plus_minus::minus ?
-						off_green_max += x : off_green_max -= x;
+					pm == plus_minus::minus ? off_green_max += x : off_green_max -= x;
 				}
 			}
 			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
@@ -751,12 +739,10 @@ void char_correction(int x, plus_minus pm) {
 			}
 			else {
 				if (top_bot) {
-					pm == plus_minus::minus ?
-						on_green_min += x : on_green_min -= x;
+					pm == plus_minus::minus ? on_green_min += x : on_green_min -= x;
 				}
 				else {
-					pm == plus_minus::minus ?
-						on_green_max += x : on_green_max -= x;
+					pm == plus_minus::minus ? on_green_max += x : on_green_max -= x;
 				}
 			}
 			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
@@ -780,4 +766,3 @@ void char_correction(int x, plus_minus pm) {
 	check_max_min();
 	lv_chart_refresh(objects.chart);
 }
-

@@ -40,8 +40,7 @@ tusb_desc_device_t const desc_device =
 
 // Invoked when received GET DEVICE DESCRIPTOR
 // Application return pointer to descriptor
-uint8_t const* tud_descriptor_device_cb(void)
-{
+uint8_t const* tud_descriptor_device_cb(void) {
   return (uint8_t const*)&desc_device;
 }
 
@@ -50,8 +49,7 @@ uint8_t const* tud_descriptor_device_cb(void)
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 
-enum
-{
+enum {
   ITF_NUM_MIDI = 0,
   ITF_NUM_MIDI_STREAMING,
   ITF_NUM_TOTAL
@@ -96,8 +94,7 @@ uint8_t const desc_hs_configuration[] =
 // Invoked when received GET CONFIGURATION DESCRIPTOR
 // Application return pointer to descriptor
 // Descriptor contents must exist long enough for transfer to complete
-uint8_t const* tud_descriptor_configuration_cb(uint8_t index)
-{
+uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
   (void)index; // for multiple configurations
 
 #if TUD_OPT_HIGH_SPEED

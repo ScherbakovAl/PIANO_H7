@@ -23,8 +23,8 @@ TouchPoints_HandleTypeDef TouchPoints;
 // extern SPI_HandleTypeDef FT6336_I2C_PORT;
 
 
-void FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size) {
-//	 LL_I2C_HandleTransfer(I2C4, SLAVE_OWN_ADDRESS, LL_I2C_ADDRSLAVE_7BIT, 1, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
+void FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	//	 LL_I2C_HandleTransfer(I2C4, SLAVE_OWN_ADDRESS, LL_I2C_ADDRSLAVE_7BIT, 1, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
 	uint8_t deviceAddress = FT6X36_ADDR; // 0x70
 	LL_I2C_ClearFlag_STOP(I2C5);
 	LL_I2C_ClearFlag_NACK(I2C5);
@@ -53,7 +53,7 @@ void FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size) {
 	LL_I2C_ClearFlag_STOP(I2C5);
 }
 
-void FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size) {
+void FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
 	uint8_t deviceAddress = FT6X36_ADDR; // 0x70
 	LL_I2C_SetTransferSize(I2C5, Size);
 	LL_I2C_SetTransferRequest(I2C5, LL_I2C_REQUEST_WRITE);
@@ -61,7 +61,7 @@ void FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size) {
 	LL_I2C_GenerateStartCondition(I2C5);
 	LL_I2C_TransmitData8(I2C5, RegAddress);
 	LL_mDelay(1);
-//	LL_I2C_ClearFlag_STOP(I2C5);
+	//	LL_I2C_ClearFlag_STOP(I2C5);
 
 	LL_I2C_SetTransferSize(I2C5, Size);
 	LL_I2C_SetTransferRequest(I2C5, LL_I2C_REQUEST_READ);
@@ -90,19 +90,19 @@ void FT6336_Init(void) {
 	FT6336_WriteRegister(0xA4, 0x00, 1); // enable interrupt out
 	uint8_t id = 0;
 	FT6336_ReadRegister(FT6336_FOCALTECH_ID, &id, 1);
-//    HAL_Delay(1000);
+	//    HAL_Delay(1000);
 
-//used to debug IIC
-//    for (uint8_t addr = 0x08; addr < 0x78; ++addr) {  // I2C 地址范围是 0x08 到 0x77
-//           if (HAL_I2C_Mem_Read(&FT6336_I2C_PORT, addr << 1, 0x00, I2C_MEMADD_SIZE_8BIT, &id, 1, 100) == HAL_OK) {
-//                // 如果扫描到设备并且读取成功，进入处理函数
-//                HAL_Delay(100);
-//            }
-//            HAL_Delay(10);
-//        }
-//    HAL_I2C_Mem_Read(&FT6336_I2C_PORT, 0xA0, 0x00, I2C_MEMADD_SIZE_8BIT, &id, 1, HAL_MAX_DELAY);
-//    HAL_Delay(1000);
 	//used to debug IIC
+	//    for (uint8_t addr = 0x08; addr < 0x78; ++addr) {  // I2C 地址范围是 0x08 到 0x77
+	//           if (HAL_I2C_Mem_Read(&FT6336_I2C_PORT, addr << 1, 0x00, I2C_MEMADD_SIZE_8BIT, &id, 1, 100) == HAL_OK) {
+	//                // 如果扫描到设备并且读取成功，进入处理函数
+	//                HAL_Delay(100);
+	//            }
+	//            HAL_Delay(10);
+	//        }
+	//    HAL_I2C_Mem_Read(&FT6336_I2C_PORT, 0xA0, 0x00, I2C_MEMADD_SIZE_8BIT, &id, 1, HAL_MAX_DELAY);
+	//    HAL_Delay(1000);
+		//used to debug IIC
 }
 #endif
 
@@ -110,16 +110,16 @@ extern I2C_HandleTypeDef FT6336_I2C_PORT;
 
 TouchPoints_HandleTypeDef TouchPoints;
 
-HAL_StatusTypeDef FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData,
-		uint16_t Size) {
+HAL_StatusTypeDef FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData,
+	uint16_t Size) {
 	return HAL_I2C_Mem_Write(&FT6336_I2C_PORT, FT6X36_ADDR, RegAddress,
-	I2C_MEMADD_SIZE_8BIT, pData, Size, HAL_MAX_DELAY);
+		I2C_MEMADD_SIZE_8BIT, pData, Size, HAL_MAX_DELAY);
 }
 
-HAL_StatusTypeDef FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData,
-		uint16_t Size) {
+HAL_StatusTypeDef FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData,
+	uint16_t Size) {
 	return HAL_I2C_Mem_Read(&FT6336_I2C_PORT, FT6X36_ADDR, RegAddress,
-	I2C_MEMADD_SIZE_8BIT, pData, Size, HAL_MAX_DELAY);
+		I2C_MEMADD_SIZE_8BIT, pData, Size, HAL_MAX_DELAY);
 }
 
 void FT6336_Init(void) {
@@ -139,7 +139,7 @@ void FT6336_Init(void) {
 	LL_mDelay(1);
 }
 
-static void AdjustTouchCoordinates(uint16_t *x, uint16_t *y) {
+static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
 	uint16_t rawX = *x;
 	uint16_t rawY = *y;
 	*x = SCREEN_WIDTH - rawY;
@@ -169,7 +169,7 @@ TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 			touchPoints.point2_x = ((touchData[4] & 0x0F) << 8) | touchData[5];
 			touchPoints.point2_y = ((touchData[6] & 0x0F) << 8) | touchData[7];
 			AdjustTouchCoordinates(&touchPoints.point2_x,
-					&touchPoints.point2_y);
+				&touchPoints.point2_y);
 		}
 	}
 	return touchPoints;
