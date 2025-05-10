@@ -22,6 +22,36 @@ lv_obj_t* btn;
 lv_obj_t* label_btn;
 
 void h7() {
+	//	LL_mDelay(100);
+
+	// TIM init
+	LL_TIM_EnableCounter(TIM2); // просто счётчик (1uS)
+
+	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
+	LL_TIM_EnableAllOutputs(TIM1);
+	LL_TIM_EnableIT_TRIG(TIM1);
+
+	LL_TIM_SetAutoReload(TIM3, allChipCount);
+	LL_TIM_EnableCounter(TIM3); // считает номер контроллера g4
+
+	LL_TIM_EnableCounter(TIM4); // для LVGL
+	LL_TIM_EnableIT_UPDATE(TIM4);
+	//---------------------------------
+
+	// UART init
+	LL_USART_Enable(UART4);
+	LL_USART_EnableDMAReq_RX(UART4);
+	//---------------------------------
+
+	// DMA RX для получения данных
+	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
+	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART4->RDR));
+	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
+	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
+	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
+	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+	//---------------------------------
+
 	// LCD init
 	LL_SPI_Enable(SPI3);
 	LL_SPI_StartMasterTransfer(SPI3);
@@ -32,42 +62,223 @@ void h7() {
 	FT6336_Init();
 
 	// LVGL init
-	LL_TIM_EnableCounter(TIM4); // для LVGL
-	LL_TIM_EnableIT_UPDATE(TIM4);
 	lv_init();
 
 	// DISP start
 	disp = lv_display_create(480, 320);
 	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
 	lv_display_set_flush_cb(disp, my_flush_cb);
-	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1),
-		LV_DISPLAY_RENDER_MODE_PARTIAL);
+	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
 	// TOUCH start
 	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
 	indev = lv_indev_create();
 	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
 	lv_indev_set_read_cb(indev, my_input_read);
-	// -----
 
 	// GUI start
 	ui_init();
 
 	// USB init
-	LL_TIM_EnableCounter(TIM2); // счётчик
+	// tusb_init(); // ?
 	tud_init(BOARD_TUD_RHPORT);
-	// tusb_init();
 
 	LL_mDelay(300);
 	send_test_midi();
+	//---------------------------------
+
+	// калибровка
+	//	while (1) {
+	//		calibration(6, 0, 0);
+	//		sync();
+	//	}
+	// calibration(4, 2, 1);
+
+	// readCompValue(4, 2, 1);
+
+	// setCompValue(4, 2, 0, 3499);
+	// setCompValue(4, 2, 1, 999);
+
+	// readCompValue(4, 2, 0);
+	// readCompValue(4, 2, 1);
+
+	// pause(15);
+	//---------------------------------
+
+	// память
+	// SaveToMemory();
+	// ReadOnMemory(); // test
+	//---------------------------------
+
+	// синхронизация
+	// sync();
+	//---------------------------------
+
+	// start PWM
+	LL_TIM_EnableCounter(TIM1); // пинает g4's (ШИМ)
+	//---------------------------------
 
 	while (1) {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
-		send_test_midi();
+		send_test_midi(); // for test
+	}
+} // h7
+
+// (1uS)
+void pause(int p) {
+	TIM2->CNT = 0;
+	while (TIM2->CNT < p) {
 	}
 }
+
+int convert8x2to16(uint8_t a, uint8_t b) {
+	return a << 8 | b;
+}
+
+conv16to8x2 convert16to8x2(int a) {
+	conv16to8x2 r;
+	r.a = (a & 0xff << 8) >> 8;
+	r.b = a & 0xff;
+	return r;
+}
+
+void sync() {
+	LL_USART_DisableDMAReq_RX(UART4);
+	TIM3->CNT = 0;
+	for (int i = 4; i < 7; ++i) {
+		UART4_SendAddress(i);
+		pause(2);
+		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
+		UART4_Receive_Settings();
+		pause(1);
+	}
+	LL_USART_EnableDMAReq_RX(UART4);
+}
+
+void calibration(uint8_t adress, uint8_t compN, uint8_t dot) {
+	sender(command::cal, adress, compN, dot, 0);
+	comparator[adress].comp[compN][dot] = convert8x2to16(a_, b_);
+}
+
+void readCompValue(uint8_t adress, uint8_t compN, uint8_t dot) {
+	sender(command::read_comp_value, adress, compN, dot, 0);
+	comparator[adress].comp[compN][dot] = convert8x2to16(a_, b_);
+}
+
+void setCompValue(uint8_t adress, uint8_t compN, uint8_t dot, int value) {
+	sender(command::set_comp_value, adress, compN, dot, value);
+}
+
+void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot,
+	int value) {
+	LL_USART_DisableDMAReq_RX(UART4);
+	UART4_SendAddress(adress);
+	pause(1);
+	UART4_Send_Settings(com, compN, dot, value);
+	UART4_Receive_Settings();
+	pause(1);
+	LL_USART_EnableDMAReq_RX(UART4);
+}
+
+void SaveToMemory() {
+	SCB_DisableICache();
+	SCB_DisableDCache();
+	HAL_FLASH_Unlock();
+
+	FLASH_Erase_Sector(FLASH_SECTOR_2, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
+
+	uint32_t Addr = Flash_Address;
+	for (uint32_t i = 0; i < 25; i++) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[0][0]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[4][0]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+	}
+	// замок на запись (по адресу Flash_Address + 0x640)
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory[0]) != HAL_OK) {
+		HAL_FLASH_Lock();
+		return;
+	}
+
+	HAL_FLASH_Lock();
+	SCB_EnableICache();
+	SCB_EnableDCache();
+}
+
+void ReadOnMemory() {
+	if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory[0]) {
+		SaveToMemory();
+	}
+	else {
+		uint32_t l = 0;
+		for (uint32_t i = 0; i < allChipCount; ++i) { // с нулевого номера считывать?
+			for (uint32_t j = 0; j < 8; ++j) {
+				for (uint32_t k = 0; k < 2; ++k) {
+					comparator[i].comp[j][k] =
+						*(volatile uint32_t*)(Flash_Address
+							+ (l * sizeof(uint32_t)));
+					++l;
+				}
+			}
+		}
+	}
+}
+
+// UART Send-Recive
+void UART4_SendAddress(uint8_t slave_address) {
+	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	LL_USART_TransmitData9(UART4, address_byte);
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+}
+
+void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value) {
+	tx_settings[0] = { (uint8_t)com };
+	tx_settings[1] = { compN };
+	tx_settings[2] = { dot };
+	conv16to8x2 c;
+	c = convert16to8x2(value);
+	tx_settings[3] = c.a;
+	tx_settings[4] = c.b;
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	for (uint16_t i = 0; i < tx_settings_length; i++) {
+		LL_USART_TransmitData9(UART4, tx_settings[i]);
+		while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	}
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+}
+
+void UART4_Receive_Settings() {
+	for (int i = 0; i < rx_settings_length; i++) {
+		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {}
+		rx_settings[i] = LL_USART_ReceiveData9(UART4);
+	}
+	compN_ = rx_settings[1];
+	dot_ = rx_settings[2];
+	a_ = rx_settings[3];
+	b_ = rx_settings[4];
+}
+//---------------------------------
+
+// DMA IQR Handler
+void DMA1_RX(void) {
+	LL_DMA_ClearFlag_TC2(DMA1);
+	GPIOD->BSRR = 0x800; // pD11
+	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), 3); // clear RX
+	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+	uint8_t note_buf[] = { 0xB0, 0x58, rx_data[2], 0x90, rx_data[0], rx_data[1] };
+	tud_midi_stream_write(0, note_buf, 6);
+	GPIOD->BSRR = 0x8000000; // pD11
+}
+//---------------------------------
 
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
@@ -92,7 +303,8 @@ void send_test_midi() {
 		tud_midi_stream_write(cable_num, note_buf, bufsize);
 	}
 }
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
 #include "vars.h"
 #include <string>
 

@@ -46,7 +46,7 @@
 /* USER CODE BEGIN PV */
 extern volatile int touchpad_pressed;
 extern lv_display_t* disp;
-extern void DMA2_Stream1_TransferComplete();
+extern void DMA2_Stream1_TransferComplete(); // ??
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -222,7 +222,7 @@ void DMA1_Stream1_IRQHandler(void)
 void DMA1_Stream2_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
-
+  DMA1_RX();
   /* USER CODE END DMA1_Stream2_IRQn 0 */
   /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
 

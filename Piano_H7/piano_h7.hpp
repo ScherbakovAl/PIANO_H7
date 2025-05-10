@@ -16,44 +16,38 @@
 #ifdef __cplusplus
 extern "C" {
 
+	using uint = unsigned int;
+	using cuint = const uint;
+
 	const int allChipCount = 26;
+	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
+	// ***** 390-14000us пролёт молоточка
 	const int allKeys = allChipCount / 2 * 7;
-	int32_t compsCHART_ON_1[allKeys] = {};
-	int32_t compsCHART_ON_2[allKeys] = {};
-	int32_t compsCHART_OFF_1[allKeys] = {};
-	int32_t compsCHART_OFF_2[allKeys] = {};
-	int on_green_max = 3515;
-	int on_green_min = 3495;
-	int on_red_max = 1010;
-	int on_red_min = 990;
-	int off_green_max = 3514;
-	int off_green_min = 3494;
-	int off_red_max = 1011;
-	int off_red_min = 991;
-	int divis = 1000000000;
-	int s1_s2 = 1;
-	int top_bot = 0;
 
-	void h7();
-	void send_test_midi();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
-
-	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
-	void manual_edit_on();
-	void manual_edit_off();
-	volatile int touchpad_pressed = 0;
-	int touchpad_x = 0;
-	int touchpad_y = 0;
-	int32_t cursor = 10;
-	int fl_on = 0;
-	int fl_off = 0;
-	int fl_disp = 0;
+	uint8_t rx_data[3] = { };
+	const int dataLengthRX = sizeof(rx_data);
+	uint8_t tx_settings[5] = { };
+	const int tx_settings_length = sizeof(tx_settings);
+	uint8_t rx_settings[5] = { };
+	const int rx_settings_length = sizeof(rx_settings);
+	uint8_t compN_ = 0;
+	uint8_t dot_ = 0;
+	uint8_t a_ = 0;
+	uint8_t b_ = 0;
+	int f = 0;
+	cuint Flash_Address = 0x08040000;
+	cuint key_to_change_memory[8] = { 0xBAFC }; // 0x640 - смещение
 
 	struct comps {
 		int comp[8][2] = { {3500, 1005}, {3501, 1000}, {3502, 1001}, {3503, 1000}, {3504, 1000}, {3505, 1000}, {3506, 1000}, {0, 0} };
 	};
 
 	int def[2] = { 3500, 1000 };
+
+	struct conv16to8x2 {
+		uint8_t a = 0;
+		uint8_t b = 0;
+	};
 
 	struct min_max {
 		int max = 0;
@@ -70,20 +64,76 @@ extern "C" {
 		s1s2 off;
 	};
 
-	on_off_s1_s2_min_max m_m;
-	void check_max_min();
+	enum command {
+		sync_timer = 1,
+		cal,
+		read_comp_value,
+		set_comp_value,
+		//set_div_value, // реализовать
+		buff_to_flash,         //
+		flash_to_buff,         //
+		read_comp_value_flash, //
+	};
 
-	comps comparator[allChipCount];
-
-	void comp_to_chart();
-	void chart_to_comp();
-	void start_chart();
 	enum plus_minus {
 		plus,
 		minus
 	};
 
+	comps comparator[allChipCount];
+	comps test[allChipCount]; // for flash test
+	comps test_in[allChipCount]; // for flash test
+
+	on_off_s1_s2_min_max m_m;
+	int32_t compsCHART_ON_1[allKeys] = {};
+	int32_t compsCHART_ON_2[allKeys] = {};
+	int32_t compsCHART_OFF_1[allKeys] = {};
+	int32_t compsCHART_OFF_2[allKeys] = {};
+	int on_green_max = 3515;
+	int on_green_min = 3495;
+	int on_red_max = 1010;
+	int on_red_min = 990;
+	int off_green_max = 3514;
+	int off_green_min = 3494;
+	int off_red_max = 1011;
+	int off_red_min = 991;
+	int divis = 1000000000;
+	int s1_s2 = 1;
+	int top_bot = 0;
+	volatile int touchpad_pressed = 0;
+	int touchpad_x = 0;
+	int touchpad_y = 0;
+	int32_t cursor = 10;
+	int fl_on = 0;
+	int fl_off = 0;
+	int fl_disp = 0;
+
+	void h7();
+	void UART4_SendAddress(uint8_t slave_address);
+	void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value);
+	void UART4_Receive_Settings();
+	conv16to8x2 convert16to8x2(int a);
+	int convert8x2to16(uint8_t a, uint8_t b);
+	void pause(int p);
+	void sync();
+	void calibration(uint8_t adress, uint8_t compN, uint8_t dot);
+	void readCompValue(uint8_t adress, uint8_t compN, uint8_t dot);
+	void setCompValue(uint8_t adress, uint8_t compN, uint8_t dot, int value);
+	void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot, int value);
+	void SaveToMemory();
+	void ReadOnMemory();
+	void DMA1_RX(void);
+	void DMA2_Stream3_TransferComplete(void);
+	void send_test_midi();
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
+	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
+	void manual_edit_on();
+	void manual_edit_off();
+	void comp_to_chart();
+	void chart_to_comp();
+	void start_chart();
 	void char_correction(int x, plus_minus pm);
+	void check_max_min();
 }
 #endif // extern "C"
 
@@ -91,3 +141,29 @@ extern "C" {
 //		GPIOC->BSRR = 0x2000000; // pC9
 //		GPIOC->BSRR = 0x80; // pC7
 //		GPIOC->BSRR = 0x800000; // pC7
+//		GPIOD->BSRR = 0x8000; // pD15
+//		GPIOD->BSRR = 0x80000000; // pD15
+//		GPIOD->BSRR = 0x2000; // pD13
+//		GPIOD->BSRR = 0x20000000; // pD13
+//		GPIOD->BSRR = 0x800; // pD11
+//		GPIOD->BSRR = 0x8000000; // pD11
+//		GPIOD->BSRR = 0x200; // pD9
+//		GPIOD->BSRR = 0x2000000; // pD9
+//		GPIOB->BSRR = 0x8000; // pB15
+//		GPIOB->BSRR = 0x80000000; // pB15
+//		GPIOB->BSRR = 0x2000; // pB13
+//		GPIOB->BSRR = 0x20000000; // pB13
+//		GPIOE->BSRR = 0x8; // pE3 LED
+//		GPIOE->BSRR = 0x80000; // pE3 LED
+
+/*TX*/
+/* Clean D-cache */
+/* Make sure the address is 32-byte aligned and add 32-bytes to length, in case it overlaps cacheline */
+/*SCB_CleanDCache_by_Addr((uint32_t*)(((uint32_t)tx_buffer) & ~(uint32_t)0x1F), TX_LENGTH+32);*/
+//			SCB_CleanDCache_by_Addr((uint32_t*)(((uint32_t)tx_data) & ~(uint32_t)0x1F), 3); // когда включениы ICache & DCache это необходимо использовать
+//			LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
+/*RX*/
+/* Invalidate D-cache before reception */
+/* Make sure the address is 32-byte aligned and add 32-bytes to length, in case it overlaps cacheline */
+/*SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_buffer) & ~(uint32_t)0x1F), RX_LENGTH+32);*/
+/* No access to rx_buffer should be made before DMA transfer is completed */
