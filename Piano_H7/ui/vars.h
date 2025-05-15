@@ -33,7 +33,8 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_CH_F = 15,
     FLOW_GLOBAL_VARIABLE_DISP_ON_OFF = 16,
     FLOW_GLOBAL_VARIABLE_DISP_ON_OFF_BUTTON = 17,
-    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR = 18
+    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR = 18,
+    FLOW_GLOBAL_VARIABLE_DEBUGG = 19
 };
 
 // Native global variables
@@ -76,6 +77,8 @@ extern const char *get_var_disp_on_off_button();
 extern void set_var_disp_on_off_button(const char *value);
 extern const char *get_var_top_bot_str();
 extern void set_var_top_bot_str(const char *value);
+extern const char *get_var_debugg();
+extern void set_var_debugg(const char *value);
 
 
 #ifdef __cplusplus

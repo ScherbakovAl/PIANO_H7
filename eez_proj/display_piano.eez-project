@@ -257,6 +257,14 @@
         "defaultValue": "\"\"",
         "persistent": false,
         "native": false
+      },
+      {
+        "objID": "c7b50d4c-3a9c-42ea-9a62-fd8ae37fa7a5",
+        "name": "debugg",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
       }
     ],
     "structures": [],
@@ -1333,6 +1341,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "e5b2d432-aed7-4c02-aaac-4ed0927283f6",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "b6c0d8da-90b2-4360-e7a5-925314d8911a",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "bbafa804-8c30-46bb-c7e7-24a36019209c",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -3056,6 +3118,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "8d72fc39-3e54-4ef6-e5a2-9d8638ea7a0e",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "84bbe4be-1027-4691-8709-1c1a11adb536",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_2",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "8fbdbcbf-361d-4012-9694-dad91314cb8c",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -4756,6 +4872,60 @@
               "longMode": "WRAP",
               "recolor": false,
               "previewValue": "0000"
+            },
+            {
+              "objID": "e1b2412b-e18f-4c51-b541-d8a54a2555aa",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "13e005e4-e55b-4421-e843-18f4dc93b5ed",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_1",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "f6cd550c-69bb-473d-99b1-770a8065b71e",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -6609,6 +6779,60 @@
               "textType": "literal",
               "longMode": "WRAP",
               "recolor": false
+            },
+            {
+              "objID": "de5974d4-a9fc-42df-960b-d55278f25c72",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "33b90980-3f02-4411-a204-a57f25d3c6e7",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_3",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "b04d8163-250e-4657-9d86-063f74f2e0db",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -8455,6 +8679,60 @@
               "textType": "literal",
               "longMode": "WRAP",
               "recolor": false
+            },
+            {
+              "objID": "03532f38-7d9f-44fd-fccb-772bc7f77733",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "212dacf0-5564-4031-9a41-8caf9392fc98",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_4",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "a5155335-d489-44f9-ebce-9c57a9b004b3",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",

@@ -6,7 +6,8 @@
  */
 
 #include "piano_h7.hpp"
-
+#include <string>
+void debug(std::string str);
 //  #include "deque"
 //  std::deque<int> rt;
 
@@ -82,34 +83,40 @@ void h7() {
 	// tusb_init(); // ?
 	tud_init(BOARD_TUD_RHPORT);
 
-	LL_mDelay(300);
-	send_test_midi();
+	// LL_mDelay(300);
+	// send_test_midi();
 	//---------------------------------
 
-	// калибровка
-	//	while (1) {
-	//		calibration(6, 0, 0);
-	//		sync();
-	//	}
-	// calibration(4, 2, 1);
+	// pre-start
+	tud_task();
+	lv_timer_handler();
+	ui_tick();
+	send_test_midi(); // for test
 
-	// readCompValue(4, 2, 1);
+// калибровка
+//	while (1) {
+//		calibration(6, 0, 0);
+//		sync();
+//	}
+// calibration(4, 2, 1);
 
-	// setCompValue(4, 2, 0, 3499);
-	// setCompValue(4, 2, 1, 999);
+// readCompValue(4, 2, 1);
 
-	// readCompValue(4, 2, 0);
-	// readCompValue(4, 2, 1);
+// setCompValue(4, 2, 0, 3499);
+// setCompValue(4, 2, 1, 999);
 
-	// pause(15);
-	//---------------------------------
+// readCompValue(4, 2, 0);
+// readCompValue(4, 2, 1);
 
-	// память
-	// SaveToMemory();
-	// ReadOnMemory(); // test
-	//---------------------------------
+// pause(15);
+//---------------------------------
 
-	// синхронизация
+// память
+// SaveToMemory();
+// ReadOnMemory(); // test
+//---------------------------------
+
+// синхронизация
 	sync();
 	//---------------------------------
 
@@ -133,6 +140,7 @@ void sync() {
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 		UART4_Receive_Settings();
+		if (b_ != 0) debug("Sync err, mcu #" + std::to_string(i));
 		pause(1);
 	}
 	LL_USART_EnableDMAReq_RX(UART4);
@@ -140,16 +148,20 @@ void sync() {
 
 void calibration(uint8_t adress, uint8_t compN, uint8_t dot) {
 	sender(command::cal, adress, compN, dot, 0);
-	comparator[adress].comp[compN][dot] = convert8x2to16(a_, b_);
+	// for test
+	if (b_ != 0) debug("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
+	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
+	// readCompValue(adress, compN, dot);
 }
 
 void readCompValue(uint8_t adress, uint8_t compN, uint8_t dot) {
 	sender(command::read_comp_value, adress, compN, dot, 0);
-	comparator[adress].comp[compN][dot] = convert8x2to16(a_, b_);
+	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 }
 
 void setCompValue(uint8_t adress, uint8_t compN, uint8_t dot, int value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
+	// TODO добавить проверку после отправки значения калибровки
 }
 
 void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot,
@@ -175,8 +187,8 @@ void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value) {
 	tx_settings[0] = { (uint8_t)com };
 	tx_settings[1] = { compN };
 	tx_settings[2] = { dot };
-	conv16to8x2 c;
-	c = convert16to8x2(value);
+	conv_16_8 c;
+	c = convert_16_8(value);
 	tx_settings[3] = c.a;
 	tx_settings[4] = c.b;
 	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
@@ -269,12 +281,12 @@ void pause(int p) {
 	}
 }
 
-int convert8x2to16(uint8_t a, uint8_t b) {
+int convert_8_16(uint8_t a, uint8_t b) {
 	return a << 8 | b;
 }
 
-conv16to8x2 convert16to8x2(int a) {
-	conv16to8x2 r;
+conv_16_8 convert_16_8(int a) {
+	conv_16_8 r;
 	r.a = (a & 0xff << 8) >> 8;
 	r.b = a & 0xff;
 	return r;
@@ -320,7 +332,6 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 // LVGL
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 
 #include "vars.h"
-#include <string>
 
 std::string ch_o;
 extern "C" const char* get_var_ch_o() {
@@ -486,6 +497,15 @@ extern "C" void set_var_top_bot_str(const char* value) {
 	top_bot_str = value;
 }
 
+std::string debugg;
+extern "C" const char* get_var_debugg() {
+	return debugg.c_str();
+}
+extern "C" void set_var_debugg(const char* value) {
+	debugg = value;
+}
+
+
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #include "actions.h"
 
@@ -495,10 +515,11 @@ extern "C" void action_to_main_disp(lv_event_t* e) {
 
 extern "C" void action_piano_off(lv_event_t* e) {
 	// TODO: Implement action piano_off here
+	debug("Off"); // for test debug
 }
 
 extern "C" void action_pre_pressure_switching(lv_event_t* e) {
-	// TODO: Implement action pre_pressure_switching here
+	// TODO action pre pressure switching
 }
 
 lv_chart_series_t* ser_1;
@@ -592,19 +613,27 @@ extern "C" void action_to_disp_back(lv_event_t* e) {
 }
 
 extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
-	// TODO: Implement action calib_sensor_1_on here
+	uint8_t adr = cursor / 7;
+	uint8_t c = cursor % 7;
+	uint8_t d = 0;
+	calibration(adr, c, d);
+	comp_to_chart();
 }
 
 extern "C" void action_calib_sensor_2_on(lv_event_t* e) {
-	// TODO: Implement action calib_sensor_2_on here
+	uint8_t adr = cursor / 7;
+	uint8_t c = cursor % 7;
+	uint8_t d = 1;
+	calibration(adr, c, d);
+	comp_to_chart();
 }
 
 extern "C" void action_calib_sensor_1_off(lv_event_t* e) {
-	// TODO: Implement action calib_sensor_1_off here
+	// TODO calib sensor 1 off
 }
 
 extern "C" void action_calib_sensor_2_off(lv_event_t* e) {
-	// TODO: Implement action calib_sensor_2_off here
+	// TODO calib sensor 2 off
 }
 
 extern "C" void action_to_disp_divisible_edit(lv_event_t* e) {
@@ -626,15 +655,15 @@ extern "C" void action_cursor_plus(lv_event_t* e) {
 }
 
 extern "C" void action_cursor_minus10(lv_event_t* e) {
-	if (cursor > 9) {
-		cursor -= 10;
+	if (cursor > 11) {
+		cursor -= 12;
 	}
 	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
 }
 
 extern "C" void action_cursor_plus10(lv_event_t* e) {
-	if (cursor < 81) {
-		cursor += 10;
+	if (cursor < 79) {
+		cursor += 12;
 	}
 	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
 }
@@ -673,6 +702,7 @@ extern "C" void action_sub_1000(lv_event_t* e) {
 
 extern "C" void action_save_calibration(lv_event_t* e) {
 	// TODO: Implement action save_calibration here
+	debug("Save calib " + std::to_string(657) + "?"); // for test
 }
 
 extern "C" void action_s1__s2_upd(lv_event_t* e) {
@@ -843,7 +873,8 @@ void start_chart() {
 			LV_DIR_VER);
 		lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
 		lv_obj_set_style_line_width(objects.chart, 0, LV_PART_ITEMS);  // толщина линий на графике
-		lv_obj_set_style_size(objects.chart, 2, 3, LV_PART_INDICATOR); // размер точек на графике
+		lv_obj_set_style_size(objects.chart, 4, 2, LV_PART_INDICATOR); // размер точек на графике
+		// lv_obj_set_style_size(objects.chart, 1, 1, LV_PART_CURSOR);
 		lv_obj_add_state(objects.s1_s2_on, 16);
 		lv_obj_add_state(objects.s1_s2_off, 16);
 		lv_obj_add_state(objects.s1_s2_button, 16);
@@ -979,4 +1010,11 @@ void chart_correction(int x, plus_minus pm) {
 	m_m = mm;
 	check_max_min();
 	lv_chart_refresh(objects.chart);
+}
+
+void debug(std::string str) {
+	// lv_obj_set_parent(objects.deb, lv_scr_act());
+	debugg.clear();
+	debugg = str;
+	// lv_obj_invalidate(objects.deb);
 }

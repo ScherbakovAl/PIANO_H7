@@ -29,6 +29,7 @@ typedef struct _objects_t {
     lv_obj_t *label_string_divisible;
     lv_obj_t *label_pre_pressure;
     lv_obj_t *switcher_pre_pressure;
+    lv_obj_t *deb;
     lv_obj_t *button_to_main;
     lv_obj_t *sub_10;
     lv_obj_t *add_10;
@@ -55,6 +56,7 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_11;
     lv_obj_t *label_sensor_10;
     lv_obj_t *chart;
+    lv_obj_t *deb_2;
     lv_obj_t *button_to_main_1;
     lv_obj_t *sub_11;
     lv_obj_t *add_11;
@@ -81,6 +83,7 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_13;
     lv_obj_t *label_sensor_14;
     lv_obj_t *label_sensor_15;
+    lv_obj_t *deb_1;
     lv_obj_t *button_to_main_2;
     lv_obj_t *sub_12;
     lv_obj_t *add_12;
@@ -101,6 +104,7 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_4;
     lv_obj_t *label_string_sensor_5;
     lv_obj_t *label_on_5;
+    lv_obj_t *deb_3;
     lv_obj_t *obj7;
     lv_obj_t *button_to_main_3;
     lv_obj_t *sub_13;
@@ -122,6 +126,7 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_6;
     lv_obj_t *label_string_sensor_7;
     lv_obj_t *label_on_6;
+    lv_obj_t *deb_4;
     lv_obj_t *obj8;
     lv_obj_t *button_to_main_4;
     lv_obj_t *sub_16;

@@ -16,6 +16,8 @@
 #ifdef __cplusplus
 extern "C" {
 
+// #include <string>
+
 	using uint = unsigned int;
 	using cuint = const uint;
 
@@ -44,7 +46,7 @@ extern "C" {
 
 	int def[2] = { 3500, 1000 };
 
-	struct conv16to8x2 {
+	struct conv_16_8 {
 		uint8_t a = 0;
 		uint8_t b = 0;
 	};
@@ -89,10 +91,10 @@ extern "C" {
 	int32_t compsCHART_ON_2[allKeys] = {};
 	int32_t compsCHART_OFF_1[allKeys] = {};
 	int32_t compsCHART_OFF_2[allKeys] = {};
-	int on_green_max = 3515;
-	int on_green_min = 3495;
-	int on_red_max = 1010;
-	int on_red_min = 990;
+	int on_green_max = 4600;
+	int on_green_min = 0;
+	int on_red_max = 4600;
+	int on_red_min = 0;
 	int off_green_max = 3514;
 	int off_green_min = 3494;
 	int off_red_max = 1011;
@@ -103,7 +105,7 @@ extern "C" {
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
-	int32_t cursor = 10;
+	int32_t cursor = 28;
 	int fl_on = 0;
 	int fl_off = 0;
 	int fl_disp = 0;
@@ -112,8 +114,8 @@ extern "C" {
 	void UART4_SendAddress(uint8_t slave_address);
 	void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value);
 	void UART4_Receive_Settings();
-	conv16to8x2 convert16to8x2(int a);
-	int convert8x2to16(uint8_t a, uint8_t b);
+	conv_16_8 convert_16_8(int a);
+	int convert_8_16(uint8_t a, uint8_t b);
 	void pause(int p);
 	void sync();
 	void calibration(uint8_t adress, uint8_t compN, uint8_t dot);
@@ -134,6 +136,7 @@ extern "C" {
 	void start_chart();
 	void chart_correction(int x, plus_minus pm);
 	void check_max_min();
+	// void debug(std::string& str);
 }
 #endif // extern "C"
 
