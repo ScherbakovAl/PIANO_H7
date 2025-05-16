@@ -12,7 +12,7 @@ void debug(std::string str);
 //  std::deque<int> rt;
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
-#define BUFF_SIZE (480 * 10 * BYTES_PER_PIXEL)
+#define BUFF_SIZE (480 * 40 * BYTES_PER_PIXEL)
 static lv_color16_t buf_1[BUFF_SIZE];
 static lv_color16_t buf_2[BUFF_SIZE];
 
