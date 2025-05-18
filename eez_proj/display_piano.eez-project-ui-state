@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/7",
     "selectedActionObject": "[display_piano.eez-project]:/actions/37",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/20",
     "subnavigationSelectedItems": {
@@ -223,8 +223,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "row",
@@ -351,7 +350,8 @@
                           },
                           "icon": "svg:page"
                         }
-                      ]
+                      ],
+                      "active": true
                     }
                   ]
                 }

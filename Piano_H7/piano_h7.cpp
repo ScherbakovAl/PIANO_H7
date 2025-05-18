@@ -8,6 +8,7 @@
 #include "piano_h7.hpp"
 #include <string>
 void debug(const std::string& str);
+void debugg2();
 //  #include "deque"
 //  std::deque<int> rt;
 
@@ -184,9 +185,13 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 // UART Send-Recive
 void UART4_SendAddress(const uint8_t& slave_address) {
 	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
+		debugg2(); // for test
+	}
 	LL_USART_TransmitData9(UART4, address_byte);
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {
+		debugg2(); // for test
+	}
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value) {
@@ -197,17 +202,25 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 	c = convert_16_8(value);
 	tx_settings[3] = c.a;
 	tx_settings[4] = c.b;
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
+		debugg2(); // for test
+	}
 	for (uint16_t i = 0; i < tx_settings_length; i++) {
 		LL_USART_TransmitData9(UART4, tx_settings[i]);
-		while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+		while (!LL_USART_IsActiveFlag_TXE(UART4)) {
+			debugg2(); // for test
+		}
 	}
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {
+		debugg2(); // for test
+	}
 }
 
 void UART4_Receive_Settings() {
 	for (int i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {}
+		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {
+			debugg2(); // for test
+		}
 		rx_settings[i] = LL_USART_ReceiveData9(UART4);
 	}
 	compN_ = rx_settings[1];
@@ -1067,4 +1080,11 @@ void chart_correction(const int& x, const plus_minus& pm) {
 void debug(const std::string& str) {
 	debugg.clear();
 	debugg = str;
+}
+
+void debugg2() {
+	if (TIM2->CNT > 100000) {
+		TIM2->CNT = 0;
+		LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_3);
+	}
 }
