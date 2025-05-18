@@ -910,30 +910,30 @@ extern "C" void action_pre_pressure_switching(lv_event_t* e) {
 extern "C" void action_set(lv_event_t* e) {
 	const uint8_t adr = cursor / 7;
 	const uint8_t c = cursor % 7;
-	const uint8_t d = 0;
-	const int value = compsCHART_ON_1[cursor];
+	const int value_on = compsCHART_ON_1[cursor];
+	const int value_off = compsCHART_OFF_1[cursor];
 	if (lv_scr_act() == objects.d_chart_calib_on) {
-		setCompValue(adr, c, 0, value); // for green
-		setCompValue(adr, c, 1, value); // for red
+		setCompValue(adr, c, 0, value_on); // for green
+		setCompValue(adr, c, 1, value_on); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
 		if (col_but == green) {
-			setCompValue(adr, c, 0, value); // for green
+			setCompValue(adr, c, 0, value_on); // for green
 		}
 		else {
-			setCompValue(adr, c, 1, value); // for red
+			setCompValue(adr, c, 1, value_on); // for red
 		}
 	}
 	else if (lv_scr_act() == objects.d_chart_calib_off) {
-		setCompValue(adr, c, 0, value); // for green
-		setCompValue(adr, c, 1, value); // for red
+		setCompValue(adr, c, 0, value_off); // for green
+		setCompValue(adr, c, 1, value_off); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
 		if (col_but == green) {
-			setCompValue(adr, c, 0, value); // for green
+			setCompValue(adr, c, 0, value_off); // for green
 		}
 		else {
-			setCompValue(adr, c, 1, value); // for red
+			setCompValue(adr, c, 1, value_off); // for red
 		}
 	}
 }
