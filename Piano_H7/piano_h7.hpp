@@ -71,7 +71,7 @@ extern "C" {
 		cal,
 		read_comp_value,
 		set_comp_value,
-		//set_div_value, // реализовать
+		//set_div_value, // реализовать // TODO
 		buff_to_flash,         //
 		flash_to_buff,         //
 		read_comp_value_flash, //
@@ -79,12 +79,31 @@ extern "C" {
 
 	enum plus_minus {
 		plus,
-		minus
+		minus,
+		none
+	};
+
+	enum current_display {
+		on,
+		off,
+		d_none
+	};
+
+	enum color_but {
+		green,
+		red,
+		c_none
+	};
+
+	enum but_top_bot {
+		top,
+		bot,
+		t_none
 	};
 
 	comps comparator[allChipCount];
-	comps test[allChipCount]; // for flash test
-	comps test_in[allChipCount]; // for flash test
+	comps test[allChipCount]; // for test flash
+	comps test_in[allChipCount]; // for test flash
 
 	on_off_s1_s2_min_max m_m;
 	int32_t compsCHART_ON_1[allKeys] = {};
@@ -100,43 +119,38 @@ extern "C" {
 	int off_red_max = 1011;
 	int off_red_min = 991;
 	int divis = 1000000000;
-	int s1_s2 = 1;
-	int top_bot = 0;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
 	int32_t cursor = 28;
-	int fl_on = 0;
-	int fl_off = 0;
-	int fl_disp = 0;
+	current_display cur_disp = d_none;
+	color_but col_but = c_none;
+	but_top_bot top_bot = t_none;
 
 	void h7();
-	void UART4_SendAddress(uint8_t slave_address);
-	void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value);
+	void UART4_SendAddress(const uint8_t& slave_address);
+	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value);
 	void UART4_Receive_Settings();
-	conv_16_8 convert_16_8(int a);
-	int convert_8_16(uint8_t a, uint8_t b);
-	void pause(int p);
+	conv_16_8 convert_16_8(const int& a);
+	int convert_8_16(const uint8_t& a, const uint8_t& b);
+	void pause(const int& p);
 	void sync();
-	void calibration(uint8_t adress, uint8_t compN, uint8_t dot);
-	void readCompValue(uint8_t adress, uint8_t compN, uint8_t dot);
-	void setCompValue(uint8_t adress, uint8_t compN, uint8_t dot, int value);
-	void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot, int value);
+	void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
+	void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
+	void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value);
+	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value);
 	void SaveToMemory();
 	void ReadOnMemory();
-	void DMA1_RX(void);
-	void DMA2_Stream3_TransferComplete(void);
+	void DMA1_RX();
+	void DMA2_Stream3_TransferComplete();
 	void send_test_midi();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
-	void manual_edit_on();
-	void manual_edit_off();
+	void config_charts();
 	void comp_to_chart();
 	void chart_to_comp();
-	void start_chart();
-	void chart_correction(int x, plus_minus pm);
+	void chart_correction(const int& x, const plus_minus& pm);
 	void check_max_min();
-	// void debug(std::string& str);
 }
 #endif // extern "C"
 

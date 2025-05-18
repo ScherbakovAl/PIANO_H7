@@ -7,7 +7,7 @@
 
 #include "piano_h7.hpp"
 #include <string>
-void debug(std::string str);
+void debug(const std::string& str);
 //  #include "deque"
 //  std::deque<int> rt;
 
@@ -18,8 +18,6 @@ static lv_color16_t buf_2[BUFF_SIZE];
 
 lv_display_t* disp;
 lv_indev_t* indev;
-lv_obj_t* btn;
-lv_obj_t* label_btn;
 
 void h7() {
 	//	LL_mDelay(100);
@@ -93,36 +91,38 @@ void h7() {
 	ui_tick();
 	send_test_midi(); // for test
 
-// калибровка
-//	while (1) {
-//		calibration(6, 0, 0);
-//		sync();
-//	}
-// calibration(4, 2, 1);
+	// калибровка
+	//	while (1) {
+	//		calibration(6, 0, 0);
+	//		sync();
+	//	}
+	// calibration(4, 2, 1);
 
-// readCompValue(4, 2, 1);
+	// readCompValue(4, 2, 1);
 
-// setCompValue(4, 2, 0, 3499);
-// setCompValue(4, 2, 1, 999);
+	// setCompValue(4, 2, 0, 3499);
+	// setCompValue(4, 2, 1, 999);
 
-// readCompValue(4, 2, 0);
-// readCompValue(4, 2, 1);
+	// readCompValue(4, 2, 0);
+	// readCompValue(4, 2, 1);
 
-// pause(15);
-//---------------------------------
+	// pause(15);
+	//---------------------------------
 
-// память
-// SaveToMemory();
-// ReadOnMemory(); // test
-//---------------------------------
+	// память
+	// SaveToMemory();
+	// ReadOnMemory(); // test
+	//---------------------------------
 
-// синхронизация
+	// синхронизация
 	sync();
 	//---------------------------------
 
 	// start PWM
 	LL_TIM_EnableCounter(TIM1); // пинает g4's (ШИМ)
 	//---------------------------------
+
+	config_charts();
 
 	while (1) {
 		tud_task();
@@ -140,50 +140,56 @@ void sync() {
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 		UART4_Receive_Settings();
+		debug("");
 		if (b_ != 0) debug("Sync err, mcu #" + std::to_string(i));
 		pause(1);
 	}
 	LL_USART_EnableDMAReq_RX(UART4);
 }
 
-void calibration(uint8_t adress, uint8_t compN, uint8_t dot) {
+void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::cal, adress, compN, dot, 0);
 	// for test
+	debug("");
 	if (b_ != 0) debug("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
+
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 	// readCompValue(adress, compN, dot);
 }
 
-void readCompValue(uint8_t adress, uint8_t compN, uint8_t dot) {
+void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::read_comp_value, adress, compN, dot, 0);
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 }
 
-void setCompValue(uint8_t adress, uint8_t compN, uint8_t dot, int value) {
+void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
 	// TODO добавить проверку после отправки значения калибровки
 }
 
-void sender(command com, uint8_t adress, uint8_t compN, uint8_t dot,
-	int value) {
+void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
+	const int& value) {
+	LL_TIM_DisableCounter(TIM1);
 	LL_USART_DisableDMAReq_RX(UART4);
 	UART4_SendAddress(adress);
-	pause(1);
+	pause(6);
 	UART4_Send_Settings(com, compN, dot, value);
+	pause(1);
 	UART4_Receive_Settings();
 	pause(1);
 	LL_USART_EnableDMAReq_RX(UART4);
+	LL_TIM_EnableCounter(TIM1);
 }
 
 // UART Send-Recive
-void UART4_SendAddress(uint8_t slave_address) {
+void UART4_SendAddress(const uint8_t& slave_address) {
 	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
 	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
 	LL_USART_TransmitData9(UART4, address_byte);
 	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
 }
 
-void UART4_Send_Settings(command com, uint8_t compN, uint8_t dot, int value) {
+void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	tx_settings[0] = { (uint8_t)com };
 	tx_settings[1] = { compN };
 	tx_settings[2] = { dot };
@@ -275,17 +281,18 @@ void ReadOnMemory() {
 //---------------------------------
 
 // (1uS)
-void pause(int p) {
+void pause(const int& p) {
 	TIM2->CNT = 0;
 	while (TIM2->CNT < p) {
 	}
 }
 
-int convert_8_16(uint8_t a, uint8_t b) {
-	return a << 8 | b;
+int convert_8_16(const uint8_t& a, const uint8_t& b) {
+	int x = a << 8 | b;
+	return x;
 }
 
-conv_16_8 convert_16_8(int a) {
+conv_16_8 convert_16_8(const int& a) {
 	conv_16_8 r;
 	r.a = (a & 0xff << 8) >> 8;
 	r.b = a & 0xff;
@@ -473,20 +480,20 @@ extern "C" void set_var_cursor_string(const char* value) {
 	cursor_string = value;
 }
 
-std::string disp_on_off;
-extern "C" const char* get_var_disp_on_off() {
-	return disp_on_off.c_str();
-}
-extern "C" void set_var_disp_on_off(const char* value) {
-	disp_on_off = value;
-}
-
 std::string disp_on_off_button;
 extern "C" const char* get_var_disp_on_off_button() {
 	return disp_on_off_button.c_str();
 }
 extern "C" void set_var_disp_on_off_button(const char* value) {
 	disp_on_off_button = value;
+}
+
+std::string disp_on_off_button_3;
+extern "C" const char* get_var_disp_on_off_button_3() {
+	return disp_on_off_button_3.c_str();
+}
+extern "C" void set_var_disp_on_off_button_3(const char* value) {
+	disp_on_off_button_3 = value;
 }
 
 std::string top_bot_str;
@@ -496,6 +503,15 @@ extern "C" const char* get_var_top_bot_str() {
 extern "C" void set_var_top_bot_str(const char* value) {
 	top_bot_str = value;
 }
+
+std::string top_bot_str_2;
+extern "C" const char* get_var_top_bot_str_2() {
+	return top_bot_str_2.c_str();
+}
+extern "C" void set_var_top_bot_str_2(const char* value) {
+	top_bot_str_2 = value;
+}
+
 
 std::string debugg;
 extern "C" const char* get_var_debugg() {
@@ -509,107 +525,133 @@ extern "C" void set_var_debugg(const char* value) {
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #include "actions.h"
 
+lv_obj_t* ch;
+lv_chart_series_t* ser_on_green;
+lv_chart_series_t* ser_on_red;
+lv_chart_cursor_t* c_on;
+lv_chart_series_t* ser_off_green;
+lv_chart_series_t* ser_off_red;
+lv_chart_cursor_t* c_off;
+
+void config_charts() {
+
+	comp_to_chart();
+
+	lv_obj_t* ob = objects.chart_on;
+	lv_chart_set_point_count(ob, allKeys);
+	ser_on_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
+	ser_on_red = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
+	lv_chart_set_series_ext_y_array(ob, ser_on_green, compsCHART_ON_1);
+	lv_chart_set_series_ext_y_array(ob, ser_on_red, compsCHART_ON_2);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	c_on = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
+	lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
+	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
+	lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
+	lv_obj_set_style_size(ob, 1, 1, LV_PART_CURSOR);
+
+	ob = objects.chart_off;
+	lv_chart_set_point_count(ob, allKeys);
+	ser_off_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
+	ser_off_red = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
+	lv_chart_set_series_ext_y_array(ob, ser_off_green, compsCHART_OFF_1);
+	lv_chart_set_series_ext_y_array(ob, ser_off_red, compsCHART_OFF_2);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	c_off = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
+	lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
+	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
+	lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
+	lv_obj_set_style_size(ob, 1, 1, LV_PART_CURSOR);
+}
+
 extern "C" void action_to_main_disp(lv_event_t* e) {
-	loadScreen(SCREEN_ID_MAIN);
+	loadScreen(SCREEN_ID_D_MAIN);
 }
-
-extern "C" void action_piano_off(lv_event_t* e) {
-	// TODO: Implement action piano_off here
-	debug("Off"); // for test debug
-}
-
-extern "C" void action_pre_pressure_switching(lv_event_t* e) {
-	// TODO action pre pressure switching
-}
-
-lv_chart_series_t* ser_1;
-lv_chart_series_t* ser_2;
-lv_chart_cursor_t* c1;
-lv_point_t* pp;
-int fl = 1;
 
 extern "C" void action_to_disp_calibration_on(lv_event_t* e) {
-	fl_disp = 0;
-	manual_edit_on();
-}
-
-void manual_edit_on() {
+	cur_disp = on;
+	ch = objects.chart_on;
 	comp_to_chart();
-	start_chart();
-	lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_ON_1);
-	lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_ON_2);
-	lv_obj_set_parent(objects.chart, objects.chart_edit_on_disp);
-	loadScreen(SCREEN_ID_CHART_EDIT_ON_DISP);
-}
-
-extern "C" void action_to_disp_calibration_off(lv_event_t* e) {
-	fl_disp = 1;
-	manual_edit_off();
-}
-
-void manual_edit_off() {
-	comp_to_chart();
-	start_chart();
-	lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_OFF_1);
-	lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_OFF_2);
-	lv_obj_set_parent(objects.chart, objects.chart_edit_off_disp);
-	loadScreen(SCREEN_ID_CHART_EDIT_OFF_DISP);
+	lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
+	loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 }
 
 extern "C" void action_to_disp_manual_edit_on(lv_event_t* e) {
-	fl_disp = 0;
+	cur_disp = on;
+	ch = objects.chart_on;
 	comp_to_chart();
-	lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_ON_1);
-	lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_ON_2);
-	lv_obj_set_parent(objects.chart, objects.chart_manual_edit_on_disp);
-	loadScreen(SCREEN_ID_CHART_MANUAL_EDIT_ON_DISP);
+	lv_obj_set_parent(objects.chart_on, objects.d_chart_manual_edit_on);
+	loadScreen(SCREEN_ID_D_CHART_MANUAL_EDIT_ON);
+	action_s1__s2_upd(e);
+}
+
+extern "C" void action_to_disp_graph_resize_on(lv_event_t* e) {
+	cur_disp = on;
+	ch = objects.chart_on;
+	comp_to_chart();
+	s1_on_min.clear();
+	s1_on_min = std::to_string(on_green_min);
+	s1_on_max.clear();
+	s1_on_max = std::to_string(on_green_max);
+	s2_on_min.clear();
+	s2_on_min = std::to_string(on_red_min);
+	s2_on_max.clear();
+	s2_on_max = std::to_string(on_red_max);
+	lv_obj_set_parent(objects.chart_on, objects.d_chart_graph_resize_on);
+	loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_ON);
+	action_s1__s2_upd(e);
+}
+
+extern "C" void action_to_disp_calibration_off(lv_event_t* e) {
+	cur_disp = off;
+	ch = objects.chart_off;
+	comp_to_chart();
+	lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
+	loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 }
 
 extern "C" void action_to_disp_manual_edit_off(lv_event_t* e) {
-	fl_disp = 1;
+	cur_disp = off;
+	ch = objects.chart_off;
 	comp_to_chart();
-	lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_OFF_1);
-	lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_OFF_2);
-	lv_obj_set_parent(objects.chart, objects.chart_manual_edit_off_disp);
-	loadScreen(SCREEN_ID_CHART_MANUAL_EDIT_OFF_DISP);
+	lv_obj_set_parent(objects.chart_off, objects.d_chart_manual_edit_off);
+	loadScreen(SCREEN_ID_D_CHART_MANUAL_EDIT_OFF);
+	action_s1__s2_upd(e);
 }
 
-extern "C" void action_to_disp_graph_resize(lv_event_t* e) {
-	disp_on_off.clear();
-
+extern "C" void action_to_disp_graph_resize_off(lv_event_t* e) {
+	cur_disp = off;
+	ch = objects.chart_off;
 	comp_to_chart();
-	if (fl_disp) {
-		disp_on_off = "OFF";
-		s1_on_min.clear();
-		s1_on_min = std::to_string(off_green_min);
-		s1_on_max.clear();
-		s1_on_max = std::to_string(off_green_max);
-		s2_on_min.clear();
-		s2_on_min = std::to_string(off_red_min);
-		s2_on_max.clear();
-		s2_on_max = std::to_string(off_red_max);
-		lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_OFF_1);
-		lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_OFF_2);
-	}
-	else {
-		disp_on_off = "ON";
-		s1_on_min.clear();
-		s1_on_min = std::to_string(on_green_min);
-		s1_on_max.clear();
-		s1_on_max = std::to_string(on_green_max);
-		s2_on_min.clear();
-		s2_on_min = std::to_string(on_red_min);
-		s2_on_max.clear();
-		s2_on_max = std::to_string(on_red_max);
-		lv_chart_set_series_ext_y_array(objects.chart, ser_1, compsCHART_ON_1);
-		lv_chart_set_series_ext_y_array(objects.chart, ser_2, compsCHART_ON_2);
-	}
-	lv_obj_set_parent(objects.chart, objects.chart_graph_resize);
-	loadScreen(SCREEN_ID_CHART_GRAPH_RESIZE);
+	s1_on_min.clear();
+	s1_on_min = std::to_string(off_green_min);
+	s1_on_max.clear();
+	s1_on_max = std::to_string(off_green_max);
+	s2_on_min.clear();
+	s2_on_min = std::to_string(off_red_min);
+	s2_on_max.clear();
+	s2_on_max = std::to_string(off_red_max);
+	lv_obj_set_parent(objects.chart_off, objects.d_chart_graph_resize_off);
+	loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_OFF);
+	action_s1__s2_upd(e);
 }
 
 extern "C" void action_to_disp_back(lv_event_t* e) {
-	fl_disp ? manual_edit_off() : manual_edit_on();
+	if (cur_disp == on) {
+		ch = objects.d_chart_calib_on;
+		comp_to_chart();
+		lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
+		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
+	}
+	else {
+		cur_disp = off;
+		ch = objects.d_chart_calib_off;
+		comp_to_chart();
+		lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
+		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
+	}
 }
 
 extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
@@ -618,6 +660,7 @@ extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
 	uint8_t d = 0;
 	calibration(adr, c, d);
 	comp_to_chart();
+	lv_chart_refresh(ch);
 }
 
 extern "C" void action_calib_sensor_2_on(lv_event_t* e) {
@@ -626,6 +669,7 @@ extern "C" void action_calib_sensor_2_on(lv_event_t* e) {
 	uint8_t d = 1;
 	calibration(adr, c, d);
 	comp_to_chart();
+	lv_chart_refresh(ch);
 }
 
 extern "C" void action_calib_sensor_1_off(lv_event_t* e) {
@@ -636,36 +680,36 @@ extern "C" void action_calib_sensor_2_off(lv_event_t* e) {
 	// TODO calib sensor 2 off
 }
 
-extern "C" void action_to_disp_divisible_edit(lv_event_t* e) {
-	loadScreen(SCREEN_ID_DIVISIBLE_EDIT_DISP);
-}
-
 extern "C" void action_cursor_minus(lv_event_t* e) {
 	if (cursor > 0) {
 		--cursor;
 	}
-	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
+	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 }
 
 extern "C" void action_cursor_plus(lv_event_t* e) {
 	if (cursor < 90) {
 		++cursor;
 	}
-	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
+	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 }
 
 extern "C" void action_cursor_minus10(lv_event_t* e) {
 	if (cursor > 11) {
 		cursor -= 12;
 	}
-	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
+	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 }
 
 extern "C" void action_cursor_plus10(lv_event_t* e) {
 	if (cursor < 79) {
 		cursor += 12;
 	}
-	lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
+	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 }
 
 extern "C" void action_add_1(lv_event_t* e) {
@@ -701,64 +745,109 @@ extern "C" void action_sub_1000(lv_event_t* e) {
 }
 
 extern "C" void action_save_calibration(lv_event_t* e) {
-	// TODO: Implement action save_calibration here
+	// TODO
 	debug("Save calib " + std::to_string(657) + "?"); // for test
 }
 
+extern "C" void action_to_disp_divisible_edit(lv_event_t* e) {
+	loadScreen(SCREEN_ID_DIVISIBLE_EDIT_DISP);
+}
+
 extern "C" void action_s1__s2_upd(lv_event_t* e) {
-	ch_o.clear();
-	if (lv_obj_get_state(objects.s1_s2_on) == 16) { // == зелёная
-		ch_o = "green";
-		fl_on = 1;
+	col_but = c_none;
+	if (lv_scr_act() == objects.d_chart_manual_edit_on) {
+		ch_o.clear();
+		if (lv_obj_get_state(objects.s1_s2_on) == 16) { // == зелёная
+			ch_o = "green";
+			col_but = green;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_on) == 17) { // == красная
+			ch_o = "red";
+			col_but = red;
+		}
+		else {
+			ch_o = "press";
+			col_but = c_none;
+		}
 	}
-	else if (lv_obj_get_state(objects.s1_s2_on) == 17) { // == красная
-		ch_o = "red";
-		fl_on = 2;
+	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
+		ch_f.clear();
+		if (lv_obj_get_state(objects.s1_s2_off) == 16) { // == зелёная
+			ch_f = "green";
+			col_but = green;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_off) == 17) { // == красная
+			ch_f = "red";
+			col_but = red;
+		}
+		else {
+			ch_f = "press";
+			col_but = c_none;
+		}
 	}
-	else {
-		ch_o = std::to_string(lv_obj_get_state(objects.s1_s2_on));
-		fl_on = 0;
+	else if (lv_scr_act() == objects.d_chart_graph_resize_on) {
+		disp_on_off_button.clear();
+		if (lv_obj_get_state(objects.s1_s2_button) == 16) { // == зелёная
+			disp_on_off_button = "green";
+			col_but = green;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_button) == 17) { // == красная
+			disp_on_off_button = "red";
+			col_but = red;
+		}
+		else {
+			disp_on_off_button = "press";
+			col_but = c_none;
+		}
 	}
-	ch_f.clear();
-	if (lv_obj_get_state(objects.s1_s2_off) == 16) { // == зелёная
-		ch_f = "green";
-		fl_off = 1;
-	}
-	else if (lv_obj_get_state(objects.s1_s2_off) == 17) { // == красная
-		ch_f = "red";
-		fl_off = 2;
-	}
-	else {
-		ch_f = std::to_string(lv_obj_get_state(objects.s1_s2_off));
-		fl_off = 0;
-	}
-	disp_on_off_button.clear();
-	if (lv_obj_get_state(objects.s1_s2_button) == 16) { // == зелёная
-		disp_on_off_button = "green";
-		s1_s2 = 0;
-	}
-	else if (lv_obj_get_state(objects.s1_s2_button) == 17) { // == красная
-		disp_on_off_button = "red";
-		s1_s2 = 1;
-	}
-	else {
-		disp_on_off_button = std::to_string(
-			lv_obj_get_state(objects.s1_s2_button));
+	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
+		disp_on_off_button_3.clear();
+		if (lv_obj_get_state(objects.s1_s2_button_3) == 16) { // == зелёная
+			disp_on_off_button_3 = "green";
+			col_but = green;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_button_3) == 17) { // == красная
+			disp_on_off_button_3 = "red";
+			col_but = red;
+		}
+		else {
+			disp_on_off_button_3 = "press";
+			col_but = c_none;
+		}
 	}
 }
 
 extern "C" void action_top_bot(lv_event_t* e) {
-	top_bot_str.clear();
-	if (lv_obj_get_state(objects.s1_s2_button_1) == 16) { // == зелёная
-		top_bot_str = "top";
-		top_bot = 0;
+	top_bot = t_none;
+	if (lv_scr_act() == objects.d_chart_graph_resize_on) {
+		top_bot_str.clear();
+		if (lv_obj_get_state(objects.s1_s2_button_1) == 16) { // == зелёная
+			top_bot_str = "top";
+			top_bot = top;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_button_1) == 17) { // == красная
+			top_bot_str = "bottom";
+			top_bot = bot;
+		}
+		else {
+			top_bot_str = "press";
+			top_bot = t_none;
+		}
 	}
-	else if (lv_obj_get_state(objects.s1_s2_button_1) == 17) { // == красная
-		top_bot_str = "bottom";
-		top_bot = 1;
-	}
-	else {
-		top_bot_str = std::to_string(lv_obj_get_state(objects.s1_s2_button_1));
+	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
+		top_bot_str_2.clear();
+		if (lv_obj_get_state(objects.s1_s2_button_2) == 16) { // == зелёная
+			top_bot_str_2 = "top";
+			top_bot = top;
+		}
+		else if (lv_obj_get_state(objects.s1_s2_button_2) == 17) { // == красная
+			top_bot_str_2 = "bottom";
+			top_bot = bot;
+		}
+		else {
+			top_bot_str_2 = "press";
+			top_bot = t_none;
+		}
 	}
 }
 
@@ -794,6 +883,15 @@ extern "C" void action_div_sub_100000(lv_event_t* e) {
 	divis -= 100000000;
 }
 
+extern "C" void action_piano_off(lv_event_t* e) {
+	// TODO: Implement action piano_off here
+	debug("Off"); // for test debug
+}
+
+extern "C" void action_pre_pressure_switching(lv_event_t* e) {
+	// TODO action pre pressure switching
+}
+
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 void comp_to_chart() {
@@ -817,18 +915,6 @@ void comp_to_chart() {
 			k = 0;
 			++c;
 		}
-	}
-	if (fl_disp) {
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
-			off_green_min, off_green_max);
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_SECONDARY_Y,
-			off_red_min, off_red_max);
-	}
-	else {
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
-			on_green_min, on_green_max);
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_SECONDARY_Y,
-			on_red_min, on_red_max);
 	}
 	check_max_min();
 }
@@ -857,33 +943,9 @@ void chart_to_comp() {
 	}
 }
 
-void start_chart() {
-	if (fl == 1) {
-		lv_chart_set_point_count(objects.chart, allKeys);
-
-		ser_1 = lv_chart_add_series(objects.chart,
-			lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
-		ser_2 = lv_chart_add_series(objects.chart,
-			lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
-			on_green_min, on_green_max);
-		lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_SECONDARY_Y,
-			on_red_min, on_red_max);
-		c1 = lv_chart_add_cursor(objects.chart, lv_color_make(250, 250, 250),
-			LV_DIR_VER);
-		lv_chart_set_cursor_point(objects.chart, c1, ser_1, cursor);
-		lv_obj_set_style_line_width(objects.chart, 0, LV_PART_ITEMS);  // толщина линий на графике
-		lv_obj_set_style_size(objects.chart, 4, 2, LV_PART_INDICATOR); // размер точек на графике
-		// lv_obj_set_style_size(objects.chart, 1, 1, LV_PART_CURSOR);
-		lv_obj_add_state(objects.s1_s2_on, 16);
-		lv_obj_add_state(objects.s1_s2_off, 16);
-		lv_obj_add_state(objects.s1_s2_button, 16);
-		lv_obj_add_state(objects.s1_s2_button_1, 16);
-		fl = 0;
-	}
-}
-
 void check_max_min() {
+	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
+	m_m = mm;
 	for (int i = 0; i < allKeys; ++i) {
 		if (m_m.on.s1.min > compsCHART_ON_1[i]) {
 			m_m.on.s1.min = compsCHART_ON_1[i];
@@ -928,93 +990,81 @@ void check_max_min() {
 	s2_off_max = std::to_string(m_m.off.s2.max);
 }
 
-void chart_correction(int x, plus_minus pm) {
+void chart_correction(const int& x, const plus_minus& pm) {
 
-	if (lv_scr_act() == objects.chart_manual_edit_on_disp) {
-		if (fl_on == 1)
-			pm == plus_minus::plus ? compsCHART_ON_1[cursor] += x : compsCHART_ON_1[cursor] -= x;
-		if (fl_on == 2)
-			pm == plus_minus::plus ? compsCHART_ON_2[cursor] += x : compsCHART_ON_2[cursor] -= x;
+	if (lv_scr_act() == objects.d_chart_manual_edit_on) {
+		if (col_but == green)
+			pm == plus ? compsCHART_ON_1[cursor] += x : compsCHART_ON_1[cursor] -= x;
+		if (col_but == red)
+			pm == plus ? compsCHART_ON_2[cursor] += x : compsCHART_ON_2[cursor] -= x;
 	}
-	else if (lv_scr_act() == objects.chart_manual_edit_off_disp) {
-		if (fl_off == 1)
-			pm == plus_minus::plus ? compsCHART_OFF_1[cursor] += x : compsCHART_OFF_1[cursor] -= x;
-		if (fl_off == 2)
-			pm == plus_minus::plus ? compsCHART_OFF_2[cursor] += x : compsCHART_OFF_2[cursor] -= x;
+	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
+		if (col_but == green)
+			pm == plus ? compsCHART_OFF_1[cursor] += x : compsCHART_OFF_1[cursor] -= x;
+		if (col_but == red)
+			pm == plus ? compsCHART_OFF_2[cursor] += x : compsCHART_OFF_2[cursor] -= x;
 	}
-	else if (lv_scr_act() == objects.chart_graph_resize) {
-		if (fl_disp) { // 0 = on, 1 = off
-			if (s1_s2) { // 0 = green, 1 = red
-				if (top_bot) { // 0 = top, 1 = bottom
-					pm == plus_minus::minus ? off_red_min += x : off_red_min -= x;
-				}
-				else {
-					pm == plus_minus::minus ? off_red_max += x : off_red_max -= x;
-				}
+	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
+		if (col_but == red) {
+			if (top_bot == bot) {
+				pm == minus ? off_red_min += x : off_red_min -= x;
 			}
-			else {
-				if (top_bot) {
-					pm == plus_minus::minus ? off_green_min += x : off_green_min -= x;
-				}
-				else {
-					pm == plus_minus::minus ? off_green_max += x : off_green_max -= x;
-				}
+			if (top_bot == top) {
+				pm == minus ? off_red_max += x : off_red_max -= x;
 			}
-			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
-				off_green_min, off_green_max);
-			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_SECONDARY_Y,
-				off_red_min, off_red_max);
-			s1_on_min.clear();
-			s1_on_min = std::to_string(off_green_min);
-			s1_on_max.clear();
-			s1_on_max = std::to_string(off_green_max);
-			s2_on_min.clear();
-			s2_on_min = std::to_string(off_red_min);
-			s2_on_max.clear();
-			s2_on_max = std::to_string(off_red_max);
 		}
-		else {
-			if (s1_s2) {
-				if (top_bot) {
-					pm == plus_minus::minus ? on_red_min += x : on_red_min -= x;
-				}
-				else {
-					pm == plus_minus::minus ? on_red_max += x : on_red_max -= x;
-				}
+		if (col_but == green) {
+			if (top_bot == bot) {
+				pm == minus ? off_green_min += x : off_green_min -= x;
 			}
-			else {
-				if (top_bot) {
-					pm == plus_minus::minus ? on_green_min += x : on_green_min -= x;
-				}
-				else {
-					pm == plus_minus::minus ? on_green_max += x : on_green_max -= x;
-				}
+			if (top_bot == top) {
+				pm == minus ? off_green_max += x : off_green_max -= x;
 			}
-			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_PRIMARY_Y,
-				on_green_min, on_green_max);
-			lv_chart_set_axis_range(objects.chart, LV_CHART_AXIS_SECONDARY_Y,
-				on_red_min, on_red_max);
-			s1_on_min.clear();
-			s1_on_min = std::to_string(on_green_min);
-			s1_on_max.clear();
-			s1_on_max = std::to_string(on_green_max);
-			s2_on_min.clear();
-			s2_on_min = std::to_string(on_red_min);
-			s2_on_max.clear();
-			s2_on_max = std::to_string(on_red_max);
 		}
-		return;
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		s1_on_min.clear();
+		s1_on_min = std::to_string(off_green_min);
+		s1_on_max.clear();
+		s1_on_max = std::to_string(off_green_max);
+		s2_on_min.clear();
+		s2_on_min = std::to_string(off_red_min);
+		s2_on_max.clear();
+		s2_on_max = std::to_string(off_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_graph_resize_on) {
+		if (col_but == red) {
+			if (top_bot == bot) {
+				pm == minus ? on_red_min += x : on_red_min -= x;
+			}
+			if (top_bot == top) {
+				pm == minus ? on_red_max += x : on_red_max -= x;
+			}
+		}
+		if (col_but == green) {
+			if (top_bot == bot) {
+				pm == minus ? on_green_min += x : on_green_min -= x;
+			}
+			if (top_bot == top) {
+				pm == minus ? on_green_max += x : on_green_max -= x;
+			}
+		}
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		s1_on_min.clear();
+		s1_on_min = std::to_string(on_green_min);
+		s1_on_max.clear();
+		s1_on_max = std::to_string(on_green_max);
+		s2_on_min.clear();
+		s2_on_min = std::to_string(on_red_min);
+		s2_on_max.clear();
+		s2_on_max = std::to_string(on_red_max);
 	}
 	chart_to_comp();
-	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
-	m_m = mm;
-	check_max_min();
-	lv_chart_refresh(objects.chart);
+	lv_chart_refresh(ch);
 }
 
-void debug(std::string str) {
-	// lv_obj_set_parent(objects.deb, lv_scr_act());
+void debug(const std::string& str) {
 	debugg.clear();
 	debugg = str;
-	// lv_obj_invalidate(objects.deb);
 }

@@ -31,10 +31,11 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_S2_OFF_MAX = 13,
     FLOW_GLOBAL_VARIABLE_CH_O = 14,
     FLOW_GLOBAL_VARIABLE_CH_F = 15,
-    FLOW_GLOBAL_VARIABLE_DISP_ON_OFF = 16,
-    FLOW_GLOBAL_VARIABLE_DISP_ON_OFF_BUTTON = 17,
-    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR = 18,
-    FLOW_GLOBAL_VARIABLE_DEBUGG = 19
+    FLOW_GLOBAL_VARIABLE_DISP_ON_OFF_BUTTON = 16,
+    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR = 17,
+    FLOW_GLOBAL_VARIABLE_DEBUGG = 18,
+    FLOW_GLOBAL_VARIABLE_DISP_ON_OFF_BUTTON_3 = 19,
+    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR_2 = 20
 };
 
 // Native global variables
@@ -71,14 +72,16 @@ extern const char *get_var_ch_o();
 extern void set_var_ch_o(const char *value);
 extern const char *get_var_ch_f();
 extern void set_var_ch_f(const char *value);
-extern const char *get_var_disp_on_off();
-extern void set_var_disp_on_off(const char *value);
 extern const char *get_var_disp_on_off_button();
 extern void set_var_disp_on_off_button(const char *value);
 extern const char *get_var_top_bot_str();
 extern void set_var_top_bot_str(const char *value);
 extern const char *get_var_debugg();
 extern void set_var_debugg(const char *value);
+extern const char *get_var_disp_on_off_button_3();
+extern void set_var_disp_on_off_button_3(const char *value);
+extern const char *get_var_top_bot_str_2();
+extern void set_var_top_bot_str_2(const char *value);
 
 
 #ifdef __cplusplus
