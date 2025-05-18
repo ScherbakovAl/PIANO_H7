@@ -58,6 +58,7 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_11;
     lv_obj_t *label_sensor_10;
     lv_obj_t *deb_2;
+    lv_obj_t *but_send;
     lv_obj_t *button_to_main_2;
     lv_obj_t *sub_12;
     lv_obj_t *add_12;
@@ -79,6 +80,7 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_5;
     lv_obj_t *label_on_5;
     lv_obj_t *deb_3;
+    lv_obj_t *but_send_2;
     lv_obj_t *obj3;
     lv_obj_t *button_to_main_4;
     lv_obj_t *sub_16;
@@ -132,6 +134,7 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_15;
     lv_obj_t *deb_1;
     lv_obj_t *chart_off;
+    lv_obj_t *but_send_1;
     lv_obj_t *button_to_main_3;
     lv_obj_t *sub_13;
     lv_obj_t *add_13;
@@ -153,6 +156,7 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_7;
     lv_obj_t *label_on_6;
     lv_obj_t *deb_4;
+    lv_obj_t *but_send_3;
     lv_obj_t *obj11;
     lv_obj_t *button_to_main_5;
     lv_obj_t *sub_17;

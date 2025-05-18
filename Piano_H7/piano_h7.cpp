@@ -7,7 +7,7 @@
 
 #include "piano_h7.hpp"
 #include <string>
-void debug(const std::string& str);
+void debugg1(const std::string& str);
 void debugg2();
 //  #include "deque"
 //  std::deque<int> rt;
@@ -141,8 +141,8 @@ void sync() {
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 		UART4_Receive_Settings();
-		debug("");
-		if (b_ != 0) debug("Sync err, mcu #" + std::to_string(i));
+		debugg1("");
+		if (b_ != 0) debugg1("Sync err, mcu #" + std::to_string(i));
 		pause(1);
 	}
 	LL_USART_EnableDMAReq_RX(UART4);
@@ -151,8 +151,8 @@ void sync() {
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::cal, adress, compN, dot, 0);
 	// for test
-	debug("");
-	if (b_ != 0) debug("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
+	debugg1("");
+	if (b_ != 0) debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
 
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 	// readCompValue(adress, compN, dot);
@@ -165,7 +165,9 @@ void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& d
 
 void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
-	// TODO добавить проверку после отправки значения калибровки
+	if (compsCHART_ON_1[cursor] != convert_8_16(a_, b_)) {
+		debugg1("g4 != h7");
+	}
 }
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
@@ -173,11 +175,11 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 	LL_TIM_DisableCounter(TIM1);
 	LL_USART_DisableDMAReq_RX(UART4);
 	UART4_SendAddress(adress);
-	pause(6);
+	pause(6); // 6 for release
 	UART4_Send_Settings(com, compN, dot, value);
-	pause(1);
+	pause(1); // 1 for release
 	UART4_Receive_Settings();
-	pause(1);
+	pause(1); // 1 for release
 	LL_USART_EnableDMAReq_RX(UART4);
 	LL_TIM_EnableCounter(TIM1);
 }
@@ -759,7 +761,7 @@ extern "C" void action_sub_1000(lv_event_t* e) {
 
 extern "C" void action_save_calibration(lv_event_t* e) {
 	// TODO
-	debug("Save calib " + std::to_string(657) + "?"); // for test
+	debugg1("Save calib " + std::to_string(657) + "?"); // for test
 }
 
 extern "C" void action_to_disp_divisible_edit(lv_event_t* e) {
@@ -898,11 +900,42 @@ extern "C" void action_div_sub_100000(lv_event_t* e) {
 
 extern "C" void action_piano_off(lv_event_t* e) {
 	// TODO: Implement action piano_off here
-	debug("Off"); // for test debug
+	debugg1("Off"); // for test debug
 }
 
 extern "C" void action_pre_pressure_switching(lv_event_t* e) {
 	// TODO action pre pressure switching
+}
+
+extern "C" void action_set(lv_event_t* e) {
+	const uint8_t adr = cursor / 7;
+	const uint8_t c = cursor % 7;
+	const uint8_t d = 0;
+	const int value = compsCHART_ON_1[cursor];
+	if (lv_scr_act() == objects.d_chart_calib_on) {
+		setCompValue(adr, c, 0, value); // for green
+		setCompValue(adr, c, 1, value); // for red
+	}
+	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
+		if (col_but == green) {
+			setCompValue(adr, c, 0, value); // for green
+		}
+		else {
+			setCompValue(adr, c, 1, value); // for red
+		}
+	}
+	else if (lv_scr_act() == objects.d_chart_calib_off) {
+		setCompValue(adr, c, 0, value); // for green
+		setCompValue(adr, c, 1, value); // for red
+	}
+	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
+		if (col_but == green) {
+			setCompValue(adr, c, 0, value); // for green
+		}
+		else {
+			setCompValue(adr, c, 1, value); // for red
+		}
+	}
 }
 
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -912,6 +945,7 @@ void comp_to_chart() {
 	int k = 0; // 0 <> 7
 	for (int i = 0; i < allKeys; ++i) {
 		compsCHART_ON_1[i] = comparator[c].comp[k][0];
+		// compsCHART_ON_1[i] = comparator[i / 7].comp[7 % 7][0]; // ?? проверить!! // TODO
 		compsCHART_ON_2[i] = comparator[c].comp[k][1];
 		++k;
 		if (k > 6) {
@@ -1077,7 +1111,7 @@ void chart_correction(const int& x, const plus_minus& pm) {
 	lv_chart_refresh(ch);
 }
 
-void debug(const std::string& str) {
+void debugg1(const std::string& str) {
 	debugg.clear();
 	debugg = str;
 }
