@@ -57,8 +57,8 @@ extern "C" {
 	};
 
 	struct s1s2 {
-		min_max s1;
-		min_max s2;
+		min_max s_green;
+		min_max s_red;
 	};
 
 	struct on_off_s1_s2_min_max {

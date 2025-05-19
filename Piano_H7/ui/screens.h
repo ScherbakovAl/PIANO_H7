@@ -16,6 +16,7 @@ typedef struct _objects_t {
     lv_obj_t *d_chart_manual_edit_off;
     lv_obj_t *d_chart_graph_resize_off;
     lv_obj_t *divisible_edit_disp;
+    lv_obj_t *deb;
     lv_obj_t *button_edit_calibration_on;
     lv_obj_t *edit_calibration_label;
     lv_obj_t *button_edit_calibration_off;
@@ -30,8 +31,8 @@ typedef struct _objects_t {
     lv_obj_t *label_string_divisible;
     lv_obj_t *label_pre_pressure;
     lv_obj_t *switcher_pre_pressure;
-    lv_obj_t *deb;
     lv_obj_t *chart_on;
+    lv_obj_t *deb_2;
     lv_obj_t *button_to_main;
     lv_obj_t *sub_10;
     lv_obj_t *add_10;
@@ -57,8 +58,9 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_8;
     lv_obj_t *label_sensor_11;
     lv_obj_t *label_sensor_10;
-    lv_obj_t *deb_2;
     lv_obj_t *but_send;
+    lv_obj_t *but_send_4;
+    lv_obj_t *deb_3;
     lv_obj_t *button_to_main_2;
     lv_obj_t *sub_12;
     lv_obj_t *add_12;
@@ -79,9 +81,10 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_4;
     lv_obj_t *label_string_sensor_5;
     lv_obj_t *label_on_5;
-    lv_obj_t *deb_3;
     lv_obj_t *but_send_2;
+    lv_obj_t *but_send_9;
     lv_obj_t *obj3;
+    lv_obj_t *deb_5;
     lv_obj_t *button_to_main_4;
     lv_obj_t *sub_16;
     lv_obj_t *add_16;
@@ -103,9 +106,11 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_18;
     lv_obj_t *label_sensor_22;
     lv_obj_t *obj4;
-    lv_obj_t *deb_5;
+    lv_obj_t *but_send_5;
     lv_obj_t *obj5;
     lv_obj_t *obj6;
+    lv_obj_t *chart_off;
+    lv_obj_t *deb_1;
     lv_obj_t *button_to_main_1;
     lv_obj_t *sub_11;
     lv_obj_t *add_11;
@@ -132,9 +137,9 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_13;
     lv_obj_t *label_sensor_14;
     lv_obj_t *label_sensor_15;
-    lv_obj_t *deb_1;
-    lv_obj_t *chart_off;
     lv_obj_t *but_send_1;
+    lv_obj_t *but_send_6;
+    lv_obj_t *deb_4;
     lv_obj_t *button_to_main_3;
     lv_obj_t *sub_13;
     lv_obj_t *add_13;
@@ -155,9 +160,10 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_6;
     lv_obj_t *label_string_sensor_7;
     lv_obj_t *label_on_6;
-    lv_obj_t *deb_4;
     lv_obj_t *but_send_3;
+    lv_obj_t *but_send_8;
     lv_obj_t *obj11;
+    lv_obj_t *deb_6;
     lv_obj_t *button_to_main_5;
     lv_obj_t *sub_17;
     lv_obj_t *add_29;
@@ -179,7 +185,7 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_34;
     lv_obj_t *label_sensor_35;
     lv_obj_t *obj12;
-    lv_obj_t *deb_6;
+    lv_obj_t *but_send_7;
     lv_obj_t *obj13;
     lv_obj_t *obj14;
     lv_obj_t *obj15;

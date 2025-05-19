@@ -938,7 +938,93 @@ extern "C" void action_set(lv_event_t* e) {
 	}
 }
 
-// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+extern "C" void action_auto_size(lv_event_t* e) {
+	const int w = 1;
+	check_max_min();
+	if (lv_scr_act() == objects.d_chart_calib_on) {
+		on_green_max = m_m.on.s_green.max + w;
+		on_green_min = m_m.on.s_green.min - w;
+		on_red_max = m_m.on.s_red.max + w;
+		on_red_min = m_m.on.s_red.min - w;
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_calib_off) {
+		off_green_max = m_m.off.s_green.max + w;
+		off_green_min = m_m.off.s_green.min - w;
+		off_red_max = m_m.off.s_red.max + w;
+		off_red_min = m_m.off.s_red.min - w;
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
+		if (col_but == green) {
+			on_green_max = m_m.on.s_green.max + w;
+			on_green_min = m_m.on.s_green.min - w;
+		}
+		else if (col_but == red) {
+			on_red_max = m_m.on.s_red.max + w;
+			on_red_min = m_m.on.s_red.min - w;
+		}
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
+		if (col_but == green) {
+			off_green_max = m_m.off.s_green.max + w;
+			off_green_min = m_m.off.s_green.min - w;
+		}
+		else if (col_but == red) {
+			off_red_max = m_m.off.s_red.max + w;
+			off_red_min = m_m.off.s_red.min - w;
+		}
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_graph_resize_on) {
+		if (col_but == green) {
+			if (top_bot == top) {
+				on_green_max = m_m.on.s_green.max + w;
+			}
+			else if (top_bot == bot) {
+				on_green_min = m_m.on.s_green.min - w;
+			}
+		}
+		else if (col_but == red) {
+			if (top_bot == top) {
+				on_red_max = m_m.on.s_red.max + w;
+			}
+			else if (top_bot == bot) {
+				on_red_min = m_m.on.s_red.min - w;
+			}
+		}
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
+		if (col_but == green) {
+			if (top_bot == top) {
+				off_green_max = m_m.off.s_green.max + w;
+			}
+			else if (top_bot == bot) {
+				off_green_min = m_m.off.s_green.min - w;
+			}
+
+		}
+		else if (col_but == red) {
+			if (top_bot == top) {
+				off_red_max = m_m.off.s_red.max + w;
+			}
+			else if (top_bot == bot) {
+				off_red_min = m_m.off.s_red.min - w;
+			}
+		}
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	}
+	lv_chart_refresh(ch);
+}
+	// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 void comp_to_chart() {
 	int c = 0; // 0 <> allChipCount
@@ -994,47 +1080,47 @@ void check_max_min() {
 	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
 	m_m = mm;
 	for (int i = 0; i < allKeys; ++i) {
-		if (m_m.on.s1.min > compsCHART_ON_1[i]) {
-			m_m.on.s1.min = compsCHART_ON_1[i];
+		if (m_m.on.s_green.min > compsCHART_ON_1[i]) {
+			m_m.on.s_green.min = compsCHART_ON_1[i];
 		}
-		if (m_m.on.s1.max < compsCHART_ON_1[i]) {
-			m_m.on.s1.max = compsCHART_ON_1[i];
+		if (m_m.on.s_green.max < compsCHART_ON_1[i]) {
+			m_m.on.s_green.max = compsCHART_ON_1[i];
 		}
-		if (m_m.on.s2.min > compsCHART_ON_2[i]) {
-			m_m.on.s2.min = compsCHART_ON_2[i];
+		if (m_m.on.s_red.min > compsCHART_ON_2[i]) {
+			m_m.on.s_red.min = compsCHART_ON_2[i];
 		}
-		if (m_m.on.s2.max < compsCHART_ON_2[i]) {
-			m_m.on.s2.max = compsCHART_ON_2[i];
+		if (m_m.on.s_red.max < compsCHART_ON_2[i]) {
+			m_m.on.s_red.max = compsCHART_ON_2[i];
 		}
-		if (m_m.off.s1.min > compsCHART_OFF_1[i]) {
-			m_m.off.s1.min = compsCHART_OFF_1[i];
+		if (m_m.off.s_green.min > compsCHART_OFF_1[i]) {
+			m_m.off.s_green.min = compsCHART_OFF_1[i];
 		}
-		if (m_m.off.s1.max < compsCHART_OFF_1[i]) {
-			m_m.off.s1.max = compsCHART_OFF_1[i];
+		if (m_m.off.s_green.max < compsCHART_OFF_1[i]) {
+			m_m.off.s_green.max = compsCHART_OFF_1[i];
 		}
-		if (m_m.off.s2.min > compsCHART_OFF_2[i]) {
-			m_m.off.s2.min = compsCHART_OFF_2[i];
+		if (m_m.off.s_red.min > compsCHART_OFF_2[i]) {
+			m_m.off.s_red.min = compsCHART_OFF_2[i];
 		}
-		if (m_m.off.s2.max < compsCHART_OFF_2[i]) {
-			m_m.off.s2.max = compsCHART_OFF_2[i];
+		if (m_m.off.s_red.max < compsCHART_OFF_2[i]) {
+			m_m.off.s_red.max = compsCHART_OFF_2[i];
 		}
 	}
 	s1_on_min.clear();
-	s1_on_min = std::to_string(m_m.on.s1.min);
+	s1_on_min = std::to_string(m_m.on.s_green.min);
 	s1_on_max.clear();
-	s1_on_max = std::to_string(m_m.on.s1.max);
+	s1_on_max = std::to_string(m_m.on.s_green.max);
 	s2_on_min.clear();
-	s2_on_min = std::to_string(m_m.on.s2.min);
+	s2_on_min = std::to_string(m_m.on.s_red.min);
 	s2_on_max.clear();
-	s2_on_max = std::to_string(m_m.on.s2.max);
+	s2_on_max = std::to_string(m_m.on.s_red.max);
 	s1_off_min.clear();
-	s1_off_min = std::to_string(m_m.off.s1.min);
+	s1_off_min = std::to_string(m_m.off.s_green.min);
 	s1_off_max.clear();
-	s1_off_max = std::to_string(m_m.off.s1.max);
+	s1_off_max = std::to_string(m_m.off.s_green.max);
 	s2_off_min.clear();
-	s2_off_min = std::to_string(m_m.off.s2.min);
+	s2_off_min = std::to_string(m_m.off.s_red.min);
 	s2_off_max.clear();
-	s2_off_max = std::to_string(m_m.off.s2.max);
+	s2_off_max = std::to_string(m_m.off.s_red.max);
 }
 
 void chart_correction(const int& x, const plus_minus& pm) {
@@ -1108,6 +1194,7 @@ void chart_correction(const int& x, const plus_minus& pm) {
 		s2_on_max = std::to_string(on_red_max);
 	}
 	chart_to_comp();
+	check_max_min();
 	lv_chart_refresh(ch);
 }
 
