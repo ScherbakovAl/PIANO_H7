@@ -23,7 +23,7 @@ extern "C" {
 
 	const int allChipCount = 26;
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
-	// ***** 390-14000us пролёт молоточка
+	// ***** 390(263)-14000us пролёт молоточка
 	const int allKeys = allChipCount / 2 * 7;
 
 	uint8_t rx_data[3] = { };
