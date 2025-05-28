@@ -22,6 +22,7 @@ extern "C" {
 	using cuint = const uint;
 
 	const int allChipCount = 26;
+	const int32_t start_cursor = 34;
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	const int allKeys = allChipCount / 2 * 7;
@@ -122,7 +123,7 @@ extern "C" {
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
-	int32_t cursor = 28;
+	int32_t cursor = start_cursor;
 	current_display cur_disp = d_none;
 	color_but col_but = c_none;
 	but_top_bot top_bot = t_none;

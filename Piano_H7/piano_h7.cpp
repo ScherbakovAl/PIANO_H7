@@ -129,7 +129,7 @@ void h7() {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
-		send_test_midi(); // for test
+		// send_test_midi(); // for test
 	}
 } // h7
 
