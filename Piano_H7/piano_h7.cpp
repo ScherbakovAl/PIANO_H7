@@ -958,8 +958,8 @@ extern "C" void action_set(lv_event_t* e) {
 
 extern "C" void action_auto_size(lv_event_t* e) {
 	const int w = 1;
-	check_max_min();
 	if (lv_scr_act() == objects.d_chart_calib_on) {
+		check_max_min();
 		on_green_max = m_m.on.s_green.max + w;
 		on_green_min = m_m.on.s_green.min - w;
 		on_red_max = m_m.on.s_red.max + w;
@@ -968,6 +968,7 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_calib_off) {
+		check_max_min();
 		off_green_max = m_m.off.s_green.max + w;
 		off_green_min = m_m.off.s_green.min - w;
 		off_red_max = m_m.off.s_red.max + w;
@@ -976,6 +977,7 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
+		check_max_min();
 		if (col_but == green) {
 			on_green_max = m_m.on.s_green.max + w;
 			on_green_min = m_m.on.s_green.min - w;
@@ -988,6 +990,7 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
+		check_max_min();
 		if (col_but == green) {
 			off_green_max = m_m.off.s_green.max + w;
 			off_green_min = m_m.off.s_green.min - w;
@@ -1016,6 +1019,14 @@ extern "C" void action_auto_size(lv_event_t* e) {
 				on_red_min = m_m.on.s_red.min - w;
 			}
 		}
+		s1_on_min.clear();
+		s1_on_min = std::to_string(on_green_min);
+		s1_on_max.clear();
+		s1_on_max = std::to_string(on_green_max);
+		s2_on_min.clear();
+		s2_on_min = std::to_string(on_red_min);
+		s2_on_max.clear();
+		s2_on_max = std::to_string(on_red_max);
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
 	}
@@ -1037,6 +1048,14 @@ extern "C" void action_auto_size(lv_event_t* e) {
 				off_red_min = m_m.off.s_red.min - w;
 			}
 		}
+		s1_off_min.clear();
+		s1_off_min = std::to_string(off_green_min);
+		s1_off_max.clear();
+		s1_off_max = std::to_string(off_green_max);
+		s2_off_min.clear();
+		s2_off_min = std::to_string(off_red_min);
+		s2_off_max.clear();
+		s2_off_max = std::to_string(off_red_max);
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
 	}
