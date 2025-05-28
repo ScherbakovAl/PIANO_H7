@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/5",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/39",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/6",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/40",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/20",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -126,6 +126,7 @@
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
                   "weight": 0.48713879917181807,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -197,7 +198,6 @@
                   "type": "tabset",
                   "id": "EDITORS",
                   "weight": 25,
-                  "selected": 1,
                   "enableDeleteWhenEmpty": false,
                   "enableClose": false,
                   "children": [
@@ -223,7 +223,8 @@
                       },
                       "icon": "svg:page"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "row",
@@ -374,8 +375,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1135,10 +1135,10 @@
     "[display_piano.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
           "6": {},
           "8": {},
-          "9": {}
+          "9": {},
+          "10": {}
         }
       },
       "transform": {
@@ -1159,17 +1159,6 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {
-            "$selected": true
-          },
-          "4": {
-            "0": {}
-          },
-          "5": {},
-          "6": {},
-          "7": {},
-          "8": {},
-          "9": {},
           "10": {},
           "11": {},
           "12": {},
@@ -1183,9 +1172,9 @@
           "20": {},
           "21": {},
           "22": {},
-          "23": {},
-          "24": {},
-          "25": {}
+          "25": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1205,17 +1194,17 @@
     "[display_piano.eez-project]:/userPages/2[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "$selected": true
-          },
-          "14": {
+          "13": {
             "0": {}
           },
+          "14": {},
           "15": {},
           "16": {},
           "17": {},
-          "18": {},
-          "21": {}
+          "20": {},
+          "22": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1255,9 +1244,7 @@
     "[display_piano.eez-project]:/userPages/3[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "$selected": true
-          },
+          "0": {},
           "1": {},
           "2": {},
           "3": {},
@@ -1267,10 +1254,10 @@
           "7": {},
           "8": {},
           "9": {},
-          "10": {},
-          "11": {
+          "10": {
             "0": {}
           },
+          "11": {},
           "12": {},
           "13": {},
           "14": {},
@@ -1280,7 +1267,9 @@
           "18": {},
           "19": {},
           "20": {},
-          "21": {}
+          "22": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1307,9 +1296,7 @@
       },
       "selection": {
         "0": {
-          "1": {
-            "$selected": true
-          },
+          "1": {},
           "2": {},
           "3": {},
           "4": {},
@@ -1328,9 +1315,11 @@
           "17": {},
           "18": {},
           "19": {},
-          "20": {},
-          "22": {},
-          "24": {}
+          "21": {},
+          "23": {},
+          "25": {
+            "$selected": true
+          }
         }
       },
       "timeline": {
@@ -1343,33 +1332,15 @@
     "[display_piano.eez-project]:/userPages/5[flow-state]": {
       "selection": {
         "0": {
-          "0": {
-            "$selected": true
-          },
-          "1": {},
-          "2": {},
-          "3": {},
-          "4": {},
-          "5": {},
-          "6": {},
-          "7": {},
-          "8": {},
-          "9": {},
-          "10": {},
-          "11": {},
-          "12": {},
-          "13": {},
-          "14": {
-            "0": {}
-          },
+          "14": {},
           "15": {},
           "16": {},
           "17": {},
           "18": {},
           "19": {},
-          "20": {},
-          "21": {},
-          "22": {}
+          "22": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1407,11 +1378,11 @@
     "[display_piano.eez-project]:/userPages/6[flow-state]": {
       "selection": {
         "0": {
-          "0": {
+          "5": {},
+          "10": {},
+          "22": {
             "$selected": true
-          },
-          "6": {},
-          "11": {}
+          }
         }
       },
       "transform": {

@@ -22,7 +22,7 @@ extern "C" {
 	using cuint = const uint;
 
 	const int allChipCount = 26;
-	const int32_t start_cursor = 34;
+	const int32_t start_cursor = 34; // 34 -7й датчик у 4й платы
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	const int allKeys = allChipCount / 2 * 7;
@@ -38,11 +38,11 @@ extern "C" {
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
 	int f = 0;
-	cuint Flash_Address = 0x08040000;
-	cuint key_to_change_memory[8] = { 0xBAFC }; // 0x640 - смещение
+	cuint Flash_Address = 0x080E0000; // FLASH
+	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	struct comps {
-		int comp[8][2] = { {3500, 1005}, {3501, 1000}, {3502, 1001}, {3503, 1000}, {3504, 1000}, {3505, 1000}, {3506, 1000}, {0, 0} };
+		int comp[8][2] = { {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {0, 0} };
 	};
 
 	int def[2] = { 3500, 1000 };
@@ -72,7 +72,7 @@ extern "C" {
 		cal,
 		read_comp_value,
 		set_comp_value,
-		//set_div_value, // реализовать // TODO
+		//set_div_value, // реализовать установку делимого 8<>32<>8 // TODO
 		buff_to_flash,         //
 		flash_to_buff,         //
 		read_comp_value_flash, //
@@ -103,22 +103,19 @@ extern "C" {
 	};
 
 	comps comparator[allChipCount];
-	comps test[allChipCount]; // for test flash
-	comps test_in[allChipCount]; // for test flash
-
 	on_off_s1_s2_min_max m_m;
 	int32_t compsCHART_ON_1[allKeys] = {};
 	int32_t compsCHART_ON_2[allKeys] = {};
 	int32_t compsCHART_OFF_1[allKeys] = {};
 	int32_t compsCHART_OFF_2[allKeys] = {};
-	int on_green_max = 4600;
+	int on_green_max = 4095;
 	int on_green_min = 0;
-	int on_red_max = 4600;
+	int on_red_max = 4095;
 	int on_red_min = 0;
-	int off_green_max = 3514;
-	int off_green_min = 3494;
-	int off_red_max = 1011;
-	int off_red_min = 991;
+	int off_green_max = 4095;
+	int off_green_min = 0;
+	int off_red_max = 4095;
+	int off_red_min = 0;
 	int divis = 1000000000;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;

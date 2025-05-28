@@ -7,8 +7,8 @@
 
 #include "piano_h7.hpp"
 #include <string>
-void debugg1(const std::string& str);
-void debugg2();
+void debugg1(const std::string& str);  // DEBUG
+void debugg2();  // DEBUG
 //  #include "deque"
 //  std::deque<int> rt;
 
@@ -141,7 +141,7 @@ void sync() {
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 		UART4_Receive_Settings();
-		debugg1("");
+		debugg1("");  // DEBUG
 		if (b_ != 0) debugg1("Sync err, mcu #" + std::to_string(i));
 		pause(1);
 	}
@@ -150,8 +150,7 @@ void sync() {
 
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::cal, adress, compN, dot, 0);
-	// for test
-	debugg1("");
+	debugg1("");  // DEBUG
 	if (b_ != 0) debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
 
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
@@ -166,7 +165,7 @@ void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& d
 void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
 	if (compsCHART_ON_1[cursor] != convert_8_16(a_, b_)) {
-		debugg1("g4 != h7");
+		debugg1("g4 != h7");  // DEBUG
 	}
 }
 
@@ -188,11 +187,11 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 void UART4_SendAddress(const uint8_t& slave_address) {
 	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
 	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-		debugg2(); // for test
+		debugg2(); // DEBUG
 	}
 	LL_USART_TransmitData9(UART4, address_byte);
 	while (!LL_USART_IsActiveFlag_TC(UART4)) {
-		debugg2(); // for test
+		debugg2(); // DEBUG
 	}
 }
 
@@ -205,23 +204,23 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 	tx_settings[3] = c.a;
 	tx_settings[4] = c.b;
 	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-		debugg2(); // for test
+		debugg2(); // DEBUG
 	}
 	for (uint16_t i = 0; i < tx_settings_length; i++) {
 		LL_USART_TransmitData9(UART4, tx_settings[i]);
 		while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-			debugg2(); // for test
+			debugg2(); // DEBUG
 		}
 	}
 	while (!LL_USART_IsActiveFlag_TC(UART4)) {
-		debugg2(); // for test
+		debugg2(); // DEBUG
 	}
 }
 
 void UART4_Receive_Settings() {
 	for (int i = 0; i < rx_settings_length; i++) {
 		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {
-			debugg2(); // for test
+			debugg2(); // DEBUG
 		}
 		rx_settings[i] = LL_USART_ReceiveData9(UART4);
 	}
@@ -249,10 +248,10 @@ void SaveToMemory() {
 	SCB_DisableDCache();
 	HAL_FLASH_Unlock();
 
-	FLASH_Erase_Sector(FLASH_SECTOR_2, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
+	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
 	uint32_t Addr = Flash_Address;
-	for (uint32_t i = 0; i < 25; i++) {
+	for (uint32_t i = 0; i < allChipCount; i++) {
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[0][0]) != HAL_OK) {
 			HAL_FLASH_Lock();
 			return;
@@ -264,7 +263,7 @@ void SaveToMemory() {
 		}
 		Addr += 0x20;
 	}
-	// замок на запись (по адресу Flash_Address + 0x640)
+	// замок на запись (по адресу Flash_Address + 0x680)
 	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory[0]) != HAL_OK) {
 		HAL_FLASH_Lock();
 		return;
@@ -276,7 +275,7 @@ void SaveToMemory() {
 }
 
 void ReadOnMemory() {
-	if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory[0]) {
+	if ((*(volatile uint32_t*)(Flash_Address + allChipCount * 0x40)) != key_to_change_memory[0]) {
 		SaveToMemory();
 	}
 	else {
@@ -528,16 +527,17 @@ extern "C" void set_var_top_bot_str_2(const char* value) {
 }
 
 
-std::string debugg;
+std::string debugg;  // DEBUG
 extern "C" const char* get_var_debugg() {
 	return debugg.c_str();
-}
+}  // DEBUG
 extern "C" void set_var_debugg(const char* value) {
 	debugg = value;
 }
 
 
 // $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
 #include "actions.h"
 
 lv_obj_t* ch;
@@ -582,10 +582,12 @@ void config_charts() {
 }
 
 extern "C" void action_to_main_disp(lv_event_t* e) {
+	debugg1(""); // DEBUG
 	loadScreen(SCREEN_ID_D_MAIN);
 }
 
 extern "C" void action_to_disp_calibration_on(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = on;
 	ch = objects.chart_on;
 	comp_to_chart();
@@ -594,6 +596,7 @@ extern "C" void action_to_disp_calibration_on(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_manual_edit_on(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = on;
 	ch = objects.chart_on;
 	comp_to_chart();
@@ -603,6 +606,7 @@ extern "C" void action_to_disp_manual_edit_on(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_graph_resize_on(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = on;
 	ch = objects.chart_on;
 	comp_to_chart();
@@ -620,6 +624,7 @@ extern "C" void action_to_disp_graph_resize_on(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_calibration_off(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = off;
 	ch = objects.chart_off;
 	comp_to_chart();
@@ -628,6 +633,7 @@ extern "C" void action_to_disp_calibration_off(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_manual_edit_off(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = off;
 	ch = objects.chart_off;
 	comp_to_chart();
@@ -637,6 +643,7 @@ extern "C" void action_to_disp_manual_edit_off(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_graph_resize_off(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	cur_disp = off;
 	ch = objects.chart_off;
 	comp_to_chart();
@@ -654,6 +661,7 @@ extern "C" void action_to_disp_graph_resize_off(lv_event_t* e) {
 }
 
 extern "C" void action_to_disp_back(lv_event_t* e) {
+	debugg1("");  // DEBUG
 	if (cur_disp == on) {
 		ch = objects.d_chart_calib_on;
 		comp_to_chart();
@@ -688,11 +696,11 @@ extern "C" void action_calib_sensor_2_on(lv_event_t* e) {
 }
 
 extern "C" void action_calib_sensor_1_off(lv_event_t* e) {
-	// TODO calib sensor 1 off
+	// TODO: calib sensor 1 off
 }
 
 extern "C" void action_calib_sensor_2_off(lv_event_t* e) {
-	// TODO calib sensor 2 off
+	// TODO: calib sensor 2 off
 }
 
 extern "C" void action_cursor_minus(lv_event_t* e) {
@@ -760,8 +768,14 @@ extern "C" void action_sub_1000(lv_event_t* e) {
 }
 
 extern "C" void action_save_calibration(lv_event_t* e) {
-	// TODO
-	debugg1("Save calib " + std::to_string(657) + "?"); // for test
+	SaveToMemory();
+	debugg1("Save calib"); // DEBUG
+}
+
+extern "C" void action_restore_calibration(lv_event_t* e) {
+	ReadOnMemory();
+	comp_to_chart();
+	debugg1("Restore calib"); // DEBUG
 }
 
 extern "C" void action_to_disp_divisible_edit(lv_event_t* e) {
@@ -899,12 +913,12 @@ extern "C" void action_div_sub_100000(lv_event_t* e) {
 }
 
 extern "C" void action_piano_off(lv_event_t* e) {
-	// TODO: Implement action piano_off here
-	debugg1("Off"); // for test debug
+	// TODO: OFF
+	debugg1("Off"); // DEBUG
 }
 
 extern "C" void action_pre_pressure_switching(lv_event_t* e) {
-	// TODO action pre pressure switching
+	// TODO: pre-pres switching
 }
 
 extern "C" void action_set(lv_event_t* e) {
@@ -1031,7 +1045,8 @@ void comp_to_chart() {
 	int k = 0; // 0 <> 7
 	for (int i = 0; i < allKeys; ++i) {
 		compsCHART_ON_1[i] = comparator[c].comp[k][0];
-		// compsCHART_ON_1[i] = comparator[i / 7].comp[7 % 7][0]; // ?? проверить!! // TODO
+		// TODO: i % 7
+		// compsCHART_ON_1[i] = comparator[i / 7].comp[7 % 7][0]; // ?? проверить!! 
 		compsCHART_ON_2[i] = comparator[c].comp[k][1];
 		++k;
 		if (k > 6) {
@@ -1198,12 +1213,12 @@ void chart_correction(const int& x, const plus_minus& pm) {
 	lv_chart_refresh(ch);
 }
 
-void debugg1(const std::string& str) {
+void debugg1(const std::string& str) {  // DEBUG
 	debugg.clear();
 	debugg = str;
 }
 
-void debugg2() {
+void debugg2() {  // DEBUG
 	if (TIM2->CNT > 100000) {
 		TIM2->CNT = 0;
 		LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_3);

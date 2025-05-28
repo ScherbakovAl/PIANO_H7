@@ -608,6 +608,14 @@
       "localVariables": [],
       "userProperties": [],
       "name": "auto_size"
+    },
+    {
+      "objID": "5b9e54b0-36fa-49aa-fa1c-4feb40833896",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "restore_calibration"
     }
   ],
   "userPages": [
@@ -636,60 +644,6 @@
           "widthUnit": "px",
           "heightUnit": "px",
           "children": [
-            {
-              "objID": "e5b2d432-aed7-4c02-aaac-4ed0927283f6",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "b6c0d8da-90b2-4360-e7a5-925314d8911a",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "bbafa804-8c30-46bb-c7e7-24a36019209c",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
-            },
             {
               "objID": "a2478186-2758-44a4-bcfa-43eb75a48e88",
               "type": "LVGLButtonWidget",
@@ -1123,8 +1077,8 @@
             {
               "objID": "e19cb824-1615-41fc-a0ea-a4c33b822cac",
               "type": "LVGLButtonWidget",
-              "left": 196,
-              "top": 52,
+              "left": 320,
+              "top": 111,
               "width": 157,
               "height": 47,
               "customInputs": [],
@@ -1216,6 +1170,114 @@
               "states": "",
               "localStyles": {
                 "objID": "1d4a9799-fadd-4f75-c3a7-07685171da0b",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "radius": 8,
+                      "bg_color": "#343638"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "3aa43b1c-8bca-4aa7-c073-bcedbb1c27c5",
+              "type": "LVGLButtonWidget",
+              "left": 320,
+              "top": 174,
+              "width": 157,
+              "height": 47,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "c209e383-bd9d-480e-b50a-bc802e228a5c",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [
+                {
+                  "objID": "7207a7a0-2e7b-4f63-9c62-09517a575b79",
+                  "eventName": "PRESSED",
+                  "handlerType": "action",
+                  "action": "restore_calibration",
+                  "userData": 0
+                }
+              ],
+              "identifier": "button_edit_calibration_off_2",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [
+                {
+                  "objID": "d9aaaf97-6ca2-4cbc-995c-7b0a83283286",
+                  "type": "LVGLLabelWidget",
+                  "left": 0,
+                  "top": 0,
+                  "width": 133,
+                  "height": 16,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "c5860986-62c8-4ed0-a09c-d16061550c5f",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "identifier": "edit_calibration_label_4",
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "IGNORE_LAYOUT",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "1520e62e-bbc0-45d7-e974-457a5e4e9719",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "align": "CENTER",
+                          "text_color": "#edb015"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "restore calibration",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                }
+              ],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "38003ef8-eb99-4054-e9c4-32b0822b3f4d",
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
@@ -1428,6 +1490,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "e5b2d432-aed7-4c02-aaac-4ed0927283f6",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "b6c0d8da-90b2-4360-e7a5-925314d8911a",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "bbafa804-8c30-46bb-c7e7-24a36019209c",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -1528,60 +1644,6 @@
               },
               "group": "",
               "groupIndex": 0
-            },
-            {
-              "objID": "8d72fc39-3e54-4ef6-e5a2-9d8638ea7a0e",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "84bbe4be-1027-4691-8709-1c1a11adb536",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_2",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "8fbdbcbf-361d-4012-9694-dad91314cb8c",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
             },
             {
               "objID": "d4ad940f-f005-4b0c-ca45-5d767601c395",
@@ -3417,6 +3479,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "8d72fc39-3e54-4ef6-e5a2-9d8638ea7a0e",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "84bbe4be-1027-4691-8709-1c1a11adb536",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_2",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "8fbdbcbf-361d-4012-9694-dad91314cb8c",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -3470,60 +3586,6 @@
           "widthUnit": "px",
           "heightUnit": "px",
           "children": [
-            {
-              "objID": "de5974d4-a9fc-42df-960b-d55278f25c72",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "33b90980-3f02-4411-a204-a57f25d3c6e7",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_3",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "b04d8163-250e-4657-9d86-063f74f2e0db",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
-            },
             {
               "objID": "27dd1723-b24d-4b65-82cb-48922c139915",
               "type": "LVGLButtonWidget",
@@ -5537,6 +5599,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "de5974d4-a9fc-42df-960b-d55278f25c72",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "33b90980-3f02-4411-a204-a57f25d3c6e7",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_3",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "b04d8163-250e-4657-9d86-063f74f2e0db",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -5590,60 +5706,6 @@
           "widthUnit": "px",
           "heightUnit": "px",
           "children": [
-            {
-              "objID": "193935ca-8e3d-46e5-82d4-7b42c1b354ed",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "73a44e33-36e9-4980-8c7b-13b2bae95696",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_5",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "b99417ad-0dc9-4744-dc99-7528797fc992",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
-            },
             {
               "objID": "7cd0640f-2f35-41fb-ed7f-bb10a428c5da",
               "type": "LVGLButtonWidget",
@@ -7442,6 +7504,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "193935ca-8e3d-46e5-82d4-7b42c1b354ed",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "73a44e33-36e9-4980-8c7b-13b2bae95696",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_5",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "b99417ad-0dc9-4744-dc99-7528797fc992",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -7542,60 +7658,6 @@
               },
               "group": "",
               "groupIndex": 0
-            },
-            {
-              "objID": "e1b2412b-e18f-4c51-b541-d8a54a2555aa",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "13e005e4-e55b-4421-e843-18f4dc93b5ed",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_1",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "f6cd550c-69bb-473d-99b1-770a8065b71e",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
             },
             {
               "objID": "409d8078-5fe5-49fa-f197-b93f74b0a3ce",
@@ -9456,6 +9518,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "e1b2412b-e18f-4c51-b541-d8a54a2555aa",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "13e005e4-e55b-4421-e843-18f4dc93b5ed",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_1",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "f6cd550c-69bb-473d-99b1-770a8065b71e",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -9509,60 +9625,6 @@
           "widthUnit": "px",
           "heightUnit": "px",
           "children": [
-            {
-              "objID": "03532f38-7d9f-44fd-fccb-772bc7f77733",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "212dacf0-5564-4031-9a41-8caf9392fc98",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_4",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "a5155335-d489-44f9-ebce-9c57a9b004b3",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
-            },
             {
               "objID": "cc70036e-8fcf-41e2-be9b-58f17da29f97",
               "type": "LVGLButtonWidget",
@@ -11569,6 +11631,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "03532f38-7d9f-44fd-fccb-772bc7f77733",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "212dacf0-5564-4031-9a41-8caf9392fc98",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_4",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "a5155335-d489-44f9-ebce-9c57a9b004b3",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
@@ -11623,60 +11739,6 @@
           "widthUnit": "px",
           "heightUnit": "px",
           "children": [
-            {
-              "objID": "19f77266-0774-4fd4-88b2-fbf0c5f31f42",
-              "type": "LVGLLabelWidget",
-              "left": 100,
-              "top": 160,
-              "width": 33,
-              "height": 16,
-              "customInputs": [],
-              "customOutputs": [],
-              "style": {
-                "objID": "2cdcc667-314f-4e97-e355-a39476154ede",
-                "useStyle": "default",
-                "conditionalStyles": [],
-                "childStyles": []
-              },
-              "timeline": [],
-              "eventHandlers": [],
-              "identifier": "deb_6",
-              "leftUnit": "px",
-              "topUnit": "px",
-              "widthUnit": "content",
-              "heightUnit": "content",
-              "children": [],
-              "widgetFlags": "",
-              "hiddenFlagType": "literal",
-              "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
-              "checkedStateType": "literal",
-              "disabledStateType": "literal",
-              "states": "",
-              "localStyles": {
-                "objID": "3a91ea3b-466c-402a-b82c-e51a3f00c4ef",
-                "definition": {
-                  "MAIN": {
-                    "DEFAULT": {
-                      "text_color": "#ff00d9",
-                      "bg_opa": 255,
-                      "bg_color": "#000000",
-                      "text_opa": 255
-                    }
-                  }
-                }
-              },
-              "group": "",
-              "groupIndex": 0,
-              "text": "debugg",
-              "textType": "expression",
-              "longMode": "SCROLL_CIRCULAR",
-              "recolor": false,
-              "previewValue": " deb"
-            },
             {
               "objID": "5f03cb92-fd81-40b8-a76a-4516313f6198",
               "type": "LVGLButtonWidget",
@@ -13475,6 +13537,60 @@
               },
               "group": "",
               "groupIndex": 0
+            },
+            {
+              "objID": "19f77266-0774-4fd4-88b2-fbf0c5f31f42",
+              "type": "LVGLLabelWidget",
+              "left": 100,
+              "top": 160,
+              "width": 33,
+              "height": 16,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "2cdcc667-314f-4e97-e355-a39476154ede",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "deb_6",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "3a91ea3b-466c-402a-b82c-e51a3f00c4ef",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#ff00d9",
+                      "bg_opa": 255,
+                      "bg_color": "#000000",
+                      "text_opa": 255
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "debugg",
+              "textType": "expression",
+              "longMode": "SCROLL_CIRCULAR",
+              "recolor": false,
+              "previewValue": " deb"
             }
           ],
           "widgetFlags": "CLICKABLE",
