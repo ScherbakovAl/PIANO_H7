@@ -109,6 +109,7 @@ typedef struct _objects_t {
     lv_obj_t *obj4;
     lv_obj_t *but_send_5;
     lv_obj_t *deb_5;
+    lv_obj_t *but_send_10;
     lv_obj_t *obj5;
     lv_obj_t *obj6;
     lv_obj_t *chart_off;
@@ -188,6 +189,7 @@ typedef struct _objects_t {
     lv_obj_t *obj12;
     lv_obj_t *but_send_7;
     lv_obj_t *deb_6;
+    lv_obj_t *but_send_11;
     lv_obj_t *obj13;
     lv_obj_t *obj14;
     lv_obj_t *obj15;

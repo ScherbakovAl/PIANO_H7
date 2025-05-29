@@ -9,6 +9,7 @@
 #include <string>
 void debugg1(const std::string& str);  // DEBUG
 void debugg2();  // DEBUG
+void debugg3_while();  // DEBUG
 //  #include "deque"
 //  std::deque<int> rt;
 
@@ -129,7 +130,6 @@ void h7() {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
-		// send_test_midi(); // for test
 	}
 } // h7
 
@@ -141,8 +141,11 @@ void sync() {
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 		UART4_Receive_Settings();
-		debugg1("");  // DEBUG
-		if (b_ != 0) debugg1("Sync err, mcu #" + std::to_string(i));
+		debugg1(""); // DEBUG
+		if (b_ != 0) {
+			debugg1("Sync err, mcu #" + std::to_string(i));
+			debugg3_while();
+		};
 		pause(1);
 	}
 	LL_USART_EnableDMAReq_RX(UART4);
@@ -150,11 +153,11 @@ void sync() {
 
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::cal, adress, compN, dot, 0);
-	debugg1("");  // DEBUG
-	if (b_ != 0) debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
-
+	debugg1(""); // DEBUG
+	if (a_ == 0 && b_ == 0) {
+		debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
+	};
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
-	// readCompValue(adress, compN, dot);
 }
 
 void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
@@ -164,8 +167,8 @@ void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& d
 
 void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
-	if (compsCHART_ON_1[cursor] != convert_8_16(a_, b_)) {
-		debugg1("g4 != h7");  // DEBUG
+	if (compsCHART_ON_1[cursor] != convert_8_16(a_, b_)) { // DEBUG
+		debugg1("g4 != h7");
 	}
 }
 
@@ -186,13 +189,9 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 // UART Send-Recive
 void UART4_SendAddress(const uint8_t& slave_address) {
 	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-		debugg2(); // DEBUG
-	}
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
 	LL_USART_TransmitData9(UART4, address_byte);
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {
-		debugg2(); // DEBUG
-	}
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value) {
@@ -203,25 +202,17 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 	c = convert_16_8(value);
 	tx_settings[3] = c.a;
 	tx_settings[4] = c.b;
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-		debugg2(); // DEBUG
-	}
+	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
 	for (uint16_t i = 0; i < tx_settings_length; i++) {
 		LL_USART_TransmitData9(UART4, tx_settings[i]);
-		while (!LL_USART_IsActiveFlag_TXE(UART4)) {
-			debugg2(); // DEBUG
-		}
+		while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
 	}
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {
-		debugg2(); // DEBUG
-	}
+	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
 }
 
 void UART4_Receive_Settings() {
 	for (int i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {
-			debugg2(); // DEBUG
-		}
+		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {}
 		rx_settings[i] = LL_USART_ReceiveData9(UART4);
 	}
 	compN_ = rx_settings[1];
@@ -532,7 +523,7 @@ extern "C" void set_var_top_bot_str_2(const char* value) {
 std::string debugg;  // DEBUG
 extern "C" const char* get_var_debugg() {
 	return debugg.c_str();
-}  // DEBUG
+}
 extern "C" void set_var_debugg(const char* value) {
 	debugg = value;
 }
@@ -1061,6 +1052,51 @@ extern "C" void action_auto_size(lv_event_t* e) {
 	}
 	lv_chart_refresh(ch);
 }
+
+extern "C" void action_max_size_chart(lv_event_t* e) {
+	if (lv_scr_act() == objects.d_chart_graph_resize_on) {
+		if (col_but == green) {
+			on_green_max = 4095;
+			on_green_min = 0;
+		}
+		else if (col_but == red) {
+			on_red_max = 4095;
+			on_red_min = 0;
+		}
+		s1_on_min.clear();
+		s1_on_min = std::to_string(on_green_min);
+		s1_on_max.clear();
+		s1_on_max = std::to_string(on_green_max);
+		s2_on_min.clear();
+		s2_on_min = std::to_string(on_red_min);
+		s2_on_max.clear();
+		s2_on_max = std::to_string(on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	}
+	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
+		if (col_but == green) {
+			off_green_max = 4095;
+			off_green_min = 0;
+		}
+		else if (col_but == red) {
+			off_red_max = 4095;
+			off_red_min = 0;
+		}
+		s1_off_min.clear();
+		s1_off_min = std::to_string(off_green_min);
+		s1_off_max.clear();
+		s1_off_max = std::to_string(off_green_max);
+		s2_off_min.clear();
+		s2_off_min = std::to_string(off_red_min);
+		s2_off_max.clear();
+		s2_off_max = std::to_string(off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	}
+	lv_chart_refresh(ch);
+}
+
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -1248,6 +1284,12 @@ void debugg1(const std::string& str) {  // DEBUG
 void debugg2() {  // DEBUG
 	if (TIM2->CNT > 100000) {
 		TIM2->CNT = 0;
-		LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_3);
+		LL_GPIO_TogglePin(GPIOE, LL_GPIO_PIN_3); // LED
+	}
+}
+
+void debugg3_while() {  // DEBUG
+	while (1) {
+		debugg2();
 	}
 }

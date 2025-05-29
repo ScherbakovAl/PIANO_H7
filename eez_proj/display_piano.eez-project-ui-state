@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[display_piano.eez-project]:/userPages/6",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/40",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/41",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/20",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -223,8 +223,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "row",
@@ -308,7 +307,8 @@
                           },
                           "icon": "svg:page"
                         }
-                      ]
+                      ],
+                      "active": true
                     }
                   ]
                 },
@@ -1172,9 +1172,9 @@
           "20": {},
           "21": {},
           "22": {},
-          "25": {
-            "$selected": true
-          }
+          "23": {},
+          "24": {},
+          "25": {}
         }
       },
       "transform": {
@@ -1202,6 +1202,7 @@
           "16": {},
           "17": {},
           "20": {},
+          "21": {},
           "22": {
             "$selected": true
           }
@@ -1267,9 +1268,11 @@
           "18": {},
           "19": {},
           "20": {},
+          "21": {},
           "22": {
             "$selected": true
-          }
+          },
+          "23": {}
         }
       },
       "transform": {
@@ -1317,9 +1320,8 @@
           "19": {},
           "21": {},
           "23": {},
-          "25": {
-            "$selected": true
-          }
+          "24": {},
+          "25": {}
         }
       },
       "timeline": {
@@ -1338,9 +1340,9 @@
           "17": {},
           "18": {},
           "19": {},
-          "22": {
-            "$selected": true
-          }
+          "20": {},
+          "21": {},
+          "22": {}
         }
       },
       "transform": {
@@ -1380,9 +1382,9 @@
         "0": {
           "5": {},
           "10": {},
-          "22": {
-            "$selected": true
-          }
+          "21": {},
+          "22": {},
+          "23": {}
         }
       },
       "transform": {
@@ -1448,9 +1450,6 @@
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "TEXT",
-    "OUTLINE",
-    "BACKGROUND",
-    "IMAGE",
     "MISCELLANEOUS"
   ],
   "showInactiveFlowsInDebugger": true,

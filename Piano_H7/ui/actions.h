@@ -48,6 +48,7 @@ extern void action_to_disp_graph_resize_off(lv_event_t * e);
 extern void action_set(lv_event_t * e);
 extern void action_auto_size(lv_event_t * e);
 extern void action_restore_calibration(lv_event_t * e);
+extern void action_max_size_chart(lv_event_t * e);
 
 
 #ifdef __cplusplus
