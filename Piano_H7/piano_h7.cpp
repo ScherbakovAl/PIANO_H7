@@ -80,8 +80,7 @@ void h7() {
 	ui_init();
 
 	// USB init
-	// tusb_init(); // ?
-	tud_init(BOARD_TUD_RHPORT);
+	tusb_init();
 
 	// LL_mDelay(300);
 	// send_test_midi();
@@ -167,7 +166,26 @@ void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& d
 
 void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
 	sender(command::set_comp_value, adress, compN, dot, value);
-	if (compsCHART_ON_1[cursor] != convert_8_16(a_, b_)) { // DEBUG
+	debugg1("");
+	int32_t ts = 0;
+	if (lv_scr_act() == objects.d_chart_calib_on) {
+		if (col_but == green) {
+			ts = compsCHART_ON_1[cursor];
+		}
+		else {
+			ts = compsCHART_ON_2[cursor];
+		}
+	}
+	else if (lv_scr_act() == objects.d_chart_calib_off) {
+		if (col_but == green) {
+			ts = compsCHART_OFF_1[cursor];
+		}
+		else {
+			ts = compsCHART_OFF_2[cursor];
+		}
+	}
+
+	if (ts == convert_8_16(a_, b_)) { // DEBUG
 		debugg1("g4 != h7");
 	}
 }
@@ -225,12 +243,12 @@ void UART4_Receive_Settings() {
 // DMA IQR Handler
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	GPIOD->BSRR = 0x800; // pD11
+	GPIOD->BSRR = 0x800; // pD11 // for test
 	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), 3); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	uint8_t note_buf[] = { 0xB0, 0x58, rx_data[2], 0x90, rx_data[0], rx_data[1] };
 	tud_midi_stream_write(0, note_buf, 6);
-	GPIOD->BSRR = 0x8000000; // pD11
+	GPIOD->BSRR = 0x8000000; // pD11 // for test
 }
 //---------------------------------
 
@@ -919,30 +937,28 @@ extern "C" void action_pre_pressure_switching(lv_event_t* e) {
 extern "C" void action_set(lv_event_t* e) {
 	const uint8_t adr = cursor / 7;
 	const uint8_t c = cursor % 7;
-	const int value_on = compsCHART_ON_1[cursor];
-	const int value_off = compsCHART_OFF_1[cursor];
 	if (lv_scr_act() == objects.d_chart_calib_on) {
-		setCompValue(adr, c, 0, value_on); // for green
-		setCompValue(adr, c, 1, value_on); // for red
+		setCompValue(adr, c, 0, compsCHART_ON_1[cursor]); // for green
+		setCompValue(adr, c, 1, compsCHART_ON_2[cursor]); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
 		if (col_but == green) {
-			setCompValue(adr, c, 0, value_on); // for green
+			setCompValue(adr, c, 0, compsCHART_ON_1[cursor]); // for green
 		}
 		else {
-			setCompValue(adr, c, 1, value_on); // for red
+			setCompValue(adr, c, 1, compsCHART_ON_2[cursor]); // for red
 		}
 	}
 	else if (lv_scr_act() == objects.d_chart_calib_off) {
-		setCompValue(adr, c, 0, value_off); // for green
-		setCompValue(adr, c, 1, value_off); // for red
+		setCompValue(adr, c, 0, compsCHART_OFF_1[cursor]); // for green
+		setCompValue(adr, c, 1, compsCHART_OFF_2[cursor]); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
 		if (col_but == green) {
-			setCompValue(adr, c, 0, value_off); // for green
+			setCompValue(adr, c, 0, compsCHART_OFF_1[cursor]); // for green
 		}
 		else {
-			setCompValue(adr, c, 1, value_off); // for red
+			setCompValue(adr, c, 1, compsCHART_OFF_2[cursor]); // for red
 		}
 	}
 }
@@ -1095,6 +1111,19 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
 	}
 	lv_chart_refresh(ch);
+}
+
+extern "C" void action_set_all(lv_event_t* e) {
+	// for (int i = 0; i < allKeys; ++i) {
+	for (int i = 28; i < 49; ++i) { // DEBUG // for 4-5-6 mcu
+		const uint8_t adr = i / 7;
+		const uint8_t compN = i % 7;
+		setCompValue(adr, compN, 0, compsCHART_ON_1[i]);
+		setCompValue(adr, compN, 1, compsCHART_ON_2[i]);
+		// setCompValue(adr, compN, 0, compsCHART_OFF_1[i]);
+		// setCompValue(adr, compN, 1, compsCHART_OFF_2[i]);
+	}
+	debugg1("set DONE"); // DEBUG: set DONE
 }
 
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

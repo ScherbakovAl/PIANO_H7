@@ -25,6 +25,7 @@ extern "C" {
 	const int32_t start_cursor = 34; // 34 -7й датчик у 4й платы
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
+	
 	const int allKeys = allChipCount / 2 * 7;
 
 	uint8_t rx_data[3] = { };

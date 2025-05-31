@@ -33,6 +33,8 @@ typedef struct _objects_t {
     lv_obj_t *label_pre_pressure;
     lv_obj_t *switcher_pre_pressure;
     lv_obj_t *deb;
+    lv_obj_t *button_edit_calibration_off_3;
+    lv_obj_t *edit_calibration_label_5;
     lv_obj_t *chart_on;
     lv_obj_t *button_to_main;
     lv_obj_t *sub_10;

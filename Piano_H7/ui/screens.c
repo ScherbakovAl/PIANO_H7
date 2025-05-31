@@ -76,7 +76,7 @@ void create_screen_d_main() {
             // button_edit_divisible
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.button_edit_divisible = obj;
-            lv_obj_set_pos(obj, 5, 52);
+            lv_obj_set_pos(obj, 3, 52);
             lv_obj_set_size(obj, 157, 47);
             lv_obj_add_event_cb(obj, action_to_disp_divisible_edit, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
@@ -200,7 +200,7 @@ void create_screen_d_main() {
             // label_pre_pressure
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.label_pre_pressure = obj;
-            lv_obj_set_pos(obj, 196, 142);
+            lv_obj_set_pos(obj, 197, 11);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_label_set_text(obj, "prePressure");
@@ -209,7 +209,7 @@ void create_screen_d_main() {
             // switcher_pre_pressure
             lv_obj_t *obj = lv_switch_create(parent_obj);
             objects.switcher_pre_pressure = obj;
-            lv_obj_set_pos(obj, 197, 173);
+            lv_obj_set_pos(obj, 197, 51);
             lv_obj_set_size(obj, 89, 48);
             lv_obj_add_event_cb(obj, action_pre_pressure_switching, LV_EVENT_PRESSED, (void *)0);
             lv_obj_add_flag(obj, LV_OBJ_FLAG_EVENT_BUBBLE);
@@ -229,6 +229,32 @@ void create_screen_d_main() {
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff000000), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_opa(obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_label_set_text(obj, "");
+        }
+        {
+            // button_edit_calibration_off_3
+            lv_obj_t *obj = lv_button_create(parent_obj);
+            objects.button_edit_calibration_off_3 = obj;
+            lv_obj_set_pos(obj, 3, 174);
+            lv_obj_set_size(obj, 157, 47);
+            lv_obj_add_event_cb(obj, action_set_all, LV_EVENT_PRESSED, (void *)0);
+            lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
+            lv_obj_set_style_radius(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);
+            {
+                lv_obj_t *parent_obj = obj;
+                {
+                    // edit_calibration_label_5
+                    lv_obj_t *obj = lv_label_create(parent_obj);
+                    objects.edit_calibration_label_5 = obj;
+                    lv_obj_set_pos(obj, 0, 0);
+                    lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+                    lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
+                    lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
+                    lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_color(obj, lv_color_hex(0xffedb015), LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_label_set_text(obj, "set all");
+                }
+            }
         }
     }
     
