@@ -944,7 +944,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_color": "#2bc464"
+                          "text_color": "#04cc4e"
                         }
                       }
                     }
@@ -1052,7 +1052,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_color": "#c04e43"
+                          "text_color": "#0bccbb"
                         }
                       }
                     }
@@ -1160,7 +1160,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_color": "#edb015"
+                          "text_color": "#eeab00"
                         }
                       }
                     }
@@ -1268,7 +1268,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_color": "#edb015"
+                          "text_color": "#eeab00"
                         }
                       }
                     }
@@ -1344,7 +1344,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -1394,7 +1394,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -1631,7 +1631,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_color": "#edb015"
+                          "text_color": "#eeab00"
                         }
                       }
                     }
@@ -2369,7 +2369,7 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_align": "CENTER",
-                          "text_color": "#2bc464"
+                          "text_color": "#04cc4e"
                         }
                       }
                     }
@@ -2477,7 +2477,7 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_align": "CENTER",
-                          "text_color": "#c04e43"
+                          "text_color": "#c14235"
                         }
                       }
                     }
@@ -2593,7 +2593,7 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_align": "CENTER",
-                          "text_color": "#edb015"
+                          "text_color": "#eeab00"
                         }
                       }
                     }
@@ -2776,7 +2776,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#edb015",
+                      "text_color": "#eeab00",
                       "text_font": "MONTSERRAT_24"
                     }
                   }
@@ -2922,7 +2922,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464",
+                      "text_color": "#04cc4e",
                       "text_font": "MONTSERRAT_24"
                     }
                   }
@@ -2974,7 +2974,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#c04e43",
+                      "text_color": "#cc1200",
                       "text_font": "MONTSERRAT_24"
                     }
                   }
@@ -3026,7 +3026,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -3076,7 +3076,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -3126,7 +3126,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#c04e43"
+                      "text_color": "#cc1200"
                     }
                   }
                 }
@@ -3176,7 +3176,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#c04e43"
+                      "text_color": "#cc1200"
                     }
                   }
                 }
@@ -3226,7 +3226,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -3277,7 +3277,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#2bc464"
+                      "text_color": "#04cc4e"
                     }
                   }
                 }
@@ -3328,7 +3328,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#c04e43"
+                      "text_color": "#cc1200"
                     }
                   }
                 }
@@ -3379,7 +3379,7 @@
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
-                      "text_color": "#c04e43"
+                      "text_color": "#cc1200"
                     }
                   }
                 }

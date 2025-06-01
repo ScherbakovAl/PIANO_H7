@@ -568,7 +568,7 @@ void config_charts() {
 	lv_obj_t* ob = objects.chart_on;
 	lv_chart_set_point_count(ob, allKeys);
 	ser_on_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
-	ser_on_red = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
+	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
 	lv_chart_set_series_ext_y_array(ob, ser_on_green, compsCHART_ON_1);
 	lv_chart_set_series_ext_y_array(ob, ser_on_red, compsCHART_ON_2);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);

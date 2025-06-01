@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[display_piano.eez-project]:/userPages/6",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/41",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/42",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/20",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -307,8 +307,7 @@
                           },
                           "icon": "svg:page"
                         }
-                      ],
-                      "active": true
+                      ]
                     }
                   ]
                 },
@@ -375,7 +374,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1135,10 +1135,15 @@
     "[display_piano.eez-project]:/userPages/0[flow-state]": {
       "selection": {
         "0": {
+          "2": {},
+          "3": {},
+          "4": {},
+          "5": {},
           "6": {},
           "8": {},
           "9": {},
-          "10": {}
+          "10": {},
+          "11": {}
         }
       },
       "transform": {
@@ -1159,6 +1164,13 @@
       "selection": {
         "0": {
           "0": {},
+          "6": {},
+          "7": {
+            "0": {
+              "$selected": true
+            }
+          },
+          "8": {},
           "10": {},
           "11": {},
           "12": {},
@@ -1203,9 +1215,7 @@
           "17": {},
           "20": {},
           "21": {},
-          "22": {
-            "$selected": true
-          }
+          "22": {}
         }
       },
       "transform": {
@@ -1269,9 +1279,7 @@
           "19": {},
           "20": {},
           "21": {},
-          "22": {
-            "$selected": true
-          },
+          "22": {},
           "23": {}
         }
       },
@@ -1450,7 +1458,9 @@
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "TEXT",
-    "MISCELLANEOUS"
+    "MISCELLANEOUS",
+    "IMAGE",
+    "ARC"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
