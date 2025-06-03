@@ -135,7 +135,7 @@ void h7() {
 void sync() {
 	LL_USART_DisableDMAReq_RX(UART4);
 	TIM3->CNT = 0;
-	for (int i = 4; i < 7; ++i) {
+	for (int i = start_sensor; i < end_sensor + 1; ++i) {
 		UART4_SendAddress(i);
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
@@ -1115,7 +1115,7 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 
 extern "C" void action_set_all(lv_event_t* e) {
 	// for (int i = 0; i < allKeys; ++i) {
-	for (int i = 28; i < 49; ++i) { // DEBUG // for 4-5-6 mcu
+	for (int i = start_sensor * 7; i < end_sensor * 7 + 1; ++i) { // DEBUG // for 4-5-6 mcu
 		const uint8_t adr = i / 7;
 		const uint8_t compN = i % 7;
 		setCompValue(adr, compN, 0, compsCHART_ON_1[i]);
