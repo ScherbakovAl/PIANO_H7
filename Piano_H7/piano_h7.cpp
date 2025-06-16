@@ -39,13 +39,13 @@ void h7() {
 	//---------------------------------
 
 	// UART init
-	LL_USART_Enable(UART4);
-	LL_USART_EnableDMAReq_RX(UART4);
+	LL_USART_Enable(UART5);
+	LL_USART_EnableDMAReq_RX(UART5);
 	//---------------------------------
 
 	// DMA RX для получения данных
 	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
-	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART4->RDR));
+	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART5->RDR));
 	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
 	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
 	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
@@ -133,7 +133,7 @@ void h7() {
 } // h7
 
 void sync() {
-	LL_USART_DisableDMAReq_RX(UART4);
+	LL_USART_DisableDMAReq_RX(UART5);
 	TIM3->CNT = 0;
 	for (int i = start_sensor; i < end_sensor + 1; ++i) {
 		UART4_SendAddress(i);
@@ -147,7 +147,24 @@ void sync() {
 		};
 		pause(1);
 	}
-	LL_USART_EnableDMAReq_RX(UART4);
+	LL_USART_EnableDMAReq_RX(UART5);
+
+	// // for note off
+	// 	LL_USART_DisableDMAReq_RX(UART5);
+	// TIM3->CNT = 0;
+	// for (int i = start_sensor + 13; i < end_sensor + 1 + 13; ++i) {
+	// 	UART4_SendAddress(i);
+	// 	pause(2);
+	// 	UART4_Send_Settings(command::sync_timer, 0, 0, 0);
+	// 	UART4_Receive_Settings();
+	// 	debugg1(""); // DEBUG
+	// 	if (b_ != 0) {
+	// 		debugg1("Sync err, mcu #" + std::to_string(i));
+	// 		debugg3_while();
+	// 	};
+	// 	pause(1);
+	// }
+	// LL_USART_EnableDMAReq_RX(UART5);
 }
 
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
@@ -193,23 +210,23 @@ void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& do
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
 	const int& value) {
 	LL_TIM_DisableCounter(TIM1);
-	LL_USART_DisableDMAReq_RX(UART4);
+	LL_USART_DisableDMAReq_RX(UART5);
 	UART4_SendAddress(adress);
 	pause(6); // 6 for release
 	UART4_Send_Settings(com, compN, dot, value);
 	pause(1); // 1 for release
 	UART4_Receive_Settings();
 	pause(1); // 1 for release
-	LL_USART_EnableDMAReq_RX(UART4);
+	LL_USART_EnableDMAReq_RX(UART5);
 	LL_TIM_EnableCounter(TIM1);
 }
 
 // UART Send-Recive
 void UART4_SendAddress(const uint8_t& slave_address) {
 	const uint16_t address_byte = slave_address | 0x100; // Установка старшего бита (MSB) для указания адреса
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
-	LL_USART_TransmitData9(UART4, address_byte);
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
+	LL_USART_TransmitData9(UART5, address_byte);
+	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value) {
@@ -220,18 +237,18 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 	c = convert_16_8(value);
 	tx_settings[3] = c.a;
 	tx_settings[4] = c.b;
-	while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	for (uint16_t i = 0; i < tx_settings_length; i++) {
-		LL_USART_TransmitData9(UART4, tx_settings[i]);
-		while (!LL_USART_IsActiveFlag_TXE(UART4)) {}
+		LL_USART_TransmitData9(UART5, tx_settings[i]);
+		while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	}
-	while (!LL_USART_IsActiveFlag_TC(UART4)) {}
+	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
 void UART4_Receive_Settings() {
 	for (int i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART4)) {}
-		rx_settings[i] = LL_USART_ReceiveData9(UART4);
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		rx_settings[i] = LL_USART_ReceiveData9(UART5);
 	}
 	compN_ = rx_settings[1];
 	dot_ = rx_settings[2];

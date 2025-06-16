@@ -62,22 +62,22 @@ void MX_GPIO_Init(void)
   /**/
   LL_GPIO_ResetOutputPin(GPIOC, offC13_Pin|offC14_Pin|offC15_Pin|offC0_Pin
                           |offC1_Pin|offC2_Pin|offC3_Pin|offC4_Pin
-                          |offC5_Pin|offC6_Pin|pin_test_2_Pin|offC8_Pin
-                          |pin_test_1_Pin|offC12_Pin);
+                          |offC5_Pin|offC6_Pin|offC7_Pin|offC8_Pin
+                          |offC9_Pin|offC12_Pin);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOA, offA2_Pin|offA3_Pin|offA4_Pin|offA5_Pin
-                          |offA6_Pin|offA7_Pin|offA8_Pin|offA9_Pin
-                          |offA10_Pin);
+  LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_0|LL_GPIO_PIN_1|offA2_Pin|offA3_Pin
+                          |offA4_Pin|offA5_Pin|offA6_Pin|offA7_Pin
+                          |offA8_Pin|offA9_Pin|offA10_Pin);
 
   /**/
   LL_GPIO_ResetOutputPin(GPIOB, offB0_Pin|offB1_Pin|offB2_Pin|offB10_Pin
-                          |offB11_Pin|offB12_Pin|pin_test_8_Pin|pin_test_7_Pin
-                          |offB4_Pin|offB6_Pin|offB8_Pin);
+                          |offB11_Pin|offB14_Pin|offB15_Pin|offB4_Pin
+                          |offB6_Pin|offB8_Pin);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOD, offD8_Pin|pin_test_6_Pin|offD10_Pin|pin_test_5_Pin
-                          |offD12_Pin|pin_test_4_Pin|offD14_Pin|pin_test_3_Pin
+  LL_GPIO_ResetOutputPin(GPIOD, offD8_Pin|offD9_Pin|offD10_Pin|offD11_Pin
+                          |offD12_Pin|offD13_Pin|offD14_Pin|offD15_Pin
                           |CTP_RST_Pin|offD1_Pin|offD2_Pin|offD3_Pin
                           |offD4_Pin|offD5_Pin|offD7_Pin);
 
@@ -101,8 +101,8 @@ void MX_GPIO_Init(void)
   /**/
   GPIO_InitStruct.Pin = offC13_Pin|offC14_Pin|offC15_Pin|offC0_Pin
                           |offC1_Pin|offC2_Pin|offC3_Pin|offC4_Pin
-                          |offC5_Pin|offC6_Pin|pin_test_2_Pin|offC8_Pin
-                          |pin_test_1_Pin|offC12_Pin;
+                          |offC5_Pin|offC6_Pin|offC7_Pin|offC8_Pin
+                          |offC9_Pin|offC12_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -110,9 +110,9 @@ void MX_GPIO_Init(void)
   LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = offA2_Pin|offA3_Pin|offA4_Pin|offA5_Pin
-                          |offA6_Pin|offA7_Pin|offA8_Pin|offA9_Pin
-                          |offA10_Pin;
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_1|offA2_Pin|offA3_Pin
+                          |offA4_Pin|offA5_Pin|offA6_Pin|offA7_Pin
+                          |offA8_Pin|offA9_Pin|offA10_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -121,8 +121,8 @@ void MX_GPIO_Init(void)
 
   /**/
   GPIO_InitStruct.Pin = offB0_Pin|offB1_Pin|offB2_Pin|offB10_Pin
-                          |offB11_Pin|offB12_Pin|pin_test_8_Pin|pin_test_7_Pin
-                          |offB4_Pin|offB6_Pin|offB8_Pin;
+                          |offB11_Pin|offB14_Pin|offB15_Pin|offB4_Pin
+                          |offB6_Pin|offB8_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -130,8 +130,8 @@ void MX_GPIO_Init(void)
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = offD8_Pin|pin_test_6_Pin|offD10_Pin|pin_test_5_Pin
-                          |offD12_Pin|pin_test_4_Pin|offD14_Pin|pin_test_3_Pin
+  GPIO_InitStruct.Pin = offD8_Pin|offD9_Pin|offD10_Pin|offD11_Pin
+                          |offD12_Pin|offD13_Pin|offD14_Pin|offD15_Pin
                           |offD1_Pin|offD2_Pin|offD3_Pin|offD4_Pin
                           |offD5_Pin|offD7_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;

@@ -23,8 +23,8 @@ extern "C" {
 
 	const int allChipCount = 26;
 	const int32_t start_cursor = 34; // 34 -7й датчик у 4й платы
-	const int start_sensor = 1;
-	const int end_sensor = 6;
+	const int start_sensor = 1; // включительно
+	const int end_sensor = 6; // включительно
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	
