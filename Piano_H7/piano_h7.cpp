@@ -104,6 +104,24 @@ void h7() {
 	// setCompValue(4, 2, 0, 3499);
 	// setCompValue(4, 2, 1, 999);
 
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+
+	// TODO
+	// TODO	GPIO ANALOG MODE !!!!!!!!!!!! test and using !!!
+	// TODO
+
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+	// TODO
+
 	// readCompValue(4, 2, 0);
 	// readCompValue(4, 2, 1);
 
