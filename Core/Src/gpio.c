@@ -54,19 +54,19 @@ void MX_GPIO_Init(void)
   LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOD);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOA, RELAY_1_Pin|RELAY_2_Pin);
-
-  /**/
-  LL_GPIO_ResetOutputPin(CTP_RST_GPIO_Port, CTP_RST_Pin);
-
-  /**/
-  LL_GPIO_ResetOutputPin(LCD_CS_GPIO_Port, LCD_CS_Pin);
+  LL_GPIO_SetOutputPin(GPIOA, RELAY_1_Pin|RELAY_2_Pin);
 
   /**/
   LL_GPIO_SetOutputPin(LCD_LED_GPIO_Port, LCD_LED_Pin);
 
   /**/
   LL_GPIO_SetOutputPin(GPIOB, LCD_DC_Pin|LCD_RESET_Pin);
+
+  /**/
+  LL_GPIO_ResetOutputPin(CTP_RST_GPIO_Port, CTP_RST_Pin);
+
+  /**/
+  LL_GPIO_ResetOutputPin(LCD_CS_GPIO_Port, LCD_CS_Pin);
 
   /**/
   GPIO_InitStruct.Pin = LL_GPIO_PIN_2|LL_GPIO_PIN_3|LL_GPIO_PIN_4|LL_GPIO_PIN_5
@@ -98,8 +98,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = RELAY_1_Pin|RELAY_2_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_DOWN;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /**/
