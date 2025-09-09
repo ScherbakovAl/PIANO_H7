@@ -278,12 +278,12 @@ void UART4_Receive_Settings() {
 // DMA IQR Handler
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	GPIOD->BSRR = 0x800; // pD11 // for test
+	// GPIOD->BSRR = 0x800; // pD11 // for test
 	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), 3); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	uint8_t note_buf[] = { 0xB0, 0x58, rx_data[2], 0x90, rx_data[0], rx_data[1] };
 	tud_midi_stream_write(0, note_buf, 6);
-	GPIOD->BSRR = 0x8000000; // pD11 // for test
+	// GPIOD->BSRR = 0x8000000; // pD11 // for test
 }
 //---------------------------------
 
