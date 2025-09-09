@@ -21,6 +21,8 @@ static lv_color16_t buf_2[BUFF_SIZE];
 lv_display_t* disp;
 lv_indev_t* indev;
 
+// настройки gpio взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
+
 void h7() {
 	//	LL_mDelay(100);
 
