@@ -1588,13 +1588,13 @@ HAL_StatusTypeDef USB_DriveVbus(const USB_OTG_GlobalTypeDef *USBx, uint8_t state
 }
 
 /**
-  * @brief  Return Host Core speed
+  * @brief  Return Host Port speed
   * @param  USBx  Selected device
-  * @retval speed : Host speed
+  * @retval speed : Host port device speed
   *          This parameter can be one of these values:
-  *            @arg HCD_SPEED_HIGH: High speed mode
-  *            @arg HCD_SPEED_FULL: Full speed mode
-  *            @arg HCD_SPEED_LOW: Low speed mode
+  *            @arg HCD_DEVICE_SPEED_HIGH: High speed mode
+  *            @arg HCD_DEVICE_SPEED_FULL: Full speed mode
+  *            @arg HCD_DEVICE_SPEED_LOW: Low speed mode
   */
 uint32_t USB_GetHostSpeed(USB_OTG_GlobalTypeDef const *USBx)
 {

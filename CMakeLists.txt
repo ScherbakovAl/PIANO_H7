@@ -25,8 +25,6 @@ endif()
 # Set the project name
 set(CMAKE_PROJECT_NAME Piano_H7)
 
-# Include toolchain file
-include("cmake/gcc-arm-none-eabi.cmake")
 
 # set(CMAKE_C_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
 # set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -Wpedantic")
