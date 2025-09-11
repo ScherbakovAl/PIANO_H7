@@ -21,16 +21,16 @@ extern "C" {
 	using uint = unsigned int;
 	using cuint = const uint;
 
-	const int allChipCount = 26;
-	const int32_t start_cursor = 7; // 34 -7й датчик у 4й платы
+	const int allChipCount = 26; // 1-13-on, 14-26-off
+	const int32_t start_cursor = 7;
 	const int start_sensor = 1; // включительно
 	const int end_sensor = 3; // включительно
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
-	
+
 	const int allKeys = allChipCount / 2 * 7;
 
-	uint8_t rx_data[3] = { };
+	uint8_t rx_data[5] = { };
 	const int dataLengthRX = sizeof(rx_data);
 	uint8_t tx_settings[5] = { };
 	const int tx_settings_length = sizeof(tx_settings);
@@ -75,10 +75,9 @@ extern "C" {
 		cal,
 		read_comp_value,
 		set_comp_value,
-		//set_div_value, // реализовать установку делимого 8<>32<>8 // TODO
-		buff_to_flash,         //
-		flash_to_buff,         //
-		read_comp_value_flash, //
+		buff_to_flash,
+		flash_to_buff,
+		read_comp_value_flash,
 	};
 
 	enum plus_minus {
@@ -119,7 +118,8 @@ extern "C" {
 	int off_green_min = 0;
 	int off_red_max = 4095;
 	int off_red_min = 0;
-	int divis = 1000000000;
+	int divis = 100'000'000;
+	const unsigned int maxMidi = 127;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;

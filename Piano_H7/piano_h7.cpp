@@ -280,12 +280,36 @@ void UART4_Receive_Settings() {
 // DMA IQR Handler
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	// GPIOD->BSRR = 0x800; // pD11 // for test
 	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), 3); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	uint8_t note_buf[] = { 0xB0, 0x58, rx_data[2], 0x90, rx_data[0], rx_data[1] };
+	cuint tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
+	cuint midi_speed = divis / tOut;
+	cuint midi_hi = midi_speed / maxMidi;
+	cuint midi_lo = midi_speed - midi_hi * maxMidi;
+	uint8_t note_buf[] = { 0xB0, 0x58, midi_lo, rx_data[0] < 39 ? 0x90 : 0x80, rx_data[0], midi_hi };
 	tud_midi_stream_write(0, note_buf, 6);
-	// GPIOD->BSRR = 0x8000000; // pD11 // for test
+
+
+	// tim_IN = 100ns на значение
+
+	// v = s / t
+    // s - расстояние
+    // s = 2 mm = 0.002 m
+    // t - время
+    // t = 62000 ns = 0.000062 s
+
+    // v = 0.002 / 0.000062 = 32,258064516 м/с;
+    // v = 2000 / 62 = 32,258064516; ~~~
+    // v = 2000000 / 62000 = 32,258064516;
+
+    // A - кинетическая энергия
+    // A = M * v * v / 2;
+
+    // М - масса (кг)
+    // M = 10 g = 0.01 kg
+    // v * v - скорость в квадрате (м/с)
+
+    // A = 0.02 * 32,258064516 * 32,258064516 / 2 = 10,405827263;
 }
 //---------------------------------
 
