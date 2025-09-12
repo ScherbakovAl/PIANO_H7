@@ -109,7 +109,7 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined symbols
 )
 
-# LVGL
+# LVGL and EEZ studio
 #######################################################
 add_subdirectory(
     Piano_H7/lvgl

@@ -22,9 +22,10 @@ extern "C" {
 	using cuint = const uint;
 
 	const int allChipCount = 26; // 1-13-on, 14-26-off
-	const int32_t start_cursor = 7;
+	const int32_t start_cursor = 23;
 	const int start_sensor = 1; // включительно
 	const int end_sensor = 3; // включительно
+	const uint pointOnToOff = 80; // после этого номера ноты идут как демпфера
 	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 

@@ -7,11 +7,53 @@
 
 #include "piano_h7.hpp"
 #include <string>
+#include <format>
+#include <cmath>
+
+//  #include "deque"
+//  std::deque<int> rt;
+
+
 void debugg1(const std::string& str);  // DEBUG
 void debugg2();  // DEBUG
 void debugg3_while();  // DEBUG
-//  #include "deque"
-//  std::deque<int> rt;
+
+int fl = 0; // for test fl
+
+uint32_t timerLenght = 0; // for test
+uint32_t speed = 0;
+uint32_t energy = 0;
+uint8_t midi_hi = 0;
+uint8_t midi_lo = 0;
+
+// uint32_t speed_t = 0; // for test
+// uint32_t energy_t = 0; // for test
+// uint32_t midi_hi_t = 0; // for test
+// uint32_t midi_lo_t = 0; // for test
+
+std::string test_t_out; // for test std::string
+std::string test_speed; // for test
+std::string test_energy; // for test
+std::string test_midi_hi; // for test
+std::string test_midi_lo; // for test
+
+float timerLenght_fl = 0; // for test
+float speed_t_fl = 0; // for test
+float energy_t_fl = 0; // for test
+float midi_hi_t_fl = 0; // for test
+float midi_lo_t_fl = 0; // for test
+
+std::string test_t_out_fl; // for test
+std::string test_speed_fl; // for test
+std::string test_energy_fl; // for test
+std::string test_midi_hi_fl; // for test
+std::string test_midi_lo_fl; // for test
+
+std::string test_timer1; // for test
+std::string test_timer2; // for test
+volatile uint32_t test_int_timer1 = 0; // for test
+volatile uint32_t test_int_timer2 = 0; // for test
+//---------------------------------
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
 #define BUFF_SIZE (480 * 40 * BYTES_PER_PIXEL)
@@ -27,7 +69,7 @@ void h7() {
 	//	LL_mDelay(100);
 
 	// TIM init
-	LL_TIM_EnableCounter(TIM2); // просто счётчик (1uS)
+	LL_TIM_EnableCounter(TIM2); // просто счётчик (137.5Mhz)
 
 	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
 	LL_TIM_EnableAllOutputs(TIM1);
@@ -92,7 +134,7 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-	send_test_midi(); // for test
+	send_test_midi(); // for test send_midi
 
 	// калибровка
 	//	while (1) {
@@ -105,24 +147,6 @@ void h7() {
 
 	// setCompValue(4, 2, 0, 3499);
 	// setCompValue(4, 2, 1, 999);
-
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO	GPIO ANALOG MODE !!!!!!!!!!!! test and using !!!
-	// TODO
-
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
-	// TODO
 
 	// readCompValue(4, 2, 0);
 	// readCompValue(4, 2, 1);
@@ -145,10 +169,54 @@ void h7() {
 
 	config_charts();
 
+	ReadOnMemory(); // восстановление графика при включении
+	comp_to_chart();
+	debugg1("Restore calib"); // DEBUG
+	for (int i = start_sensor * 7; i < end_sensor * 7 + 1; ++i) { // DEBUG // for 4-5-6 mcu
+		const uint8_t adr = i / 7;
+		const uint8_t compN = i % 7;
+		setCompValue(adr, compN, 0, compsCHART_ON_1[i]);
+		setCompValue(adr, compN, 1, compsCHART_ON_2[i]);
+		// setCompValue(adr, compN, 0, compsCHART_OFF_1[i]);
+		// setCompValue(adr, compN, 1, compsCHART_OFF_2[i]);
+	}
+	debugg1("set DONE"); // DEBUG: set DONE
+
 	while (1) {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
+
+		if (fl) {
+			test_t_out.clear(); // for test clear string
+			test_t_out = std::to_string(timerLenght);
+			test_speed.clear(); // for test
+			test_speed = std::to_string(speed);
+			test_energy.clear(); // for test
+			test_energy = std::to_string(energy);
+			test_midi_hi.clear(); // for test
+			test_midi_hi = std::to_string(midi_hi);
+			test_midi_lo.clear(); // for test
+			test_midi_lo = std::to_string(midi_lo);
+
+			test_t_out_fl.clear(); // for test clear string
+			test_t_out_fl = std::format("{:.10f}", timerLenght_fl);
+			test_speed_fl.clear(); // for test
+			test_speed_fl = std::format("{:.2f}", speed_t_fl);
+			test_energy_fl.clear(); // for test
+			test_energy_fl = std::format("{:.2f}", energy_t_fl);
+			test_midi_hi_fl.clear(); // for test
+			test_midi_hi_fl = std::format("{:.2f}", midi_hi_t_fl);
+			test_midi_lo_fl.clear(); // for test
+			test_midi_lo_fl = std::format("{:.2f}", midi_lo_t_fl);
+
+			test_timer1.clear();
+			test_timer1 = std::to_string(test_int_timer1);
+			test_timer2.clear();
+			test_timer2 = std::to_string(test_int_timer2);
+
+			fl = 0; // for test fl
+		}
 	}
 } // h7
 
@@ -278,38 +346,75 @@ void UART4_Receive_Settings() {
 //---------------------------------
 
 // DMA IQR Handler
+const uint32_t distance = 200'000'000; // * x ??
+const uint32_t mass = 100; // гр умножить на 10 надо
+const uint32_t deriv = 2'000'000;
+
+const float distance_fl = 0.002f; // 2 мм
+const float mass_fl = 0.008f; // 8 гр
+const float deriv_fl = 2.0f; // делить на 2 в формуле
+const float maxMidi_fl = 127.999f;
+
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), 3); // clear RX
+	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	cuint tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
-	cuint midi_speed = divis / tOut;
-	cuint midi_hi = midi_speed / maxMidi;
-	cuint midi_lo = midi_speed - midi_hi * maxMidi;
-	uint8_t note_buf[] = { 0xB0, 0x58, midi_lo, rx_data[0] < 39 ? 0x90 : 0x80, rx_data[0], midi_hi };
-	tud_midi_stream_write(0, note_buf, 6);
+	uint32_t tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
 
+
+	// cuint midi_speed = divis / tOut;
+	// cuint midi_hi = midi_speed / maxMidi;
+	// cuint midi_lo = midi_speed - midi_hi * maxMidi;
+	// uint8_t note_buf[] = { 0xB0, 0x58, midi_lo, rx_data[0] < 39 ? 0x90 : 0x80, rx_data[0], midi_hi };
+	// tud_midi_stream_write(0, note_buf, 6);
+
+	// TIM2->CNT = 0; // for test
+	// timerLenght = tOut; // for test DMA
+	// speed = distance / tOut; // for test
+	// energy = (mass * speed * speed) / deriv; // for test
+	// midi_hi = energy / maxMidi; // for test
+	// midi_lo = energy - midi_hi * maxMidi; // for test
+
+	// uint8_t note_buf[] = { 0xB0, 0x58, midi_lo, rx_data[0] < 39 ? 0x90 : 0x80, rx_data[0], midi_hi };
+	// test_int_timer1 = TIM2->CNT; // for test
+	// tud_midi_stream_write(0, note_buf, 6);
+
+	TIM2->CNT = 0; // for test
+	timerLenght_fl = (float)tOut * 0.0000000001f; // for test
+	speed_t_fl = distance_fl / timerLenght_fl; // for test
+	energy_t_fl = (mass_fl * speed_t_fl * speed_t_fl) / deriv_fl; // for test
+	midi_hi_t_fl = energy_t_fl / maxMidi_fl; // for test
+	// midi_lo_t_fl = energy_t_fl - midi_hi_t_fl * maxMidi_fl; // for test
+	float integerPart;
+	midi_lo_t_fl = modf(midi_hi_t_fl, &integerPart) * 127.0f;
+
+	uint8_t note_buf2[] = { 0xB0, 0x58, (uint8_t)midi_lo_t_fl, rx_data[0] < pointOnToOff ? 0x90 : 0x80, rx_data[0] + 17, (uint8_t)midi_hi_t_fl };
+	test_int_timer2 = TIM2->CNT; // for test
+	tud_midi_stream_write(0, note_buf2, 6);
+
+	fl = 1; // for test
 
 	// tim_IN = 100ns на значение
+	// 35445 = 22.211 midi
 
 	// v = s / t
-    // s - расстояние
-    // s = 2 mm = 0.002 m
-    // t - время
-    // t = 62000 ns = 0.000062 s
+	// s - расстояние
+	// s = 2 mm = 0.002 m
+	// t - время
+	// t = 62000 ns = 0.000062 s
 
-    // v = 0.002 / 0.000062 = 32,258064516 м/с;
-    // v = 2000 / 62 = 32,258064516; ~~~
-    // v = 2000000 / 62000 = 32,258064516;
+	// v = 0.002 / 0.000062 = 32,258064516 м/с;
+	// v = 2000 / 62 = 32,258064516; ~~~
+	// v = 2000000 / 62000 = 32,258064516;
 
-    // A - кинетическая энергия
-    // A = M * v * v / 2;
+	// A - кинетическая энергия
+	// A = M * v * v / 2;
 
-    // М - масса (кг)
-    // M = 10 g = 0.01 kg
-    // v * v - скорость в квадрате (м/с)
+	// М - масса (кг)
+	// M = 10 g = 0.01 kg
+	// v * v - скорость в квадрате (м/с)
 
-    // A = 0.02 * 32,258064516 * 32,258064516 / 2 = 10,405827263;
+	// A = 0.02 * 32,258064516 * 32,258064516 / 2 = 10,405827263;
 }
 //---------------------------------
 
@@ -607,7 +712,101 @@ extern "C" void set_var_debugg(const char* value) {
 	debugg = value;
 }
 
+// for test
+extern "C" const char* get_var_test_t_out() {
+	return test_t_out.c_str();
+}
+extern "C" void set_var_test_t_out(const char* value) {
+	test_t_out = value;
+}
 
+// for test
+extern "C" const char* get_var_test_speed() {
+	return test_speed.c_str();
+}
+extern "C" void set_var_test_speed(const char* value) {
+	test_speed = value;
+}
+
+// for test
+extern "C" const char* get_var_test_energy() {
+	return test_energy.c_str();
+}
+extern "C" void set_var_test_energy(const char* value) {
+	test_energy = value;
+}
+
+// for test
+extern "C" const char* get_var_test_midi_hi() {
+	return test_midi_hi.c_str();
+}
+extern "C" void set_var_test_midi_hi(const char* value) {
+	test_midi_hi = value;
+}
+
+// for test
+extern "C" const char* get_var_test_midi_lo() {
+	return test_midi_lo.c_str();
+}
+extern "C" void set_var_test_midi_lo(const char* value) {
+	test_midi_lo = value;
+}
+
+// for test
+extern "C" const char* get_var_test_timer1() {
+	return test_timer1.c_str();
+}
+extern "C" void set_var_test_timer1(const char* value) {
+	test_timer1 = value;
+}
+
+//for test
+extern "C" const char* get_var_test_timer2() {
+	return test_timer2.c_str();
+}
+extern "C" void set_var_test_timer2(const char* value) {
+	test_timer2 = value;
+}
+
+//for test
+extern "C" const char* get_var_test_t_out_fl() {
+	return test_t_out_fl.c_str();
+}
+extern "C" void set_var_test_t_out_fl(const char* value) {
+	test_t_out_fl = value;
+}
+
+//for test
+extern "C" const char* get_var_test_speed_fl() {
+	return test_speed_fl.c_str();
+}
+extern "C" void set_var_test_speed_fl(const char* value) {
+	test_speed_fl = value;
+}
+
+//for test
+extern "C" const char* get_var_test_energy_fl() {
+	return test_energy_fl.c_str();
+}
+extern "C" void set_var_test_energy_fl(const char* value) {
+	test_energy_fl = value;
+}
+
+//for test
+extern "C" const char* get_var_test_midi_hi_fl() {
+	return test_midi_hi_fl.c_str();
+}
+extern "C" void set_var_test_midi_hi_fl(const char* value) {
+	test_midi_hi_fl = value;
+}
+
+//for test
+extern "C" const char* get_var_test_midi_lo_fl() {
+	return test_midi_lo_fl.c_str();
+}
+extern "C" void set_var_test_midi_lo_fl(const char* value) {
+	test_midi_lo_fl = value;
+}
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$

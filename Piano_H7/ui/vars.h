@@ -35,7 +35,19 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_TOP_BOT_STR = 17,
     FLOW_GLOBAL_VARIABLE_DEBUGG = 18,
     FLOW_GLOBAL_VARIABLE_DISP_ON_OFF_BUTTON_3 = 19,
-    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR_2 = 20
+    FLOW_GLOBAL_VARIABLE_TOP_BOT_STR_2 = 20,
+    FLOW_GLOBAL_VARIABLE_TEST_T_OUT = 21,
+    FLOW_GLOBAL_VARIABLE_TEST_ENERGY = 22,
+    FLOW_GLOBAL_VARIABLE_TEST_MIDI_HI = 23,
+    FLOW_GLOBAL_VARIABLE_TEST_MIDI_LO = 24,
+    FLOW_GLOBAL_VARIABLE_TEST_SPEED = 25,
+    FLOW_GLOBAL_VARIABLE_TEST_TIMER1 = 26,
+    FLOW_GLOBAL_VARIABLE_TEST_TIMER2 = 27,
+    FLOW_GLOBAL_VARIABLE_TEST_T_OUT_FL = 28,
+    FLOW_GLOBAL_VARIABLE_TEST_SPEED_FL = 29,
+    FLOW_GLOBAL_VARIABLE_TEST_ENERGY_FL = 30,
+    FLOW_GLOBAL_VARIABLE_TEST_MIDI_HI_FL = 31,
+    FLOW_GLOBAL_VARIABLE_TEST_MIDI_LO_FL = 32
 };
 
 // Native global variables
@@ -82,6 +94,30 @@ extern const char *get_var_disp_on_off_button_3();
 extern void set_var_disp_on_off_button_3(const char *value);
 extern const char *get_var_top_bot_str_2();
 extern void set_var_top_bot_str_2(const char *value);
+extern const char *get_var_test_t_out();
+extern void set_var_test_t_out(const char *value);
+extern const char *get_var_test_energy();
+extern void set_var_test_energy(const char *value);
+extern const char *get_var_test_midi_hi();
+extern void set_var_test_midi_hi(const char *value);
+extern const char *get_var_test_midi_lo();
+extern void set_var_test_midi_lo(const char *value);
+extern const char *get_var_test_speed();
+extern void set_var_test_speed(const char *value);
+extern const char *get_var_test_timer1();
+extern void set_var_test_timer1(const char *value);
+extern const char *get_var_test_timer2();
+extern void set_var_test_timer2(const char *value);
+extern const char *get_var_test_t_out_fl();
+extern void set_var_test_t_out_fl(const char *value);
+extern const char *get_var_test_speed_fl();
+extern void set_var_test_speed_fl(const char *value);
+extern const char *get_var_test_energy_fl();
+extern void set_var_test_energy_fl(const char *value);
+extern const char *get_var_test_midi_hi_fl();
+extern void set_var_test_midi_hi_fl(const char *value);
+extern const char *get_var_test_midi_lo_fl();
+extern void set_var_test_midi_lo_fl(const char *value);
 
 
 #ifdef __cplusplus
