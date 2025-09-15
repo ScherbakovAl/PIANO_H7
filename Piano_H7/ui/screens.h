@@ -39,15 +39,8 @@ typedef struct _objects_t {
     lv_obj_t *test_speed;
     lv_obj_t *test_midi_hi;
     lv_obj_t *test_midi_lo;
-    lv_obj_t *test_t_out_;
-    lv_obj_t *test_speed_;
-    lv_obj_t *test_midi_hi_;
-    lv_obj_t *test_midi_lo_;
     lv_obj_t *test_energy;
-    lv_obj_t *test_energy_;
     lv_obj_t *tick;
-    lv_obj_t *int_t;
-    lv_obj_t *float_t;
     lv_obj_t *test_t_out__1;
     lv_obj_t *test_speed__1;
     lv_obj_t *test_midi_hi__1;
@@ -84,6 +77,8 @@ typedef struct _objects_t {
     lv_obj_t *but_send;
     lv_obj_t *but_send_4;
     lv_obj_t *deb_2;
+    lv_obj_t *s1_s2_on_2;
+    lv_obj_t *obj5;
     lv_obj_t *button_to_main_2;
     lv_obj_t *sub_12;
     lv_obj_t *add_12;
@@ -107,7 +102,7 @@ typedef struct _objects_t {
     lv_obj_t *but_send_2;
     lv_obj_t *but_send_9;
     lv_obj_t *deb_3;
-    lv_obj_t *obj5;
+    lv_obj_t *obj6;
     lv_obj_t *button_to_main_4;
     lv_obj_t *sub_16;
     lv_obj_t *add_16;
@@ -128,12 +123,12 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_20;
     lv_obj_t *label_sensor_18;
     lv_obj_t *label_sensor_22;
-    lv_obj_t *obj6;
+    lv_obj_t *obj7;
     lv_obj_t *but_send_5;
     lv_obj_t *deb_5;
     lv_obj_t *but_send_10;
-    lv_obj_t *obj7;
     lv_obj_t *obj8;
+    lv_obj_t *obj9;
     lv_obj_t *chart_off;
     lv_obj_t *button_to_main_1;
     lv_obj_t *sub_11;
@@ -141,13 +136,13 @@ typedef struct _objects_t {
     lv_obj_t *sub_2;
     lv_obj_t *add_2;
     lv_obj_t *button_calibration_sensor_on_3;
-    lv_obj_t *obj9;
-    lv_obj_t *button_calibration_sensor_on_4;
     lv_obj_t *obj10;
-    lv_obj_t *button_edit_cal_manual_on_1;
+    lv_obj_t *button_calibration_sensor_on_4;
     lv_obj_t *obj11;
-    lv_obj_t *button_edit_cal_manual_on_3;
+    lv_obj_t *button_edit_cal_manual_on_1;
     lv_obj_t *obj12;
+    lv_obj_t *button_edit_cal_manual_on_3;
+    lv_obj_t *obj13;
     lv_obj_t *label_on_1;
     lv_obj_t *label_cursor_1;
     lv_obj_t *label_string_cursor_1;
@@ -164,6 +159,8 @@ typedef struct _objects_t {
     lv_obj_t *but_send_1;
     lv_obj_t *but_send_6;
     lv_obj_t *deb_1;
+    lv_obj_t *s1_s2_on_1;
+    lv_obj_t *obj14;
     lv_obj_t *button_to_main_3;
     lv_obj_t *sub_13;
     lv_obj_t *add_13;
@@ -187,7 +184,7 @@ typedef struct _objects_t {
     lv_obj_t *but_send_3;
     lv_obj_t *but_send_8;
     lv_obj_t *deb_4;
-    lv_obj_t *obj13;
+    lv_obj_t *obj15;
     lv_obj_t *button_to_main_5;
     lv_obj_t *sub_17;
     lv_obj_t *add_29;
@@ -208,12 +205,10 @@ typedef struct _objects_t {
     lv_obj_t *label_sensor_33;
     lv_obj_t *label_sensor_34;
     lv_obj_t *label_sensor_35;
-    lv_obj_t *obj14;
+    lv_obj_t *obj16;
     lv_obj_t *but_send_7;
     lv_obj_t *deb_6;
     lv_obj_t *but_send_11;
-    lv_obj_t *obj15;
-    lv_obj_t *obj16;
     lv_obj_t *obj17;
     lv_obj_t *obj18;
     lv_obj_t *obj19;
@@ -224,6 +219,8 @@ typedef struct _objects_t {
     lv_obj_t *obj24;
     lv_obj_t *obj25;
     lv_obj_t *obj26;
+    lv_obj_t *obj27;
+    lv_obj_t *obj28;
 } objects_t;
 
 extern objects_t objects;

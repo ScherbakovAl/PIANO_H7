@@ -16,20 +16,26 @@
 #ifdef __cplusplus
 extern "C" {
 
-// #include <string>
+	// пины тестовой колодки
+	// pin 2 - tim trig
+	// pin 4 - tim slc
+	// pin 6 - Urx
+	// pin 8 - Utx
 
 	using uint = unsigned int;
 	using cuint = const uint;
 
-	const int allChipCount = 26; // 1-13-on, 14-26-off
-	const int32_t start_cursor = 23;
-	const int start_sensor = 1; // включительно
-	const int end_sensor = 3; // включительно
-	const uint pointOnToOff = 80; // после этого номера ноты идут как демпфера
-	//const int chipAdress = 1; // для NoteOff что-то придумать надо здесь!
-	// ***** 390(263)-14000(22723)us пролёт молоточка
+	// TODO сделать проверку: сколько раз заходит в циклы While при работе с  uart?
+
+	const int allChipCount = 26; // 1-13-on, 14-23(26)-off
+	const int32_t start_cursor = 7;
+	const int start_chip = 14; // включительно
+	const int end_chip = 23; // включительно
+	cuint pointOnToOff = 97; // после этого номера ноты идут как демпфера
 
 	const int allKeys = allChipCount / 2 * 7;
+	// ***** 390(263)-14000(22723)us пролёт молоточка
+
 
 	uint8_t rx_data[5] = { };
 	const int dataLengthRX = sizeof(rx_data);
@@ -50,6 +56,11 @@ extern "C" {
 	};
 
 	int def[2] = { 3500, 1000 };
+	int def_off[2] = { 800, 3100 };
+
+	int8_t noteAdder[200] = {};
+	float mass_flo[200] = {};
+	void startInitNotesSettings();
 
 	struct conv_16_8 {
 		uint8_t a = 0;
@@ -105,6 +116,12 @@ extern "C" {
 		t_none
 	};
 
+	enum calib_all_on_off{
+		calib_on,
+		calib_off,
+		calib_none
+	};
+
 	comps comparator[allChipCount];
 	on_off_s1_s2_min_max m_m;
 	int32_t compsCHART_ON_1[allKeys] = {};
@@ -120,7 +137,7 @@ extern "C" {
 	int off_red_max = 4095;
 	int off_red_min = 0;
 	int divis = 100'000'000;
-	const unsigned int maxMidi = 127;
+	// const unsigned int maxMidi = 127;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
@@ -128,6 +145,7 @@ extern "C" {
 	current_display cur_disp = d_none;
 	color_but col_but = c_none;
 	but_top_bot top_bot = t_none;
+	calib_all_on_off calib_all_OnOff = calib_none;
 
 	void h7();
 	void UART4_SendAddress(const uint8_t& slave_address);
@@ -144,7 +162,8 @@ extern "C" {
 	void SaveToMemory();
 	void ReadOnMemory();
 	void DMA1_RX();
-	void DMA2_Stream3_TransferComplete();
+	void resetPin();
+	// void DMA2_Stream3_TransferComplete();
 	void send_test_midi();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
