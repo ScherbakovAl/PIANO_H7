@@ -13,32 +13,20 @@
     },
     "tasks": [
         {
-            "type": "shell",
-            "label": "CubeProg: Flash project (SWD)",
-            "command": "STM32_Programmer_CLI",
-            "args": [
-                "--connect",
-                "port=swd",
-                "sn=24003800070000574B31534E", // чёрный
-                // "sn=7400410007000059334D524E", // синий
-                "--download",
-                "${command:cmake.launchTargetPath}",
-                "-hardRst",
-                "-rst",
-                "--start"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": []
-        },
-        {
             "label": "Build + Flash",
             "dependsOrder": "sequence",
             "dependsOn": [
                 "CMake: clean rebuild",
                 "CubeProg: Flash project (SWD)"
             ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "B + F",
+                    "detail": "Build + Flash"
+                }
+            },
             "problemMatcher": []
         },
         {
@@ -51,7 +39,15 @@
             "preset": "${command:cmake.activeBuildPresetName}",
             "group": "build",
             "problemMatcher": [],
-            "detail": "CMake template clean rebuild task"
+            "detail": "CMake template clean rebuild task",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "C + R",
+                    "detail": "CMake: clean rebuild"
+                }
+            }
         },
         {
             "type": "shell",
@@ -61,7 +57,36 @@
                 "--list"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "List",
+                    "detail": "CubeProg: List all available communication interfaces"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "CubeProg: Flash project (SWD)",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=swd",
+                "sn=24003800070000574B31534E",
+                "--download",
+                "${command:cmake.launchTargetPath}",
+                "-hardRst",
+                "-rst",
+                "--start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#17c4b6",
+                    "label": "$(fold-down) FLASH",
+                    "detail": "CubeProg: Flash project (SWD)"
+                }
             },
             "problemMatcher": []
         }

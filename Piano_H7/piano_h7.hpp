@@ -27,13 +27,17 @@ extern "C" {
 
 	// TODO сделать проверку: сколько раз заходит в циклы While при работе с  uart?
 
-	const int allChipCount = 26; // 1-13-on, 14-23(26)-off
-	const int32_t start_cursor = 7;
+	// TODO проверить UART TX должен быть подтянут к UP?
+
+	// номер 95 у последней верхней клавиши
+	
+	const int allChipCount = 23; // 1-13-on, 14-23(26)-off // до этого значения считает таймер
 	const int start_chip = 14; // включительно
-	const int end_chip = 23; // включительно
+	const int end_chip = 23; // включительно всего 23
+	const int32_t start_cursor = 10;
 	cuint pointOnToOff = 97; // после этого номера ноты идут как демпфера
 
-	const int allKeys = allChipCount / 2 * 7;
+	const int allKeys = 100;
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 
 
@@ -52,11 +56,11 @@ extern "C" {
 	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	struct comps {
-		int comp[8][2] = { {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {3500, 1000}, {0, 0} };
+		int comp[8][2] = { {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {0, 0} };
 	};
 
-	int def[2] = { 3500, 1000 };
-	int def_off[2] = { 800, 3100 };
+	int def[2] = { 2800, 1000 };
+	int def_off[2] = { 1500, 1800 };
 
 	int8_t noteAdder[200] = {};
 	float mass_flo[200] = {};
@@ -122,12 +126,12 @@ extern "C" {
 		calib_none
 	};
 
-	comps comparator[allChipCount];
+	comps comparator[24];
 	on_off_s1_s2_min_max m_m;
-	int32_t compsCHART_ON_1[allKeys] = {};
-	int32_t compsCHART_ON_2[allKeys] = {};
-	int32_t compsCHART_OFF_1[allKeys] = {};
-	int32_t compsCHART_OFF_2[allKeys] = {};
+	int32_t compsCHART_ON_1[100] = {};
+	int32_t compsCHART_ON_2[100] = {};
+	int32_t compsCHART_OFF_1[100] = {};
+	int32_t compsCHART_OFF_2[100] = {};
 	int on_green_max = 4095;
 	int on_green_min = 0;
 	int on_red_max = 4095;

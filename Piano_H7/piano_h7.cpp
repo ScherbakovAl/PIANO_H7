@@ -21,6 +21,11 @@ float speed_t_fl = 0; // for test
 float energy_t_fl = 0; // for test
 float midi_hi_t_fl = 0; // for test
 float midi_lo_t_fl = 0; // for test
+int tt1 = 0;
+int tt2 = 0;
+int tt3 = 0;
+int tt4 = 0;
+float timer_data_in = 0;
 
 
 #include "actions.h"
@@ -39,10 +44,20 @@ std::string test_energy_fl; // for test
 std::string test_midi_hi_fl; // for test
 std::string test_midi_lo_fl; // for test
 std::string note; // for test
+std::string mass_str;
+std::string tim_str_in; // for test
+std::string t1; // for test
+std::string t2; // for test
+std::string t3; // for test
+std::string t4; // for test
+std::string timer_data; // for test
+
 
 std::string test_timer2; // for test
 volatile uint32_t test_int_timer2 = 0; // for test
 std::string calib_all_str;
+float mass_to_disp = 0; // for test
+int odldCursor = 0;
 //---------------------------------
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
@@ -62,7 +77,7 @@ void h7() {
 	LL_TIM_EnableCounter(TIM2); // просто счётчик (137.5Mhz)
 
 	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
-	LL_TIM_EnableAllOutputs(TIM1);
+	LL_TIM_EnableAllOutputs(TIM1); // PWM - tim clk
 	LL_TIM_EnableIT_TRIG(TIM1);
 
 	LL_TIM_SetAutoReload(TIM3, allChipCount);
@@ -120,45 +135,55 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-	send_test_midi(); // for test send_midi
+	// send_test_midi(); // for test send_midi
 	//---------------------------------
 
 	// память
 	// SaveToMemory();
 	// ReadOnMemory(); // test
 	//---------------------------------
-	tud_task();
-	lv_timer_handler();
-	ui_tick();
 
 	// синхронизация
+	// pause(1000);
 	sync();
-	pause(100);
 	//---------------------------------
 
 	// start PWM
-	LL_TIM_EnableCounter(TIM1); // пинает g4's (ШИМ)
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
-
-	config_charts();
 
 	startInitNotesSettings();
 
-	ReadOnMemory(); // восстановление графика при включении
+	config_charts();
+
+
+	// ReadOnMemory(); // восстановление графика при включении
+	// debugg1("Restore calib Done! )"); // DEBUG
 	comp_to_chart();
-	debugg1("Restore calib Done! )"); // DEBUG
 
 	while (1) {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
 
+		if (odldCursor != rx_data[0]) {
+			odldCursor = rx_data[0];
+			cursor = rx_data[0] > 97 ? rx_data[0] - 91 : rx_data[0];
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_on_green, cursor);
+
+		}
+
 		if (calib_all_OnOff == calib_on) {
+			// при входе сюда предварительно срабатывает LL_TIM_DisableCounter(TIM1); (там, где обработка событий нажатия кнопки)
 			if (lv_scr_act() == objects.d_chart_calib_on) {
 				for (uint8_t adress = 1; adress < 14; ++adress) {
 					for (uint8_t dot = 0; dot < 7; ++dot) {
 						calibration(adress, dot, 0);
-						pause(30);
+						if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
+							adress = end_chip + 1; // выход из цикла
+							dot = 7; // выход из цикла
+						}
 					}
 				}
 			}
@@ -166,7 +191,10 @@ void h7() {
 				for (uint8_t adress = 14; adress < 24; ++adress) {
 					for (uint8_t dot = 0; dot < 7; ++dot) {
 						calibration(adress, dot, 0);
-						pause(30);
+						if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
+							adress = 25; // выход из цикла
+							dot = 8; // выход из цикла
+						}
 					}
 				}
 			}
@@ -175,30 +203,47 @@ void h7() {
 		}
 
 		if (fl) {
-			fl = 0; // for test fl
 			test_t_out_fl.clear(); // for test clear string
 			test_t_out_fl = std::format("{:.10f}", timerLenght_fl);
 			test_speed_fl.clear(); // for test
-			test_speed_fl = std::format("{:.2f}", speed_t_fl);
+			test_speed_fl = std::format("{:.3f}", speed_t_fl);
 			test_energy_fl.clear(); // for test
-			test_energy_fl = std::format("{:.2f}", energy_t_fl);
+			test_energy_fl = std::format("{:.3f}", energy_t_fl);
 			test_midi_hi_fl.clear(); // for test
-			test_midi_hi_fl = std::format("{:.2f}", midi_hi_t_fl);
+			test_midi_hi_fl = std::format("{:.3f}", midi_hi_t_fl);
 			test_midi_lo_fl.clear(); // for test
-			test_midi_lo_fl = std::format("{:.2f}", midi_lo_t_fl);
+			test_midi_lo_fl = std::format("{:.3f}", midi_lo_t_fl);
 
 			test_timer2.clear();
 			test_timer2 = std::to_string(test_int_timer2);
 
+			mass_str.clear();
+			mass_str = std::format("{}", mass_to_disp);
+
 			note.clear();
 			note = std::to_string(rx_data[0]);
+			t1.clear();
+			t1 = std::to_string(rx_data[1]);
+			t2.clear();
+			t2 = std::to_string(rx_data[2]);
+			t3.clear();
+			t3 = std::to_string(rx_data[3]);
+			t4.clear();
+			t4 = std::to_string(rx_data[4]);
+
+			timer_data.clear();
+			timer_data = std::format("{:.1f}", timer_data_in);
+
+
+			fl = 0; // for test fl
 		}
 	}
 } // h7
 
 void sync() {
 	LL_USART_DisableDMAReq_RX(UART5);
-	TIM3->CNT = 0;
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	TIM3->CNT = 0; // сбросить номер контроллера
 	for (int i = start_chip; i < end_chip + 1; ++i) {
 		UART4_SendAddress(i);
 		pause(2);
@@ -213,6 +258,7 @@ void sync() {
 		pause(1);
 	}
 	LL_USART_EnableDMAReq_RX(UART5);
+	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 }
 
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
@@ -225,12 +271,16 @@ void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot
 }
 
 void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	sender(command::read_comp_value, adress, compN, dot, 0);
+	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 }
 
 void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	sender(command::set_comp_value, adress, compN, dot, value);
+	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	debugg1("");
 	int32_t ts = 0;
 	if (lv_scr_act() == objects.d_chart_calib_on) {
@@ -260,16 +310,14 @@ void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& do
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
 	const int& value) {
-	LL_TIM_DisableCounter(TIM1);
 	LL_USART_DisableDMAReq_RX(UART5);
 	UART4_SendAddress(adress);
-	pause(6); // 6 for release
+	pause(8); // 6 for release
 	UART4_Send_Settings(com, compN, dot, value);
-	pause(1); // 1 for release
+	pause(2); // 1 for release
 	UART4_Receive_Settings();
-	pause(1); // 1 for release
+	pause(2); // 1 for release
 	LL_USART_EnableDMAReq_RX(UART5);
-	LL_TIM_EnableCounter(TIM1);
 }
 
 // UART Send-Recive
@@ -311,27 +359,32 @@ void UART4_Receive_Settings() {
 //---------------------------------
 
 // DMA IQR Handler
-const float distance_fl = 0.002f; // 2 мм
+const float distance_fl = 0.0016f; // 2 мм
 const float mass_fl = 0.008f; // 8 гр
 const float deriv_fl = 2.0f; // делить на 2 в формуле
-const float maxMidi_fl = 127.999f;
+const float maxMidi_fl = 127.99f;
 
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
 	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	uint32_t tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
+
 	TIM2->CNT = 0;
-	uint8_t note_ = rx_data[0] + noteAdder[rx_data[0]];
-	timerLenght_fl = (float)tOut * 0.0000000001f;
+	uint32_t tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
+	mass_to_disp = mass_flo[rx_data[0]]; // for test
+
+	timer_data_in = (float)tOut * 0.1f;
+
+	timerLenght_fl = (float)tOut * 0.00000000004f; // меньше - громче
 	speed_t_fl = distance_fl / timerLenght_fl;
-	energy_t_fl = (mass_flo[note_] * speed_t_fl * speed_t_fl) / deriv_fl;
+	energy_t_fl = (mass_flo[rx_data[0]] * speed_t_fl * speed_t_fl) / deriv_fl;
 	midi_hi_t_fl = energy_t_fl / maxMidi_fl;
 	float integerPart;
 	midi_lo_t_fl = modf(midi_hi_t_fl, &integerPart) * maxMidi_fl;
-	uint8_t note_buf2[] = { 0xB0, 0x58, (uint8_t)midi_lo_t_fl, rx_data[0] < pointOnToOff ? 0x90 : 0x80, note_, (uint8_t)midi_hi_t_fl };
-	test_int_timer2 = TIM2->CNT; // for test
-	tud_midi_stream_write(0, note_buf2, 6);
+	uint8_t note_ = rx_data[0] + noteAdder[rx_data[0]];
+	uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_t_fl, rx_data[0] < pointOnToOff ? 0x90 : 0x80, note_, (uint8_t)midi_hi_t_fl };
+	test_int_timer2 = TIM2->CNT * 137; // for test
+	tud_midi_stream_write(0, note_buf, 6);
 	fl = 1; // for test
 }
 // tim_IN = 100ns на значение
@@ -435,12 +488,13 @@ void startInitNotesSettings() {
 			comparator[i].comp[j][1] = def[1];
 		}
 	}
-	for (int i = 14; i < 26; ++i) { // for note OFF
+	for (int i = 14; i < 24; ++i) { // for note OFF
 		for (int j = 0; j < 7; ++j) {
 			comparator[i].comp[j][0] = def_off[0];
 			comparator[i].comp[j][1] = def_off[1];
 		}
 	}
+	comp_to_chart();
 
 	for (uint i = 1; i < 200; ++i) { // note shift
 		if (i < 55) {
@@ -747,6 +801,50 @@ extern "C" const char* get_var_calib_all_str() {
 extern "C" void set_var_calib_all_str(const char* value) {
 	calib_all_str = value;
 }
+
+
+extern "C" const char* get_var_mass_str() {
+	return mass_str.c_str();
+}
+extern "C" void set_var_mass_str(const char* value) {
+	mass_str = value;
+}
+
+extern "C" const char* get_var_t1() {
+	return t1.c_str();
+}
+extern "C" void set_var_t1(const char* value) {
+	t1 = value;
+}
+
+extern "C" const char* get_var_t2() {
+	return t2.c_str();
+}
+extern "C" void set_var_t2(const char* value) {
+	t2 = value;
+}
+
+extern "C" const char* get_var_t3() {
+	return t3.c_str();
+}
+extern "C" void set_var_t3(const char* value) {
+	t3 = value;
+}
+
+
+extern "C" const char* get_var_t4() {
+	return t4.c_str();
+}
+extern "C" void set_var_t4(const char* value) {
+	t4 = value;
+}
+
+extern "C" const char* get_var_timer_data() {
+	return timer_data.c_str();
+}
+extern "C" void set_var_timer_data(const char* value) {
+	timer_data = value;
+}
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -884,7 +982,9 @@ extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
 	uint8_t adr = cursor / 7;
 	uint8_t c = cursor % 7;
 	uint8_t d = 0;
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	calibration(adr, c, d);
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	comp_to_chart();
 	lv_chart_refresh(ch);
 }
@@ -893,7 +993,9 @@ extern "C" void action_calib_sensor_2_on(lv_event_t* e) {
 	uint8_t adr = cursor / 7;
 	uint8_t c = cursor % 7;
 	uint8_t d = 1;
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	calibration(adr, c, d);
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	comp_to_chart();
 	lv_chart_refresh(ch);
 }
@@ -902,7 +1004,9 @@ extern "C" void action_calib_sensor_1_off(lv_event_t* e) {
 	uint8_t adr = cursor / 7;
 	uint8_t c = cursor % 7;
 	uint8_t d = 0;
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	calibration(adr + 13, c, d);
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	comp_to_chart();
 	lv_chart_refresh(ch);
 }
@@ -925,7 +1029,7 @@ extern "C" void action_cursor_minus(lv_event_t* e) {
 }
 
 extern "C" void action_cursor_plus(lv_event_t* e) {
-	if (cursor < 90) {
+	if (cursor < 99) {
 		++cursor;
 	}
 	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
@@ -941,7 +1045,7 @@ extern "C" void action_cursor_minus10(lv_event_t* e) {
 }
 
 extern "C" void action_cursor_plus10(lv_event_t* e) {
-	if (cursor < 84) {
+	if (cursor < 93) {
 		cursor += 7;
 	}
 	lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
@@ -1314,22 +1418,40 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 	lv_chart_refresh(ch);
 }
 
-extern "C" void action_set_all(lv_event_t* e) {
-	// for (int i = 0; i < allKeys; ++i) {
-	for (int i = start_chip * 7; i < end_chip * 7 + 1; ++i) { // DEBUG // for 4-5-6 mcu
-		const uint8_t adr = i / 7;
-		const uint8_t compN = i % 7;
-		setCompValue(adr, compN, 0, compsCHART_ON_1[i]);
-		setCompValue(adr, compN, 1, compsCHART_ON_2[i]);
-		// setCompValue(adr, compN, 0, compsCHART_OFF_1[i]);
-		// setCompValue(adr, compN, 1, compsCHART_OFF_2[i]);
+extern "C" void action_set_all(lv_event_t* e) { // TODO << ???
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	comp_to_chart();
+	for (int i = start_chip; i < end_chip + 1; ++i) {
+		for (int j = 0; j < 7; ++j) {
+			sender(command::set_comp_value, i, j, 0, comparator[i].comp[j][0]);
+			// if (convert_8_16(a_, b_) != comparator[i].comp[j][0]) {
+			// 	debugg1("g4 != h7 !!!");
+			// }
+			sender(command::set_comp_value, i, j, 1, comparator[i].comp[j][1]);
+			// if (convert_8_16(a_, b_) != comparator[i].comp[j][1]) {
+			// 	debugg1("g4 != h7 !!!");
+			// }
+		}
 	}
-	debugg1("set DONE"); // DEBUG: set DONE
+
+	// for (int i = start_chip * 7; i < end_chip * 7 + 1; ++i) { // DEBUG // for 4-5-6 mcu
+	// 	const uint8_t adr = i / 7;
+	// 	const uint8_t compN = i % 7;
+	// 	setCompValue(adr, compN, 0, compsCHART_ON_1[i]);
+	// 	setCompValue(adr, compN, 1, compsCHART_ON_2[i]);
+	// 	setCompValue(adr, compN, 0, compsCHART_OFF_1[i]);
+	// 	setCompValue(adr, compN, 1, compsCHART_OFF_2[i]);
+	// }
+	debugg1("set DONEE"); // DEBUG: set DONE
+	pause(20);
+	// sync();
+	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 }
 
 extern "C" void action_calib_all(lv_event_t* e) {
 	if (calib_all_OnOff != calib_on) {
-		LL_TIM_DisableCounter(TIM1); // пина ет g4's (ШИМ)
+		LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+
 		calib_all_OnOff = calib_on;
 		calib_all_str.clear();
 		calib_all_str = "calibration..";
@@ -1338,9 +1460,7 @@ extern "C" void action_calib_all(lv_event_t* e) {
 		calib_all_OnOff = calib_off;
 		calib_all_str.clear();
 		calib_all_str = "calib cycle";
-		sync();
-		pause(20);
-		LL_TIM_EnableCounter(TIM1); // пинает g4's (ШИМ)
+		LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	}
 }
 
@@ -1349,29 +1469,38 @@ extern "C" void action_calib_all(lv_event_t* e) {
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 void comp_to_chart() {
-	for (int i = 0; i < allKeys; ++i) {
-		compsCHART_ON_1[i] = comparator[i / 7].comp[i % 7][0];
+	for(int i = 0; i < 100; ++i){
+		compsCHART_ON_1[i] = 3000;
+		compsCHART_ON_2[i] = 500;
+		compsCHART_OFF_1[i] = 500;
+		compsCHART_OFF_2[i] = 3000;
+	}
+	for (int i = 0; i < 91; ++i) {
+		compsCHART_ON_1[i] = comparator[i / 7].comp[i % 7][0]; // comparator[allChipCount] = 23
 		compsCHART_ON_2[i] = comparator[i / 7].comp[i % 7][1];
-
-		compsCHART_OFF_1[i] = comparator[i / 7 + 13].comp[i % 7][0];
-		compsCHART_OFF_2[i] = comparator[i / 7 + 13].comp[i % 7][1];
+	}
+	for (int i = 0; i < 68; ++i) { // TODO ?? 70?
+		compsCHART_OFF_1[i] = comparator[(i / 7) + 14].comp[i % 7][0];
+		compsCHART_OFF_2[i] = comparator[(i / 7) + 14].comp[i % 7][1];
 	}
 	check_max_min();
 }
 
 void chart_to_comp() {
-	for (int i = 0; i < allKeys; ++i) {
+	for (int i = 0; i < 91; ++i) {
 		comparator[i / 7].comp[i % 7][0] = compsCHART_ON_1[i];
 		comparator[i / 7].comp[i % 7][1] = compsCHART_ON_2[i];
-		comparator[i / 7 + 13].comp[i % 7][0] = compsCHART_OFF_1[i];
-		comparator[i / 7 + 13].comp[i % 7][1] = compsCHART_OFF_2[i];
+	}
+	for (int i = 0; i < 68; ++i) { // TODO ?? 70?
+		comparator[(i / 7) + 14].comp[i % 7][0] = compsCHART_OFF_1[i];
+		comparator[(i / 7) + 14].comp[i % 7][1] = compsCHART_OFF_2[i];
 	}
 }
 
 void check_max_min() {
 	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
 	m_m = mm;
-	for (int i = 0; i < allKeys; ++i) {
+	for (int i = 0; i < 91; ++i) {
 		if (m_m.on.s_green.min > compsCHART_ON_1[i]) {
 			m_m.on.s_green.min = compsCHART_ON_1[i];
 		}
@@ -1384,6 +1513,8 @@ void check_max_min() {
 		if (m_m.on.s_red.max < compsCHART_ON_2[i]) {
 			m_m.on.s_red.max = compsCHART_ON_2[i];
 		}
+	}
+	for (int i = 0; i < 70; ++i) {
 		if (m_m.off.s_green.min > compsCHART_OFF_1[i]) {
 			m_m.off.s_green.min = compsCHART_OFF_1[i];
 		}

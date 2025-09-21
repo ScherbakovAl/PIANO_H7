@@ -43,7 +43,13 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_TEST_MIDI_LO_FL = 25,
     FLOW_GLOBAL_VARIABLE_TEST_T_OUT_FL = 26,
     FLOW_GLOBAL_VARIABLE_NOTE = 27,
-    FLOW_GLOBAL_VARIABLE_CALIB_ALL_STR = 28
+    FLOW_GLOBAL_VARIABLE_CALIB_ALL_STR = 28,
+    FLOW_GLOBAL_VARIABLE_MASS_STR = 29,
+    FLOW_GLOBAL_VARIABLE_T1 = 30,
+    FLOW_GLOBAL_VARIABLE_T2 = 31,
+    FLOW_GLOBAL_VARIABLE_T3 = 32,
+    FLOW_GLOBAL_VARIABLE_T4 = 33,
+    FLOW_GLOBAL_VARIABLE_TIMER_DATA = 34
 };
 
 // Native global variables
@@ -106,6 +112,18 @@ extern const char *get_var_note();
 extern void set_var_note(const char *value);
 extern const char *get_var_calib_all_str();
 extern void set_var_calib_all_str(const char *value);
+extern const char *get_var_mass_str();
+extern void set_var_mass_str(const char *value);
+extern const char *get_var_t1();
+extern void set_var_t1(const char *value);
+extern const char *get_var_t2();
+extern void set_var_t2(const char *value);
+extern const char *get_var_t3();
+extern void set_var_t3(const char *value);
+extern const char *get_var_t4();
+extern void set_var_t4(const char *value);
+extern const char *get_var_timer_data();
+extern void set_var_timer_data(const char *value);
 
 
 #ifdef __cplusplus
