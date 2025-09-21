@@ -34,8 +34,8 @@ extern "C" {
 	const int allChipCount = 23; // 1-13-on, 14-23(26)-off // до этого значения считает таймер
 	const int start_chip = 14; // включительно
 	const int end_chip = 23; // включительно всего 23
-	const int32_t start_cursor = 10;
-	cuint pointOnToOff = 97; // после этого номера ноты идут как демпфера
+	const uint8_t start_cursor = 10;
+	const uint8_t pointOnToOff = 97; // после этого номера ноты идут как демпфера
 
 	const int allKeys = 100;
 	// ***** 390(263)-14000(22723)us пролёт молоточка
@@ -44,23 +44,23 @@ extern "C" {
 	uint8_t rx_data[5] = { };
 	const int dataLengthRX = sizeof(rx_data);
 	uint8_t tx_settings[5] = { };
-	const int tx_settings_length = sizeof(tx_settings);
+	const uint8_t tx_settings_length = sizeof(tx_settings);
 	uint8_t rx_settings[5] = { };
-	const int rx_settings_length = sizeof(rx_settings);
+	const uint8_t rx_settings_length = sizeof(rx_settings);
 	uint8_t compN_ = 0;
 	uint8_t dot_ = 0;
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
 	int f = 0;
-	cuint Flash_Address = 0x080E0000; // FLASH
+	const uint32_t Flash_Address = 0x080E0000; // FLASH
 	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	struct comps {
-		int comp[8][2] = { {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {0, 0} };
+		uint32_t comp[8][2] = { {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {0, 0} };
 	};
 
-	int def[2] = { 2800, 1000 };
-	int def_off[2] = { 1500, 1800 };
+	uint32_t def[2] = { 2800, 1000 };
+	uint32_t def_off[2] = { 1500, 1800 };
 
 	int8_t noteAdder[200] = {};
 	float mass_flo[200] = {};
@@ -72,8 +72,8 @@ extern "C" {
 	};
 
 	struct min_max {
-		int max = 0;
-		int min = 4095;
+		uint32_t max = 0;
+		uint32_t min = 4095;
 	};
 
 	struct s1s2 {
@@ -128,24 +128,24 @@ extern "C" {
 
 	comps comparator[24];
 	on_off_s1_s2_min_max m_m;
-	int32_t compsCHART_ON_1[100] = {};
-	int32_t compsCHART_ON_2[100] = {};
-	int32_t compsCHART_OFF_1[100] = {};
-	int32_t compsCHART_OFF_2[100] = {};
-	int on_green_max = 4095;
-	int on_green_min = 0;
-	int on_red_max = 4095;
-	int on_red_min = 0;
-	int off_green_max = 4095;
-	int off_green_min = 0;
-	int off_red_max = 4095;
-	int off_red_min = 0;
+	uint32_t compsCHART_ON_1[100] = {};
+	uint32_t compsCHART_ON_2[100] = {};
+	uint32_t compsCHART_OFF_1[100] = {};
+	uint32_t compsCHART_OFF_2[100] = {};
+	uint32_t on_green_max = 4095;
+	uint32_t on_green_min = 0;
+	uint32_t on_red_max = 4095;
+	uint32_t on_red_min = 0;
+	uint32_t off_green_max = 4095;
+	uint32_t off_green_min = 0;
+	uint32_t off_red_max = 4095;
+	uint32_t off_red_min = 0;
 	int divis = 100'000'000;
 	// const unsigned int maxMidi = 127;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
-	int32_t cursor = start_cursor;
+	uint8_t cursor = start_cursor;
 	current_display cur_disp = d_none;
 	color_but col_but = c_none;
 	but_top_bot top_bot = t_none;
@@ -153,16 +153,16 @@ extern "C" {
 
 	void h7();
 	void UART4_SendAddress(const uint8_t& slave_address);
-	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value);
+	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
-	conv_16_8 convert_16_8(const int& a);
-	int convert_8_16(const uint8_t& a, const uint8_t& b);
-	void pause(const int& p);
+	conv_16_8 convert_16_8(const uint32_t& a);
+	uint32_t convert_8_16(const uint8_t& a, const uint8_t& b);
+	void pause(const uint32_t& p);
 	void sync();
 	void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
 	void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
-	void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value);
-	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value);
+	void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
+	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void SaveToMemory();
 	void ReadOnMemory();
 	void DMA1_RX();
@@ -174,7 +174,7 @@ extern "C" {
 	void config_charts();
 	void comp_to_chart();
 	void chart_to_comp();
-	void chart_correction(const int& x, const plus_minus& pm);
+	void chart_correction(const uint32_t& x, const plus_minus& pm);
 	void check_max_min();
 }
 #endif // extern "C"

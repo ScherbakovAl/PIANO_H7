@@ -26,11 +26,12 @@ set(TARGET_FLAGS "-mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${TARGET_FLAGS}")
 set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp -MMD -MP")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wpedantic -fdata-sections -ffunction-sections") #  -Wextra чтобы не подсвечивало неиспользуемые переменные
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wpedantic -fdata-sections -ffunction-sections")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wconversion -Wsign-conversion -Wsign-compare -Wundef") # << сюда добавляем свои
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g3") # -O0
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3") # -O0
 set(CMAKE_C_FLAGS_RELEASE "-Os -g0")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3") # -O0
 set(CMAKE_CXX_FLAGS_RELEASE "-Os -g0")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics") #?? cxx<->c

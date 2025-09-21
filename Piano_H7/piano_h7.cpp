@@ -244,7 +244,7 @@ void sync() {
 	LL_USART_DisableDMAReq_RX(UART5);
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	TIM3->CNT = 0; // сбросить номер контроллера
-	for (int i = start_chip; i < end_chip + 1; ++i) {
+	for (uint8_t i = start_chip; i < end_chip + 1; ++i) {
 		UART4_SendAddress(i);
 		pause(2);
 		UART4_Send_Settings(command::sync_timer, 0, 0, 0);
@@ -277,12 +277,12 @@ void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& d
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 }
 
-void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const int& value) {
+void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	sender(command::set_comp_value, adress, compN, dot, value);
 	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	debugg1("");
-	int32_t ts = 0;
+	uint32_t ts = 0;
 	if (lv_scr_act() == objects.d_chart_calib_on) {
 		if (col_but == green) {
 			ts = compsCHART_ON_1[cursor];
@@ -309,7 +309,7 @@ void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& do
 }
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
-	const int& value) {
+	const uint32_t& value) {
 	LL_USART_DisableDMAReq_RX(UART5);
 	UART4_SendAddress(adress);
 	pause(8); // 6 for release
@@ -328,7 +328,7 @@ void UART4_SendAddress(const uint8_t& slave_address) {
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
-void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const int& value) {
+void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
 	tx_settings[0] = { (uint8_t)com };
 	tx_settings[1] = { compN };
 	tx_settings[2] = { dot };
@@ -345,11 +345,11 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 }
 
 void UART4_Receive_Settings() {
-	for (int i = 0; i < rx_settings_length; i++) {
+	for (uint8_t i = 0; i < rx_settings_length; i++) {
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
 			// debugg1("receive falling"); // DEBUG
 		}
-		rx_settings[i] = LL_USART_ReceiveData9(UART5);
+		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 	compN_ = rx_settings[1];
 	dot_ = rx_settings[2];
@@ -366,14 +366,14 @@ const float maxMidi_fl = 127.99f;
 
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX
+	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), (int32_t)dataLengthRX); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
 	TIM2->CNT = 0;
 	uint32_t tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
 	mass_to_disp = mass_flo[rx_data[0]]; // for test
 
-	timer_data_in = (float)tOut * 0.1f;
+	timer_data_in = (float)tOut * 0.1f; // for test
 
 	timerLenght_fl = (float)tOut * 0.00000000004f; // меньше - громче
 	speed_t_fl = distance_fl / timerLenght_fl;
@@ -381,8 +381,8 @@ void DMA1_RX(void) {
 	midi_hi_t_fl = energy_t_fl / maxMidi_fl;
 	float integerPart;
 	midi_lo_t_fl = modf(midi_hi_t_fl, &integerPart) * maxMidi_fl;
-	uint8_t note_ = rx_data[0] + noteAdder[rx_data[0]];
-	uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_t_fl, rx_data[0] < pointOnToOff ? 0x90 : 0x80, note_, (uint8_t)midi_hi_t_fl };
+	uint8_t note_ = (uint8_t)((int8_t)rx_data[0] + noteAdder[rx_data[0]]);
+	uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_t_fl, rx_data[0] < pointOnToOff ? (uint8_t)0x90U : (uint8_t)0x80U, note_, (uint8_t)midi_hi_t_fl };
 	test_int_timer2 = TIM2->CNT * 137; // for test
 	tud_midi_stream_write(0, note_buf, 6);
 	fl = 1; // for test
@@ -451,8 +451,7 @@ void ReadOnMemory() {
 			for (uint32_t j = 0; j < 8; ++j) {
 				for (uint32_t k = 0; k < 2; ++k) {
 					comparator[i].comp[j][k] =
-						*(volatile uint32_t*)(Flash_Address
-							+ (l * sizeof(uint32_t)));
+						*(volatile uint32_t*)(Flash_Address + (l * sizeof(uint32_t)));
 					++l;
 				}
 			}
@@ -462,19 +461,19 @@ void ReadOnMemory() {
 //---------------------------------
 
 // (1uS)
-void pause(const int& p) {
+void pause(const uint32_t& p) {
 	TIM2->CNT = 0;
 	uint32_t t = p * 137;
 	while (TIM2->CNT < t) {
 	}
 }
 
-int convert_8_16(const uint8_t& a, const uint8_t& b) {
-	int x = a << 8 | b;
+uint32_t convert_8_16(const uint8_t& a, const uint8_t& b) {
+	uint32_t x = a << 8 | b;
 	return x;
 }
 
-conv_16_8 convert_16_8(const int& a) {
+conv_16_8 convert_16_8(const uint32_t& a) {
 	conv_16_8 r;
 	r.a = (a & 0xff << 8) >> 8;
 	r.b = a & 0xff;
@@ -511,7 +510,7 @@ void startInitNotesSettings() {
 		}
 	}
 	for (uint i = 0; i < 200; ++i) {
-		mass_flo[i] = 0.008; // 8 гр
+		mass_flo[i] = 0.008f; // 8 гр
 	}
 }
 //---------------------------------
@@ -541,9 +540,9 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
-	int height = area->y2 - area->y1 + 1;
-	int width = area->x2 - area->x1 + 1;
-	for (int i = 0; i < width * height; i++) {
+	int32_t height = area->y2 - area->y1 + 1;
+	int32_t width = area->x2 - area->x1 + 1;
+	for (int32_t i = 0; i < width * height; i++) {
 		LCD_Send_Data_16(color_p);
 		++color_p;
 	}
@@ -857,10 +856,10 @@ void config_charts() {
 	lv_chart_set_point_count(ob, allKeys);
 	ser_on_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
 	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
-	lv_chart_set_series_ext_y_array(ob, ser_on_green, compsCHART_ON_1);
-	lv_chart_set_series_ext_y_array(ob, ser_on_red, compsCHART_ON_2);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+	lv_chart_set_series_ext_y_array(ob, ser_on_green, (int32_t*)compsCHART_ON_1); // TODO ??  (int32_t*) здесь правильно работает?
+	lv_chart_set_series_ext_y_array(ob, ser_on_red, (int32_t*)compsCHART_ON_2);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 	c_on = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
 	lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
@@ -871,10 +870,10 @@ void config_charts() {
 	lv_chart_set_point_count(ob, allKeys);
 	ser_off_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
 	ser_off_red = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
-	lv_chart_set_series_ext_y_array(ob, ser_off_green, compsCHART_OFF_1);
-	lv_chart_set_series_ext_y_array(ob, ser_off_red, compsCHART_OFF_2);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+	lv_chart_set_series_ext_y_array(ob, ser_off_green, (int32_t*)compsCHART_OFF_1); // TODO ??  (int32_t*) здесь правильно работает?
+	lv_chart_set_series_ext_y_array(ob, ser_off_red, (int32_t*)compsCHART_OFF_2);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 	c_off = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
 	lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
@@ -979,9 +978,9 @@ extern "C" void action_to_disp_back(lv_event_t* e) {
 }
 
 extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
-	uint8_t adr = cursor / 7;
-	uint8_t c = cursor % 7;
-	uint8_t d = 0;
+	uint8_t adr = cursor / 7u;
+	uint8_t c = cursor % 7u;
+	uint8_t d = 0u;
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	calibration(adr, c, d);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
@@ -1243,8 +1242,8 @@ extern "C" void action_set(lv_event_t* e) {
 	const uint8_t adr = cursor / 7;
 	const uint8_t c = cursor % 7;
 	if (lv_scr_act() == objects.d_chart_calib_on) {
-		setCompValue(adr, c, 0, compsCHART_ON_1[cursor]); // for green
-		setCompValue(adr, c, 1, compsCHART_ON_2[cursor]); // for red
+		setCompValue(adr, c, 0U, compsCHART_ON_1[cursor]); // for green
+		setCompValue(adr, c, 1U, compsCHART_ON_2[cursor]); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
 		if (col_but == green) {
@@ -1269,15 +1268,15 @@ extern "C" void action_set(lv_event_t* e) {
 }
 
 extern "C" void action_auto_size(lv_event_t* e) {
-	const int w = 1;
+	const uint32_t w = 1;
 	if (lv_scr_act() == objects.d_chart_calib_on) {
 		check_max_min();
 		on_green_max = m_m.on.s_green.max + w;
 		on_green_min = m_m.on.s_green.min - w;
 		on_red_max = m_m.on.s_red.max + w;
 		on_red_min = m_m.on.s_red.min - w;
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_calib_off) {
 		check_max_min();
@@ -1285,8 +1284,8 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		off_green_min = m_m.off.s_green.min - w;
 		off_red_max = m_m.off.s_red.max + w;
 		off_red_min = m_m.off.s_red.min - w;
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_on) {
 		check_max_min();
@@ -1298,8 +1297,8 @@ extern "C" void action_auto_size(lv_event_t* e) {
 			on_red_max = m_m.on.s_red.max + w;
 			on_red_min = m_m.on.s_red.min - w;
 		}
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
 		check_max_min();
@@ -1311,8 +1310,8 @@ extern "C" void action_auto_size(lv_event_t* e) {
 			off_red_max = m_m.off.s_red.max + w;
 			off_red_min = m_m.off.s_red.min - w;
 		}
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_graph_resize_on) {
 		if (col_but == green) {
@@ -1339,8 +1338,8 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		s2_on_min = std::to_string(on_red_min);
 		s2_on_max.clear();
 		s2_on_max = std::to_string(on_red_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
 		if (col_but == green) {
@@ -1368,8 +1367,8 @@ extern "C" void action_auto_size(lv_event_t* e) {
 		s2_off_min = std::to_string(off_red_min);
 		s2_off_max.clear();
 		s2_off_max = std::to_string(off_red_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 	}
 	lv_chart_refresh(ch);
 }
@@ -1392,8 +1391,8 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 		s2_on_min = std::to_string(on_red_min);
 		s2_on_max.clear();
 		s2_on_max = std::to_string(on_red_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 	}
 	else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
 		if (col_but == green) {
@@ -1412,8 +1411,8 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 		s2_off_min = std::to_string(off_red_min);
 		s2_off_max.clear();
 		s2_off_max = std::to_string(off_red_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 	}
 	lv_chart_refresh(ch);
 }
@@ -1421,8 +1420,8 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 extern "C" void action_set_all(lv_event_t* e) { // TODO << ???
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	comp_to_chart();
-	for (int i = start_chip; i < end_chip + 1; ++i) {
-		for (int j = 0; j < 7; ++j) {
+	for (uint8_t i = start_chip; i < end_chip + 1; ++i) {
+		for (uint8_t j = 0; j < 7; ++j) {
 			sender(command::set_comp_value, i, j, 0, comparator[i].comp[j][0]);
 			// if (convert_8_16(a_, b_) != comparator[i].comp[j][0]) {
 			// 	debugg1("g4 != h7 !!!");
@@ -1469,7 +1468,7 @@ extern "C" void action_calib_all(lv_event_t* e) {
 	//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 void comp_to_chart() {
-	for(int i = 0; i < 100; ++i){
+	for (int i = 0; i < 100; ++i) {
 		compsCHART_ON_1[i] = 3000;
 		compsCHART_ON_2[i] = 500;
 		compsCHART_OFF_1[i] = 500;
@@ -1546,7 +1545,7 @@ void check_max_min() {
 	s2_off_max = std::to_string(m_m.off.s_red.max);
 }
 
-void chart_correction(const int& x, const plus_minus& pm) {
+void chart_correction(const uint32_t& x, const plus_minus& pm) {
 
 	if (lv_scr_act() == objects.d_chart_manual_edit_on) {
 		if (col_but == green)
@@ -1581,8 +1580,8 @@ void chart_correction(const int& x, const plus_minus& pm) {
 				pm == minus ? off_green_max += x : off_green_max -= x;
 			}
 		}
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, off_green_min, off_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, off_red_min, off_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)off_green_min, (int32_t)off_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)off_red_min, (int32_t)off_red_max);
 		s1_on_min.clear();
 		s1_on_min = std::to_string(off_green_min);
 		s1_on_max.clear();
@@ -1609,8 +1608,8 @@ void chart_correction(const int& x, const plus_minus& pm) {
 				pm == minus ? on_green_max += x : on_green_max -= x;
 			}
 		}
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, on_green_min, on_green_max);
-		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, on_red_min, on_red_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_PRIMARY_Y, (int32_t)on_green_min, (int32_t)on_green_max);
+		lv_chart_set_axis_range(ch, LV_CHART_AXIS_SECONDARY_Y, (int32_t)on_red_min, (int32_t)on_red_max);
 		s1_on_min.clear();
 		s1_on_min = std::to_string(on_green_min);
 		s1_on_max.clear();

@@ -50,7 +50,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
-message("> > > >>>>>>>>>>>>> Build type: " ${CMAKE_BUILD_TYPE} " <<<<<<<<<<<<<<<<< < < < <")
 
 # Enable CMake support for ASM and C languages
 # enable_language(C ASM)
@@ -118,3 +117,29 @@ add_subdirectory(
 target_link_libraries(${CMAKE_PROJECT_NAME}
     lvgl::lvgl
 )
+
+message(" ")
+message("Build type: > > > >>>>>>>>>>>>> > > >  >  >   " ${CMAKE_BUILD_TYPE} "   <  <  < < < <<<<<<<<<<<<<<<<< < < < <")
+message(" ")
+
+
+message("CMAKE_C_FLAGS:          ${CMAKE_C_FLAGS}")
+message(" ")
+message("CMAKE_CXX_FLAGS:        ${CMAKE_CXX_FLAGS}")
+message(" ")
+
+message("CMAKE_C_LINK_FLAGS:      ${CMAKE_C_LINK_FLAGS}")
+message(" ")
+message("CMAKE_CXX_LINK_FLAGS:    ${CMAKE_CXX_LINK_FLAGS}")
+message(" ")
+message("CMAKE_ASM_FLAGS:        ${CMAKE_ASM_FLAGS}")
+message(" ")
+
+message("CMAKE_C_FLAGS_DEBUG:     ${CMAKE_C_FLAGS_DEBUG}")
+message("CMAKE_CXX_FLAGS_DEBUG:   ${CMAKE_CXX_FLAGS_DEBUG}")
+message(" ")
+message("CMAKE_C_FLAGS_RELEASE:   ${CMAKE_C_FLAGS_RELEASE}")
+message("CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+
+message(" ")
+
