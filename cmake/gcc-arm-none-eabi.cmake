@@ -29,6 +29,10 @@ set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS} -x assembler-with-cpp -MMD -MP")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wpedantic -fdata-sections -ffunction-sections")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wconversion -Wsign-conversion -Wsign-compare -Wundef") # << сюда добавляем свои
 
+
+
+
+
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g3") # -O0
 set(CMAKE_C_FLAGS_RELEASE "-Os -g0")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3") # -O0
@@ -47,3 +51,32 @@ set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--start-group -lc -lm -Wl,--en
 set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--print-memory-usage")
 
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group")
+
+
+
+
+
+
+
+
+
+
+# # Расширенные предупреждения для максимального выявления проблем
+# set(EXTENDED_WARNINGS 
+#     # ""
+#     "-Wundef -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wcast-align=strict -Wcast-qual -Wbad-function-cast -Wwrite-strings -Wstrict-aliasing=2 -Wdate-time -Wfloat-equal -Wlogical-op -Wstrict-overflow=5 -Wformat=2 -Wformat-nonliteral -Wformat-security -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused -Wuninitialized -Wshadow -Wpointer-arith -Wduplicated-cond -Wduplicated-branches -Wnull-dereference -Walloc-zero -Wvla -Woverlength-strings -Wdouble-promotion -Wjump-misses-init -Wmissing-field-initializers"
+# )
+
+# # Для GCC 10+ добавить статический анализатор
+# if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "10.0")
+#     set(EXTENDED_WARNINGS "${EXTENDED_WARNINGS} -fanalyzer")
+# endif()
+
+# # Дополнительные флаги для C++
+# set(CXX_EXTENDED_WARNINGS
+#     "-Wctor-dtor-privacy -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wsign-promo -Weffc++ -Wstrict-null-sentinel -Wnoexcept -Wdelete-non-virtual-dtor -Wnarrowing -Wclass-memaccess -Wcatch-value -Wextra-semi"
+# )
+
+# # Применение флагов
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTENDED_WARNINGS}")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTENDED_WARNINGS} ${CXX_EXTENDED_WARNINGS}")
