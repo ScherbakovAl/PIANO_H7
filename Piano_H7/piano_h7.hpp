@@ -60,7 +60,7 @@ extern "C" {
 	};
 
 	uint32_t def[2] = { 2800, 1000 };
-	uint32_t def_off[2] = { 1500, 1800 };
+	uint32_t def_off[2] = { 2400, 2600 };
 
 	int8_t noteAdder[200] = {};
 	float mass_flo[200] = {};

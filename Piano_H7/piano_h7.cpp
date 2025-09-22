@@ -161,17 +161,23 @@ void h7() {
 	// debugg1("Restore calib Done! )"); // DEBUG
 	comp_to_chart();
 
+	odldCursor = rx_data[0];
+
 	while (1) {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
 
-		if (odldCursor != rx_data[0]) {
+		if (odldCursor != rx_data[0]) { // станавливает курсор в позицию нажатой клавиши
 			odldCursor = rx_data[0];
-			cursor = rx_data[0] > 97 ? rx_data[0] - 91 : rx_data[0];
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_on_green, cursor);
-
+			if (lv_scr_act() == objects.d_chart_calib_on) {
+				cursor = rx_data[0];
+				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			}
+			else if (lv_scr_act() == objects.d_chart_calib_off) {
+				cursor = rx_data[0] - 98;
+				lv_chart_set_cursor_point(objects.chart_off, c_off, ser_on_green, cursor);
+			}
 		}
 
 		if (calib_all_OnOff == calib_on) {
@@ -263,9 +269,9 @@ void sync() {
 
 void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot) {
 	sender(command::cal, adress, compN, dot, 0);
-	debugg1(""); // DEBUG
 	if (a_ == 0 && b_ == 0) {
-		debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot));
+		debugg1(""); // DEBUG
+		debugg1("Calib err, mcu #" + std::to_string(adress) + " comp-" + std::to_string(compN) + " dot-" + std::to_string(dot)); // DEBUG
 	};
 	comparator[adress].comp[compN][dot] = convert_8_16(a_, b_);
 }
@@ -366,7 +372,7 @@ const float maxMidi_fl = 127.99f;
 
 void DMA1_RX(void) {
 	LL_DMA_ClearFlag_TC2(DMA1);
-	SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), (int32_t)dataLengthRX); // clear RX
+	SCB_InvalidateDCache_by_Addr((uint32_t*)((uint32_t)rx_data), dataLengthRX); // clear RX
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
 	TIM2->CNT = 0;
@@ -978,9 +984,9 @@ extern "C" void action_to_disp_back(lv_event_t* e) {
 }
 
 extern "C" void action_calib_sensor_1_on(lv_event_t* e) {
-	uint8_t adr = cursor / 7u;
-	uint8_t c = cursor % 7u;
-	uint8_t d = 0u;
+	uint8_t adr = cursor / 7;
+	uint8_t c = cursor % 7;
+	uint8_t d = 0;
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	calibration(adr, c, d);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
@@ -1004,7 +1010,7 @@ extern "C" void action_calib_sensor_1_off(lv_event_t* e) {
 	uint8_t c = cursor % 7;
 	uint8_t d = 0;
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
-	calibration(adr + 13, c, d);
+	calibration(adr + 14, c, d);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	comp_to_chart();
 	lv_chart_refresh(ch);
@@ -1014,7 +1020,9 @@ extern "C" void action_calib_sensor_2_off(lv_event_t* e) {
 	uint8_t adr = cursor / 7;
 	uint8_t c = cursor % 7;
 	uint8_t d = 1;
-	calibration(adr + 13, c, d);
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+	calibration(adr + 14, c, d);
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	comp_to_chart();
 	lv_chart_refresh(ch);
 }
@@ -1254,15 +1262,15 @@ extern "C" void action_set(lv_event_t* e) {
 		}
 	}
 	else if (lv_scr_act() == objects.d_chart_calib_off) {
-		setCompValue(adr, c, 0, compsCHART_OFF_1[cursor]); // for green
-		setCompValue(adr, c, 1, compsCHART_OFF_2[cursor]); // for red
+		setCompValue(adr + 14, c, 0, compsCHART_OFF_1[cursor]); // for green
+		setCompValue(adr + 14, c, 1, compsCHART_OFF_2[cursor]); // for red
 	}
 	else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
 		if (col_but == green) {
-			setCompValue(adr, c, 0, compsCHART_OFF_1[cursor]); // for green
+			setCompValue(adr + 14, c, 0, compsCHART_OFF_1[cursor]); // for green
 		}
 		else {
-			setCompValue(adr, c, 1, compsCHART_OFF_2[cursor]); // for red
+			setCompValue(adr + 14, c, 1, compsCHART_OFF_2[cursor]); // for red
 		}
 	}
 }
@@ -1419,20 +1427,20 @@ extern "C" void action_max_size_chart(lv_event_t* e) {
 
 extern "C" void action_set_all(lv_event_t* e) { // TODO << ???
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	uint32_t ogo = 0;
 	comp_to_chart();
 	for (uint8_t i = start_chip; i < end_chip + 1; ++i) {
 		for (uint8_t j = 0; j < 7; ++j) {
 			sender(command::set_comp_value, i, j, 0, comparator[i].comp[j][0]);
-			// if (convert_8_16(a_, b_) != comparator[i].comp[j][0]) {
-			// 	debugg1("g4 != h7 !!!");
-			// }
+			if (convert_8_16(a_, b_) != comparator[i].comp[j][0]) {
+				++ogo;
+			}
 			sender(command::set_comp_value, i, j, 1, comparator[i].comp[j][1]);
-			// if (convert_8_16(a_, b_) != comparator[i].comp[j][1]) {
-			// 	debugg1("g4 != h7 !!!");
-			// }
+			if (convert_8_16(a_, b_) != comparator[i].comp[j][1]) {
+				++ogo;
+			}
 		}
 	}
-
 	// for (int i = start_chip * 7; i < end_chip * 7 + 1; ++i) { // DEBUG // for 4-5-6 mcu
 	// 	const uint8_t adr = i / 7;
 	// 	const uint8_t compN = i % 7;
@@ -1441,9 +1449,14 @@ extern "C" void action_set_all(lv_event_t* e) { // TODO << ???
 	// 	setCompValue(adr, compN, 0, compsCHART_OFF_1[i]);
 	// 	setCompValue(adr, compN, 1, compsCHART_OFF_2[i]);
 	// }
-	debugg1("set DONEE"); // DEBUG: set DONE
+	if(ogo){
+		debugg1(std::format("ERROR!!! g4 != h7 !!! ogo = {}", ogo));
+	}
+	else{
+		debugg1("set DONEE"); // DEBUG: set DONE
+	}
 	pause(20);
-	// sync();
+	sync();
 	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 }
 
