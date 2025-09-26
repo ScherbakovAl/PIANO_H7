@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/3",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/38",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -125,7 +125,7 @@
                 {
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
-                  "weight": 1.285679167561008,
+                  "weight": 0.8422236429751572,
                   "enableClose": false,
                   "children": [
                     {
@@ -157,7 +157,7 @@
                 {
                   "type": "tabset",
                   "id": "#8d747c40-1bd4-47d9-a802-7d15c197cc04",
-                  "weight": 0.5069436321659317,
+                  "weight": 0.9503991567517829,
                   "enableClose": false,
                   "children": [
                     {
@@ -192,16 +192,29 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 11.266889262565051,
+              "selected": 2,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#25ed22e8-5b7a-43e8-bbe6-9c62ea5286f5",
-                  "name": "d_chart_calib_on",
+                  "id": "#c78fe817-5738-4e89-a6f1-f54606e30cd4",
+                  "name": "Settings",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/1",
+                    "objectPath": "[display_piano.eez-project]:/settings",
+                    "subObjectPath": "[display_piano.eez-project]:/settings",
+                    "permanent": false
+                  },
+                  "icon": "material:settings"
+                },
+                {
+                  "type": "tab",
+                  "id": "#25ed22e8-5b7a-43e8-bbe6-9c62ea5286f5",
+                  "name": "d_chart_calib_off",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[display_piano.eez-project]:/userPages/4",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -1003,14 +1016,13 @@
           "2": {},
           "3": {},
           "4": {},
+          "5": {},
           "18": {},
           "20": {},
           "21": {},
           "31": {},
           "32": {},
-          "33": {
-            "$selected": true
-          }
+          "33": {}
         }
       },
       "transform": {
@@ -1031,6 +1043,7 @@
       "selection": {
         "0": {
           "0": {},
+          "5": {},
           "6": {},
           "7": {
             "0": {}
@@ -1040,7 +1053,9 @@
           "11": {},
           "12": {},
           "13": {},
-          "14": {},
+          "14": {
+            "$selected": true
+          },
           "15": {},
           "16": {},
           "17": {},
@@ -1080,7 +1095,8 @@
           "14": {},
           "15": {},
           "16": {},
-          "17": {
+          "17": {},
+          "18": {
             "$selected": true
           },
           "20": {},
@@ -1093,7 +1109,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1172,8 +1188,8 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -234.8300865800866,
-          "y": -138.2840909090909
+          "x": -223.3300865800866,
+          "y": -212.7840909090909
         },
         "scale": 1.25
       },
@@ -1191,7 +1207,9 @@
           "9": {},
           "10": {},
           "11": {},
-          "12": {},
+          "12": {
+            "$selected": true
+          },
           "13": {},
           "14": {},
           "15": {},
@@ -1206,9 +1224,7 @@
             "0": {}
           },
           "26": {},
-          "28": {
-            "$selected": true
-          }
+          "27": {}
         }
       },
       "timeline": {
