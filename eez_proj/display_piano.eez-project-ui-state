@@ -1,8 +1,8 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/42",
-    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/34",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/3",
+    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -125,7 +125,7 @@
                 {
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
-                  "weight": 0.8408996949499612,
+                  "weight": 1.285679167561008,
                   "enableClose": false,
                   "children": [
                     {
@@ -157,7 +157,7 @@
                 {
                   "type": "tabset",
                   "id": "#8d747c40-1bd4-47d9-a802-7d15c197cc04",
-                  "weight": 0.8589006058510307,
+                  "weight": 0.5069436321659317,
                   "enableClose": false,
                   "children": [
                     {
@@ -173,7 +173,7 @@
                 {
                   "type": "tabset",
                   "id": "#a9aa8c3c-5981-4c4d-8907-c4f6a03cd743",
-                  "weight": 1.300199699199008,
+                  "weight": 1.2073772002730587,
                   "enableClose": false,
                   "children": [
                     {
@@ -191,8 +191,7 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 14.861419617109933,
-              "selected": 1,
+              "weight": 11.266889262565051,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -224,12 +223,12 @@
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 5.573032356416225,
+              "weight": 9.167562710961109,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#97387266-3096-4afb-9786-6c73071f158e",
-                  "weight": 0.7610047410129441,
+                  "weight": 0.8868632174112387,
                   "children": [
                     {
                       "type": "tab",
@@ -244,7 +243,7 @@
                 {
                   "type": "tabset",
                   "id": "#2bf6aa07-3c0c-495d-851c-3b2382e1fbd9",
-                  "weight": 0.3819658411622662,
+                  "weight": 0.25610736476397156,
                   "children": [
                     {
                       "type": "tab",
@@ -1004,24 +1003,22 @@
           "2": {},
           "3": {},
           "4": {},
-          "5": {},
-          "6": {},
-          "8": {},
-          "9": {},
-          "10": {},
-          "11": {},
-          "24": {},
-          "37": {
+          "18": {},
+          "20": {},
+          "21": {},
+          "31": {},
+          "32": {},
+          "33": {
             "$selected": true
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -40
+          "x": -332.8338744588741,
+          "y": -272.9034090909088
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1052,20 +1049,20 @@
           "20": {},
           "21": {},
           "22": {},
-          "23": {},
-          "24": {},
+          "23": {
+            "0": {}
+          },
           "25": {},
-          "26": {
-            "$selected": true
-          }
+          "26": {},
+          "27": {}
         }
       },
       "transform": {
         "translate": {
           "x": -240,
-          "y": -160
+          "y": -280
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1078,13 +1075,14 @@
       "selection": {
         "0": {
           "13": {
-            "0": {},
-            "$selected": true
+            "0": {}
           },
           "14": {},
           "15": {},
           "16": {},
-          "17": {},
+          "17": {
+            "$selected": true
+          },
           "20": {},
           "21": {},
           "22": {}
@@ -1162,7 +1160,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1174,13 +1172,14 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -234.8300865800866,
+          "y": -138.2840909090909
         },
-        "scale": 1
+        "scale": 1.25
       },
       "selection": {
         "0": {
+          "0": {},
           "1": {},
           "2": {},
           "3": {},
@@ -1193,9 +1192,7 @@
           "10": {},
           "11": {},
           "12": {},
-          "13": {
-            "$selected": true
-          },
+          "13": {},
           "14": {},
           "15": {},
           "16": {},
@@ -1205,9 +1202,12 @@
           "21": {},
           "23": {},
           "24": {},
-          "25": {},
-          "26": {
+          "25": {
             "0": {}
+          },
+          "26": {},
+          "28": {
+            "$selected": true
           }
         }
       },
@@ -1229,7 +1229,9 @@
           "19": {},
           "20": {},
           "21": {},
-          "22": {}
+          "22": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1237,7 +1239,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1269,7 +1271,11 @@
         "0": {
           "5": {},
           "10": {},
-          "21": {},
+          "21": {
+            "0": {
+              "$selected": true
+            }
+          },
           "22": {},
           "23": {}
         }
@@ -1279,7 +1285,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1312,7 +1318,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1
+        "scale": 1.25
       },
       "timeline": {
         "isEditorActive": false,
@@ -1339,13 +1345,10 @@
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
     "TEXT",
-    "MISCELLANEOUS",
-    "ARC",
-    "POSITION AND SIZE",
-    "BACKGROUND"
+    "MISCELLANEOUS"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1,
+  "flowZoom": 1.25,
   "implementationLanguage": "C++"
 }

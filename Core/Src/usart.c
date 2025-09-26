@@ -97,7 +97,7 @@ void MX_UART5_Init(void)
 
   /* USER CODE END UART5_Init 1 */
   UART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
-  UART_InitStruct.BaudRate = 13600000;
+  UART_InitStruct.BaudRate = 11424000;
   UART_InitStruct.DataWidth = LL_USART_DATAWIDTH_9B;
   UART_InitStruct.StopBits = LL_USART_STOPBITS_1;
   UART_InitStruct.Parity = LL_USART_PARITY_NONE;

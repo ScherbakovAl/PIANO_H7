@@ -51,6 +51,7 @@ extern void action_restore_calibration(lv_event_t * e);
 extern void action_max_size_chart(lv_event_t * e);
 extern void action_set_all(lv_event_t * e);
 extern void action_calib_all(lv_event_t * e);
+extern void action_read_all(lv_event_t * e);
 
 
 #ifdef __cplusplus

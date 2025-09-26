@@ -359,7 +359,7 @@ void LCD_Init() {
 		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, RED);
 		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, GREEN);
 		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, BLUE);
-		LL_mDelay(6);
+		// LL_mDelay(6);
 
 		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, 0x0);
 		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, 0x0);
@@ -368,10 +368,10 @@ void LCD_Init() {
 	//	}
 
 		// DMA
-	LL_SPI_EnableDMAReq_TX(SPI3);
+	// LL_SPI_EnableDMAReq_TX(SPI3);
 	//	LL_SPI_EnableIT_EOT(SPI3);
 	//	LL_SPI_EnableIT_TXP(SPI3);
-	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
+	// LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 }
 
 void LCD_RES_H() {

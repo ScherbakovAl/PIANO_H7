@@ -12,59 +12,14 @@
 #include "lvgl.h"
 #include "ui.h"
 #include "tusb.h"
+#include "vars.h"
+#include "actions.h"
 
 #ifdef __cplusplus
 extern "C" {
 
-	// пины тестовой колодки
-	// pin 2 - tim trig
-	// pin 4 - tim slc
-	// pin 6 - Urx
-	// pin 8 - Utx
-
 	using uint = unsigned int;
 	using cuint = const uint;
-
-	// TODO сделать проверку: сколько раз заходит в циклы While при работе с  uart?
-
-	// TODO проверить UART TX должен быть подтянут к UP?
-
-	// номер 95 у последней верхней клавиши
-	
-	const int allChipCount = 23; // 1-13-on, 14-23(26)-off // до этого значения считает таймер
-	const int start_chip = 14; // включительно
-	const int end_chip = 23; // включительно всего 23
-	const uint8_t start_cursor = 10;
-	const uint8_t pointOnToOff = 97; // после этого номера ноты идут как демпфера
-
-	const int allKeys = 100;
-	// ***** 390(263)-14000(22723)us пролёт молоточка
-
-
-	uint8_t rx_data[5] = { };
-	const int dataLengthRX = sizeof(rx_data);
-	uint8_t tx_settings[5] = { };
-	const uint8_t tx_settings_length = sizeof(tx_settings);
-	uint8_t rx_settings[5] = { };
-	const uint8_t rx_settings_length = sizeof(rx_settings);
-	uint8_t compN_ = 0;
-	uint8_t dot_ = 0;
-	uint8_t a_ = 0;
-	uint8_t b_ = 0;
-	int f = 0;
-	const uint32_t Flash_Address = 0x080E0000; // FLASH
-	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
-
-	struct comps {
-		uint32_t comp[8][2] = { {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {1, 4095}, {4095, 1}, {0, 0} };
-	};
-
-	uint32_t def[2] = { 2800, 1000 };
-	uint32_t def_off[2] = { 2400, 2600 };
-
-	int8_t noteAdder[200] = {};
-	float mass_flo[200] = {};
-	void startInitNotesSettings();
 
 	struct conv_16_8 {
 		uint8_t a = 0;
@@ -72,8 +27,8 @@ extern "C" {
 	};
 
 	struct min_max {
-		uint32_t max = 0;
-		uint32_t min = 4095;
+		int32_t max = 0;
+		int32_t min = 4095;
 	};
 
 	struct s1s2 {
@@ -105,7 +60,8 @@ extern "C" {
 	enum current_display {
 		on,
 		off,
-		d_none
+		d_none,
+		dis_main
 	};
 
 	enum color_but {
@@ -120,62 +76,121 @@ extern "C" {
 		t_none
 	};
 
-	enum calib_all_on_off{
+	enum calib_all_on_off {
 		calib_on,
 		calib_off,
 		calib_none
 	};
 
-	comps comparator[24];
+
+	// пины тестовой колодки
+	// pin 2 - tim trig
+	// pin 4 - tim slc
+	// pin 6 - Urx
+	// pin 8 - Utx
+
+	// TODO сделать проверку: сколько раз заходит в циклы While при работе с uart?
+
+	// TODO проверить UART TX должен быть подтянут к UP?
+
+	// номер 95 у последней верхней клавиши
+	// ***** 390(263)-14000(22723)us пролёт молоточка
+
+	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
+
+	const uint8_t start_adress_chip_on = 1; // включительно
+	const uint8_t end_adress_chip_on = 13; // включительно (если < end_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t start_ardress_chip_off = 14; // включительно
+	const uint8_t end_adress_chip_off = 23; // включительно всего 23
+
+	const uint32_t start_cursor = 70;
+	volatile uint32_t cursor = start_cursor;
+	// const uint8_t pointOnToOff = 98; // после этого номера ноты идут как демпфера
+
+	uint8_t rx_data[5] = { }; // TODO uint8_t->uint32_t ?? в 373й строке очистка потому-что!
+	const uint32_t dataLengthRX = sizeof(rx_data);
+	uint8_t tx_settings[5] = { };
+	const uint8_t tx_settings_length = sizeof(tx_settings);
+	uint8_t rx_settings[5] = { };
+	const uint8_t rx_settings_length = sizeof(rx_settings);
+	uint8_t compN_ = 0;
+	uint8_t dot_ = 0;
+	uint8_t a_ = 0;
+	uint8_t b_ = 0;
+	int f = 0; // TODO используеся где?
+
+	int32_t def_on[2] = { 2600, 1000 }; // [0]-green, [1]-red
+	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
+
+	const int32_t sizeCHART_BUFFER = 196;
+	int32_t compsCHART_0[sizeCHART_BUFFER] = {}; // green
+	int32_t compsCHART_1[sizeCHART_BUFFER] = {}; // red
+	int32_t compsCHART_CALIB[sizeCHART_BUFFER] = {};
+	int32_t compsCHART_CALIB_old[sizeCHART_BUFFER] = {};
+
+
+	int8_t noteAdder[196] = {};
+	float mass_F[196] = {};
+
+	const uint32_t Flash_Address = 0x080E0000; // FLASH
+
+ // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
+	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
+
 	on_off_s1_s2_min_max m_m;
-	uint32_t compsCHART_ON_1[100] = {};
-	uint32_t compsCHART_ON_2[100] = {};
-	uint32_t compsCHART_OFF_1[100] = {};
-	uint32_t compsCHART_OFF_2[100] = {};
-	uint32_t on_green_max = 4095;
-	uint32_t on_green_min = 0;
-	uint32_t on_red_max = 4095;
-	uint32_t on_red_min = 0;
-	uint32_t off_green_max = 4095;
-	uint32_t off_green_min = 0;
-	uint32_t off_red_max = 4095;
-	uint32_t off_red_min = 0;
+	int32_t on_green_max = 4095; // TODO uint32_t >>>> int32_t ?????
+	int32_t on_green_min = 0; // TODO uint32_t >>>> int32_t ?????
+	int32_t on_red_max = 4095; // TODO uint32_t >>>> int32_t ?????
+	int32_t on_red_min = 0; // TODO uint32_t >>>> int32_t ?????
+	int32_t off_green_max = 4095; // TODO uint32_t >>>> int32_t ?????
+	int32_t off_green_min = 0; // TODO uint32_t >>>> int32_t ?????
+	int32_t off_red_max = 4095; // TODO uint32_t >>>> int32_t ?????
+	int32_t off_red_min = 0; // TODO uint32_t >>>> int32_t ?????
 	int divis = 100'000'000;
 	// const unsigned int maxMidi = 127;
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
-	uint8_t cursor = start_cursor;
+
 	current_display cur_disp = d_none;
 	color_but col_but = c_none;
 	but_top_bot top_bot = t_none;
 	calib_all_on_off calib_all_OnOff = calib_none;
 
 	void h7();
+	void sync();
+	int sync_sender(const uint8_t& i);
+	void initBuffers();
+	void check_max_min();
+	void all_H7_to_g4();
+	void all_g4_to_H7();
+	void checkDataOnSensor(const uint8_t& adress, const uint8_t& compN);
+	// void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value); // TODO можно удалить
+	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
+	void DMA1_RX();
+	void DMA_UART_ERRORS_HANDLER();
+	int32_t convert_8_16(const uint8_t& a, const uint8_t& b);
 	conv_16_8 convert_16_8(const uint32_t& a);
-	uint32_t convert_8_16(const uint8_t& a, const uint8_t& b);
-	void pause(const uint32_t& p);
-	void sync();
-	void calibration(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
-	void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
-	void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
-	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
+	void chart_correction(const uint32_t& x, const plus_minus& pm);
 	void SaveToMemory();
 	void ReadOnMemory();
-	void DMA1_RX();
+	void pause(const uint32_t& p);
+	void debugg_fn(const std::string& str);  // DEBUG
+	void debugg_clear();
 	void resetPin();
-	// void DMA2_Stream3_TransferComplete();
 	void send_test_midi();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
+
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
-	void config_charts();
-	void comp_to_chart();
-	void chart_to_comp();
-	void chart_correction(const uint32_t& x, const plus_minus& pm);
-	void check_max_min();
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
+
+	void configCharts(); // display_functions.cpp
+
+	// void DMA2_Stream3_TransferComplete();
+	// void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
+
 }
 #endif // extern "C"
 
