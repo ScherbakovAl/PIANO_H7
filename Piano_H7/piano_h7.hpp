@@ -105,7 +105,6 @@ extern "C" {
 
 	const uint32_t start_cursor = 70;
 	volatile uint32_t cursor = start_cursor;
-	// const uint8_t pointOnToOff = 98; // после этого номера ноты идут как демпфера
 
 	uint8_t rx_data[5] = { }; // TODO uint8_t->uint32_t ?? в 373й строке очистка потому-что!
 	const uint32_t dataLengthRX = sizeof(rx_data);
@@ -138,16 +137,16 @@ extern "C" {
 	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	on_off_s1_s2_min_max m_m;
-	int32_t on_green_max = 4095; // TODO uint32_t >>>> int32_t ?????
-	int32_t on_green_min = 0; // TODO uint32_t >>>> int32_t ?????
-	int32_t on_red_max = 4095; // TODO uint32_t >>>> int32_t ?????
-	int32_t on_red_min = 0; // TODO uint32_t >>>> int32_t ?????
-	int32_t off_green_max = 4095; // TODO uint32_t >>>> int32_t ?????
-	int32_t off_green_min = 0; // TODO uint32_t >>>> int32_t ?????
-	int32_t off_red_max = 4095; // TODO uint32_t >>>> int32_t ?????
-	int32_t off_red_min = 0; // TODO uint32_t >>>> int32_t ?????
+	int32_t on_green_max = 4095;
+	int32_t on_green_min = 0;
+	int32_t on_red_max = 4095;
+	int32_t on_red_min = 0;
+	int32_t off_green_max = 4095;
+	int32_t off_green_min = 0;
+	int32_t off_red_max = 4095;
+	int32_t off_red_min = 0;
 	int divis = 100'000'000;
-	// const unsigned int maxMidi = 127;
+
 	volatile int touchpad_pressed = 0;
 	int touchpad_x = 0;
 	int touchpad_y = 0;
