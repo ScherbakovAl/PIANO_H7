@@ -204,19 +204,6 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles DMA1 stream1 global interrupt.
-  */
-void DMA1_Stream1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 0 */
-  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream1_IRQn 1 */
-}
-
-/**
   * @brief This function handles DMA1 stream2 global interrupt.
   */
 void DMA1_Stream2_IRQHandler(void)
@@ -280,26 +267,6 @@ GPIOA->BSRR = 0x200000; // for test // DEBUG
 }
 
 /**
-  * @brief This function handles SPI3 global interrupt.
-  */
-void SPI3_IRQHandler(void)
-{
-  /* USER CODE BEGIN SPI3_IRQn 0 */
-  // GPIOC->BSRR = 0x80; // pC7
-  // GPIOC->BSRR = 0x800000; // pC7
-  // LL_SPI_DisableIT_TXP(SPI3);
-  // LL_SPI_ClearFlag_EOT(SPI3);
-  // LL_SPI_ClearFlag_TXTF(SPI3);
-  // LL_SPI_ClearFlag_SUSP(SPI3);
-  // LL_mDelay(3);
-  // lv_display_flush_ready(disp);
-  /* USER CODE END SPI3_IRQn 0 */
-  /* USER CODE BEGIN SPI3_IRQn 1 */
-
-  /* USER CODE END SPI3_IRQn 1 */
-}
-
-/**
   * @brief This function handles TIM6 global interrupt, DAC1_CH1 and DAC1_CH2 underrun error interrupts.
   */
 void TIM6_DAC_IRQHandler(void)
@@ -313,23 +280,6 @@ void TIM6_DAC_IRQHandler(void)
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
   /* USER CODE END TIM6_DAC_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA2 stream1 global interrupt.
-  */
-void DMA2_Stream1_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
-  // LL_DMA_ClearFlag_TC1(DMA2);
-  // flag_DMA_STREAM1_bsy = 1;
-  // GPIOC->BSRR = 0x200; // pC9
-  // GPIOC->BSRR = 0x2000000; // pC9
-  // LL_mDelay(2);
-  // lv_display_flush_ready(disp);
-  /* USER CODE END DMA2_Stream1_IRQn 0 */
-  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
-  /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
 
 /**
