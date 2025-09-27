@@ -222,10 +222,14 @@ void DMA1_Stream2_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
-  GPIOA->BSRR = 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
   LL_TIM_ClearFlag_UPDATE(TIM4);
   lv_tick_inc(1);
-  GPIOA->BSRR = 0x200000; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -238,7 +242,11 @@ void TIM4_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-  GPIOA->BSRR = 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
   /* USER CODE END EXTI15_10_IRQn 0 */
   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
   {
@@ -262,7 +270,11 @@ void EXTI15_10_IRQHandler(void)
     /* USER CODE END LL_EXTI_LINE_15 */
   }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-GPIOA->BSRR = 0x200000; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
+  GPIOA->BSRR |= 0x20; // for test // DEBUG
+  GPIOA->BSRR |= 0x200000;
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
@@ -272,10 +284,18 @@ GPIOA->BSRR = 0x200000; // for test // DEBUG
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-      GPIOA->BSRR = 0x20; // for test // DEBUG
+      GPIOA->BSRR |= 0x20; // for test // DEBUG
+      GPIOA->BSRR |= 0x200000;
+      GPIOA->BSRR |= 0x20;
+      GPIOA->BSRR |= 0x200000;
+      GPIOA->BSRR |= 0x20; // for test // DEBUG
       LL_TIM_ClearFlag_UPDATE(TIM6);
       touchpad_pressed = 0;
-      GPIOA->BSRR = 0x200000; // for test // DEBUG
+      GPIOA->BSRR |= 0x200000;
+      GPIOA->BSRR |= 0x20; // for test // DEBUG
+      GPIOA->BSRR |= 0x200000;
+      GPIOA->BSRR |= 0x20; // for test // DEBUG
+      GPIOA->BSRR |= 0x200000;
   /* USER CODE END TIM6_DAC_IRQn 0 */
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 

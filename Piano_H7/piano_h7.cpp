@@ -163,15 +163,15 @@ void h7() {
 	pause(30);
 
 
-	GPIOA->BSRR = 0x10; // for test // DEBUG
-	pause(1);
-	GPIOA->BSRR = 0x100000;
-	pause(1);
+	// GPIOA->BSRR = 0x10; // for test // DEBUG
+	// pause(1);
+	// GPIOA->BSRR = 0x100000;
+	// pause(1);
 
-	GPIOA->BSRR = 0x20; // for test // DEBUG
-	pause(1);
-	GPIOA->BSRR = 0x200000;
-	pause(1);
+	// GPIOA->BSRR = 0x20; // for test // DEBUG
+	// pause(1);
+	// GPIOA->BSRR = 0x200000;
+	// pause(1);
 
 
 	// start PWM
@@ -316,7 +316,7 @@ void check_max_min() {
 				m_m.on.s_red.max = compsCHART_1[i];
 			}
 		}
-		
+
 		s1_on_min = std::to_string(m_m.on.s_green.min);
 		s1_on_max = std::to_string(m_m.on.s_green.max);
 		s2_on_min = std::to_string(m_m.on.s_red.min);
@@ -337,7 +337,7 @@ void check_max_min() {
 				m_m.off.s_red.max = compsCHART_1[i];
 			}
 		}
-		
+
 		s1_off_min = std::to_string(m_m.off.s_green.min);
 		s1_off_max = std::to_string(m_m.off.s_green.max);
 		s2_off_min = std::to_string(m_m.off.s_red.min);
@@ -477,22 +477,20 @@ const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
 
 void DMA1_RX(void) {
+
 	LL_DMA_ClearFlag_TC2(DMA1);
-	GPIOA->BSRR = 0x10; // for test // DEBUG
-	TIM2->CNT = 0; // for test считаем количество тиков процессора
+
+	TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
+
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
-	uint32_t nomerShip = TIM3->CNT; // for test
 
-	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX // TODO rx-data -> uint32t?
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // тоже работает... с такой же скоростью.. 
-
-
+	// uint32_t nomerShip = TIM3->CNT; // for test
 	// if (nomerShip != ((rx_data[0] / 7) + 1)) {
-	// 	debugg_fn(std::format("ship NOMER ERR   rx_data =  {},   TIM3 =  {}", ((rx_data[0] / 7) + 1), nomerShip));
-	// }
+		// 	debugg_fn(std::format("ship NOMER ERR   rx_data =  {},   TIM3 =  {}", ((rx_data[0] / 7) + 1), nomerShip));
+		// }
+
 	uint32_t tOut = 0;
 	tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
-
 
 
 	timerLenght_F = (float)tOut * 0.00000000004f; // меньше - громче
@@ -502,45 +500,48 @@ void DMA1_RX(void) {
 	float integerPart_F;
 	midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 	int note_ = rx_data[0] + noteAdder[rx_data[0]];
-	uint8_t note_buf[] = { 0xB0, 0x58, 22, 0x80, 56, 23 }; // for test // DEBUG
-	// uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_F, rx_data[0] < 98 ? 0x90 : 0x80, note_, (uint8_t)midi_hi_F };
+	// uint8_t note_buf[] = { 0xB0, 0x58, 22, 0x80, 56, 23 }; // for test // DEBUG
+	uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_F, rx_data[0] < 98 ? 0x90 : 0x80, note_, (uint8_t)midi_hi_F };
 	tud_midi_stream_write(0, note_buf, 6);
 	mass_to_disp = mass_F[rx_data[0]]; // for test
 	timer_data_in = (float)tOut * 0.0001f; // for test
 	fl = 1; // for test
 
+
+	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX // TODO rx-data -> uint32t?
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // тоже работает... с такой же скоростью.. 
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
-	// if (rx_data[0] > 98) {
-	// 	cursor = rx_data[0] - 98;
-	// }
-	// else {
-	// 	cursor = rx_data[0];
-	// }
-	
 	test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) {
 
 		// LL_USART_DisableDMAReq_RX(UART5); // DEBUG оно здесь помогает очистить от ошибок?
-		
+		GPIOA->BSRR = 0x10; // for test // DEBUG
 		debugg_fn("USART Noise Error detected");
 		LL_USART_ClearFlag_NE(UART5);
 		// TODO сбросить счётчик DMA ? (при ошибке..)
-		LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
+		// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 		// LL_DMA_ClearFlag_HT2(DMA1);
 		// LL_DMA_ClearFlag_TC2(DMA1);
 		// LL_DMA_ClearFlag_TE2(DMA1);
 		// LL_DMA_ClearFlag_DME2(DMA1);
+
+		LL_USART_RequestRxDataFlush(UART5);
+
+
+		// LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
 		// LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART5->RDR));
 		// LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
 		// LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
-		LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-		
+		// LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 		// LL_USART_EnableDMAReq_RX(UART5);
+		// LL_DMA_ClearFlag_TC2(DMA1);
+
+		// LL_TIM_DisableCounter(TIM1); // DEBUG
+		GPIOA->BSRR = 0x100000; // for test // DEBUG
 	}
-	GPIOA->BSRR = 0x100000; // for test // DEBUG
 }
 
 void DMA_UART_ERRORS_HANDLER() {
@@ -818,7 +819,7 @@ extern "C" {
 		cur_disp = on;
 		cur_shart = objects.chart_on;
 		all_g4_to_H7();
-		check_max_min();
+		// check_max_min();
 		lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 	}
@@ -840,7 +841,7 @@ extern "C" {
 		check_max_min();
 		action_s1__s2_upd(e);
 		lv_obj_set_parent(objects.chart_on, objects.d_chart_graph_resize_on);
-		loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_ON);
+		loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_ON); // TODO loadScreen поставить в самый верх?
 	}
 
 	void action_to_disp_calibration_off(lv_event_t* e) {
@@ -850,7 +851,7 @@ extern "C" {
 		cur_disp = off;
 		cur_shart = objects.chart_off;
 		all_g4_to_H7();
-		check_max_min();
+		// check_max_min();
 		lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 	}
@@ -897,7 +898,7 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
 		compsCHART_0[cursor] = convert_8_16(a_, b_);
 		sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-		check_max_min();
+		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -908,7 +909,7 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
 		compsCHART_1[cursor] = convert_8_16(a_, b_);
 		sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
-		check_max_min();
+		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -920,7 +921,7 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
 		compsCHART_0[cu] = convert_8_16(a_, b_);
 		sensor_off_1_data_string = std::to_string(compsCHART_0[cu]);
-		check_max_min();
+		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -932,7 +933,7 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
 		compsCHART_1[cu] = convert_8_16(a_, b_);
 		sensor_off_2_data_string = std::to_string(compsCHART_1[cu]);
-		check_max_min();
+		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -989,7 +990,7 @@ extern "C" {
 	void action_s1__s2_upd(lv_event_t* e) {
 		col_but = c_none;
 		if (lv_scr_act() == objects.d_chart_manual_edit_on) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_on) == 16) { // == зелёная
 				ch_o = "green";
 				col_but = green;
@@ -1004,7 +1005,7 @@ extern "C" {
 			}
 		}
 		else if (lv_scr_act() == objects.d_chart_manual_edit_off) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_off) == 16) { // == зелёная
 				ch_f = "green";
 				col_but = green;
@@ -1019,7 +1020,7 @@ extern "C" {
 			}
 		}
 		else if (lv_scr_act() == objects.d_chart_graph_resize_on) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_button) == 16) { // == зелёная
 				disp_on_off_button = "green";
 				col_but = green;
@@ -1034,7 +1035,7 @@ extern "C" {
 			}
 		}
 		else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_button_3) == 16) { // == зелёная
 				disp_on_off_button_3 = "green";
 				col_but = green;
@@ -1053,7 +1054,7 @@ extern "C" {
 	void action_top_bot(lv_event_t* e) {
 		top_bot = t_none;
 		if (lv_scr_act() == objects.d_chart_graph_resize_on) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_button_1) == 16) { // == зелёная
 				top_bot_str = "top";
 				top_bot = top;
@@ -1068,7 +1069,7 @@ extern "C" {
 			}
 		}
 		else if (lv_scr_act() == objects.d_chart_graph_resize_off) {
-			
+
 			if (lv_obj_get_state(objects.s1_s2_button_2) == 16) { // == зелёная
 				top_bot_str_2 = "top";
 				top_bot = top;
@@ -1262,12 +1263,12 @@ extern "C" {
 		// 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
 		// 	calib_all_OnOff = calib_on;
-		
+
 		// 	calib_all_str = "calibration..";
 		// }
 		// else {
 		// 	calib_all_OnOff = calib_off;
-		
+
 		// 	calib_all_str = "calib cycle";
 		// 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 		// }
