@@ -49,6 +49,15 @@ extern "C" {
 		buff_to_flash,
 		flash_to_buff,
 		read_comp_value_flash,
+		all_calib
+	};
+
+	enum subcommand {
+		start_calibration = 1,
+		read_calibration,
+		stop_calibration,
+		working,
+		nothing
 	};
 
 	enum plus_minus {
@@ -99,8 +108,8 @@ extern "C" {
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
 	const uint8_t start_adress_chip_on = 1; // включительно
-	const uint8_t end_adress_chip_on = 13; // включительно (если < end_chip_on, то выключено) // TODO проверить этот момент..
-	const uint8_t start_ardress_chip_off = 24; // включительно
+	const uint8_t end_adress_chip_on = 13; // включительно (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t start_ardress_chip_off = 14; // включительно
 	const uint8_t end_adress_chip_off = 26; // включительно всего 23
 
 	const uint32_t start_cursor = 70;
@@ -164,7 +173,6 @@ extern "C" {
 	void all_H7_to_g4();
 	void all_g4_to_H7();
 	void checkDataOnSensor(const uint8_t& adress, const uint8_t& compN);
-	// void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value); // TODO можно удалить
 	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
@@ -185,11 +193,7 @@ extern "C" {
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
-	void configCharts(); // display_functions.cpp
-
-	// void DMA2_Stream3_TransferComplete();
-	// void readCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot);
-
+	void configCharts();
 }
 #endif // extern "C"
 

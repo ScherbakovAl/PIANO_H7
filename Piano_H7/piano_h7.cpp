@@ -208,13 +208,21 @@ void h7() {
 			lv_chart_refresh(cur_shart);
 		}
 		if (cur_disp == off) {
-			for (uint8_t adress = start_ardress_chip_off; adress <= end_adress_chip_off; ++adress) {
-				for (uint8_t dot = 0; dot < 7; ++dot) {
-					checkDataOnSensor(adress, dot);
-					if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
-						adress = end_adress_chip_off + 14; // выход из цикла
-						dot = 8; // выход из цикла
-					}
+			// for (uint8_t adress = start_ardress_chip_off; adress <= end_adress_chip_off; ++adress) {
+			// 	for (uint8_t dot = 0; dot < 7; ++dot) {
+					// checkDataOnSensor(adress, dot);
+			// 		if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
+			// 			adress = end_adress_chip_off + 14; // выход из цикла
+			// 			dot = 8; // выход из цикла
+			// 		}
+			// 	}
+			// }
+			// sender(command::all_calib, adress, 0, 0, 
+			for (uint8_t adress = 24; adress <= 24; ++adress) {
+				sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::read_calibration, 0));
+				for (int i = 0; i < 7; ++i) {
+					UART4_Receive_Settings();
+					compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
 				}
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
@@ -424,7 +432,7 @@ void checkDataOnSensor(const uint8_t& adress, const uint8_t& compN) {
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
 	const uint32_t& value) {
-	LL_USART_DisableDMAReq_RX(UART5);
+	// LL_USART_DisableDMAReq_RX(UART5);
 	UART4_SendAddress(adress);
 	pause(4); // 4 for release
 	UART4_Send_Settings(com, compN, dot, value);
@@ -439,7 +447,7 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 			debugg_fn(std::format("BAD SET DATA [0]= {}, add={}, comp={}, dot={}, value={}, in={}", rx_settings[0], adress, compN, dot, value, convert_8_16(a_, b_)));
 		}
 	}
-	LL_USART_EnableDMAReq_RX(UART5);
+	// LL_USART_EnableDMAReq_RX(UART5);
 }
 
 // UART Send-Recive
@@ -735,12 +743,12 @@ void resetPin() {
 }
 
 void send_test_midi() { // for test   // TODO можно удалить
-		uint8_t const cable_num = 0;
-		uint8_t note_buf[] = { 0xB0, 0x58, 16, 0x90, 64, 0x36, 0xB0, 0x58, 125, 0x80, 64, 0x36 };
-		const int bufsize = sizeof(note_buf);
-		tud_midi_stream_write(cable_num, note_buf, bufsize);
-		pause(100);
-		tud_midi_stream_write(cable_num, note_buf, bufsize);
+	uint8_t const cable_num = 0;
+	uint8_t note_buf[] = { 0xB0, 0x58, 16, 0x90, 64, 0x36, 0xB0, 0x58, 125, 0x80, 64, 0x36 };
+	const int bufsize = sizeof(note_buf);
+	tud_midi_stream_write(cable_num, note_buf, bufsize);
+	pause(100);
+	tud_midi_stream_write(cable_num, note_buf, bufsize);
 }
 
 // LVGL UTILITES
@@ -812,13 +820,18 @@ extern "C" {
 		cur_disp = dis_main;
 		debugg_clear();
 		// TODO добавить сброс и запуск прерываний в g4
+		for (uint8_t adress = 24; adress <= 24; ++adress) {
+			sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::stop_calibration, 0));
+		}
 		sync();
 		loadScreen(SCREEN_ID_D_MAIN);
+		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
 
 	void action_to_disp_calibration_on(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
 		debugg_clear();
 		// TODO добавить сброс и выключение прерываний в g4
 		cur_disp = on;
@@ -851,12 +864,16 @@ extern "C" {
 
 	void action_to_disp_calibration_off(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
 		debugg_clear();
 		// TODO добавить сброс и выключение прерываний в g4
 		cur_disp = off;
 		cur_shart = objects.chart_off;
 		all_g4_to_H7();
 		// check_max_min();
+		for (uint8_t adress = 24; adress <= 24; ++adress) {
+			sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::start_calibration, 0));
+		}
 		lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 	}
