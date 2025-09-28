@@ -172,7 +172,7 @@ extern "C" {
 	void check_max_min();
 	void all_H7_to_g4();
 	void all_g4_to_H7();
-	void checkDataOnSensor(const uint8_t& adress, const uint8_t& compN);
+	void checkDataOnSensor(const uint8_t& adress);
 	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);

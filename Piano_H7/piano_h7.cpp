@@ -58,6 +58,7 @@ lv_chart_series_t* ser_on_green;
 lv_chart_series_t* ser_on_red;
 lv_chart_series_t* ser_on_blue;
 lv_chart_cursor_t* c_on;
+lv_style_t cursor_style;
 lv_chart_series_t* ser_off_green;
 lv_chart_series_t* ser_off_red;
 lv_chart_series_t* ser_off_blue;
@@ -197,7 +198,7 @@ void h7() {
 		if (cur_disp == on) {
 			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 				for (uint8_t dot = 0; dot < 7; ++dot) {
-					checkDataOnSensor(adress, dot);
+					// checkDataOnSensor(adress, dot);
 					if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
 						adress = end_adress_chip_on + 14; // выход из цикла // TODO проверить здесь правильность
 						dot = 8; // выход из цикла
@@ -207,23 +208,15 @@ void h7() {
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
 			lv_chart_refresh(cur_shart);
 		}
+
 		if (cur_disp == off) {
-			// for (uint8_t adress = start_ardress_chip_off; adress <= end_adress_chip_off; ++adress) {
-			// 	for (uint8_t dot = 0; dot < 7; ++dot) {
-					// checkDataOnSensor(adress, dot);
-			// 		if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
-			// 			adress = end_adress_chip_off + 14; // выход из цикла
-			// 			dot = 8; // выход из цикла
-			// 		}
-			// 	}
-			// }
-			// sender(command::all_calib, adress, 0, 0, 
-			for (uint8_t adress = 24; adress <= 24; ++adress) {
-				sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::read_calibration, 0));
+			for (uint8_t adress = 24; adress <= 26; ++adress) {
+				sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
 				for (int i = 0; i < 7; ++i) {
 					UART4_Receive_Settings();
 					compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
 				}
+				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
 			lv_chart_refresh(cur_shart);
@@ -392,47 +385,41 @@ void all_g4_to_H7() {
 	check_max_min();
 }
 
-void checkDataOnSensor(const uint8_t& adress, const uint8_t& compN) {
-	sender(command::cal, adress, compN, 0, 0);
-	int c = (adress * 7) + compN;
-	bool fl_c = false;
-	compsCHART_CALIB[c] = convert_8_16(a_, b_);
-	if (compsCHART_CALIB_old[c] + 200 < compsCHART_CALIB[c]) {
-		compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
-		fl_c = true;
-	}
-	else if (compsCHART_CALIB_old[c] - 200 > compsCHART_CALIB[c]) {
-		compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
-		fl_c = true;
-	}
-	if (fl_c) {
-		if (c > 98) {
-			cursor = c - 98;
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-			sensor_off_1_data_string = std::to_string(compsCHART_0[c]);
-			sensor_off_2_data_string = std::to_string(compsCHART_1[c]);
-			cursor_string = std::to_string(cursor);
+void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh cursor"
+	for (int i = 0; i < 7; ++i) {
+		const int c = (adress * 7) + i;
+		bool fl_c = false;
+		if (compsCHART_CALIB_old[c] + 200 < compsCHART_CALIB[c]) {
+			compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
+			fl_c = true;
 		}
-		else {
-			cursor = c;
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-			sensor_on_1_data_string = std::to_string(compsCHART_0[c]);
-			sensor_on_2_data_string = std::to_string(compsCHART_1[c]);
-			cursor_string = std::to_string(cursor);
+		else if (compsCHART_CALIB_old[c] - 200 > compsCHART_CALIB[c]) {
+			compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
+			fl_c = true;
 		}
-		fl_c = false;
+		if (fl_c) {
+			if (c > 98) {
+				cursor = c - 98;
+				lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+				sensor_off_1_data_string = std::to_string(compsCHART_0[c]);
+				sensor_off_2_data_string = std::to_string(compsCHART_1[c]);
+				cursor_string = std::to_string(cursor);
+			}
+			else {
+				cursor = c;
+				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+				sensor_on_1_data_string = std::to_string(compsCHART_0[c]);
+				sensor_on_2_data_string = std::to_string(compsCHART_1[c]);
+				cursor_string = std::to_string(cursor);
+			}
+			fl_c = false;
+		}
 	}
 }
 
-// void setCompValue(const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
-// 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-// 	sender(command::set_comp_value, adress, compN, dot, value);
-// 	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
-// }
-
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
 	const uint32_t& value) {
-	// LL_USART_DisableDMAReq_RX(UART5);
+	// LL_USART_DisableDMAReq_RX(UART5); // TODO проследить включение и выключение этого
 	UART4_SendAddress(adress);
 	pause(4); // 4 for release
 	UART4_Send_Settings(com, compN, dot, value);
@@ -447,7 +434,7 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 			debugg_fn(std::format("BAD SET DATA [0]= {}, add={}, comp={}, dot={}, value={}, in={}", rx_settings[0], adress, compN, dot, value, convert_8_16(a_, b_)));
 		}
 	}
-	// LL_USART_EnableDMAReq_RX(UART5);
+	// LL_USART_EnableDMAReq_RX(UART5); // TODO проследить включение и выключение этого
 }
 
 // UART Send-Recive
@@ -476,9 +463,7 @@ void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t
 
 void UART4_Receive_Settings() {
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
-			// debugg1("receive falling"); // DEBUG
-		}
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 	compN_ = rx_settings[1];
@@ -793,11 +778,11 @@ extern "C" {
 		lv_chart_set_series_ext_y_array(ob, ser_on_blue, compsCHART_CALIB);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
-		c_on = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
+		c_on = lv_chart_add_cursor(ob, lv_color_make(200, 200, 200), LV_DIR_VER);
 		lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
-		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
-		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
-		lv_obj_set_style_size(ob, 1, 1, LV_PART_CURSOR);
+		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
+		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
+		lv_obj_set_style_size(ob, 3, 2, LV_PART_INDICATOR); // размер точек на графике
 
 		ob = objects.chart_off;
 		lv_chart_set_point_count(ob, 98);
@@ -809,22 +794,22 @@ extern "C" {
 		lv_chart_set_series_ext_y_array(ob, ser_off_blue, &compsCHART_CALIB[98]);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
-		c_off = lv_chart_add_cursor(ob, lv_color_make(250, 250, 250), LV_DIR_VER);
+		c_off = lv_chart_add_cursor(ob, lv_color_make(200, 200, 200), LV_DIR_VER);
 		lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
-		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий на графике
-		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
-		lv_obj_set_style_size(ob, 1, 1, LV_PART_CURSOR);
+		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
+		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
+		lv_obj_set_style_size(ob, 3, 2, LV_PART_INDICATOR); // размер точек на графике
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
-		cur_disp = dis_main;
-		debugg_clear();
-		// TODO добавить сброс и запуск прерываний в g4
-		for (uint8_t adress = 24; adress <= 24; ++adress) {
-			sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::stop_calibration, 0));
+		// TODO if (cur_disp = on or off.....)
+		for (uint8_t adress = 24; adress <= 26; ++adress) {
+			sender(command::all_calib, adress, 0, 0, ::stop_calibration);
 		}
-		sync();
+		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
+		debugg_clear();
+		sync();
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
@@ -832,14 +817,12 @@ extern "C" {
 	void action_to_disp_calibration_on(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 		LL_USART_DisableDMAReq_RX(UART5);
-		debugg_clear();
-		// TODO добавить сброс и выключение прерываний в g4
 		cur_disp = on;
 		cur_shart = objects.chart_on;
-		all_g4_to_H7();
-		// check_max_min();
 		lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
+		debugg_clear();
+		all_g4_to_H7();
 	}
 
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
@@ -865,17 +848,15 @@ extern "C" {
 	void action_to_disp_calibration_off(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 		LL_USART_DisableDMAReq_RX(UART5);
-		debugg_clear();
-		// TODO добавить сброс и выключение прерываний в g4
 		cur_disp = off;
 		cur_shart = objects.chart_off;
-		all_g4_to_H7();
-		// check_max_min();
-		for (uint8_t adress = 24; adress <= 24; ++adress) {
-			sender(command::all_calib, adress, 0, 0, convert_8_16(subcommand::start_calibration, 0));
-		}
 		lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
+		debugg_clear();
+		all_g4_to_H7();
+		for (uint8_t adress = 24; adress <= 26; ++adress) { // TODO
+			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
+		}
 	}
 
 	void action_to_disp_manual_edit_off(lv_event_t* e) {
@@ -920,7 +901,6 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
 		compsCHART_0[cursor] = convert_8_16(a_, b_);
 		sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -931,7 +911,6 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
 		compsCHART_1[cursor] = convert_8_16(a_, b_);
 		sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
-		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -943,7 +922,6 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
 		compsCHART_0[cu] = convert_8_16(a_, b_);
 		sensor_off_1_data_string = std::to_string(compsCHART_0[cu]);
-		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -955,7 +933,6 @@ extern "C" {
 		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
 		compsCHART_1[cu] = convert_8_16(a_, b_);
 		sensor_off_2_data_string = std::to_string(compsCHART_1[cu]);
-		// check_max_min();
 		lv_chart_refresh(cur_shart);
 	}
 
@@ -964,8 +941,16 @@ extern "C" {
 			--cursor;
 		}
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		if (cur_disp == on) {
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
+			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+		}
+		else if (cur_disp == off) {
+			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
+			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		}
 	}
 
 	void action_cursor_plus(lv_event_t* e) {
@@ -973,8 +958,16 @@ extern "C" {
 			++cursor;
 		}
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		if (cur_disp == on) {
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
+			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+		}
+		else if (cur_disp == off) {
+			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
+			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		}
 	}
 
 	void action_cursor_minus10(lv_event_t* e) {
@@ -982,8 +975,16 @@ extern "C" {
 			cursor -= 7;
 		}
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		if (cur_disp == on) {
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
+			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+		}
+		else if (cur_disp == off) {
+			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
+			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		}
 	}
 
 	void action_cursor_plus10(lv_event_t* e) {
@@ -991,8 +992,16 @@ extern "C" {
 			cursor += 7;
 		}
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		if (cur_disp == on) {
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
+			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+		}
+		else if (cur_disp == off) {
+			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
+			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		}
 	}
 
 	void action_save_calibration(lv_event_t* e) {
