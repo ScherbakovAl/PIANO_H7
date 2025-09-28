@@ -109,13 +109,13 @@ extern "C" {
 
 	const uint8_t start_adress_chip_on = 1; // включительно
 	const uint8_t end_adress_chip_on = 13; // включительно (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
-	const uint8_t start_ardress_chip_off = 14; // включительно
+	const uint8_t start_adress_chip_off = 14; // включительно
 	const uint8_t end_adress_chip_off = 26; // включительно всего 23
 
 	const uint32_t start_cursor = 70;
 	volatile uint32_t cursor = start_cursor;
 
-	uint8_t rx_data[5] = { }; // TODO uint8_t->uint32_t ?? в 373й строке очистка потому-что!
+	uint8_t rx_data[4] = { };
 	const uint32_t dataLengthRX = sizeof(rx_data);
 	uint8_t tx_settings[5] = { };
 	const uint8_t tx_settings_length = sizeof(tx_settings);
@@ -125,7 +125,7 @@ extern "C" {
 	uint8_t dot_ = 0;
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
-	int f = 0; // TODO используеся где?
+	// int f = 0; // TODO используеся где?
 
 	int32_t def_on[2] = { 2600, 1000 }; // [0]-green, [1]-red
 	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red

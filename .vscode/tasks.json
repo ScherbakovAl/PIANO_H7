@@ -73,7 +73,7 @@
             "args": [
                 "--connect",
                 "port=swd",
-                "sn=24003800070000574B31534E",
+                "sn=24003800070000574B31534E", // только прошивка, не дебаг
                 "--download",
                 "${command:cmake.launchTargetPath}",
                 "-hardRst",

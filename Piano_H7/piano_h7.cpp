@@ -42,7 +42,6 @@ uint32_t debug_counter = 0;
 int tt1 = 0;
 int tt2 = 0;
 int tt3 = 0;
-int tt4 = 0;
 float timer_data_in = 0;
 
 #define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
@@ -75,7 +74,6 @@ std::string tim_str_in; // for test
 std::string t1; // for test
 std::string t2; // for test
 std::string t3; // for test
-std::string t4; // for test
 std::string timer_data; // for test
 
 
@@ -115,9 +113,6 @@ void h7() {
 	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
 	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
 	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
-
-// LL_DMA_SetStreamPriorityLevel(DMA1, LL_DMA_STREAM_2, LL_DMA_PRIORITY_VERYHIGH); // for test // DEBUG - не работает
-
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	//---------------------------------
 
@@ -175,15 +170,10 @@ void h7() {
 	// LL_USART_EnableDMAReq_RX(UART5);
 
 		// GPIOA->BSRR = 0x10; // for test // DEBUG
-		// pause(1);
 		// GPIOA->BSRR = 0x100000;
-		// pause(1);
 
 		// GPIOA->BSRR = 0x20; // for test // DEBUG
-		// pause(1);
 		// GPIOA->BSRR = 0x200000;
-		// pause(1);
-
 
 		// start PWM
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
@@ -197,20 +187,19 @@ void h7() {
 
 		if (cur_disp == on) {
 			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-				for (uint8_t dot = 0; dot < 7; ++dot) {
-					// checkDataOnSensor(adress, dot);
-					if (calib_all_OnOff == calib_off) { // если прерывние от кнопки сработало, то завершаем калибровку
-						adress = end_adress_chip_on + 14; // выход из цикла // TODO проверить здесь правильность
-						dot = 8; // выход из цикла
-					}
+				sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
+				for (int i = 0; i < 7; ++i) {
+					UART4_Receive_Settings();
+					compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
 				}
+				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
 			lv_chart_refresh(cur_shart);
 		}
 
 		if (cur_disp == off) {
-			for (uint8_t adress = 24; adress <= 26; ++adress) {
+			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
 				sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
 				for (int i = 0; i < 7; ++i) {
 					UART4_Receive_Settings();
@@ -234,7 +223,6 @@ void h7() {
 			t1 = std::to_string(rx_data[1]);
 			t2 = std::to_string(rx_data[2]);
 			t3 = std::to_string(rx_data[3]);
-			t4 = std::to_string(rx_data[4]);
 			timer_data = std::format("{:.4f}", timer_data_in);
 			fl = 0; // for test fl
 		}
@@ -249,7 +237,7 @@ void sync() {
 	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) {
 		fl_sync += sync_sender(i);
 	}
-	for (uint8_t i = start_ardress_chip_off; i <= end_adress_chip_off; ++i) {
+	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) {
 		fl_sync += sync_sender(i);
 	}
 	if (fl_sync == 0) {
@@ -362,7 +350,7 @@ void all_H7_to_g4() {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 	}
-	for (uint8_t i = start_ardress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 	}
@@ -376,7 +364,7 @@ void all_g4_to_H7() {
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
 		compsCHART_1[i] = convert_8_16(a_, b_);
 	}
-	for (uint8_t i = start_ardress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
@@ -482,36 +470,41 @@ const float maxMidi_F = 127.99f;
 void DMA1_RX(void) {
 
 	LL_DMA_ClearFlag_TC2(DMA1);
-
 	TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
-
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
-
-// uint32_t nomerShip = TIM3->CNT; // for test
-// if (nomerShip != ((rx_data[0] / 7) + 1)) {
-// 	debugg_fn(std::format("ship NOMER ERR   rx_data =  {},   TIM3 =  {}", ((rx_data[0] / 7) + 1), nomerShip));
-// }
+	// uint32_t nomerShip = TIM3->CNT; // for test
+	// if (nomerShip != ((rx_data[0] / 7) + 1)) {
+	// 	debugg_fn(std::format("ship NOMER ERR   rx_data =  {},   TIM3 =  {}", ((rx_data[0] / 7) + 1), nomerShip));
+	// }
 	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX // TODO rx-data -> uint32t?
 	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // тоже работает... с такой же скоростью.. 
+
 	uint32_t tOut = 0;
-	tOut = rx_data[1] << 24 | rx_data[2] << 16 | rx_data[3] << 8 | rx_data[4];
+	tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
 
-
+	const int rxB = rx_data[0];
 	timerLenght_F = (float)tOut * 0.00000000004f; // меньше - громче
 	speed_F = distance_F / timerLenght_F;
-	energy_F = (mass_F[rx_data[0]] * speed_F * speed_F) / deriv_F;
+	energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
 	midi_hi_F = energy_F / maxMidi_F;
 	float integerPart_F;
 	midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-	int note_ = rx_data[0] + noteAdder[rx_data[0]];
-	// uint8_t note_buf[] = { 0xB0, 0x58, 22, 0x80, 56, 23 }; // for test // DEBUG
-	uint8_t note_buf[] = { 0xB0, 0x58, (uint8_t)midi_lo_F, rx_data[0] < 98 ? 0x90 : 0x80, note_, (uint8_t)midi_hi_F };
+	int note_ = rxB + noteAdder[rxB];
+	uint8_t note_buf[] = {
+		0xB0,
+		0x58,
+		(uint8_t)midi_lo_F,
+		rxB < 98 ? 0x90 : 0x80,
+		note_,
+		(uint8_t)midi_hi_F > 127 ? 127 : (uint8_t)midi_hi_F
+	};
 	tud_midi_stream_write(0, note_buf, 6);
-	mass_to_disp = mass_F[rx_data[0]]; // for test
-	timer_data_in = (float)tOut * 0.0001f; // for test
-	fl = 1; // for test
 
-	test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
+	mass_to_disp = mass_F[rxB]; // for test
+	timer_data_in = (float)tOut * 0.0001f; // for test
+
+	fl = 1; // разрешить обновлять цифры на дисплее
+
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) {
 		GPIOA->BSRR = 0x10; // for test //
@@ -541,6 +534,8 @@ void DMA1_RX(void) {
 	}
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
+	test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
+
 }
 
 void DMA_UART_ERRORS_HANDLER() {
@@ -803,7 +798,10 @@ extern "C" {
 
 	void action_to_main_disp(lv_event_t* e) {
 		// TODO if (cur_disp = on or off.....)
-		for (uint8_t adress = 24; adress <= 26; ++adress) {
+		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+			sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+		}
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
 			sender(command::all_calib, adress, 0, 0, ::stop_calibration);
 		}
 		cur_disp = dis_main;
@@ -823,6 +821,9 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
+		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO
+			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
+		}
 	}
 
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
@@ -854,7 +855,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		all_g4_to_H7();
-		for (uint8_t adress = 24; adress <= 26; ++adress) { // TODO
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
@@ -1610,13 +1611,6 @@ extern "C" {
 	}
 	void set_var_t3(const char* value) {
 		t3 = value;
-	}
-
-	const char* get_var_t4() {
-		return t4.c_str();
-	}
-	void set_var_t4(const char* value) {
-		t4 = value;
 	}
 
 	const char* get_var_timer_data() {
