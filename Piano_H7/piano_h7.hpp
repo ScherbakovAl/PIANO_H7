@@ -110,7 +110,7 @@ extern "C" {
 	const uint8_t start_adress_chip_on = 1; // включительно
 	const uint8_t end_adress_chip_on = 13; // включительно (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно
-	const uint8_t end_adress_chip_off = 26; // включительно всего 23
+	const uint8_t end_adress_chip_off = 23; // включительно всего 23
 
 	const uint32_t start_cursor = 70;
 	volatile uint32_t cursor = start_cursor;
