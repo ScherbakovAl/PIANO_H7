@@ -1008,8 +1008,8 @@
             {
               "objID": "3bc05345-70e9-4229-c71c-65b617bfb8f6",
               "type": "LVGLButtonWidget",
-              "left": 381,
-              "top": 3,
+              "left": 192,
+              "top": 99,
               "width": 96,
               "height": 32,
               "customInputs": [],
@@ -1120,7 +1120,7 @@
               "objID": "e19cb824-1615-41fc-a0ea-a4c33b822cac",
               "type": "LVGLButtonWidget",
               "left": 320,
-              "top": 43,
+              "top": 6,
               "width": 157,
               "height": 47,
               "customInputs": [],
@@ -1153,8 +1153,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 100,
-                  "height": 33,
+                  "width": 113,
+                  "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1189,14 +1189,14 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_color": "#eeab00",
-                          "text_font": "MONTSERRAT_10"
+                          "text_font": "MONTSERRAT_14"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "save calibration\nto H7 memory\n(only TEXT) for TEST",
+                  "text": "save calibration\nto H7 memory",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -1231,7 +1231,7 @@
               "objID": "3aa43b1c-8bca-4aa7-c073-bcedbb1c27c5",
               "type": "LVGLButtonWidget",
               "left": 320,
-              "top": 97,
+              "top": 71,
               "width": 157,
               "height": 47,
               "customInputs": [],
@@ -1264,8 +1264,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 100,
-                  "height": 33,
+                  "width": 133,
+                  "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1300,14 +1300,14 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_color": "#eeab00",
-                          "text_font": "MONTSERRAT_10"
+                          "text_font": "MONTSERRAT_14"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "restore calibration\nfrom H7 memory\n(only TEXT) for TEST",
+                  "text": "restore calibration\nfrom H7 memory",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -1342,7 +1342,7 @@
               "objID": "3b95a268-88fe-4932-d74b-468cce93438d",
               "type": "LVGLButtonWidget",
               "left": 320,
-              "top": 150,
+              "top": 137,
               "width": 157,
               "height": 47,
               "customInputs": [],

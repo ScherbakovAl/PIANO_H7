@@ -147,38 +147,41 @@ void h7() {
 	tusb_init();
 	//---------------------------------
 
-	// память
-	// SaveToMemory();
-	// ReadOnMemory(); // восстановление графика при включении
-	// debugg_fn("Restore calib Done! )"); // DEBUG
-	//---------------------------------
-
 	sync();
-
 	initBuffers();
-
 	configCharts();
 
 	pause(30);
 	send_test_midi();
-	// LL_USART_DisableDMAReq_RX(UART5);
-	// LL_USART_Disable(UART5);
 
-	// LL_USART_SetDataWidth(UART5, LL_USART_DATAWIDTH_8B); // for test // DEBUG
 
-	// LL_USART_Enable(UART5);
-	// LL_USART_EnableDMAReq_RX(UART5);
-
-		// GPIOA->BSRR = 0x10; // for test // DEBUG
-		// GPIOA->BSRR = 0x100000;
-
-		// GPIOA->BSRR = 0x20; // for test // DEBUG
-		// GPIOA->BSRR = 0x200000;
-
-		// start PWM
+	tud_task();
+	lv_timer_handler();
+	ui_tick();
+// память
+// SaveToMemory();
+	ReadOnMemory(); // восстановление графика при включении
+	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+	LL_USART_DisableDMAReq_RX(UART5);
+	all_H7_to_g4();
+	LL_USART_EnableDMAReq_RX(UART5);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
 	//---------------------------------
 
+	tud_task();
+	lv_timer_handler();
+	ui_tick();
+
+// GPIOA->BSRR = 0x10; // for test // DEBUG
+// GPIOA->BSRR = 0x100000;
+// GPIOA->BSRR = 0x20; // for test // DEBUG
+// GPIOA->BSRR = 0x200000;
+// start PWM
+
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	//---------------------------------
 
 	while (1) {
 		tud_task();
@@ -210,6 +213,14 @@ void h7() {
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
 			lv_chart_refresh(cur_shart);
 		}
+
+		// if (test_memory < 196) { // for test
+		// 	if (TIM2->CNT > 80000000) {
+		// 		debugg_fn(std::format(" #{} CHART_0 = {}  CHART_1 = {}", test_memory, compsCHART_0[test_memory], compsCHART_1[test_memory]));
+		// 		TIM2->CNT = 0;
+		// 		++test_memory;
+		// 	}
+		// }
 
 		if (fl) {
 			test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
@@ -370,7 +381,6 @@ void all_g4_to_H7() {
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
 		compsCHART_1[i] = convert_8_16(a_, b_);
 	}
-	check_max_min();
 }
 
 void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh cursor"
@@ -649,52 +659,50 @@ void chart_correction(const uint32_t& x, const plus_minus& pm) {
 }
 
 void SaveToMemory() {
-	// SCB_DisableICache();
-	// SCB_DisableDCache();
-	// HAL_FLASH_Unlock();
 
-	// FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
+	SCB_DisableICache();
+	SCB_DisableDCache();
+	HAL_FLASH_Unlock();
 
-	// uint32_t Addr = Flash_Address;
-	// for (uint32_t i = 0; i < allChipCount; i++) {
-	// 	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[0][0]) != HAL_OK) {
-	// 		HAL_FLASH_Lock();
-	// 		return;
-	// 	}
-	// 	Addr += 0x20;
-	// 	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&comparator[i].comp[4][0]) != HAL_OK) {
-	// 		HAL_FLASH_Lock();
-	// 		return;
-	// 	}
-	// 	Addr += 0x20;
-	// }
-	// // замок на запись (по адресу Flash_Address + 0x680)
-	// if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory[0]) != HAL_OK) {
-	// 	HAL_FLASH_Lock();
-	// 	return;
-	// }
+	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
-	// HAL_FLASH_Lock();
-	// SCB_EnableICache();
-	// SCB_EnableDCache();
+	uint32_t Addr = Flash_Address;
+	for (uint32_t i = 0; i < sizeCHART_BUFFER; i += 8) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&compsCHART_0[i]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+	}
+	for (uint32_t i = 0; i < sizeCHART_BUFFER; i += 8) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&compsCHART_1[i]) != HAL_OK) {
+			HAL_FLASH_Lock();
+			return;
+		}
+		Addr += 0x20;
+	}
+
+	// // замок на запись (по адресу Flash_Address + 0x640)
+	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory) != HAL_OK) {
+		HAL_FLASH_Lock();
+		return;
+	}
+
+	HAL_FLASH_Lock();
+	SCB_EnableICache();
+	SCB_EnableDCache();
 }
 
 void ReadOnMemory() {
-	// if ((*(volatile uint32_t*)(Flash_Address + allChipCount * 0x40)) != key_to_change_memory[0]) {
+	// if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory) {
 	// 	SaveToMemory();
 	// }
 	// else {
-	// 	uint32_t l = 0;
-	// 	for (uint32_t i = 0; i < allChipCount; ++i) { // с нулевого номера считывать?
-	// 		for (uint32_t j = 0; j < 8; ++j) {
-	// 			for (uint32_t k = 0; k < 2; ++k) {
-	// 				comparator[i].comp[j][k] =
-	// 					*(volatile uint32_t*)(Flash_Address + (l * sizeof(uint32_t)));
-	// 				++l;
-	// 			}
-	// 		}
-	// 	}
-	// }
+	for (int i = 0; i < sizeCHART_BUFFER; ++i) {
+		compsCHART_0[i] = *(volatile uint32_t*)(Flash_Address + (i * sizeof(uint32_t)));
+		compsCHART_1[i] = *(volatile uint32_t*)(Flash_Address + (i * sizeof(uint32_t)) + 0x320);
+	}
+// }
 }
 
 // (1uS)
@@ -706,7 +714,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 15 == 0)debugg_clear();
+	if (debug_counter % 10 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += " ";
@@ -1007,12 +1015,12 @@ extern "C" {
 
 	void action_save_calibration(lv_event_t* e) {
 		SaveToMemory();
-		debugg_fn("Save calib (only text for test)"); // DEBUG
+		debugg_fn("Save calib"); // DEBUG
 	}
 
 	void action_restore_calibration(lv_event_t* e) {
 		ReadOnMemory();
-		debugg_fn("Restore calib (only text for test)"); // DEBUG
+		debugg_fn("Restore calib"); // DEBUG
 	}
 
 	void action_to_disp_divisible_edit(lv_event_t* e) {
@@ -1280,27 +1288,28 @@ extern "C" {
 
 	void action_set_all(lv_event_t* e) { // TODO << ???
 		LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
 		all_H7_to_g4();
+		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	}
 
 	void action_read_all(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
 		all_g4_to_H7();
+		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	}
 
 	void action_calib_all(lv_event_t* e) { // TODO удалить кнопку
 		// if (calib_all_OnOff != calib_on) {
 		// 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
-
 		// 	calib_all_OnOff = calib_on;
-
 		// 	calib_all_str = "calibration..";
 		// }
 		// else {
 		// 	calib_all_OnOff = calib_off;
-
 		// 	calib_all_str = "calib cycle";
 		// 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 		// }

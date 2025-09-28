@@ -136,14 +136,13 @@ extern "C" {
 	int32_t compsCHART_CALIB[sizeCHART_BUFFER] = {};
 	int32_t compsCHART_CALIB_old[sizeCHART_BUFFER] = {};
 
-
 	int8_t noteAdder[196] = {};
 	float mass_F[196] = {};
 
 	const uint32_t Flash_Address = 0x080E0000; // FLASH
 
- // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
-	cuint key_to_change_memory[8] = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
+	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
+	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	on_off_s1_s2_min_max m_m;
 	int32_t on_green_max = 4095;

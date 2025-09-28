@@ -2,7 +2,7 @@
   "navigation": {
     "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
-    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
+    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/-1",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -120,7 +120,7 @@
             {
               "type": "row",
               "id": "#f161a8dc-9aa4-4c87-962b-9684b18e2fd1",
-              "weight": 4.654608125653038,
+              "weight": 2.910092025253121,
               "children": [
                 {
                   "type": "tabset",
@@ -189,54 +189,115 @@
               ]
             },
             {
-              "type": "tabset",
-              "id": "EDITORS",
-              "weight": 11.266889262565051,
-              "selected": 2,
-              "enableDeleteWhenEmpty": false,
-              "enableClose": false,
+              "type": "row",
+              "id": "#5d1d731c-bb86-4743-9ce7-993fe4fa768a",
+              "weight": 18.376921555215453,
               "children": [
                 {
-                  "type": "tab",
-                  "id": "#c78fe817-5738-4e89-a6f1-f54606e30cd4",
-                  "name": "Settings",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[display_piano.eez-project]:/settings",
-                    "subObjectPath": "[display_piano.eez-project]:/settings",
-                    "permanent": false
-                  },
-                  "icon": "material:settings"
+                  "type": "row",
+                  "id": "#355b8d3e-0d53-46c9-a368-f3252420865b",
+                  "weight": 50,
+                  "children": [
+                    {
+                      "type": "tabset",
+                      "id": "EDITORS",
+                      "weight": 50,
+                      "enableDeleteWhenEmpty": false,
+                      "enableClose": false,
+                      "children": [
+                        {
+                          "type": "tab",
+                          "id": "#b6626e5f-2709-493d-bb66-7d9a6510b0f3",
+                          "name": "d_main",
+                          "component": "editor",
+                          "config": {
+                            "objectPath": "[display_piano.eez-project]:/userPages/0",
+                            "permanent": true
+                          },
+                          "icon": "svg:page"
+                        },
+                        {
+                          "type": "tab",
+                          "id": "#d8b185e7-18d4-4b34-8b9a-87ee89e49121",
+                          "name": "d_chart_calib_on",
+                          "component": "editor",
+                          "config": {
+                            "objectPath": "[display_piano.eez-project]:/userPages/1",
+                            "permanent": true
+                          },
+                          "icon": "svg:page"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tabset",
+                      "id": "#70e55fe5-c9ee-4a79-8a8e-deaff8251c03",
+                      "weight": 50,
+                      "children": [
+                        {
+                          "type": "tab",
+                          "id": "#a4c560f7-3ebb-4f67-baa7-70b42e95cb4b",
+                          "name": "d_chart_calib_off",
+                          "component": "editor",
+                          "config": {
+                            "objectPath": "[display_piano.eez-project]:/userPages/4",
+                            "permanent": true
+                          },
+                          "icon": "svg:page"
+                        }
+                      ]
+                    }
+                  ]
                 },
                 {
-                  "type": "tab",
-                  "id": "#25ed22e8-5b7a-43e8-bbe6-9c62ea5286f5",
-                  "name": "d_chart_calib_off",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/4",
-                    "permanent": false
-                  },
-                  "icon": "svg:page"
-                },
-                {
-                  "type": "tab",
-                  "id": "#43ff6626-b974-4e74-a0bc-d8ba8c6a7cd4",
-                  "name": "d_main",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/0",
-                    "permanent": true
-                  },
-                  "icon": "svg:page"
+                  "type": "row",
+                  "id": "#d7299ee5-99d1-4584-91dc-383b645d304b",
+                  "weight": 50,
+                  "children": [
+                    {
+                      "type": "tabset",
+                      "id": "#641f77c2-c5a8-4938-80c1-b89f3d81e4e5",
+                      "weight": 50,
+                      "children": [
+                        {
+                          "type": "tab",
+                          "id": "#c2efe12b-ade2-4a66-9611-fd2691944200",
+                          "name": "d_chart_graph_resize_on",
+                          "component": "editor",
+                          "config": {
+                            "objectPath": "[display_piano.eez-project]:/userPages/3",
+                            "permanent": true
+                          },
+                          "icon": "svg:page"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "tabset",
+                      "id": "#dc2460b0-0faa-4a69-ae4a-3acc29423ec9",
+                      "weight": 50,
+                      "children": [
+                        {
+                          "type": "tab",
+                          "id": "#da89a301-1451-453d-9904-2224c34118f4",
+                          "name": "d_chart_graph_resize_off",
+                          "component": "editor",
+                          "config": {
+                            "objectPath": "[display_piano.eez-project]:/userPages/6",
+                            "permanent": true
+                          },
+                          "icon": "svg:page"
+                        }
+                      ]
+                    }
+                  ]
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 9.167562710961109,
+              "weight": 3.8020465187106245,
               "children": [
                 {
                   "type": "tabset",
@@ -251,7 +312,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1020,17 +1082,17 @@
           "18": {},
           "20": {},
           "21": {},
-          "31": {},
-          "32": {},
-          "33": {}
+          "29": {},
+          "30": {},
+          "31": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -332.8338744588741,
-          "y": -272.9034090909088
+          "x": -248.44999999999996,
+          "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1044,7 +1106,9 @@
         "0": {
           "0": {},
           "5": {},
-          "6": {},
+          "6": {
+            "$selected": true
+          },
           "7": {
             "0": {}
           },
@@ -1053,31 +1117,17 @@
           "11": {},
           "12": {},
           "13": {},
-          "14": {
-            "$selected": true
-          },
+          "14": {},
           "15": {},
-          "16": {},
-          "17": {},
-          "18": {},
-          "19": {},
-          "20": {},
-          "21": {},
-          "22": {},
-          "23": {
-            "0": {}
-          },
-          "25": {},
-          "26": {},
-          "27": {}
+          "16": {}
         }
       },
       "transform": {
         "translate": {
           "x": -240,
-          "y": -280
+          "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1096,9 +1146,7 @@
           "15": {},
           "16": {},
           "17": {},
-          "18": {
-            "$selected": true
-          },
+          "18": {},
           "20": {},
           "21": {},
           "22": {}
@@ -1109,7 +1157,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1145,7 +1193,9 @@
           "1": {},
           "2": {},
           "3": {},
-          "4": {},
+          "4": {
+            "$selected": true
+          },
           "5": {},
           "6": {},
           "7": {},
@@ -1166,9 +1216,7 @@
           "20": {},
           "21": {},
           "22": {},
-          "23": {
-            "$selected": true
-          }
+          "23": {}
         }
       },
       "transform": {
@@ -1176,7 +1224,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1188,10 +1236,10 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -223.3300865800866,
-          "y": -212.7840909090909
+          "x": -240,
+          "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "selection": {
         "0": {
@@ -1199,7 +1247,9 @@
           "1": {},
           "2": {},
           "3": {},
-          "4": {},
+          "4": {
+            "$selected": true
+          },
           "5": {},
           "6": {},
           "7": {},
@@ -1207,24 +1257,11 @@
           "9": {},
           "10": {},
           "11": {},
-          "12": {
-            "$selected": true
-          },
+          "12": {},
           "13": {},
           "14": {},
           "15": {},
-          "16": {},
-          "17": {},
-          "18": {},
-          "19": {},
-          "21": {},
-          "23": {},
-          "24": {},
-          "25": {
-            "0": {}
-          },
-          "26": {},
-          "27": {}
+          "16": {}
         }
       },
       "timeline": {
@@ -1288,9 +1325,7 @@
           "5": {},
           "10": {},
           "21": {
-            "0": {
-              "$selected": true
-            }
+            "0": {}
           },
           "22": {},
           "23": {}
@@ -1301,7 +1336,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 1.25
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1365,6 +1400,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.25,
+  "flowZoom": 1,
   "implementationLanguage": "C++"
 }

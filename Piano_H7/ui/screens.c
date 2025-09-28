@@ -76,7 +76,7 @@ void create_screen_d_main() {
             // button_piano_off
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.button_piano_off = obj;
-            lv_obj_set_pos(obj, 381, 3);
+            lv_obj_set_pos(obj, 192, 99);
             lv_obj_set_size(obj, 96, 32);
             lv_obj_add_event_cb(obj, action_piano_off, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
@@ -102,7 +102,7 @@ void create_screen_d_main() {
             // button_edit_calibration_off_1
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.button_edit_calibration_off_1 = obj;
-            lv_obj_set_pos(obj, 320, 43);
+            lv_obj_set_pos(obj, 320, 6);
             lv_obj_set_size(obj, 157, 47);
             lv_obj_add_event_cb(obj, action_save_calibration, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
@@ -120,8 +120,8 @@ void create_screen_d_main() {
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xffeeab00), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "save calibration\nto H7 memory\n(only TEXT) for TEST");
+                    lv_obj_set_style_text_font(obj, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_label_set_text(obj, "save calibration\nto H7 memory");
                 }
             }
         }
@@ -129,7 +129,7 @@ void create_screen_d_main() {
             // button_edit_calibration_off_2
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.button_edit_calibration_off_2 = obj;
-            lv_obj_set_pos(obj, 320, 97);
+            lv_obj_set_pos(obj, 320, 71);
             lv_obj_set_size(obj, 157, 47);
             lv_obj_add_event_cb(obj, action_restore_calibration, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
@@ -147,8 +147,8 @@ void create_screen_d_main() {
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_color(obj, lv_color_hex(0xffeeab00), LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_label_set_text(obj, "restore calibration\nfrom H7 memory\n(only TEXT) for TEST");
+                    lv_obj_set_style_text_font(obj, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_label_set_text(obj, "restore calibration\nfrom H7 memory");
                 }
             }
         }
@@ -156,7 +156,7 @@ void create_screen_d_main() {
             // button_edit_calibration_off_3
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.button_edit_calibration_off_3 = obj;
-            lv_obj_set_pos(obj, 320, 150);
+            lv_obj_set_pos(obj, 320, 137);
             lv_obj_set_size(obj, 157, 47);
             lv_obj_add_event_cb(obj, action_set_all, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
