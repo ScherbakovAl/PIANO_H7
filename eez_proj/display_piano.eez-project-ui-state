@@ -1,8 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/6",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
-    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/-1",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -126,6 +125,7 @@
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
                   "weight": 0.8422236429751572,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -191,7 +191,7 @@
             {
               "type": "row",
               "id": "#5d1d731c-bb86-4743-9ce7-993fe4fa768a",
-              "weight": 18.376921555215453,
+              "weight": 17.11408926754095,
               "children": [
                 {
                   "type": "row",
@@ -227,7 +227,8 @@
                           },
                           "icon": "svg:page"
                         }
-                      ]
+                      ],
+                      "active": true
                     },
                     {
                       "type": "tabset",
@@ -297,7 +298,7 @@
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 3.8020465187106245,
+              "weight": 5.064878806385129,
               "children": [
                 {
                   "type": "tabset",
@@ -312,8 +313,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1083,7 +1083,9 @@
           "20": {},
           "21": {},
           "29": {},
-          "30": {},
+          "30": {
+            "$selected": true
+          },
           "31": {}
         }
       },
@@ -1247,9 +1249,7 @@
           "1": {},
           "2": {},
           "3": {},
-          "4": {
-            "$selected": true
-          },
+          "4": {},
           "5": {},
           "6": {},
           "7": {},

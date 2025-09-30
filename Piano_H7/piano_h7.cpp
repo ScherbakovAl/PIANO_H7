@@ -387,13 +387,16 @@ void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh curso
 	for (int i = 0; i < 7; ++i) {
 		const int c = (adress * 7) + i;
 		bool fl_c = false;
-		if (compsCHART_CALIB_old[c] + 200 < compsCHART_CALIB[c]) {
-			compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
-			fl_c = true;
-		}
-		else if (compsCHART_CALIB_old[c] - 200 > compsCHART_CALIB[c]) {
-			compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
-			fl_c = true;
+		if (compsCHART_CALIB[c] < 4080 && compsCHART_CALIB[c] > 2) {
+
+			if (compsCHART_CALIB_old[c] + 200 < compsCHART_CALIB[c]) {
+				compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
+				fl_c = true;
+			}
+			else if (compsCHART_CALIB_old[c] - 200 > compsCHART_CALIB[c]) {
+				compsCHART_CALIB_old[c] = compsCHART_CALIB[c];
+				fl_c = true;
+			}
 		}
 		if (fl_c) {
 			if (c > 98) {
