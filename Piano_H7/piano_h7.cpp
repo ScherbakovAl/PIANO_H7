@@ -496,7 +496,7 @@ void DMA1_RX(void) {
 	tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
 
 	const int rxB = rx_data[0];
-	timerLenght_F = (float)tOut * 0.00000000004f; // меньше - громче
+	timerLenght_F = (float)tOut * 0.000000000065f; // меньше - громче
 	speed_F = distance_F / timerLenght_F;
 	energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
 	midi_hi_F = energy_F / maxMidi_F;
@@ -776,35 +776,35 @@ extern "C" {
 	void configCharts() {
 		lv_obj_t* ob = objects.chart_on;
 		lv_chart_set_point_count(ob, 98);
-		ser_on_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
+		ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x04cc4e), LV_CHART_AXIS_PRIMARY_Y);
 		ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
-		ser_on_blue = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_SECONDARY_Y); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
+		ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_SECONDARY_Y); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
 		lv_chart_set_series_ext_y_array(ob, ser_on_green, compsCHART_0);
 		lv_chart_set_series_ext_y_array(ob, ser_on_red, compsCHART_1);
 		lv_chart_set_series_ext_y_array(ob, ser_on_blue, compsCHART_CALIB);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
-		c_on = lv_chart_add_cursor(ob, lv_color_make(200, 200, 200), LV_DIR_VER);
+		c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
 		lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 3, 2, LV_PART_INDICATOR); // размер точек на графике
+		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
 
 		ob = objects.chart_off;
 		lv_chart_set_point_count(ob, 98);
-		ser_off_green = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_GREEN), LV_CHART_AXIS_PRIMARY_Y);
-		ser_off_red = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_SECONDARY_Y);
-		ser_off_blue = lv_chart_add_series(ob, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_SECONDARY_Y);
+		ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x04cc4e), LV_CHART_AXIS_PRIMARY_Y);
+		ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
+		ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_SECONDARY_Y);
 		lv_chart_set_series_ext_y_array(ob, ser_off_green, &compsCHART_0[98]);
 		lv_chart_set_series_ext_y_array(ob, ser_off_red, &compsCHART_1[98]);
 		lv_chart_set_series_ext_y_array(ob, ser_off_blue, &compsCHART_CALIB[98]);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
-		c_off = lv_chart_add_cursor(ob, lv_color_make(200, 200, 200), LV_DIR_VER);
+		c_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
 		lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 3, 2, LV_PART_INDICATOR); // размер точек на графике
+		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
