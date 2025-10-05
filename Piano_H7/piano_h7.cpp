@@ -387,13 +387,11 @@ void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh curso
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
 	const uint32_t& value) {
-	// LL_USART_DisableDMAReq_RX(UART5); // TODO проследить включение и выключение этого
 	UART4_SendAddress(adress);
-	pause(4); // 4 for release
+	pause(4); // 4 for release, 10-debug g4
 	UART4_Send_Settings(com, compN, dot, value);
-	pause(2); // 2 for release
 	UART4_Receive_Settings();
-	pause(1); // 1 for release
+	pause(1); // 1 for release, 4-debug g4
 	if (adress != rx_settings[0]) {
 		debugg_fn(std::format("BAD ADRESS {}   rx_settings {}", adress, rx_settings[0]));
 	}
@@ -402,7 +400,6 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 			debugg_fn(std::format("BAD SET DATA [0]= {}, add={}, comp={}, dot={}, value={}, in={}", rx_settings[0], adress, compN, dot, value, convert_8_16(a_, b_)));
 		}
 	}
-	// LL_USART_EnableDMAReq_RX(UART5); // TODO проследить включение и выключение этого
 }
 
 // UART Send-Recive
@@ -830,12 +827,16 @@ extern "C" {
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
-		// TODO if (cur_disp = on or off.....)
-		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-			sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+		pause(100);
+		if (cur_disp == current_display::on) {
+			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+			}
 		}
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-			sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+		if (cur_disp == current_display::off) {
+			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+			}
 		}
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
