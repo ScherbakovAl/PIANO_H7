@@ -275,39 +275,6 @@ int sync_sender(const uint8_t& i) {
 	return fs;
 }
 
-void initBuffers() {
-	for (int i = 0; i < 196; ++i) {
-		if (i < 98) {
-			compsCHART_0[i] = def_on[0];
-			compsCHART_1[i] = def_on[1];
-		}
-		else {
-			compsCHART_0[i] = def_off[0];
-			compsCHART_1[i] = def_off[1];
-		}
-		compsCHART_CALIB[i] = 800;
-	}
-
-	for (uint i = 1; i < 196; ++i) { // note shift // TODO проверить здесь что происходит...
-		if (i < 55) {
-			noteAdder[i] = 14;
-		}
-		if (i > 54 && i < 96) {
-			noteAdder[i] = 13;
-		}
-		if (i > 95 && i < 146) {
-			noteAdder[i] = -77;
-		}
-		if (i > 145 && i < 200) {
-			noteAdder[i] = -78;
-		}
-	}
-
-	for (uint i = 0; i < 196; ++i) {
-		mass_F[i] = 0.008f + (float)i / 10000000; // 8 гр
-	}
-}
-
 void check_max_min() {
 	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
 	m_m = mm;
@@ -475,8 +442,10 @@ void UART4_Receive_Settings() {
 //---------------------------------
 
 // DMA IQR Handler
-const float distance_F = 0.0016f; // 2 мм
-// const float mass_fl = 0.008f; // 8 гр -->> переехал в массив
+const float key_mass = 0.008f; // 8 гр -->> переехал в массив
+const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+const float div_on = 0.00000000007f; // меньше - громче
+const float div_off = 0.00000000004f; // меньше - громче 
 const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
 
@@ -484,34 +453,55 @@ void DMA1_RX(void) {
 
 	LL_DMA_ClearFlag_TC2(DMA1);
 	TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
-	LL_TIM_DisableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
-	// uint32_t nomerShip = TIM3->CNT; // for test
-	// if (nomerShip != ((rx_data[0] / 7) + 1)) {
-	// 	debugg_fn(std::format("ship NOMER ERR   rx_data =  {},   TIM3 =  {}", ((rx_data[0] / 7) + 1), nomerShip));
-	// }
-	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // clear RX // TODO rx-data -> uint32t?
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // тоже работает... с такой же скоростью.. 
+	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+
+	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 	uint32_t tOut = 0;
 	tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
 
 	const int rxB = rx_data[0];
-	timerLenght_F = (float)tOut * 0.000000000065f; // меньше - громче
+	if (rxB < 98) {
+		timerLenght_F = (float)tOut * div_on;
+	}
+	else {
+		timerLenght_F = (float)tOut * div_off;
+	}
 	speed_F = distance_F / timerLenght_F;
 	energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
 	midi_hi_F = energy_F / maxMidi_F;
 	float integerPart_F;
 	midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 	int note_ = rxB + noteAdder[rxB];
+	if (midi_hi_F < 1) {
+		midi_hi_F = 1;
+		midi_lo_F = 1;
+	}
+	if (midi_hi_F > 127) {
+		midi_hi_F = 127;
+		midi_lo_F = 127;
+	}
 	uint8_t note_buf[] = {
 		0xB0,
 		0x58,
 		(uint8_t)midi_lo_F,
-		rxB < 98 ? 0x90 : 0x80,
+		rxB < 98 ? 0x90 : 0x80, // 0x90 note on
 		note_,
 		(uint8_t)midi_hi_F > 127 ? 127 : (uint8_t)midi_hi_F
 	};
-	tud_midi_stream_write(0, note_buf, 6);
+		// uint8_t note_buf[] = {
+		// 0xB0,
+		// 0x58,
+		// (uint8_t)midi_lo_F,
+		// 0x80, // 0x90 note on
+		// note_,
+		// (uint8_t)midi_hi_F
+		// };
+	// if (rxB > 98) {
+		tud_midi_stream_write(0, note_buf, 6);
+		test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
+	// }
 
 	mass_to_disp = mass_F[rxB]; // for test
 	timer_data_in = (float)tOut * 0.0001f; // for test
@@ -547,8 +537,6 @@ void DMA1_RX(void) {
 	}
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
-	test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
-
 }
 
 void DMA_UART_ERRORS_HANDLER() {
@@ -585,11 +573,44 @@ void DMA_UART_ERRORS_HANDLER() {
 // A = M * v * v / 2;
 
 // М - масса (кг)
-// M = 10 g = 0.01 kg
+// M = 8 g = 0.008 kg
 // v * v - скорость в квадрате (м/с)
 
 // A = 0.02 * 32,258064516 * 32,258064516 / 2 = 10,405827263;
 //---------------------------------
+
+void initBuffers() {
+	for (int i = 0; i < 196; ++i) {
+		if (i < 98) {
+			compsCHART_0[i] = def_on[0];
+			compsCHART_1[i] = def_on[1];
+		}
+		else {
+			compsCHART_0[i] = def_off[0];
+			compsCHART_1[i] = def_off[1];
+		}
+		compsCHART_CALIB[i] = 800;
+	}
+
+	for (uint i = 1; i < 196; ++i) { // note shift // TODO проверить здесь что происходит...
+		if (i < 55) {
+			noteAdder[i] = 14;
+		}
+		if (i > 54 && i < 96) {
+			noteAdder[i] = 13;
+		}
+		if (i > 95 && i < 146) {
+			noteAdder[i] = -77;
+		}
+		if (i > 145 && i < 200) {
+			noteAdder[i] = -78;
+		}
+	}
+
+	for (uint i = 0; i < 196; ++i) {
+		mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
+	}
+}
 
 int32_t convert_8_16(const uint8_t& a, const uint8_t& b) {
 	int32_t x = a << 8 | b;
