@@ -441,7 +441,6 @@ void UART4_Receive_Settings() {
 }
 //---------------------------------
 
-// DMA IQR Handler
 const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
 const float div_on = 0.00000000007f; // меньше - громче
@@ -449,6 +448,7 @@ const float div_off = 0.00000000004f; // меньше - громче
 const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
 
+// DMA IQR Handler
 void DMA1_RX(void) {
 
 	LL_DMA_ClearFlag_TC2(DMA1);
@@ -458,53 +458,54 @@ void DMA1_RX(void) {
 	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
-	uint32_t tOut = 0;
-	tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
-
 	const int rxB = rx_data[0];
-	if (rxB < 98) {
-		timerLenght_F = (float)tOut * div_on;
-	}
-	else {
-		timerLenght_F = (float)tOut * div_off;
-	}
-	speed_F = distance_F / timerLenght_F;
-	energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
-	midi_hi_F = energy_F / maxMidi_F;
-	float integerPart_F;
-	midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-	int note_ = rxB + noteAdder[rxB];
-	if (midi_hi_F < 1) {
-		midi_hi_F = 1;
-		midi_lo_F = 1;
-	}
-	if (midi_hi_F > 127) {
-		midi_hi_F = 127;
-		midi_lo_F = 127;
-	}
-	uint8_t note_buf[] = {
-		0xB0,
-		0x58,
-		(uint8_t)midi_lo_F,
-		rxB < 98 ? 0x90 : 0x80, // 0x90 note on
-		note_,
-		(uint8_t)midi_hi_F > 127 ? 127 : (uint8_t)midi_hi_F
-	};
-		// uint8_t note_buf[] = {
-		// 0xB0,
-		// 0x58,
-		// (uint8_t)midi_lo_F,
-		// 0x80, // 0x90 note on
-		// note_,
-		// (uint8_t)midi_hi_F
-		// };
-	// if (rxB > 98) {
+	if (rxB < 168) {
+		uint32_t tOut = 0;
+		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+
+		if (rxB < 98) {
+			timerLenght_F = (float)tOut * div_on;
+		}
+		else {
+			timerLenght_F = (float)tOut * div_off;
+		}
+		speed_F = distance_F / timerLenght_F;
+		energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
+		midi_hi_F = energy_F / maxMidi_F;
+		float integerPart_F;
+		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+		int note_ = rxB + noteAdder[rxB];
+		if (midi_hi_F < 1) {
+			midi_hi_F = 1;
+			midi_lo_F = 1;
+		}
+		if (midi_hi_F > 127) {
+			midi_hi_F = 127;
+			midi_lo_F = 127;
+		}
+		uint8_t note_buf[] = {
+			0xB0,
+			0x58,
+			(uint8_t)midi_lo_F,
+			rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+			note_,
+			(uint8_t)midi_hi_F > 127 ? 127 : (uint8_t)midi_hi_F
+		};
+			// uint8_t note_buf[] = {
+			// 0xB0,
+			// 0x58,
+			// (uint8_t)midi_lo_F,
+			// 0x80, // 0x90 note on
+			// note_,
+			// (uint8_t)midi_hi_F
+			// };
+		// if (rxB > 98) {
 		tud_midi_stream_write(0, note_buf, 6);
 		test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
-	// }
 
-	mass_to_disp = mass_F[rxB]; // for test
-	timer_data_in = (float)tOut * 0.0001f; // for test
+		mass_to_disp = mass_F[rxB]; // for test
+		timer_data_in = (float)tOut * 0.0001f; // for test
+	}
 
 	fl = 1; // разрешить обновлять цифры на дисплее
 
