@@ -440,7 +440,7 @@ void UART4_Receive_Settings() {
 
 const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-const float div_on = 0.00000000007f; // меньше - громче
+const float div_on = 0.00000000008f; // меньше - громче
 const float div_off = 0.00000000004f; // меньше - громче 
 const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
