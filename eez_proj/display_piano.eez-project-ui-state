@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -228,7 +228,8 @@
                       },
                       "icon": "svg:page"
                     }
-                  ]
+                  ],
+                  "active": true
                 }
               ]
             },
@@ -253,8 +254,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1061,19 +1061,19 @@
           "4": {},
           "17": {},
           "19": {},
-          "20": {
-            "$selected": true
-          },
+          "20": {},
           "28": {},
-          "29": {}
+          "29": {
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -217.81785714285718,
+          "y": -195.9794642857145
         },
-        "scale": 1
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1102,10 +1102,10 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
-        "scale": 1
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1132,10 +1132,10 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
-        "scale": 1
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1199,8 +1199,8 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
         "scale": 1
       },
@@ -1214,10 +1214,10 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
-        "scale": 1
+        "scale": 1.1
       },
       "selection": {
         "0": {
@@ -1264,8 +1264,8 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
         "scale": 1.1
       },
@@ -1308,8 +1308,8 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
         "scale": 1
       },
@@ -1341,8 +1341,8 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -160
+          "x": -192,
+          "y": -128
         },
         "scale": 1.25
       },
@@ -1376,6 +1376,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1,
+  "flowZoom": 1.1,
   "implementationLanguage": "C++"
 }
