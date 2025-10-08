@@ -364,6 +364,7 @@ void all_H7_to_g4() {
 	for (uint8_t i = start_adress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
+		sender(command::set_comp_value, i / 7, i % 7, 2, compsCHART_0[i] - (compsCHART_0[i] / 10));
 	}
 }
 
@@ -774,7 +775,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 50 == 0)debugg_clear();
+	if (debug_counter % 10 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
