@@ -183,6 +183,11 @@ void h7() {
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
 
+	pause(2000); // DEBUG
+	debugg_clear();
+	debug_counter = 1;
+	int test_int_timer2_old = test_int_timer2;
+
 	while (1) {
 		tud_task();
 		lv_timer_handler();
@@ -223,18 +228,46 @@ void h7() {
 		// }
 
 		if (fl) {
-			test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
-			test_speed_fl = std::format("{:.3f}", speed_F);
-			test_energy_fl = std::format("{:.3f}", energy_F);
-			test_midi_hi_fl = std::format("{:.3f}", midi_hi_F);
-			test_midi_lo_fl = std::format("{:.3f}", midi_lo_F);
-			test_timer2 = std::to_string(test_int_timer2);
-			mass_str = std::format("{:.7f} kgr", mass_to_disp);
-			note = std::format("{}, ship# {}", rx_data[0], rx_data[0] / 7);
-			t1 = std::to_string(rx_data[1]);
-			t2 = std::to_string(rx_data[2]);
-			t3 = std::to_string(rx_data[3]);
-			timer_data = std::format("{:.4f}", timer_data_in);
+		// 	// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
+			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
+				// debugg_fn(std::format("spd = {:.3f}", speed_F));
+			// 	// test_energy_fl = std::format("{:.3f}", energy_F);
+				// debugg_fn(std::format("engy = {:.3f}", energy_F));
+			// 	// test_midi_hi_fl = std::format("{:.3f}", midi_hi_F);
+				// debugg_fn(std::format("mhi = {:.3f}", midi_hi_F));
+			// 	// test_midi_lo_fl = std::format("{:.3f}", midi_lo_F);
+				// debugg_fn(std::format("mlo = {:.3f}", midi_lo_F));
+			// 	// test_timer2 = std::to_string(test_int_timer2);
+			// 	// debugg_fn(std::to_string(test_int_timer2));
+			// 	// mass_str = std::format("{:.7f} kgr", mass_to_disp);
+			// 	// debugg_fn(std::format("{:.7f} kgr", mass_to_disp));
+			// 	// note = std::format("{}, ship# {}", rx_data[0], rx_data[0] / 7);
+			// debugg_fn(std::format(
+			// 	"mhi {:.2f}, mlo {:.2f}",
+			// 	midi_hi_F,
+			// 	midi_lo_F
+			// ));
+			debugg_fn(std::format(
+				"{}  ship {}     {}-{}-{}    {:.3f}.ms    {:.2f}.Hi   {:.2f}.Lo  {:.3f}.ms",
+				rx_data[0],
+				(rx_data[0] / 7),
+				rx_data[1],
+				rx_data[2],
+				rx_data[3],
+				timer_data_in,
+				midi_hi_F,
+				midi_lo_F,
+				(float)(test_int_timer2 - test_int_timer2_old) / 275000.0f
+			));
+			test_int_timer2_old = test_int_timer2;
+		// 	// t1 = std::to_string(rx_data[1]);
+			// debugg_fn(std::format("1 = {}", rx_data[1]));
+		// 	// t2 = std::to_string(rx_data[2]);
+			// debugg_fn(std::format("2 = {}", rx_data[2]));
+		// 	// t3 = std::to_string(rx_data[3]);
+			// debugg_fn(std::format("3 = {}", rx_data[3]));
+		// 	// timer_data = std::format("{:.4f}", timer_data_in);
+			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
 		}
 	}
@@ -440,7 +473,7 @@ void UART4_Receive_Settings() {
 
 const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-const float div_on = 0.00000000008f; // меньше - громче
+const float div_on = 0.000000000092f; // меньше - громче
 const float div_off = 0.00000000004f; // меньше - громче 
 const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
@@ -449,13 +482,18 @@ const float maxMidi_F = 127.99f;
 void DMA1_RX(void) {
 
 	LL_DMA_ClearFlag_TC2(DMA1);
-	TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
+	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
 	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 	const int rxB = rx_data[0];
+
+	midi_hi_F = 0; // DEBUG
+	midi_lo_F = 0; // DEBUG
+	timer_data_in = 0; // DEBUG
+
 	if (rxB < 168) {
 		uint32_t tOut = 0;
 		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
@@ -498,11 +536,11 @@ void DMA1_RX(void) {
 			// };
 		// if (rxB > 98) {
 		tud_midi_stream_write(0, note_buf, 6);
-		test_int_timer2 = TIM2->CNT * 2; // for test " * 2" = количество тиков процессора
 
 		mass_to_disp = mass_F[rxB]; // for test
 		timer_data_in = (float)tOut * 0.0001f; // for test
 	}
+	test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
 
 	fl = 1; // разрешить обновлять цифры на дисплее
 
@@ -736,10 +774,10 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 10 == 0)debugg_clear();
+	if (debug_counter % 50 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
-	debugg += " ";
+	debugg += "        ";
 	debugg += str;
 	++debug_counter;
 }

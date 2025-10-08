@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -228,15 +228,14 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 }
               ]
             },
             {
               "type": "row",
               "id": "#ce7eadf1-a240-4990-9ae6-5ac24c856768",
-              "weight": 8.725832722780893,
+              "weight": 4.835422438685571,
               "children": [
                 {
                   "type": "tabset",
@@ -279,7 +278,7 @@
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 5.064878806385129,
+              "weight": 8.95528909048045,
               "children": [
                 {
                   "type": "tabset",
@@ -294,7 +293,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1059,21 +1059,17 @@
           "2": {},
           "3": {},
           "4": {},
-          "17": {},
-          "19": {},
-          "20": {},
-          "28": {},
-          "29": {
+          "5": {
             "$selected": true
           }
         }
       },
       "transform": {
         "translate": {
-          "x": -217.81785714285718,
-          "y": -195.9794642857145
+          "x": -71.94382814878647,
+          "y": -58.96097554322307
         },
-        "scale": 1.1
+        "scale": 0.5
       },
       "timeline": {
         "isEditorActive": false,
@@ -1102,10 +1098,10 @@
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
-        "scale": 1.1
+        "scale": 0.5
       },
       "timeline": {
         "isEditorActive": false,
@@ -1127,15 +1123,19 @@
           "18": {},
           "20": {},
           "21": {},
-          "22": {}
+          "22": {},
+          "23": {},
+          "26": {
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -63.79936474300195,
+          "y": -70.00450168645857
         },
-        "scale": 1.1
+        "scale": 0.5
       },
       "timeline": {
         "isEditorActive": false,
@@ -1199,8 +1199,8 @@
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
         "scale": 1
       },
@@ -1214,10 +1214,10 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
-        "scale": 1.1
+        "scale": 0.5
       },
       "selection": {
         "0": {
@@ -1264,8 +1264,8 @@
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
         "scale": 1.1
       },
@@ -1308,8 +1308,8 @@
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
         "scale": 1
       },
@@ -1341,8 +1341,8 @@
       },
       "transform": {
         "translate": {
-          "x": -192,
-          "y": -128
+          "x": -48,
+          "y": -32
         },
         "scale": 1.25
       },
@@ -1376,6 +1376,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.1,
+  "flowZoom": 0.5,
   "implementationLanguage": "C++"
 }
