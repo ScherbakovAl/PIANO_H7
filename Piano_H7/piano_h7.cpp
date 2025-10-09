@@ -226,7 +226,8 @@ void h7() {
 		// 		++test_memory;
 		// 	}
 		// }
-
+// #define deb
+#ifdef deb
 		if (fl) {
 		// 	// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
@@ -270,6 +271,7 @@ void h7() {
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
 		}
+#endif
 	}
 } // h7
 
@@ -357,11 +359,11 @@ void check_max_min() {
 
 void all_H7_to_g4() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
-	for (uint8_t i = start_adress_chip_on * 7; i <= end_adress_chip_on * 7; ++i) {
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 2, compsCHART_0[i] - (compsCHART_0[i] / 10));
@@ -370,13 +372,13 @@ void all_H7_to_g4() {
 
 void all_g4_to_H7() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
-	for (uint8_t i = start_adress_chip_on * 7; i <= end_adress_chip_on * 7; ++i) {
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
 		compsCHART_1[i] = convert_8_16(a_, b_);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= end_adress_chip_off * 7; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
