@@ -18,7 +18,7 @@
             "servertype": "stlink",
             "device": "STM32H723VGTx", //MCU used
             "interface": "swd",
-            "serialNumber": "24003800070000574B31534E", // black stmH7
+            // "serialNumber": "24003800070000574B31534E", // black stmH7
             // "serialNumber": "7400410007000059334D524E", // blue stmG4
             // "runToEntryPoint": "main",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32H723.svd",
@@ -50,7 +50,7 @@
             "servertype": "stlink",
             "device": "STM32H723VGTx", //MCU used
             "interface": "swd",
-            "serialNumber": "24003800070000574B31534E", // black stmH7
+            // "serialNumber": "24003800070000574B31534E", // black stmH7
             // "serialNumber": "7400410007000059334D524E", // blue stmG4
             // "runToEntryPoint": "main",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32H723.svd",
