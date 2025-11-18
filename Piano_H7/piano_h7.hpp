@@ -177,6 +177,7 @@ extern "C" {
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
 	void DMA1_RX();
+	void USART_Noise_Error_detected();
 	void DMA_UART_ERRORS_HANDLER();
 	int32_t convert_8_16(const uint8_t& a, const uint8_t& b);
 	conv_16_8 convert_16_8(const uint32_t& a);

@@ -490,15 +490,12 @@ void DMA1_RX(void) {
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
 		LL_USART_ClearFlag_NE(UART5);
-		GPIOA->BSRR = 0x10; // for test // DEBUG
-		debugg_fn("USART Noise Error detected");
-		LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
-		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
-		GPIOA->BSRR = 0x100000; // for test // DEBUG
+		USART_Noise_Error_detected();
+		debugg_fn("...noise");
 	}
 	else {
 
-		// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+		// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // вариант
 		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 		const int rxB = rx_data[0];
@@ -506,6 +503,16 @@ void DMA1_RX(void) {
 		midi_hi_F = 0; // DEBUG
 		midi_lo_F = 0; // DEBUG
 		timer_data_in = 0; // DEBUG
+
+
+		if (rxB > 168) { // DEBUG
+			GPIOA->BSRR |= 0x10; // for test // DEBUG
+			GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			GPIOA->BSRR |= 0x10; // for test // DEBUG
+			GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			USART_Noise_Error_detected(); // DEBUG
+			debugg_fn("...>168");
+		}
 
 		if (rxB < 168) { // TODO зачем это здесь?
 			uint32_t tOut = 0;
@@ -524,7 +531,7 @@ void DMA1_RX(void) {
 			float integerPart_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 			int note_ = rxB + noteAdder[rxB];
-			
+
 			if (midi_hi_F < 1) {
 				midi_hi_F = 1;
 				midi_lo_F = 1;
@@ -565,6 +572,15 @@ void DMA1_RX(void) {
 
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
+}
+
+void USART_Noise_Error_detected() {
+	GPIOA->BSRR |= 0x10; // for test // DEBUG
+	// debugg_fn("USART Noise Error detected");
+	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
+	LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void DMA_UART_ERRORS_HANDLER() {
