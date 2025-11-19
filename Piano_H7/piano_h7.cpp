@@ -511,8 +511,17 @@ void DMA1_RX(void) {
 			GPIOA->BSRR |= 0x10; // for test // DEBUG
 			GPIOA->BSRR |= 0x100000; // for test // DEBUG
 			USART_Noise_Error_detected(); // DEBUG
-			debugg_fn("...>168");
+			debugg_fn("... No > 168");
 		}
+
+		// if (rx_data[1] > 3) { // DEBUG
+		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+		// 	USART_Noise_Error_detected(); // DEBUG
+		// 	debugg_fn("... t > 3");
+		// }
 
 		if (rxB < 168) { // TODO зачем это здесь?
 			uint32_t tOut = 0;
