@@ -151,7 +151,7 @@ void h7() {
 	initBuffers();
 	configCharts();
 
-	pause(30);
+	pause(3);
 	send_test_midi();
 
 
@@ -183,7 +183,7 @@ void h7() {
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
 
-	pause(2000); // DEBUG
+	pause(5); // DEBUG
 	debugg_clear();
 	debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
