@@ -223,9 +223,9 @@ void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
   LL_TIM_ClearFlag_UPDATE(TIM4);
-  GPIOA->BSRR |= 0x20; // for test 
+  // GPIOA->BSRR |= 0x20; // for test 
   lv_tick_inc(1);
-  GPIOA->BSRR |= 0x200000; // for test
+  // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 

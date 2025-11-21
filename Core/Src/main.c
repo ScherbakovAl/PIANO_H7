@@ -227,7 +227,7 @@ void PeriphCommonClock_Config(void)
   LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_2_4);
   LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
   LL_RCC_PLL3_SetM(10);
-  LL_RCC_PLL3_SetN(108);
+  LL_RCC_PLL3_SetN(150);
   LL_RCC_PLL3_SetP(2);
   LL_RCC_PLL3_SetQ(1);
   LL_RCC_PLL3_SetR(2);
