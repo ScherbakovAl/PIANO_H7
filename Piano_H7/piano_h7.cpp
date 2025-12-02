@@ -536,12 +536,16 @@ void DMA1_RX(void) {
 				timerLenght_F = (float)tOut * div_off;
 			}
 
+			#define fl
+			#ifdef fl
+			//*****************************************************************************
 			speed_F = distance_F / timerLenght_F;
 			energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
 			midi_hi_F = energy_F / maxMidi_F;
 			float integerPart_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 			int note_ = rxB + noteAdder[rxB];
+
 
 			if (midi_hi_F < 1) {
 				midi_hi_F = 1;
@@ -572,6 +576,40 @@ void DMA1_RX(void) {
 			// };
 
 			tud_midi_stream_write(0, note_buf, 6);
+			#endif
+
+			#ifndef fl
+			//*****************************************************************************
+			const int divisible = 10'000'000;
+			const int maxMidi = 127;
+			const int ofs = 1;
+			const int midi_speed = divisible / tOut;	//~480-25000
+			int midi_hi = midi_speed / maxMidi;
+			int midi_lo = midi_speed - midi_hi * maxMidi;
+			
+			if (midi_hi < 1) {
+				midi_hi = 1;
+				midi_lo = 1;
+			}
+			
+			if (midi_hi > 127) {
+				midi_hi = 127;
+				midi_lo = 127;
+			}
+
+			const int m_h_o = ((int)midi_hi) + ofs;
+
+			uint8_t note_buf_int[] = {
+				0xB0,
+				0x58,
+				(uint8_t)midi_lo,
+				rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+				note_,
+				(uint8_t)m_h_o
+			};
+			tud_midi_stream_write(0, note_buf_int, 6);
+			//*****************************************************************************
+			#endif
 
 			// mass_to_disp = mass_F[rxB]; // for test
 			// timer_data_in = (float)tOut * 0.0001f; // for test
