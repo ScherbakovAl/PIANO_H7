@@ -145,23 +145,22 @@ void h7() {
 
 	// USB init
 	tusb_init();
-	//---------------------------------
-
-	sync();
-	initBuffers();
-	configCharts();
-
-	pause(3);
 	send_test_midi();
-
+	//---------------------------------
 
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-// память
-// SaveToMemory();
+
+
+	initBuffers();
+	// память
+	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+
+	configCharts();
+
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	all_H7_to_g4();
@@ -174,16 +173,18 @@ void h7() {
 	lv_timer_handler();
 	ui_tick();
 
-// GPIOA->BSRR = 0x10; // for test // DEBUG
-// GPIOA->BSRR = 0x100000;
-// GPIOA->BSRR = 0x20; // for test // DEBUG
-// GPIOA->BSRR = 0x200000;
-// start PWM
+	sync();
+
+	// GPIOA->BSRR = 0x10; // for test // DEBUG
+	// GPIOA->BSRR = 0x100000;
+	// GPIOA->BSRR = 0x20; // for test // DEBUG
+	// GPIOA->BSRR = 0x200000;
+	// start PWM
 
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
 
-	pause(5); // DEBUG
+	// pause(5); // DEBUG
 	debugg_clear();
 	debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
@@ -270,9 +271,9 @@ void h7() {
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
-		}
-#endif
 	}
+#endif
+}
 } // h7
 
 void sync() {
@@ -536,9 +537,9 @@ void DMA1_RX(void) {
 				timerLenght_F = (float)tOut * div_off;
 			}
 
-			#define fl
-			#ifdef fl
-			//*****************************************************************************
+#define fl
+#ifdef fl
+//*****************************************************************************
 			speed_F = distance_F / timerLenght_F;
 			energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
 			midi_hi_F = energy_F / maxMidi_F;
@@ -576,22 +577,22 @@ void DMA1_RX(void) {
 			// };
 
 			tud_midi_stream_write(0, note_buf, 6);
-			#endif
+#endif
 
-			#ifndef fl
-			//*****************************************************************************
+#ifndef fl
+//*****************************************************************************
 			const int divisible = 10'000'000;
 			const int maxMidi = 127;
 			const int ofs = 1;
 			const int midi_speed = divisible / tOut;	//~480-25000
 			int midi_hi = midi_speed / maxMidi;
 			int midi_lo = midi_speed - midi_hi * maxMidi;
-			
+
 			if (midi_hi < 1) {
 				midi_hi = 1;
 				midi_lo = 1;
 			}
-			
+
 			if (midi_hi > 127) {
 				midi_hi = 127;
 				midi_lo = 127;
@@ -606,18 +607,18 @@ void DMA1_RX(void) {
 				rxB < 98 ? 0x90 : 0x80, // 0x90 note on
 				note_,
 				(uint8_t)m_h_o
-			};
+		};
 			tud_midi_stream_write(0, note_buf_int, 6);
 			//*****************************************************************************
-			#endif
+#endif
 
-			// mass_to_disp = mass_F[rxB]; // for test
-			// timer_data_in = (float)tOut * 0.0001f; // for test
-		}
-
-		// test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
-		// fl = 1; // for test // разрешить обновлять цифры на дисплее
+// mass_to_disp = mass_F[rxB]; // for test
+// timer_data_in = (float)tOut * 0.0001f; // for test
 	}
+
+	// test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
+	// fl = 1; // for test // разрешить обновлять цифры на дисплее
+}
 
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
@@ -856,7 +857,6 @@ void send_test_midi() { // for test   // TODO можно удалить
 	uint8_t note_buf[] = { 0xB0, 0x58, 16, 0x90, 64, 0x36, 0xB0, 0x58, 125, 0x80, 64, 0x36 };
 	const int bufsize = sizeof(note_buf);
 	tud_midi_stream_write(cable_num, note_buf, bufsize);
-	pause(100);
 	tud_midi_stream_write(cable_num, note_buf, bufsize);
 }
 
