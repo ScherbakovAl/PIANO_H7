@@ -146,22 +146,20 @@ void h7() {
 	// USB init
 	tusb_init();
 	//---------------------------------
-
-	sync();
-	initBuffers();
-	configCharts();
-
-	pause(3);
-	send_test_midi();
-
-
+	
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-// память
-// SaveToMemory();
+	
+	send_test_midi();
+
+	initBuffers();
+	// память
+	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+	configCharts();
+
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	all_H7_to_g4();
@@ -173,6 +171,8 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
+
+	sync();
 
 // GPIOA->BSRR = 0x10; // for test // DEBUG
 // GPIOA->BSRR = 0x100000;
