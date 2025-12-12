@@ -488,7 +488,7 @@ void DMA1_RX(void) {
 	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
-	// GPIOA->BSRR |= 0x10; // for test // DEBUG
+	GPIOA->BSRR |= 0x10; // for test // DEBUG
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
 		LL_USART_ClearFlag_NE(UART5);
@@ -584,14 +584,14 @@ void DMA1_RX(void) {
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
-	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void USART_Noise_Error_detected() {
 	GPIOA->BSRR |= 0x10; // for test // DEBUG
 	// debugg_fn("USART Noise Error detected");
 	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
-	// LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
+	LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
 	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
