@@ -44,6 +44,8 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_2_on;
     lv_obj_t *deb_7;
     lv_obj_t *label_string_sensor_8;
+    lv_obj_t *label_string_sensor_9;
+    lv_obj_t *label_string_sensor_13;
     lv_obj_t *button_to_main_2;
     lv_obj_t *sub_12;
     lv_obj_t *add_12;
@@ -141,6 +143,8 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_3;
     lv_obj_t *deb_1;
     lv_obj_t *label_string_sensor_10;
+    lv_obj_t *label_string_sensor_11;
+    lv_obj_t *label_string_sensor_12;
     lv_obj_t *button_to_main_3;
     lv_obj_t *sub_13;
     lv_obj_t *add_13;

@@ -30,6 +30,9 @@ std::string top_bot_str;
 std::string top_bot_str_2;
 std::string debugg;  // DEBUG
 std::string chart_calib_online;
+std::string l;
+std::string r;
+
 
 int fl = 0; // for test fl
 
@@ -203,6 +206,8 @@ void h7() {
 				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
+			l = std::to_string(compsCHART_CALIB[cursor - 1]);
+			r = std::to_string(compsCHART_CALIB[cursor + 1]);
 			lv_chart_refresh(cur_shart);
 		}
 
@@ -216,6 +221,8 @@ void h7() {
 				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
+			l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
+			r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
 			lv_chart_refresh(cur_shart);
 		}
 
@@ -1468,6 +1475,20 @@ extern "C" {
 	//---------------------------------
 
 	// LVGL VARS
+	const char* get_var_l() {
+		return l.c_str();
+	}
+
+	void set_var_l(const char* value) {
+		l = value;
+	}
+	const char* get_var_r() {
+		return r.c_str();
+	}
+
+	void set_var_r(const char* value) {
+		r = value;
+	}
 
 	const char* get_var_ch_o() {
 		return ch_o.c_str();

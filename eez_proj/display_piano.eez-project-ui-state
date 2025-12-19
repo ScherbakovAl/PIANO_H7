@@ -1,7 +1,8 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
+    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -71,7 +72,7 @@
           },
           {
             "type": "border",
-            "selected": 0,
+            "selected": 1,
             "size": 49.5,
             "location": "bottom",
             "children": [
@@ -253,8 +254,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -283,8 +283,8 @@
               "children": [
                 {
                   "type": "tabset",
-                  "id": "#97387266-3096-4afb-9786-6c73071f158e",
-                  "weight": 0.8868632174112387,
+                  "id": "#914bccbe-d86a-4b46-8cdf-754953d1a8ef",
+                  "weight": 0.4434316087056194,
                   "children": [
                     {
                       "type": "tab",
@@ -294,7 +294,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1059,17 +1060,15 @@
           "2": {},
           "3": {},
           "4": {},
-          "5": {
-            "$selected": true
-          }
+          "5": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
-        "scale": 0.5
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1093,15 +1092,18 @@
           "11": {},
           "12": {},
           "13": {},
-          "14": {}
+          "14": {},
+          "16": {
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
-        "scale": 0.5
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1132,10 +1134,10 @@
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
-        "scale": 0.5
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1199,8 +1201,8 @@
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
         "scale": 1
       },
@@ -1214,10 +1216,10 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
-        "scale": 0.5
+        "scale": 1
       },
       "selection": {
         "0": {
@@ -1235,7 +1237,10 @@
           "11": {},
           "12": {},
           "13": {},
-          "14": {}
+          "14": {},
+          "15": {
+            "$selected": true
+          }
         }
       },
       "timeline": {
@@ -1264,8 +1269,8 @@
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
         "scale": 1.1
       },
@@ -1308,8 +1313,8 @@
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
         "scale": 1
       },
@@ -1341,8 +1346,8 @@
       },
       "transform": {
         "translate": {
-          "x": -120,
-          "y": -80
+          "x": -240,
+          "y": -160
         },
         "scale": 1.25
       },
@@ -1376,6 +1381,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 0.5,
+  "flowZoom": 1,
   "implementationLanguage": "C++"
 }
