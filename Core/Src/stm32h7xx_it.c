@@ -223,7 +223,9 @@ void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
   LL_TIM_ClearFlag_UPDATE(TIM4);
+  // GPIOA->BSRR |= 0x20; // for test 
   lv_tick_inc(1);
+  // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -236,6 +238,7 @@ void TIM4_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
+  // GPIOA->BSRR |= 0x20; // for test
   /* USER CODE END EXTI15_10_IRQn 0 */
   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
   {
@@ -259,6 +262,7 @@ void EXTI15_10_IRQHandler(void)
     /* USER CODE END LL_EXTI_LINE_15 */
   }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+  // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
@@ -268,8 +272,10 @@ void EXTI15_10_IRQHandler(void)
 void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-      LL_TIM_ClearFlag_UPDATE(TIM6);
-      touchpad_pressed = 0;
+  LL_TIM_ClearFlag_UPDATE(TIM6);
+  // GPIOA->BSRR |= 0x20; // for test
+  touchpad_pressed = 0;
+  // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END TIM6_DAC_IRQn 0 */
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
@@ -282,7 +288,9 @@ void TIM6_DAC_IRQHandler(void)
 void OTG_HS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
+  // GPIOA->BSRR |= 0x20; // for test
 	tud_int_handler(BOARD_DEVICE_RHPORT_NUM);
+  // GPIOA->BSRR |= 0x200000; // for test
 	return;
   /* USER CODE END OTG_HS_IRQn 0 */
   HAL_HCD_IRQHandler(&hhcd_USB_OTG_HS);

@@ -107,9 +107,9 @@ extern "C" {
 
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
-	const uint8_t start_adress_chip_on = 8; // включительно
-	const uint8_t end_adress_chip_on = 10; // включительно (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
-	const uint8_t start_adress_chip_off = 25; // включительно
+	const uint8_t start_adress_chip_on = 1; // включительно
+	const uint8_t end_adress_chip_on = 13; // включительно (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t start_adress_chip_off = 14; // включительно
 	const uint8_t end_adress_chip_off = 23; // включительно всего 23
 
 	const uint32_t start_cursor = 70;
@@ -177,6 +177,7 @@ extern "C" {
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
 	void DMA1_RX();
+	void USART_Noise_Error_detected();
 	void DMA_UART_ERRORS_HANDLER();
 	int32_t convert_8_16(const uint8_t& a, const uint8_t& b);
 	conv_16_8 convert_16_8(const uint32_t& a);

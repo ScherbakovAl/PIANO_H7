@@ -146,22 +146,20 @@ void h7() {
 	// USB init
 	tusb_init();
 	//---------------------------------
-
-	sync();
-	initBuffers();
-	configCharts();
-
-	pause(30);
-	send_test_midi();
-
-
+	
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-// память
-// SaveToMemory();
+	
+	send_test_midi();
+
+	initBuffers();
+	// память
+	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+	configCharts();
+
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	all_H7_to_g4();
@@ -174,6 +172,8 @@ void h7() {
 	lv_timer_handler();
 	ui_tick();
 
+	sync();
+
 // GPIOA->BSRR = 0x10; // for test // DEBUG
 // GPIOA->BSRR = 0x100000;
 // GPIOA->BSRR = 0x20; // for test // DEBUG
@@ -183,7 +183,7 @@ void h7() {
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
 
-	pause(2000); // DEBUG
+	pause(5); // DEBUG
 	debugg_clear();
 	debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
@@ -488,47 +488,80 @@ void DMA1_RX(void) {
 	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
-	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+	// GPIOA->BSRR |= 0x10; // for test // DEBUG
 
-	const int rxB = rx_data[0];
+	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
+		LL_USART_ClearFlag_NE(UART5);
+		USART_Noise_Error_detected();
+		debugg_fn("...noise");
+	}
+	else {
 
-	midi_hi_F = 0; // DEBUG
-	midi_lo_F = 0; // DEBUG
-	timer_data_in = 0; // DEBUG
+		// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // вариант
+		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
-	if (rxB < 168) {
-		uint32_t tOut = 0;
-		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+		const int rxB = rx_data[0];
 
-		if (rxB < 98) {
-			timerLenght_F = (float)tOut * div_on;
+		midi_hi_F = 0; // DEBUG
+		midi_lo_F = 0; // DEBUG
+		timer_data_in = 0; // DEBUG
+
+
+		if (rxB > 168) { // DEBUG
+			GPIOA->BSRR |= 0x10; // for test // DEBUG
+			GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			GPIOA->BSRR |= 0x10; // for test // DEBUG
+			GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			USART_Noise_Error_detected(); // DEBUG
+			debugg_fn("... No > 168");
 		}
-		else {
-			timerLenght_F = (float)tOut * div_off;
-		}
-		speed_F = distance_F / timerLenght_F;
-		energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
-		midi_hi_F = energy_F / maxMidi_F;
-		float integerPart_F;
-		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-		int note_ = rxB + noteAdder[rxB];
-		if (midi_hi_F < 1) {
-			midi_hi_F = 1;
-			midi_lo_F = 1;
-		}
-		if (midi_hi_F > 127) {
-			midi_hi_F = 127;
-			midi_lo_F = 127;
-		}
-		uint8_t note_buf[] = {
-			0xB0,
-			0x58,
-			(uint8_t)midi_lo_F,
-			rxB < 98 ? 0x90 : 0x80, // 0x90 note on
-			note_,
-			(uint8_t)midi_hi_F > 127 ? 127 : (uint8_t)midi_hi_F
-		};
+
+		// if (rx_data[1] > 3) { // DEBUG
+		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+		// 	USART_Noise_Error_detected(); // DEBUG
+		// 	debugg_fn("... t > 3");
+		// }
+
+		if (rxB < 168) { // TODO зачем это здесь?
+			uint32_t tOut = 0;
+			tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+
+			if (rxB < 98) {
+				timerLenght_F = (float)tOut * div_on;
+			}
+			else {
+				timerLenght_F = (float)tOut * div_off;
+			}
+
+			speed_F = distance_F / timerLenght_F;
+			energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
+			midi_hi_F = energy_F / maxMidi_F;
+			float integerPart_F;
+			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+			int note_ = rxB + noteAdder[rxB];
+
+			if (midi_hi_F < 1) {
+				midi_hi_F = 1;
+				midi_lo_F = 1;
+			}
+
+			if (midi_hi_F > 127) {
+				midi_hi_F = 127;
+				midi_lo_F = 127;
+			}
+
+			uint8_t note_buf[] = {
+				0xB0,
+				0x58,
+				(uint8_t)midi_lo_F,
+				rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+				note_,
+				(uint8_t)midi_hi_F
+			};
+
 			// uint8_t note_buf[] = {
 			// 0xB0,
 			// 0x58,
@@ -537,50 +570,36 @@ void DMA1_RX(void) {
 			// note_,
 			// (uint8_t)midi_hi_F
 			// };
-		// if (rxB > 98) {
-		tud_midi_stream_write(0, note_buf, 6);
 
-		mass_to_disp = mass_F[rxB]; // for test
-		timer_data_in = (float)tOut * 0.0001f; // for test
+			tud_midi_stream_write(0, note_buf, 6);
+
+			// mass_to_disp = mass_F[rxB]; // for test
+			// timer_data_in = (float)tOut * 0.0001f; // for test
+		}
+
+		// test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
+		// fl = 1; // for test // разрешить обновлять цифры на дисплее
 	}
-	test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
 
-	fl = 1; // разрешить обновлять цифры на дисплее
-
-
-	if (LL_USART_IsActiveFlag_NE(UART5)) {
-		GPIOA->BSRR = 0x10; // for test //
-
-		  // LL_USART_DisableDMAReq_RX(UART5); // DEBUG оно здесь помогает очистить от ошибок?
-		debugg_fn("USART Noise Error detected");
-		LL_USART_ClearFlag_NE(UART5);
-		// TODO сбросить счётчик DMA ? (при ошибке..)
-		// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
-
-		// LL_USART_RequestRxDataFlush(UART5); // TODO // for test
-
-		// LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
-		// LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART5->RDR));
-		// LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
-		// LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
-		// LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-		// LL_USART_EnableDMAReq_RX(UART5);
-		// LL_DMA_ClearFlag_TC2(DMA1);
-		// LL_DMA_ClearFlag_HT2(DMA1);
-		// LL_DMA_ClearFlag_TE2(DMA1);
-		// LL_DMA_ClearFlag_DME2(DMA1);
-
-		// LL_TIM_DisableCounter(TIM1); // DEBUG
-
-		GPIOA->BSRR = 0x100000; // for test // DEBUG
-	}
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
+
+	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+}
+
+void USART_Noise_Error_detected() {
+	GPIOA->BSRR |= 0x10; // for test // DEBUG
+	// debugg_fn("USART Noise Error detected");
+	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
+	// LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void DMA_UART_ERRORS_HANDLER() {
 	// if (LL_USART_IsActiveFlag_NE(UART5)) {
 		// debugg_fn("USART Noise error detected ");
+		// LL_USART_DisableDMAReq_RX(UART5); // DEBUG оно здесь помогает очистить от ошибок?
 		// LL_USART_ClearFlag_NE(UART5);
 		// LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
 		// LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
@@ -592,6 +611,7 @@ void DMA_UART_ERRORS_HANDLER() {
 		// LL_DMA_ClearFlag_TE2(DMA1);
 		// LL_DMA_ClearFlag_DME2(DMA1);
 		// LL_USART_RequestRxDataFlush(UART5);
+		// LL_USART_EnableDMAReq_RX(UART5); // ?
 	// }
 }
 

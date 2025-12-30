@@ -190,12 +190,12 @@
             {
               "type": "row",
               "id": "#f8839e12-0524-4845-836b-fa35b8f13c34",
-              "weight": 8.388256544760061,
+              "weight": 7.622530583967379,
               "children": [
                 {
                   "type": "tabset",
                   "id": "EDITORS",
-                  "weight": 50,
+                  "weight": 50.421052631578945,
                   "enableDeleteWhenEmpty": false,
                   "enableClose": false,
                   "children": [
@@ -215,7 +215,7 @@
                 {
                   "type": "tabset",
                   "id": "#c4bc15f5-5992-4afa-b4de-4ec425bd462f",
-                  "weight": 50,
+                  "weight": 49.578947368421055,
                   "children": [
                     {
                       "type": "tab",
@@ -235,7 +235,7 @@
             {
               "type": "row",
               "id": "#ce7eadf1-a240-4990-9ae6-5ac24c856768",
-              "weight": 4.835422438685571,
+              "weight": 5.601148399478252,
               "children": [
                 {
                   "type": "tabset",
@@ -253,7 +253,8 @@
                       },
                       "icon": "svg:page"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -293,8 +294,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1066,8 +1066,8 @@
       },
       "transform": {
         "translate": {
-          "x": -71.94382814878647,
-          "y": -58.96097554322307
+          "x": -120,
+          "y": -80
         },
         "scale": 0.5
       },
@@ -1098,8 +1098,8 @@
       },
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 0.5
       },
@@ -1132,8 +1132,8 @@
       },
       "transform": {
         "translate": {
-          "x": -63.79936474300195,
-          "y": -70.00450168645857
+          "x": -120,
+          "y": -80
         },
         "scale": 0.5
       },
@@ -1199,8 +1199,8 @@
       },
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 1
       },
@@ -1214,8 +1214,8 @@
     "[display_piano.eez-project]:/userPages/4[flow-state]": {
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 0.5
       },
@@ -1264,8 +1264,8 @@
       },
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 1.1
       },
@@ -1308,8 +1308,8 @@
       },
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 1
       },
@@ -1341,8 +1341,8 @@
       },
       "transform": {
         "translate": {
-          "x": -48,
-          "y": -32
+          "x": -120,
+          "y": -80
         },
         "scale": 1.25
       },
