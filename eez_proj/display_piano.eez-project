@@ -1041,7 +1041,7 @@
               "eventHandlers": [
                 {
                   "objID": "047c60cf-4e3b-45c1-c27d-b9041e9dc22c",
-                  "eventName": "PRESSED",
+                  "eventName": "RELEASED",
                   "handlerType": "action",
                   "action": "piano_off",
                   "userData": 0
@@ -1636,7 +1636,7 @@
               "eventHandlers": [
                 {
                   "objID": "1998b307-1edc-41d1-a0d9-f8c631519160",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_minus10",
                   "userData": 0
@@ -1742,7 +1742,7 @@
               "eventHandlers": [
                 {
                   "objID": "71511cb4-3951-4749-a18f-3d53ec937598",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_plus10",
                   "userData": 0
@@ -1848,7 +1848,7 @@
               "eventHandlers": [
                 {
                   "objID": "1bdd4265-c609-4f26-be8b-3d2b6cf4520e",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_minus",
                   "userData": 0
@@ -1954,7 +1954,7 @@
               "eventHandlers": [
                 {
                   "objID": "ccce760a-aa1d-4241-a670-8f475534eaaa",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_plus",
                   "userData": 0
@@ -2060,7 +2060,7 @@
               "eventHandlers": [
                 {
                   "objID": "49102e40-ae02-4404-8c3d-93491b537a2b",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "calib_sensor_1_on",
                   "userData": 0
@@ -2169,7 +2169,7 @@
               "eventHandlers": [
                 {
                   "objID": "646e5233-ff97-4ecd-8b49-6518412aa3d6",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "calib_sensor_2_on",
                   "userData": 0
@@ -9066,7 +9066,7 @@
               "eventHandlers": [
                 {
                   "objID": "e44d12dd-d408-4bf1-b2d3-e5612226bb1f",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_minus10",
                   "userData": 0
@@ -9173,7 +9173,7 @@
               "eventHandlers": [
                 {
                   "objID": "f76f4d93-ec46-4fbc-aaed-689d17d2ce5e",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_plus10",
                   "userData": 0
@@ -9280,7 +9280,7 @@
               "eventHandlers": [
                 {
                   "objID": "9f4cd6fd-ac38-4f3b-f7d7-374cbf21e7b0",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_minus",
                   "userData": 0
@@ -9387,7 +9387,7 @@
               "eventHandlers": [
                 {
                   "objID": "c1af6beb-7348-4b82-c4b5-49da0b59dbe6",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "cursor_plus",
                   "userData": 0
@@ -9494,7 +9494,7 @@
               "eventHandlers": [
                 {
                   "objID": "fbf202bf-0be0-4390-8b85-f08fc50baeba",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "calib_sensor_1_off",
                   "userData": 0
@@ -9604,7 +9604,7 @@
               "eventHandlers": [
                 {
                   "objID": "e2cf2865-e5ac-4565-d138-768d30370a50",
-                  "eventName": "RELEASED",
+                  "eventName": "PRESSED",
                   "handlerType": "action",
                   "action": "calib_sensor_2_off",
                   "userData": 0
