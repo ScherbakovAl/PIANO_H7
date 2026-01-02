@@ -89,8 +89,109 @@ float mass_to_disp = 0; // for test
 
 // настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 
+
+
+/*
+инициализация gpio C13 на прерывание:
+
+  LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
+  // LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
+
+  EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_13;
+  EXTI_InitStruct.Line_32_63 = LL_EXTI_LINE_NONE;
+  EXTI_InitStruct.Line_64_95 = LL_EXTI_LINE_NONE;
+  EXTI_InitStruct.LineCommand = ENABLE;
+  EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+  EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
+  LL_EXTI_Init(&EXTI_InitStruct);
+
+  LL_GPIO_SetPinPull(GPIOC, LL_GPIO_PIN_13, LL_GPIO_PULL_NO);
+  LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_INPUT);
+
+  // NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  // NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+
+  + внутри "void EXTI15_10_IRQHandler(void)" :
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
+  {
+	LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+		resetPin();
+  }
+
+
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
+	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		LCD_stby();
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+		HAL_PWR_EnterSTANDBYMode();
+	} else {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+		LCD_start();
+	}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
+
+void to_sleep() {
+	// LCD_stby();
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	HAL_PWR_EnterSTANDBYMode();
+}
+
+
+*/
+
+void pwr(){
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
+	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		// LCD_stby();
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+		HAL_PWR_EnterSTANDBYMode();
+	} else {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+		// LCD_start();
+	}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
+}
+
+void to_sleep() {
+	// LCD_stby();
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	HAL_PWR_EnterSTANDBYMode();
+}
+
+void C13_init_aka_interrupt_key_for_reset() {
+	LL_EXTI_InitTypeDef EXTI_InitStruct = { 0 };
+	LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
+	EXTI_InitStruct.Line_0_31 = LL_EXTI_LINE_13;
+	EXTI_InitStruct.Line_32_63 = LL_EXTI_LINE_NONE;
+	EXTI_InitStruct.Line_64_95 = LL_EXTI_LINE_NONE;
+	EXTI_InitStruct.LineCommand = ENABLE;
+	EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
+	EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
+	LL_EXTI_Init(&EXTI_InitStruct);
+	LL_GPIO_SetPinPull(GPIOC, LL_GPIO_PIN_13, LL_GPIO_PULL_NO);
+	LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_INPUT);
+}
+
+void interrupt_C13() {
+	if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET) {
+		LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+		resetPin();
+	}
+}
+
 void h7() {
-	//	LL_mDelay(100);
+	// LL_mDelay(100);
 	// TIM init
 	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
 
@@ -146,6 +247,10 @@ void h7() {
 	// GUI start
 	ui_init();
 
+	// pwr();
+	pause(10);
+	C13_init_aka_interrupt_key_for_reset();
+
 	// USB init
 	tusb_init();
 	//---------------------------------
@@ -153,7 +258,7 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-	
+
 	pause(10);
 	send_test_midi();
 

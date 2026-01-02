@@ -194,6 +194,7 @@ extern "C" {
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
 	void configCharts();
+	void interrupt_C13();
 }
 #endif // extern "C"
 
