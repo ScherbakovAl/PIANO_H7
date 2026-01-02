@@ -150,17 +150,17 @@ void h7() {
 	tusb_init();
 	//---------------------------------
 
+	tud_task();
+	lv_timer_handler();
+	ui_tick();
+	
+	pause(10);
+	send_test_midi();
+
 	sync();
 	initBuffers();
 	configCharts();
 
-	pause(3);
-	send_test_midi();
-
-
-	tud_task();
-	lv_timer_handler();
-	ui_tick();
 // память
 // SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
@@ -190,7 +190,7 @@ void h7() {
 	debugg_clear();
 	debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
-	
+
 	while (1) {
 		tud_task();
 		lv_timer_handler();
