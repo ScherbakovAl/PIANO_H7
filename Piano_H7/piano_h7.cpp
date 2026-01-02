@@ -192,6 +192,17 @@ void h7() {
 	int test_int_timer2_old = test_int_timer2;
 
 	while (1) {
+		UART4_SendAddress(1);
+		pause(4);
+		UART4_Send_Settings(command::cal, 1, 0, 0);
+		UART4_Receive_Settings();
+		// UART4_Receive_Settings();
+		pause(2000);
+	}
+
+
+
+	while (1) {
 		tud_task();
 		lv_timer_handler();
 		ui_tick();
