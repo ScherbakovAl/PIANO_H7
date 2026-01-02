@@ -146,17 +146,17 @@ void to_sleep() {
 
 */
 
-void pwr(){
+void pwr() {
 	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
 	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
-		// LCD_stby();
 		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
 		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
 		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
 		HAL_PWR_EnterSTANDBYMode();
-	} else {
+	}
+	else {
 		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-		// LCD_start();
+		GPIOD->BSRR = 0x40;// pD6 - LED подсветка
 	}
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
 }
@@ -247,8 +247,8 @@ void h7() {
 	// GUI start
 	ui_init();
 
-	// pwr();
-	pause(10);
+	GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+	pwr();
 	C13_init_aka_interrupt_key_for_reset();
 
 	// USB init
@@ -382,9 +382,9 @@ void h7() {
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
-	}
+		}
 #endif
-}
+	}
 } // h7
 
 void sync() {
