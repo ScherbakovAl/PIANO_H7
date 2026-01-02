@@ -153,7 +153,7 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-	
+
 	pause(10);
 	send_test_midi();
 
@@ -277,9 +277,9 @@ void h7() {
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
-	}
+		}
 #endif
-}
+	}
 } // h7
 
 void sync() {
@@ -832,7 +832,20 @@ void send_test_midi() { // for test   // TODO можно удалить
 // LVGL UTILITES
 //---------------------------------
 void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
-	if (touchpad_pressed) {
+	// if (touchpad_pressed) {
+	// 	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+	// 	data->point.x = TP.point1_x;
+	// 	data->point.y = TP.point1_y;
+	// 	data->state = LV_INDEV_STATE_PRESSED;
+	// }
+	// else {
+	// 	data->state = LV_INDEV_STATE_RELEASED;
+	// }
+	uint8_t touchStatus = 0;
+	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
+	uint8_t touchCount = touchStatus & 0x0F;
+
+	if (touchCount > 0) {
 		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
 		data->point.x = TP.point1_x;
 		data->point.y = TP.point1_y;
