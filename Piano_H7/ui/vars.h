@@ -49,7 +49,9 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_T2 = 31,
     FLOW_GLOBAL_VARIABLE_T3 = 32,
     FLOW_GLOBAL_VARIABLE_TIMER_DATA = 33,
-    FLOW_GLOBAL_VARIABLE_CHART_CALIB_ONLINE = 34
+    FLOW_GLOBAL_VARIABLE_CHART_CALIB_ONLINE = 34,
+    FLOW_GLOBAL_VARIABLE_L = 35,
+    FLOW_GLOBAL_VARIABLE_R = 36
 };
 
 // Native global variables
@@ -124,6 +126,10 @@ extern const char *get_var_timer_data();
 extern void set_var_timer_data(const char *value);
 extern const char *get_var_chart_calib_online();
 extern void set_var_chart_calib_online(const char *value);
+extern const char *get_var_l();
+extern void set_var_l(const char *value);
+extern const char *get_var_r();
+extern void set_var_r(const char *value);
 
 
 #ifdef __cplusplus

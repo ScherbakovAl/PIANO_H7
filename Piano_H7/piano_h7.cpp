@@ -30,6 +30,9 @@ std::string top_bot_str;
 std::string top_bot_str_2;
 std::string debugg;  // DEBUG
 std::string chart_calib_online;
+std::string l;
+std::string r;
+
 
 int fl = 0; // for test fl
 
@@ -146,20 +149,22 @@ void h7() {
 	// USB init
 	tusb_init();
 	//---------------------------------
-	
+
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
 	
+	pause(10);
 	send_test_midi();
 
+	sync();
 	initBuffers();
-	// память
-	// SaveToMemory();
-	ReadOnMemory(); // восстановление графика при включении
-	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	configCharts();
 
+// память
+// SaveToMemory();
+	ReadOnMemory(); // восстановление графика при включении
+	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	all_H7_to_g4();
@@ -171,8 +176,6 @@ void h7() {
 	tud_task();
 	lv_timer_handler();
 	ui_tick();
-
-	sync();
 
 // GPIOA->BSRR = 0x10; // for test // DEBUG
 // GPIOA->BSRR = 0x100000;
@@ -203,6 +206,8 @@ void h7() {
 				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
+			l = std::to_string(compsCHART_CALIB[cursor - 1]);
+			r = std::to_string(compsCHART_CALIB[cursor + 1]);
 			lv_chart_refresh(cur_shart);
 		}
 
@@ -216,6 +221,8 @@ void h7() {
 				checkDataOnSensor(adress);
 			}
 			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
+			l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
+			r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
 			lv_chart_refresh(cur_shart);
 		}
 
@@ -270,9 +277,9 @@ void h7() {
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
-		}
-#endif
 	}
+#endif
+}
 } // h7
 
 void sync() {
@@ -588,12 +595,12 @@ void DMA1_RX(void) {
 }
 
 void USART_Noise_Error_detected() {
-	GPIOA->BSRR |= 0x10; // for test // DEBUG
+	// GPIOA->BSRR |= 0x10; // for test // DEBUG
 	// debugg_fn("USART Noise Error detected");
 	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
-	// LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
+	LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
 	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
-	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void DMA_UART_ERRORS_HANDLER() {
@@ -1468,6 +1475,20 @@ extern "C" {
 	//---------------------------------
 
 	// LVGL VARS
+	const char* get_var_l() {
+		return l.c_str();
+	}
+
+	void set_var_l(const char* value) {
+		l = value;
+	}
+	const char* get_var_r() {
+		return r.c_str();
+	}
+
+	void set_var_r(const char* value) {
+		r = value;
+	}
 
 	const char* get_var_ch_o() {
 		return ch_o.c_str();

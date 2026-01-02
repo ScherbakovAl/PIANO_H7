@@ -385,6 +385,22 @@
         "defaultValue": "\"\"",
         "persistent": false,
         "native": false
+      },
+      {
+        "objID": "29729541-821e-4576-ce12-aa863fb5efed",
+        "name": "L",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
+      },
+      {
+        "objID": "870710bf-3929-4fb1-8c6a-f2eeb31b3742",
+        "name": "R",
+        "type": "string",
+        "defaultValue": "\"\"",
+        "persistent": false,
+        "native": false
       }
     ],
     "structures": [],
@@ -2597,6 +2613,112 @@
               "group": "",
               "groupIndex": 0,
               "text": "CHART_CALIB_online",
+              "textType": "expression",
+              "longMode": "WRAP",
+              "recolor": false,
+              "previewValue": "0000"
+            },
+            {
+              "objID": "fc993cbe-9e90-48c5-eb39-5376d17a02b7",
+              "type": "LVGLLabelWidget",
+              "left": 254,
+              "top": 167,
+              "width": 64,
+              "height": 27,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "791ff58d-71bd-4e12-e201-fd9d971ec8bc",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "hiddenInEditor": false,
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "label_string_sensor_9",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "19a1ae74-4d1c-4fca-f370-5124efa7dd40",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#314ded",
+                      "text_font": "MONTSERRAT_24"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "L",
+              "textType": "expression",
+              "longMode": "WRAP",
+              "recolor": false,
+              "previewValue": "0000"
+            },
+            {
+              "objID": "afd054cd-75db-4e53-83d0-d1e2583b2e4e",
+              "type": "LVGLLabelWidget",
+              "left": 413,
+              "top": 168,
+              "width": 64,
+              "height": 27,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "1616e303-40db-47b1-f0f5-f57e41cefc76",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "hiddenInEditor": false,
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "label_string_sensor_13",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "51b7ab53-6862-42f5-eee5-c96ca1a1f459",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#314ded",
+                      "text_font": "MONTSERRAT_24"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "R",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
@@ -9937,6 +10059,112 @@
               "group": "",
               "groupIndex": 0,
               "text": "CHART_CALIB_online",
+              "textType": "expression",
+              "longMode": "WRAP",
+              "recolor": false,
+              "previewValue": "0000"
+            },
+            {
+              "objID": "cf7cab1e-4ecd-4418-a58f-b200b5c0c816",
+              "type": "LVGLLabelWidget",
+              "left": 254,
+              "top": 165,
+              "width": 64,
+              "height": 27,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "b3fbd454-1661-403d-e726-aef3f4f9fd60",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "hiddenInEditor": false,
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "label_string_sensor_11",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "037ecf50-60a1-43a5-c9a5-ebb44db47f5d",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#314ded",
+                      "text_font": "MONTSERRAT_24"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "L",
+              "textType": "expression",
+              "longMode": "WRAP",
+              "recolor": false,
+              "previewValue": "0000"
+            },
+            {
+              "objID": "966eb376-44dd-4b0c-8c1a-bd28a887676c",
+              "type": "LVGLLabelWidget",
+              "left": 413,
+              "top": 165,
+              "width": 64,
+              "height": 27,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "3b4d0e30-55e0-48c8-daaf-51f54dac92a9",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "hiddenInEditor": false,
+              "timeline": [],
+              "eventHandlers": [],
+              "identifier": "label_string_sensor_12",
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "content",
+              "heightUnit": "content",
+              "children": [],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "4512b9d6-a930-47af-aef7-dc4decd3013c",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "text_color": "#314ded",
+                      "text_font": "MONTSERRAT_24"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0,
+              "text": "R",
               "textType": "expression",
               "longMode": "WRAP",
               "recolor": false,
