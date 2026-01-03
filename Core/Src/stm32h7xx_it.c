@@ -240,8 +240,15 @@ void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
   // GPIOA->BSRR |= 0x20; // for test
-  interrupt_C13();
+  // interrupt_C13();
   /* USER CODE END EXTI15_10_IRQn 0 */
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+    /* USER CODE BEGIN LL_EXTI_LINE_13 */
+    resetPin();
+    /* USER CODE END LL_EXTI_LINE_13 */
+  }
   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15) != RESET)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);

@@ -155,8 +155,10 @@ void pwr() {
 		HAL_PWR_EnterSTANDBYMode();
 	}
 	else {
+		GPIOA->BSRR |= 0x20; // for test // DEBUG
 		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-		GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+		GPIOA->BSRR |= 0x200000;
+		// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
 	}
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
 }
@@ -247,9 +249,24 @@ void h7() {
 	// GUI start
 	ui_init();
 
+	GPIOA->BSRR |= 0x10; // for test // DEBUG
+	// pause(2);
+
+	GPIOD->BSRR = 0x40;// pD6 - LED подсветка
 	GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+	GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+	GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+
+	GPIOA->BSRR |= 0x100000;
+	pause(2);
+
 	pwr();
-	C13_init_aka_interrupt_key_for_reset();
+
+	GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+
+	// C13_init_aka_interrupt_key_for_reset();
 
 	// USB init
 	tusb_init();
@@ -266,8 +283,8 @@ void h7() {
 	initBuffers();
 	configCharts();
 
-// память
-// SaveToMemory();
+	// память
+	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
@@ -282,11 +299,11 @@ void h7() {
 	lv_timer_handler();
 	ui_tick();
 
-// GPIOA->BSRR = 0x10; // for test // DEBUG
-// GPIOA->BSRR = 0x100000;
-// GPIOA->BSRR = 0x20; // for test // DEBUG
-// GPIOA->BSRR = 0x200000;
-// start PWM
+	// GPIOA->BSRR = 0x10; // for test // DEBUG
+	// GPIOA->BSRR = 0x100000;
+	// GPIOA->BSRR = 0x20; // for test // DEBUG
+	// GPIOA->BSRR = 0x200000;
+	// start PWM
 
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
