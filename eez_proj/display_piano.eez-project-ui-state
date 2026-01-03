@@ -72,7 +72,7 @@
           },
           {
             "type": "border",
-            "selected": 1,
+            "selected": 0,
             "size": 49.5,
             "location": "bottom",
             "children": [
@@ -189,97 +189,53 @@
               ]
             },
             {
-              "type": "row",
-              "id": "#f8839e12-0524-4845-836b-fa35b8f13c34",
-              "weight": 7.622530583967379,
+              "type": "tabset",
+              "id": "EDITORS",
+              "weight": 8.209278389006043,
+              "selected": 2,
+              "enableDeleteWhenEmpty": false,
+              "enableClose": false,
               "children": [
                 {
-                  "type": "tabset",
-                  "id": "EDITORS",
-                  "weight": 50.421052631578945,
-                  "enableDeleteWhenEmpty": false,
-                  "enableClose": false,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "#b6626e5f-2709-493d-bb66-7d9a6510b0f3",
-                      "name": "d_main",
-                      "component": "editor",
-                      "config": {
-                        "objectPath": "[display_piano.eez-project]:/userPages/0",
-                        "permanent": true
-                      },
-                      "icon": "svg:page"
-                    }
-                  ]
+                  "type": "tab",
+                  "id": "#ff9ae142-ffa6-4d51-a72d-8e4571ab8b54",
+                  "name": "d_chart_calib_off",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[display_piano.eez-project]:/userPages/4",
+                    "permanent": false
+                  },
+                  "icon": "svg:page"
                 },
                 {
-                  "type": "tabset",
-                  "id": "#c4bc15f5-5992-4afa-b4de-4ec425bd462f",
-                  "weight": 49.578947368421055,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "#f7166e81-ad16-4ede-8155-cc088fce196f",
-                      "name": "d_chart_manual_edit_on",
-                      "component": "editor",
-                      "config": {
-                        "objectPath": "[display_piano.eez-project]:/userPages/2",
-                        "permanent": true
-                      },
-                      "icon": "svg:page"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "row",
-              "id": "#ce7eadf1-a240-4990-9ae6-5ac24c856768",
-              "weight": 5.601148399478252,
-              "children": [
-                {
-                  "type": "tabset",
-                  "id": "#70e55fe5-c9ee-4a79-8a8e-deaff8251c03",
-                  "weight": 50,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "#a4c560f7-3ebb-4f67-baa7-70b42e95cb4b",
-                      "name": "d_chart_calib_off",
-                      "component": "editor",
-                      "config": {
-                        "objectPath": "[display_piano.eez-project]:/userPages/4",
-                        "permanent": true
-                      },
-                      "icon": "svg:page"
-                    }
-                  ]
+                  "type": "tab",
+                  "id": "#df3ac432-fe03-436b-8e82-76dd0a1ca382",
+                  "name": "d_chart_calib_on",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[display_piano.eez-project]:/userPages/1",
+                    "permanent": true
+                  },
+                  "icon": "svg:page"
                 },
                 {
-                  "type": "tabset",
-                  "id": "#aa0edbac-b347-401a-949c-c2628b440b70",
-                  "weight": 50,
-                  "children": [
-                    {
-                      "type": "tab",
-                      "id": "#d8b185e7-18d4-4b34-8b9a-87ee89e49121",
-                      "name": "d_chart_calib_on",
-                      "component": "editor",
-                      "config": {
-                        "objectPath": "[display_piano.eez-project]:/userPages/1",
-                        "permanent": true
-                      },
-                      "icon": "svg:page"
-                    }
-                  ]
+                  "type": "tab",
+                  "id": "#b6626e5f-2709-493d-bb66-7d9a6510b0f3",
+                  "name": "d_main",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[display_piano.eez-project]:/userPages/0",
+                    "permanent": true
+                  },
+                  "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 8.95528909048045,
+              "weight": 8.368541285441786,
               "children": [
                 {
                   "type": "tabset",
@@ -294,8 +250,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1084,7 +1039,8 @@
           "5": {},
           "6": {},
           "7": {
-            "0": {}
+            "0": {},
+            "$selected": true
           },
           "8": {},
           "9": {},
@@ -1093,9 +1049,7 @@
           "12": {},
           "13": {},
           "14": {},
-          "16": {
-            "$selected": true
-          }
+          "16": {}
         }
       },
       "transform": {
@@ -1230,7 +1184,9 @@
           "4": {},
           "5": {},
           "6": {},
-          "7": {},
+          "7": {
+            "$selected": true
+          },
           "8": {},
           "9": {},
           "10": {},
@@ -1238,9 +1194,7 @@
           "12": {},
           "13": {},
           "14": {},
-          "15": {
-            "$selected": true
-          }
+          "15": {}
         }
       },
       "timeline": {
