@@ -33,7 +33,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef void (*pFunction)(void);
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -43,13 +43,17 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define DFU_BOOT_FLAG 0xDEADBEEF
+#define BOOTLOADER_ADDRESS 0x1FF09800
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+extern int _bflag;
+uint32_t *dfu_boot_flag;
+pFunction JumpToApplication;
+uint32_t JumpAddress;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,6 +76,16 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+
+    dfu_boot_flag = (uint32_t*) (&_bflag);
+	if (*dfu_boot_flag == DFU_BOOT_FLAG) {
+		*dfu_boot_flag = 0;
+		JumpAddress = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+		JumpToApplication = (pFunction) JumpAddress;
+		JumpToApplication();
+
+	}
+	*dfu_boot_flag = 0;
 
   /* USER CODE END 1 */
 

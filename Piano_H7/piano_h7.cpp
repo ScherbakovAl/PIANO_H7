@@ -1231,10 +1231,12 @@ extern "C" {
 			}
 		}
 	}
-
+extern uint32_t *dfu_boot_flag;
 	void action_piano_off(lv_event_t* e) {
-		// TODO: OFF
-		debugg_fn("Reset"); // DEBUG
+		SCB_DisableDCache();
+		SCB_DisableICache();
+		*dfu_boot_flag = 0xDEADBEEF;
+		pause(200000);
 		NVIC_SystemReset();
 	}
 
