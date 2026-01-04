@@ -247,39 +247,9 @@ void EXTI15_10_IRQHandler(void)
         resetPin();
     /* USER CODE END LL_EXTI_LINE_13 */
   }
-  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15) != RESET)
-  {
-    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
-    /* USER CODE BEGIN LL_EXTI_LINE_15 */
-        if (LL_TIM_IsEnabledCounter(TIM6))
-        {
-          LL_TIM_SetCounter(TIM6, 0);
-        }
-        else {
-          LL_TIM_EnableCounter(TIM6);
-          touchpad_pressed = 1;
-        }
-    /* USER CODE END LL_EXTI_LINE_15 */
-  }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
   // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END EXTI15_10_IRQn 1 */
-}
-
-/**
-  * @brief This function handles TIM6 global interrupt, DAC1_CH1 and DAC1_CH2 underrun error interrupts.
-  */
-void TIM6_DAC_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
-  LL_TIM_ClearFlag_UPDATE(TIM6);
-  // GPIOA->BSRR |= 0x20; // for test
-  touchpad_pressed = 0;
-  // GPIOA->BSRR |= 0x200000; // for test
-  /* USER CODE END TIM6_DAC_IRQn 0 */
-  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
-
-  /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /**

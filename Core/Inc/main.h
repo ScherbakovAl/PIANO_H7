@@ -79,9 +79,6 @@ void Error_Handler(void);
 #define TIM1_trigger_GPIO_Port GPIOE
 #define TIM1_CLK_Pin LL_GPIO_PIN_11
 #define TIM1_CLK_GPIO_Port GPIOE
-#define CTP_INT_Pin LL_GPIO_PIN_15
-#define CTP_INT_GPIO_Port GPIOA
-#define CTP_INT_EXTI_IRQn EXTI15_10_IRQn
 #define CTP_I2C5_SDA_Pin LL_GPIO_PIN_10
 #define CTP_I2C5_SDA_GPIO_Port GPIOC
 #define CTP_I2C5_SCL_Pin LL_GPIO_PIN_11
