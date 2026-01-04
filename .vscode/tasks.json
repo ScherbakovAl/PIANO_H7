@@ -66,7 +66,7 @@
             },
             "problemMatcher": []
         },
-        {
+                {
             "type": "shell",
             "label": "CubeProg: Flash project (SWD)",
             "command": "STM32_Programmer_CLI",
@@ -86,6 +86,30 @@
                     "color": "#17c4b6",
                     "label": "$(fold-down) FLASH",
                     "detail": "CubeProg: Flash project (SWD)"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "CubeProg: Flash project (DFU)",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=usb1",
+                "--download",
+                // "${workspaceFolder}/build/Release/Piano_H7.elf",
+                "${command:cmake.launchTargetPath}"
+                // "-hardRst",
+                // "-rst",
+                // "--start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#17c4b6",
+                    "label": "$(plug) DFU",
+                    "detail": "CubeProg: Flash project (DFU USB)"
                 }
             },
             "problemMatcher": []

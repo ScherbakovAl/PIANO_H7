@@ -1058,8 +1058,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 37,
-                  "height": 16,
+                  "width": 60,
+                  "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1101,7 +1101,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "reset",
+                  "text": "jump to\nusb dfu!",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
