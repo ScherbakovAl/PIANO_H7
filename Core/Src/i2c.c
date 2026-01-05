@@ -66,7 +66,7 @@ void MX_I2C5_Init(void)
   LL_I2C_DisableGeneralCall(I2C5);
   LL_I2C_EnableClockStretching(I2C5);
   I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-  I2C_InitStruct.Timing = 0x60404E72;
+  I2C_InitStruct.Timing = 0x00D049FB;
   I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
   I2C_InitStruct.DigitalFilter = 0;
   I2C_InitStruct.OwnAddress1 = 0;
