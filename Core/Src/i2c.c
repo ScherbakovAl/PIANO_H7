@@ -24,8 +24,6 @@
 
 /* USER CODE END 0 */
 
-I2C_HandleTypeDef hi2c5;
-
 /* I2C5 init function */
 void MX_I2C5_Init(void)
 {
@@ -34,96 +32,51 @@ void MX_I2C5_Init(void)
 
   /* USER CODE END I2C5_Init 0 */
 
+  LL_I2C_InitTypeDef I2C_InitStruct = {0};
+
+  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  LL_RCC_SetI2CClockSource(LL_RCC_I2C123_CLKSOURCE_PCLK1);
+
+  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOC);
+  /**I2C5 GPIO Configuration
+  PC10   ------> I2C5_SDA
+  PC11   ------> I2C5_SCL
+  */
+  GPIO_InitStruct.Pin = CTP_I2C5_SDA_Pin|CTP_I2C5_SCL_Pin;
+  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
+  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
+  GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
+  GPIO_InitStruct.Alternate = LL_GPIO_AF_4;
+  LL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C5);
+
   /* USER CODE BEGIN I2C5_Init 1 */
 
   /* USER CODE END I2C5_Init 1 */
-  hi2c5.Instance = I2C5;
-  hi2c5.Init.Timing = 0x60404E72;
-  hi2c5.Init.OwnAddress1 = 0;
-  hi2c5.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-  hi2c5.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c5.Init.OwnAddress2 = 0;
-  hi2c5.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
-  hi2c5.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c5.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-  if (HAL_I2C_Init(&hi2c5) != HAL_OK)
-  {
-    Error_Handler();
-  }
 
-  /** Configure Analogue filter
+  /** I2C Initialization
   */
-  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c5, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Configure Digital filter
-  */
-  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c5, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
+  LL_I2C_EnableAutoEndMode(I2C5);
+  LL_I2C_SetOwnAddress2(I2C5, 0, LL_I2C_OWNADDRESS2_NOMASK);
+  LL_I2C_DisableOwnAddress2(I2C5);
+  LL_I2C_DisableGeneralCall(I2C5);
+  LL_I2C_EnableClockStretching(I2C5);
+  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+  I2C_InitStruct.Timing = 0x60404E72;
+  I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+  I2C_InitStruct.DigitalFilter = 0;
+  I2C_InitStruct.OwnAddress1 = 0;
+  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+  LL_I2C_Init(I2C5, &I2C_InitStruct);
   /* USER CODE BEGIN I2C5_Init 2 */
 
   /* USER CODE END I2C5_Init 2 */
 
-}
-
-void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
-{
-
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(i2cHandle->Instance==I2C5)
-  {
-  /* USER CODE BEGIN I2C5_MspInit 0 */
-
-  /* USER CODE END I2C5_MspInit 0 */
-    LL_RCC_SetI2CClockSource(LL_RCC_I2C123_CLKSOURCE_PCLK1);
-
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**I2C5 GPIO Configuration
-    PC10     ------> I2C5_SDA
-    PC11     ------> I2C5_SCL
-    */
-    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF4_I2C5;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-    /* I2C5 clock enable */
-    __HAL_RCC_I2C5_CLK_ENABLE();
-  /* USER CODE BEGIN I2C5_MspInit 1 */
-
-  /* USER CODE END I2C5_MspInit 1 */
-  }
-}
-
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
-{
-
-  if(i2cHandle->Instance==I2C5)
-  {
-  /* USER CODE BEGIN I2C5_MspDeInit 0 */
-
-  /* USER CODE END I2C5_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_I2C5_CLK_DISABLE();
-
-    /**I2C5 GPIO Configuration
-    PC10     ------> I2C5_SDA
-    PC11     ------> I2C5_SCL
-    */
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_10);
-
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_11);
-
-  /* USER CODE BEGIN I2C5_MspDeInit 1 */
-
-  /* USER CODE END I2C5_MspDeInit 1 */
-  }
 }
 
 /* USER CODE BEGIN 1 */
