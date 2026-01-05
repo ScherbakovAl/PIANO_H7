@@ -8,15 +8,12 @@
 #pragma once
 
 #include <stdint.h>
-#include "i2c.h"
 #include "gpio.h"
-#include "stm32h7xx_ll_i2c.h"
+#include "stm32h7xx_ll_gpio.h"
 
-#define FT6X36_ADDR 0x38 << 1
+#define FT6X36_ADDR 0x38
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 320;
-
-#define FT6336_I2C_PORT hi2c5
 
 //struct TouchPoints_HandleTypeDef {
 //	uint16_t point1_x;

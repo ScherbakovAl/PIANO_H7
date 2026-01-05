@@ -6,6 +6,7 @@
  */
 
 #include "ft6336.h"
+#include "stm32h7xx_ll_i2c.h"
 
 void FT6336_RST_L() {
 	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0);
