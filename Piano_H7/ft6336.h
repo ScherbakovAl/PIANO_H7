@@ -11,7 +11,7 @@
 #include "gpio.h"
 #include "stm32h7xx_ll_gpio.h"
 
-#define FT6X36_ADDR 0x38
+#define FT6X36_ADDR 0x38 << 1 
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 320;
 
