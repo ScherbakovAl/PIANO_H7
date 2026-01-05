@@ -70,6 +70,6 @@ void FT6336_RST_H();
 
 void FT6336_Init();
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint();
-void FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
-void FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
+uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
+uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
 
