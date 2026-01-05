@@ -18,120 +18,58 @@ void FT6336_RST_H() {
 
 TouchPoints_HandleTypeDef TouchPoints;
 
-#define FT6336_I2C I2C5
-#define FT6336_TIMEOUT 10000
-
-static void FT6336_I2C_WaitUntilReady(void) {
-	uint32_t timeout = FT6336_TIMEOUT;
-	// Wait until BUSY flag is cleared
-	while (LL_I2C_IsActiveFlag_BUSY(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-}
-
-static void FT6336_I2C_Start(void) {
-	LL_I2C_GenerateStartCondition(FT6336_I2C);
-}
-
-static void FT6336_I2C_Stop(void) {
-	LL_I2C_GenerateStopCondition(FT6336_I2C);
-}
-
-static void FT6336_I2C_SendAddress(uint8_t Address, uint8_t Direction) {
-	LL_I2C_TransmitData8(FT6336_I2C, (Address << 1) | Direction);
-}
-
-static void FT6336_I2C_WriteByte(uint8_t Data) {
-	LL_I2C_TransmitData8(FT6336_I2C, Data);
-	// Wait until TXE flag is set (data transferred)
-	uint32_t timeout = FT6336_TIMEOUT;
-	while (!LL_I2C_IsActiveFlag_TXE(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-}
-
-static uint8_t FT6336_I2C_ReadByte(void) {
-	// Wait until RXNE flag is set
-	uint32_t timeout = FT6336_TIMEOUT;
-	while (!LL_I2C_IsActiveFlag_RXNE(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-	return LL_I2C_ReceiveData8(FT6336_I2C);
-}
-
-void FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
-	FT6336_I2C_WaitUntilReady();
-
-	// Generate START
-	LL_I2C_GenerateStartCondition(FT6336_I2C);
-
-	// Send device address with write direction
-	FT6336_I2C_SendAddress(FT6X36_ADDR, LL_I2C_DIRECTION_WRITE);
-
-	// Wait for ADDR flag (address sent, ACK received)
-	uint32_t timeout = FT6336_TIMEOUT;
-	while (!LL_I2C_IsActiveFlag_ADDR(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-	LL_I2C_ClearFlag_ADDR(FT6336_I2C);
-
-	// Send register address
-	FT6336_I2C_WriteByte(RegAddress);
-
-	// Send data
+uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	// Ожидание готовности шины I2C
+	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	
+	// Настройка передачи
+	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
+		Size + 1, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
+	
+	// Ожидание готовности TX буфера и отправка адреса регистра
+	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	LL_I2C_TransmitData8(I2C5, RegAddress);
+	
+	// Отправка данных
 	for (uint16_t i = 0; i < Size; i++) {
-		FT6336_I2C_WriteByte(pData[i]);
+		while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+		LL_I2C_TransmitData8(I2C5, pData[i]);
 	}
-
-	// Generate STOP
-	FT6336_I2C_Stop();
+	
+	// Ожидание завершения передачи
+	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	LL_I2C_ClearFlag_STOP(I2C5);
+	
+	return 0; // Успех
 }
 
-void FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
-	FT6336_I2C_WaitUntilReady();
-
-	// Generate START
-	LL_I2C_GenerateStartCondition(FT6336_I2C);
-
-	// Send device address with write direction
-	FT6336_I2C_SendAddress(FT6X36_ADDR, LL_I2C_DIRECTION_WRITE);
-
-	// Wait for ADDR flag
-	uint32_t timeout = FT6336_TIMEOUT;
-	while (!LL_I2C_IsActiveFlag_ADDR(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-	LL_I2C_ClearFlag_ADDR(FT6336_I2C);
-
-	// Send register address
-	FT6336_I2C_WriteByte(RegAddress);
-
-	// Generate RESTART
-	LL_I2C_GenerateStartCondition(FT6336_I2C);
-
-	// Send device address with read direction
-	FT6336_I2C_SendAddress(FT6X36_ADDR, LL_I2C_DIRECTION_READ);
-
-	// Wait for ADDR flag
-	timeout = FT6336_TIMEOUT;
-	while (!LL_I2C_IsActiveFlag_ADDR(FT6336_I2C) && timeout > 0) {
-		timeout--;
-	}
-	LL_I2C_ClearFlag_ADDR(FT6336_I2C);
-
-	// Read data
+uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	// Ожидание готовности шины I2C
+	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	
+	// Отправка адреса регистра (запись)
+	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
+		1, LL_I2C_MODE_SOFTEND, LL_I2C_GENERATE_START_WRITE);
+	
+	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	LL_I2C_TransmitData8(I2C5, RegAddress);
+	
+	while (!LL_I2C_IsActiveFlag_TC(I2C5));
+	
+	// Чтение данных
+	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
+		Size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
+	
 	for (uint16_t i = 0; i < Size; i++) {
-		if (i == (Size - 1)) {
-			// Last byte: disable ACK
-			LL_I2C_AcknowledgeNextData(FT6336_I2C, LL_I2C_NACK);
-			// Generate STOP
-			FT6336_I2C_Stop();
-		}
-		pData[i] = FT6336_I2C_ReadByte();
+		while (!LL_I2C_IsActiveFlag_RXNE(I2C5));
+		pData[i] = LL_I2C_ReceiveData8(I2C5);
 	}
-
-	// Re-enable ACK for future transfers
-	LL_I2C_AcknowledgeNextData(FT6336_I2C, LL_I2C_ACK);
+	
+	// Ожидание завершения приема
+	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	LL_I2C_ClearFlag_STOP(I2C5);
+	
+	return 0; // Успех
 }
 
 void FT6336_Init(void) {
