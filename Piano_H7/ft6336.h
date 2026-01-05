@@ -15,12 +15,6 @@
 const int SCREEN_WIDTH = 480;
 const int SCREEN_HEIGHT = 320;
 
-//struct TouchPoints_HandleTypeDef {
-//	uint16_t point1_x;
-//	uint16_t point1_y;
-//	uint16_t point2_x;
-//	uint16_t point2_y;
-//};
 typedef struct {
 	uint16_t point1_x;
 	uint16_t point1_y;
