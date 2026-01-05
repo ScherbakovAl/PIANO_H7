@@ -8,9 +8,9 @@
 #pragma once
 
 #include <stdint.h>
- //#include "i2c.h"
+#include "i2c.h"
 #include "gpio.h"
-#include "stm32h7xx_hal.h"
+#include "stm32h7xx_ll_i2c.h"
 
 #define FT6X36_ADDR 0x38 << 1
 const int SCREEN_WIDTH = 480;
@@ -73,7 +73,6 @@ void FT6336_RST_H();
 
 void FT6336_Init();
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint();
-//void FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
-HAL_StatusTypeDef FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
-// void ReadTouchData();
+uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
+uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
 
