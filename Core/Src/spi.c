@@ -62,6 +62,31 @@ void MX_SPI3_Init(void)
   GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
   LL_GPIO_Init(LCD_SDI_GPIO_Port, &GPIO_InitStruct);
 
+  /* SPI3 DMA Init */
+
+  /* SPI3_TX Init */
+  LL_DMA_SetPeriphRequest(DMA1, LL_DMA_STREAM_0, LL_DMAMUX1_REQ_SPI3_TX);
+
+  LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_STREAM_0, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+
+  LL_DMA_SetStreamPriorityLevel(DMA1, LL_DMA_STREAM_0, LL_DMA_PRIORITY_LOW);
+
+  LL_DMA_SetMode(DMA1, LL_DMA_STREAM_0, LL_DMA_MODE_NORMAL);
+
+  LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_PERIPH_NOINCREMENT);
+
+  LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_MEMORY_INCREMENT);
+
+  LL_DMA_SetPeriphSize(DMA1, LL_DMA_STREAM_0, LL_DMA_PDATAALIGN_HALFWORD);
+
+  LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_HALFWORD);
+
+  LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_0);
+
+  /* SPI3 interrupt Init */
+  NVIC_SetPriority(SPI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(SPI3_IRQn);
+
   /* USER CODE BEGIN SPI3_Init 1 */
 
   /* USER CODE END SPI3_Init 1 */
