@@ -271,7 +271,28 @@ void SPI3_IRQHandler(void)
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
+	// Проверка флага Transfer Complete
+	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
+		LL_DMA_ClearFlag_TC1(DMA2);
+		// dma_transfer_complete = 1;
 
+		// Вызов callback если установлен
+		// if (lvgl_flush_complete_callback != NULL) {
+		// 	lvgl_flush_complete_callback();
+		// }
+	}
+
+	// Проверка флага Transfer Error
+	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
+		LL_DMA_ClearFlag_TE1(DMA2);
+		// Обработка ошибки
+		// dma_transfer_complete = 1; // Сброс флага чтобы не зависнуть
+	}
+
+	// Проверка флага Half Transfer (если нужно)
+	if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
+		LL_DMA_ClearFlag_HT1(DMA2);
+	}
   /* USER CODE END DMA2_Stream1_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
