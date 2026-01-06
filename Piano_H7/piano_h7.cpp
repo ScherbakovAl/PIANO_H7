@@ -891,8 +891,9 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	// 	LCD_Send_Data_16(color_p);
 	// 	++color_p;
 	// }
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height);
-	Send_DMA_Data8(color_p, width * height);
+	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height * 2);
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height * 2);
+	Send_DMA_Data8(color_p, width * height * 2);
 	// Send_DMA_Data16(color_p, width  * height);
 
 	// lv_display_flush_ready(disp);

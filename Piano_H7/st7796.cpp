@@ -16,6 +16,9 @@ lcd_dev lcddev;
 
 void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
 
+	// LCD_DC_C(); // ? надо?
+	// LCD_WR_REG(0x2c); // надо?
+	LCD_DC_D();
 	//	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	//	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t) color_p);
 	//	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, (width / 2) * height);
@@ -368,10 +371,10 @@ void LCD_Init() {
 	//	}
 
 		// DMA
-	// LL_SPI_EnableDMAReq_TX(SPI3);
-	//	LL_SPI_EnableIT_EOT(SPI3);
-	//	LL_SPI_EnableIT_TXP(SPI3);
-	// LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
+	LL_SPI_EnableDMAReq_TX(SPI3);
+	// LL_SPI_EnableIT_EOT(SPI3);
+	// LL_SPI_EnableIT_TXP(SPI3);
+	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 }
 
 void LCD_RES_H() {
