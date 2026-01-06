@@ -861,13 +861,13 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	int32_t height = area->y2 - area->y1 + 1;
 	int32_t width = area->x2 - area->x1 + 1;
-	for (int32_t i = 0; i < width * height; i++) {
-		LCD_Send_Data_16(color_p);
-		++color_p;
-	}
-	// Send_DMA_Data8(color_p, width  * height);
+	// for (int32_t i = 0; i < width * height; i++) {
+	// 	LCD_Send_Data_16(color_p);
+	// 	++color_p;
+	// }
+	Send_DMA_Data16(color_p, width  * height);
 
-	lv_display_flush_ready(disp);
+	// lv_display_flush_ready(disp);
 }
 
 // LVGL ACTIONS
