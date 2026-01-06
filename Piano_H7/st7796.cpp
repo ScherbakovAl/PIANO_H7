@@ -14,7 +14,7 @@ uint16_t POINT_COLOR = 0x0000;
 
 lcd_dev lcddev;
 
-void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize) {
+void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
 
 	//	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	//	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t) color_p);

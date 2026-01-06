@@ -857,7 +857,7 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 }
 
 
-void DMA2_Stream1_TransferComplete(){
+void DMA2_Stream1_TransferComplete() {
 	// Проверка флага Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
 		LL_DMA_ClearFlag_TC1(DMA2);
@@ -891,8 +891,8 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	// 	LCD_Send_Data_16(color_p);
 	// 	++color_p;
 	// }
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width  * height);
-	Send_DMA_Data8((uint8_t*)color_p, width  * height);
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height);
+	Send_DMA_Data8(color_p, width * height);
 	// Send_DMA_Data16(color_p, width  * height);
 
 	// lv_display_flush_ready(disp);
@@ -1259,7 +1259,7 @@ extern "C" {
 			}
 		}
 	}
-extern uint32_t *dfu_boot_flag;
+	extern uint32_t* dfu_boot_flag;
 	void action_piano_off(lv_event_t* e) {
 		SCB_DisableDCache();
 		SCB_DisableICache();
