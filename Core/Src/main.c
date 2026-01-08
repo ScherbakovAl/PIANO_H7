@@ -127,6 +127,7 @@ int main(void)
   MX_I2C5_Init();
   MX_SPI3_Init();
   MX_TIM4_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
   h7();
   /* USER CODE END 2 */

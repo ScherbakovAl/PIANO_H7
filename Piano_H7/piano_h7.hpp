@@ -112,7 +112,7 @@ extern "C" {
 	const uint8_t start_adress_chip_off = 20; // включительно
 	const uint8_t end_adress_chip_off = 10; // включительно всего 23
 
-	const uint32_t start_cursor = 70;
+	const uint32_t start_cursor = 27;
 	volatile uint32_t cursor = start_cursor;
 
 	uint8_t rx_data[4] = { };

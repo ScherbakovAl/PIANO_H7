@@ -47,9 +47,9 @@ int tt2 = 0;
 int tt3 = 0;
 float timer_data_in = 0;
 
-#define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565))
+#define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)) // TODO 565 or 888? (было 565)
 #define BUFF_SIZE (480 * 20 * BYTES_PER_PIXEL)
-static lv_color16_t buf_1[BUFF_SIZE];
+static lv_color16_t buf_1[BUFF_SIZE]; // TODO 16 or 8
 static lv_color16_t buf_2[BUFF_SIZE];
 
 lv_display_t* disp;
@@ -103,6 +103,9 @@ void h7() {
 
 	LL_TIM_EnableCounter(TIM4); // для LVGL
 	LL_TIM_EnableIT_UPDATE(TIM4);
+
+	LL_TIM_EnableCounter(TIM5); // ограничение скорости сканирования плат
+
 	//---------------------------------
 
 	// UART init
@@ -193,47 +196,55 @@ void h7() {
 
 	while (1) {
 		tud_task();
+		GPIOA->BSRR |= 0x10; // for test // DEBUG
 		lv_timer_handler();
+		GPIOA->BSRR |= 0x100000; // for test // DEBUG
+		GPIOA->BSRR |= 0x20; // for test // DEBUG
 		ui_tick();
+		GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
-		if (cur_disp == on) {
-			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-				sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
-				for (int i = 0; i < 7; ++i) {
-					UART4_Receive_Settings();
-					compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
+
+		if (TIM5->CNT > 5000) { // 10000 = 10ms (чтобы калибровка не наступала себе на пятки)
+			if (cur_disp == on) {
+				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
+					for (int i = 0; i < 7; ++i) {
+						UART4_Receive_Settings();
+						compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
+					}
+					checkDataOnSensor(adress);
 				}
-				checkDataOnSensor(adress);
+				chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
+				l = std::to_string(compsCHART_CALIB[cursor - 1]);
+				r = std::to_string(compsCHART_CALIB[cursor + 1]);
+				lv_chart_refresh(cur_shart);
 			}
-			chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
-			l = std::to_string(compsCHART_CALIB[cursor - 1]);
-			r = std::to_string(compsCHART_CALIB[cursor + 1]);
-			lv_chart_refresh(cur_shart);
+
+			if (cur_disp == off) {
+				for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
+					for (int i = 0; i < 7; ++i) {
+						UART4_Receive_Settings();
+						compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
+					}
+					checkDataOnSensor(adress);
+				}
+				chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
+				l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
+				r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
+				lv_chart_refresh(cur_shart);
+			}
+			TIM5->CNT = 0;
 		}
 
-		if (cur_disp == off) {
-			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-				sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
-				for (int i = 0; i < 7; ++i) {
-					UART4_Receive_Settings();
-					compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
-				}
-				checkDataOnSensor(adress);
-			}
-			chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
-			l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
-			r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
-			lv_chart_refresh(cur_shart);
-		}
-
-		// if (test_memory < 196) { // for test
-		// 	if (TIM2->CNT > 80000000) {
-		// 		debugg_fn(std::format(" #{} CHART_0 = {}  CHART_1 = {}", test_memory, compsCHART_0[test_memory], compsCHART_1[test_memory]));
-		// 		TIM2->CNT = 0;
-		// 		++test_memory;
-		// 	}
-		// }
-// #define deb
+			// if (test_memory < 196) { // for test
+			// 	if (TIM2->CNT > 80000000) {
+			// 		debugg_fn(std::format(" #{} CHART_0 = {}  CHART_1 = {}", test_memory, compsCHART_0[test_memory], compsCHART_1[test_memory]));
+			// 		TIM2->CNT = 0;
+			// 		++test_memory;
+			// 	}
+			// }
+	// #define deb
 #ifdef deb
 		if (fl) {
 		// 	// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
@@ -504,7 +515,6 @@ void DMA1_RX(void) {
 	}
 	else {
 
-		// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX); // вариант
 		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 		const int rxB = rx_data[0];
@@ -861,25 +871,19 @@ void DMA2_Stream1_TransferComplete() {
 	// Проверка флага Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
 		LL_DMA_ClearFlag_TC1(DMA2);
-		// dma_transfer_complete = 1;
-
-		// Вызов callback если установлен
-		// if (lvgl_flush_complete_callback != NULL) {
-		// 	lvgl_flush_complete_callback();
-		// }
 	}
 
 	// Проверка флага Transfer Error
 	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
 		LL_DMA_ClearFlag_TE1(DMA2);
 		// Обработка ошибки
-		// dma_transfer_complete = 1; // Сброс флага чтобы не зависнуть
 	}
 
 	// Проверка флага Half Transfer (если нужно)
 	if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
 		LL_DMA_ClearFlag_HT1(DMA2);
 	}
+
 	lv_display_flush_ready(disp);
 }
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
@@ -887,16 +891,15 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	int32_t height = area->y2 - area->y1 + 1;
 	int32_t width = area->x2 - area->x1 + 1;
+
 	// for (int32_t i = 0; i < width * height; i++) {
 	// 	LCD_Send_Data_16(color_p);
 	// 	++color_p;
 	// }
-	// SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height * 2);
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), width * height * 2);
-	Send_DMA_Data8(color_p, width * height * 2);
-	// Send_DMA_Data16(color_p, width  * height);
-
 	// lv_display_flush_ready(disp);
+
+	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), (width * height * 2) + 32);
+	Send_DMA_Data8(color_p, width * height * 2);
 }
 
 // LVGL ACTIONS

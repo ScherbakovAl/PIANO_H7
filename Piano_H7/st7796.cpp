@@ -19,43 +19,12 @@ void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
 	// LCD_DC_C(); // ? надо?
 	// LCD_WR_REG(0x2c); // надо?
 	LCD_DC_D();
-	//	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
-	//	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t) color_p);
-	//	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, (width / 2) * height);
 
-	// LL_SPI_SetDataWidth(SPI3, LL_SPI_DATAWIDTH_8BIT);
-	// LL_SPI_Disable(SPI3);
-	// LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_BYTE);
-	// LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_1, LL_DMA_MDATAALIGN_BYTE);
 	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	//	LL_DMA_ClearFlag_TC3(DMA2);
-	//	LL_DMA_ClearFlag_TE3(DMA2);
-	//	LL_SPI_EnableDMAReq_TX(SPI3);
-	//	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
-	//	LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_1);
-	//	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
 	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
-	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1,
-		LL_SPI_DMA_GetTxRegAddr(SPI3));
+	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff);
-	//    LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_1, (uint32_t)buff, LL_SPI_DMA_GetRegAddr(SPI3), LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_STREAM_1));
 	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
-	//	LL_SPI_Enable(SPI3);
-	//	while (!flag_DMA_STREAM1_bsy) {
-	//	}
-	//	flag_DMA_STREAM1_bsy = 0;
-	LL_mDelay(1);
-
-	//	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	//	LL_SPI_Disable(SPI3);
-	//	LL_DMA_ClearFlag_TC3(DMA2);
-	//	LL_DMA_ClearFlag_TE3(DMA2);
-	//	LL_SPI_DisableDMAReq_TX(SPI3);
-	//	LL_DMA_DisableIT_TC(DMA2, LL_DMA_STREAM_1);
-	//	LL_DMA_DisableIT_TE(DMA2, LL_DMA_STREAM_1);
-	//	LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_HALFWORD);
-	//	LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_1, LL_DMA_MDATAALIGN_HALFWORD);
-	//	LL_SPI_Enable(SPI3);
 }
 
 void Send_DMA_Data16(uint16_t* buff, uint16_t dataSize) {
@@ -370,10 +339,8 @@ void LCD_Init() {
 	}
 	//	}
 
-		// DMA
+	// DMA
 	LL_SPI_EnableDMAReq_TX(SPI3);
-	// LL_SPI_EnableIT_EOT(SPI3);
-	// LL_SPI_EnableIT_TXP(SPI3);
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 }
 
