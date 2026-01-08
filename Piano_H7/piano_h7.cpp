@@ -515,6 +515,7 @@ void DMA1_RX(void) {
 	}
 	else {
 
+		// SCB_CleanInvalidateDCache(); // or
 		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 		const int rxB = rx_data[0];

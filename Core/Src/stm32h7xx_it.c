@@ -223,9 +223,7 @@ void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
   LL_TIM_ClearFlag_UPDATE(TIM4);
-  // GPIOA->BSRR |= 0x20; // for test 
   lv_tick_inc(1);
-  // GPIOA->BSRR |= 0x200000; // for test
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -238,7 +236,7 @@ void TIM4_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-  // GPIOA->BSRR |= 0x20; // for test
+
   /* USER CODE END EXTI15_10_IRQn 0 */
   if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
   {
@@ -248,7 +246,7 @@ void EXTI15_10_IRQHandler(void)
     /* USER CODE END LL_EXTI_LINE_13 */
   }
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-  // GPIOA->BSRR |= 0x200000; // for test
+
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
@@ -271,30 +269,7 @@ void SPI3_IRQHandler(void)
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
-
-  DMA2_Stream1_TransferComplete();
-	// // Проверка флага Transfer Complete
-	// if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
-	// 	LL_DMA_ClearFlag_TC1(DMA2);
-	// 	// dma_transfer_complete = 1;
-
-	// 	// Вызов callback если установлен
-	// 	// if (lvgl_flush_complete_callback != NULL) {
-	// 	// 	lvgl_flush_complete_callback();
-	// 	// }
-	// }
-
-	// // Проверка флага Transfer Error
-	// if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
-	// 	LL_DMA_ClearFlag_TE1(DMA2);
-	// 	// Обработка ошибки
-	// 	// dma_transfer_complete = 1; // Сброс флага чтобы не зависнуть
-	// }
-
-	// // Проверка флага Half Transfer (если нужно)
-	// if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
-	// 	LL_DMA_ClearFlag_HT1(DMA2);
-	// }
+  DMA2_Stream1_TransferComplete();	
   /* USER CODE END DMA2_Stream1_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
@@ -307,9 +282,7 @@ void DMA2_Stream1_IRQHandler(void)
 void OTG_HS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
-  // GPIOA->BSRR |= 0x20; // for test
 	tud_int_handler(BOARD_DEVICE_RHPORT_NUM);
-  // GPIOA->BSRR |= 0x200000; // for test
 	return;
   /* USER CODE END OTG_HS_IRQn 0 */
   HAL_HCD_IRQHandler(&hhcd_USB_OTG_HS);
