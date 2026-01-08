@@ -199,12 +199,12 @@ void h7() {
 		GPIOA->BSRR |= 0x10; // for test // DEBUG
 		lv_timer_handler();
 		GPIOA->BSRR |= 0x100000; // for test // DEBUG
+
 		GPIOA->BSRR |= 0x20; // for test // DEBUG
 		ui_tick();
 		GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
-
-		if (TIM5->CNT > 6000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
+		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == on) {
 				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
@@ -290,8 +290,8 @@ void h7() {
 			fl = 0; // for test fl
 		}
 #endif
-	}
-} // h7
+		}
+	} // h7
 
 void sync() {
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
@@ -842,6 +842,31 @@ void send_test_midi() { // for test   // TODO можно удалить
 
 // LVGL UTILITES
 //---------------------------------
+
+void DMA2_Stream3_i2c(void) {
+	// Обработка Transfer Complete
+	if (LL_DMA_IsActiveFlag_TC3(DMA2)) {
+		LL_DMA_ClearFlag_TC3(DMA2);
+		ft6336_dma_rx_complete = 1;
+	}
+
+	// Обработка Transfer Error
+	// if (LL_DMA_IsActiveFlag_TE3(DMA2)) {
+	// 	LL_DMA_ClearFlag_TE3(DMA2);
+	// 	ft6336_dma_error = 1;
+	// }
+
+	// Обработка Half Transfer (опционально)
+	// if (LL_DMA_IsActiveFlag_HT3(DMA2)) {
+	// 	LL_DMA_ClearFlag_HT3(DMA2);
+	// }
+
+	// Обработка Direct Mode Error (опционально)
+	// if (LL_DMA_IsActiveFlag_DME3(DMA2)) {
+	// 	LL_DMA_ClearFlag_DME3(DMA2);
+	// }
+}
+
 void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 	// if (touchpad_pressed) {
 	// 	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
@@ -853,7 +878,7 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 	// 	data->state = LV_INDEV_STATE_RELEASED;
 	// }
 	uint8_t touchStatus = 0;
-	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
+	FT6336_ReadRegister_DMA(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
 	uint8_t touchCount = touchStatus & 0x0F;
 
 	if (touchCount > 0) {

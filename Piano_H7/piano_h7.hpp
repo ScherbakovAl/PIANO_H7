@@ -194,6 +194,7 @@ extern "C" {
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
 	void DMA2_Stream1_TransferComplete();
+	void DMA2_Stream3_i2c();
 
 	void configCharts();
 }

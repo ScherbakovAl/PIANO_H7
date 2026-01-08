@@ -47,6 +47,7 @@
 extern volatile int touchpad_pressed;
 extern lv_display_t* disp;
 extern void DMA2_Stream1_TransferComplete(); // ??
+extern void DMA2_Stream3_i2c();
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -223,7 +224,7 @@ void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
   LL_TIM_ClearFlag_UPDATE(TIM4);
-  lv_tick_inc(1);
+  lv_tick_inc(5);
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -274,6 +275,19 @@ void DMA2_Stream1_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
   /* USER CODE END DMA2_Stream1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream3 global interrupt.
+  */
+void DMA2_Stream3_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream3_IRQn 0 */
+  DMA2_Stream3_i2c();
+  /* USER CODE END DMA2_Stream3_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream3_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream3_IRQn 1 */
 }
 
 /**
