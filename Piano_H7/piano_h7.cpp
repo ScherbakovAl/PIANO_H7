@@ -204,7 +204,7 @@ void h7() {
 		GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
 
-		if (TIM5->CNT > 5000) { // 10000 = 10ms (чтобы калибровка не наступала себе на пятки)
+		if (TIM5->CNT > 6000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == on) {
 				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
@@ -889,8 +889,9 @@ void DMA2_Stream1_TransferComplete() {
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
-	int32_t height = area->y2 - area->y1 + 1;
-	int32_t width = area->x2 - area->x1 + 1;
+	const int32_t height = area->y2 - area->y1 + 1;
+	const int32_t width = area->x2 - area->x1 + 1;
+	const int32_t wh_ = width * height * 2;
 
 	// for (int32_t i = 0; i < width * height; i++) {
 	// 	LCD_Send_Data_16(color_p);
@@ -898,8 +899,9 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	// }
 	// lv_display_flush_ready(disp);
 
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), (width * height * 2) + 32);
-	Send_DMA_Data8(color_p, width * height * 2);
+	// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), wh_ + 32);
+	SCB_CleanInvalidateDCache(); // or
+	Send_DMA_Data8(color_p, wh_);
 }
 
 // LVGL ACTIONS
