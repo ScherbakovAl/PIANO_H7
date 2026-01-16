@@ -196,13 +196,13 @@ void h7() {
 
 	while (1) {
 		tud_task();
-		GPIOA->BSRR |= 0x10; // for test // DEBUG
-		lv_timer_handler();
 		GPIOA->BSRR |= 0x100000; // for test // DEBUG
-
-		GPIOA->BSRR |= 0x20; // for test // DEBUG
+		lv_timer_handler();
+		
+		// GPIOA->BSRR |= 0x20; // for test // DEBUG
 		ui_tick();
-		GPIOA->BSRR |= 0x200000; // for test // DEBUG
+		GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == on) {
@@ -1114,7 +1114,7 @@ extern "C" {
 
 	void action_cursor_minus(lv_event_t* e) {
 		if (cursor > 0) {
-			--cursor;
+			cursor = cursor - 1;
 		}
 		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
@@ -1131,7 +1131,7 @@ extern "C" {
 
 	void action_cursor_plus(lv_event_t* e) {
 		if (cursor < 99) {
-			++cursor;
+			cursor = cursor + 1;
 		}
 		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
