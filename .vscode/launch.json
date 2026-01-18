@@ -18,6 +18,7 @@
             "servertype": "stlink",
             "device": "STM32H723VGTx", //MCU used
             "interface": "swd",
+            "showDevDebugOutput": "raw", // Включаем подробный вывод GDB
             // "serialNumber": "24003800070000574B31534E", // black stmH7
             // "serialNumber": "7400410007000059334D524E", // blue stmG4
             // "runToEntryPoint": "main",
@@ -27,10 +28,11 @@
             "stm32cubeprogrammer": "${config:STM32VSCodeExtension.cubeCLT.path}/STM32CubeProgrammer/bin",
             "stlinkPath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
             "armToolchainPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin",
-            "gdbPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+            // "gdbPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+            "gdbPath": "/usr/bin/gdb",
             "serverArgs": [
                 "-m",
-                "0",
+                "0"
             ],
             //"preLaunchTask": "Build + Flash"
             /* If you use external loader, add additional arguments */
@@ -50,6 +52,7 @@
             "servertype": "stlink",
             "device": "STM32H723VGTx", //MCU used
             "interface": "swd",
+            "showDevDebugOutput": "raw", // Включаем подробный вывод GDB
             // "serialNumber": "24003800070000574B31534E", // black stmH7
             // "serialNumber": "7400410007000059334D524E", // blue stmG4
             // "runToEntryPoint": "main",
@@ -59,10 +62,11 @@
             "stm32cubeprogrammer": "${config:STM32VSCodeExtension.cubeCLT.path}/STM32CubeProgrammer/bin",
             "stlinkPath": "${config:STM32VSCodeExtension.cubeCLT.path}/STLink-gdb-server/bin/ST-LINK_gdbserver",
             "armToolchainPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin",
-            "gdbPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+            // "gdbPath": "${config:STM32VSCodeExtension.cubeCLT.path}/GNU-tools-for-STM32/bin/arm-none-eabi-gdb",
+            "gdbPath": "/usr/bin/gdb",
             "serverArgs": [
                 "-m",
-                "0",
+                "0"
             ],
             /* If you use external loader, add additional arguments */
             //"serverArgs": ["--extload", "path/to/ext/loader.stldr"],
