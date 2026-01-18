@@ -196,18 +196,14 @@ void h7() {
 
 	while (1) {
 		tud_task();
-<<<<<<< Updated upstream
 		GPIOA->BSRR |= 0x100000; // for test // DEBUG
 		lv_timer_handler();
 		
 		// GPIOA->BSRR |= 0x20; // for test // DEBUG
-=======
-		// GPIOA->BSRR |= 0x10; // for test // DEBUG
-		lv_timer_handler();
+		// GPIOA->BSRR |= 0x10; // for test // DEBU
 		// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 
 		GPIOA->BSRR |= 0x20; // for test // DEBUG
->>>>>>> Stashed changes
 		ui_tick();
 		GPIOA->BSRR |= 0x10; // for test // DEBUG
 		// GPIOA->BSRR |= 0x200000; // for test // DEBUG
