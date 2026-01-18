@@ -99,7 +99,7 @@ LV_ATTRIBUTE_TIMER_HANDLER uint32_t lv_timer_handler(void)
         state_p->timer_created             = false;
 
         timer_active = lv_ll_get_head(timer_head);
-        while(timer_active) {
+        while(timer_active) { // TODO таймер тут?
             /*The timer might be deleted if it runs only once ('repeat_count = 1')
              *So get next element until the current is surely valid*/
             next = lv_ll_get_next(timer_head, timer_active);
@@ -308,7 +308,7 @@ bool lv_timer_get_paused(lv_timer_t * timer)
  * @param timer pointer to lv_timer
  * @return true: execute, false: not executed
  */
-static bool lv_timer_exec(lv_timer_t * timer)
+static bool lv_timer_exec(lv_timer_t * timer) // TODO а здесь что?
 {
     if(timer->paused) return false;
 
