@@ -192,7 +192,7 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 8.209278389006043,
-              "selected": 2,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -1039,12 +1039,13 @@
     "[display_piano.eez-project]:/userPages/1[flow-state]": {
       "selection": {
         "0": {
-          "0": {},
+          "0": {
+            "$selected": true
+          },
           "5": {},
           "6": {},
           "7": {
-            "0": {},
-            "$selected": true
+            "0": {}
           },
           "8": {},
           "9": {},
@@ -1335,7 +1336,8 @@
   "lvglExpandedPropertiesGroup": [
     "TEXT",
     "MISCELLANEOUS",
-    "BORDER"
+    "BORDER",
+    "POSITION AND SIZE"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,

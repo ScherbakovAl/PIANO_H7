@@ -196,10 +196,18 @@ void h7() {
 
 	while (1) {
 		tud_task();
+<<<<<<< Updated upstream
 		GPIOA->BSRR |= 0x100000; // for test // DEBUG
 		lv_timer_handler();
 		
 		// GPIOA->BSRR |= 0x20; // for test // DEBUG
+=======
+		// GPIOA->BSRR |= 0x10; // for test // DEBUG
+		lv_timer_handler();
+		// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+
+		GPIOA->BSRR |= 0x20; // for test // DEBUG
+>>>>>>> Stashed changes
 		ui_tick();
 		GPIOA->BSRR |= 0x10; // for test // DEBUG
 		// GPIOA->BSRR |= 0x200000; // for test // DEBUG
@@ -506,7 +514,7 @@ void DMA1_RX(void) {
 	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
-	// GPIOA->BSRR |= 0x10; // for test // DEBUG
+	GPIOA->BSRR |= 0x10; // for test // DEBUG
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
 		LL_USART_ClearFlag_NE(UART5);
@@ -602,7 +610,7 @@ void DMA1_RX(void) {
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
-	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void USART_Noise_Error_detected() {
