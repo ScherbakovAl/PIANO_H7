@@ -193,6 +193,8 @@ extern "C" {
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
+	void my_flush_wait(lv_display_t *disp);
+
 	void DMA2_Stream1_TransferComplete();
 	void DMA2_Stream3_i2c();
 

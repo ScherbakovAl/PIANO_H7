@@ -140,6 +140,8 @@ void h7() {
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
+	// lv_display_set_flush_wait_cb(disp, my_flush_wait);
+
 	// TOUCH start
 	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
 	indev = lv_indev_create();
@@ -196,18 +198,12 @@ void h7() {
 
 	while (1) {
 		tud_task();
-		GPIOA->BSRR |= 0x100000; // for test // DEBUG
-		lv_timer_handler();
-		
-		// GPIOA->BSRR |= 0x20; // for test // DEBUG
-		// GPIOA->BSRR |= 0x10; // for test // DEBU
+		// GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// lv_timer_handler();
 		// GPIOA->BSRR |= 0x100000; // for test // DEBUG
-
-		GPIOA->BSRR |= 0x20; // for test // DEBUG
+		lv_timer_handler_run_in_period(10);
 		ui_tick();
-		GPIOA->BSRR |= 0x10; // for test // DEBUG
-		// GPIOA->BSRR |= 0x200000; // for test // DEBUG
-
+		
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == on) {
 				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
@@ -294,8 +290,8 @@ void h7() {
 			fl = 0; // for test fl
 		}
 #endif
-		}
-	} // h7
+	}
+} // h7
 
 void sync() {
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
@@ -510,7 +506,7 @@ void DMA1_RX(void) {
 	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
-	GPIOA->BSRR |= 0x10; // for test // DEBUG
+	// GPIOA->BSRR |= 0x10; // for test // DEBUG
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
 		LL_USART_ClearFlag_NE(UART5);
@@ -530,10 +526,10 @@ void DMA1_RX(void) {
 
 
 		if (rxB > 168) { // DEBUG
-			GPIOA->BSRR |= 0x10; // for test // DEBUG
-			GPIOA->BSRR |= 0x100000; // for test // DEBUG
-			GPIOA->BSRR |= 0x10; // for test // DEBUG
-			GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			// GPIOA->BSRR |= 0x10; // for test // DEBUG
+			// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+			// GPIOA->BSRR |= 0x10; // for test // DEBUG
+			// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 			USART_Noise_Error_detected(); // DEBUG
 			debugg_fn("... No > 168");
 		}
@@ -606,7 +602,7 @@ void DMA1_RX(void) {
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
-	GPIOA->BSRR |= 0x100000; // for test // DEBUG
+	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void USART_Noise_Error_detected() {
@@ -847,7 +843,7 @@ void send_test_midi() { // for test   // TODO можно удалить
 // LVGL UTILITES
 //---------------------------------
 
-void DMA2_Stream3_i2c(void) {
+void DMA2_Stream3_i2c(void) { // DMA touch - панели
 	// Обработка Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC3(DMA2)) {
 		LL_DMA_ClearFlag_TC3(DMA2);
@@ -881,10 +877,10 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 	// else {
 	// 	data->state = LV_INDEV_STATE_RELEASED;
 	// }
-	uint8_t touchStatus = 0;
-	FT6336_ReadRegister_DMA(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
-	uint8_t touchCount = touchStatus & 0x0F;
 
+	uint8_t touchStatus = 0;
+	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
+	uint8_t touchCount = touchStatus & 0x0F;
 	if (touchCount > 0) {
 		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
 		data->point.x = TP.point1_x;
@@ -896,8 +892,7 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 	}
 }
 
-
-void DMA2_Stream1_TransferComplete() {
+void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	// Проверка флага Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
 		LL_DMA_ClearFlag_TC1(DMA2);
@@ -916,22 +911,35 @@ void DMA2_Stream1_TransferComplete() {
 
 	lv_display_flush_ready(disp);
 }
+
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
+	// GPIOA->BSRR |= 0x20; // for test // DEBUG
+
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 2;
 
 	// for (int32_t i = 0; i < width * height; i++) {
-	// 	LCD_Send_Data_16(color_p);
-	// 	++color_p;
-	// }
-	// lv_display_flush_ready(disp);
+		// 	LCD_Send_Data_16(color_p);
+		// 	++color_p;
+		// }
+		// lv_display_flush_ready(disp);
 
 	// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), wh_ + 32);
 	SCB_CleanInvalidateDCache(); // or
 	Send_DMA_Data8(color_p, wh_);
+
+	// GPIOA->BSRR |= 0x200000; // for test // DEBUG
+
+}
+
+void my_flush_wait(lv_display_t* disp) {
+	GPIOA->BSRR |= 0x20; // for test // DEBUG
+	GPIOA->BSRR |= 0x200000; // for test // DEBUG
+	lv_display_flush_ready(disp);
+
 }
 
 // LVGL ACTIONS

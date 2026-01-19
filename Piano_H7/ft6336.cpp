@@ -81,11 +81,10 @@ uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Siz
 	// Сброс флагов
 	ft6336_dma_rx_complete = 0;
 	ft6336_dma_error = 0;
-
 	SCB_CleanInvalidateDCache(); // or
 
 	// Ожидание готовности шины I2C
-	// while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
 
 	// Отправка адреса регистра (запись)
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT, 1, LL_I2C_MODE_SOFTEND, LL_I2C_GENERATE_START_WRITE);
@@ -105,7 +104,6 @@ uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Siz
 	LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_3,
 		(uint32_t)&I2C5->RXDR, (uint32_t)pData,
 		LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-
 	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_3, Size);
 
 	// Включение DMA для I2C
@@ -175,17 +173,17 @@ TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 	uint8_t touchStatus = 0;
 	uint8_t touchData[8];
 
-	FT6336_ReadRegister_DMA(FT6336_TD_STATUS, &touchStatus, 1);
+	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);
 	uint8_t touchCount = touchStatus & 0x0F; // получить количество точек
 
 	if (touchCount > 0) {
-		FT6336_ReadRegister_DMA(FT6336_P1_XH, touchData, 4); // первая точка
+		FT6336_ReadRegister(FT6336_P1_XH, touchData, 4); // первая точка
 		touchPoints.point1_x = ((touchData[0] & 0x0F) << 8) | touchData[1];
 		touchPoints.point1_y = ((touchData[2] & 0x0F) << 8) | touchData[3];
 		AdjustTouchCoordinates(&touchPoints.point1_x, &touchPoints.point1_y);
 
 		if (touchCount > 1) {
-			FT6336_ReadRegister_DMA(FT6336_P2_XH, &touchData[4], 4);
+			FT6336_ReadRegister(FT6336_P2_XH, &touchData[4], 4);
 			touchPoints.point2_x = ((touchData[4] & 0x0F) << 8) | touchData[5];
 			touchPoints.point2_y = ((touchData[6] & 0x0F) << 8) | touchData[7];
 			AdjustTouchCoordinates(&touchPoints.point2_x,
