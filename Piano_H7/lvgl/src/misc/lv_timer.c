@@ -63,10 +63,7 @@ void lv_timer_core_init(void)
 
 LV_ATTRIBUTE_TIMER_HANDLER uint32_t lv_timer_handler(void)
 {
-    GPIOA->BSRR |= 0x10; // for test // DEBUG
     LV_TRACE_TIMER("begin");
-    GPIOA->BSRR |= 0x100000; // for test // DEBUG
-    GPIOA->BSRR |= 0x10; // for test // DEBUG
 
     lv_timer_state_t * state_p = &state;
     /*Avoid concurrent running of the timer handler*/

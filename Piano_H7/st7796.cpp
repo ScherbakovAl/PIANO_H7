@@ -234,7 +234,7 @@ void LCD_Init() {
 	LCD_WR_DATA(0x48); // 0x48
 
 	LCD_WR_REG(0x3A); // COLMOD (Interface Pixel Format, Формат цвета)
-	LCD_WR_DATA(0x05); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
+	LCD_WR_DATA(0x55); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
 
 	//	/*
 		// с этими настройками немного цвет меняется
@@ -319,7 +319,7 @@ void LCD_Init() {
 
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
 
-	LCD_direction(3);
+	LCD_direction(0);
 
 	LCD_Clear(0x0000); // test
 	LCD_Clear(0x07E0);

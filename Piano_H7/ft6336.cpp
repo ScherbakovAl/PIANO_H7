@@ -180,14 +180,13 @@ TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 		FT6336_ReadRegister(FT6336_P1_XH, touchData, 4); // первая точка
 		touchPoints.point1_x = ((touchData[0] & 0x0F) << 8) | touchData[1];
 		touchPoints.point1_y = ((touchData[2] & 0x0F) << 8) | touchData[3];
-		AdjustTouchCoordinates(&touchPoints.point1_x, &touchPoints.point1_y);
+		// AdjustTouchCoordinates(&touchPoints.point1_x, &touchPoints.point1_y);
 
 		if (touchCount > 1) {
 			FT6336_ReadRegister(FT6336_P2_XH, &touchData[4], 4);
 			touchPoints.point2_x = ((touchData[4] & 0x0F) << 8) | touchData[5];
 			touchPoints.point2_y = ((touchData[6] & 0x0F) << 8) | touchData[7];
-			AdjustTouchCoordinates(&touchPoints.point2_x,
-				&touchPoints.point2_y);
+			// AdjustTouchCoordinates(&touchPoints.point2_x, &touchPoints.point2_y);
 		}
 	}
 	return touchPoints;
