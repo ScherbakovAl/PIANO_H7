@@ -84,7 +84,7 @@ void MX_SPI3_Init(void)
   LL_DMA_DisableFifoMode(DMA2, LL_DMA_STREAM_1);
 
   /* SPI3 interrupt Init */
-  NVIC_SetPriority(SPI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_SetPriority(SPI3_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),1, 0));
   NVIC_EnableIRQ(SPI3_IRQn);
 
   /* USER CODE BEGIN SPI3_Init 1 */
