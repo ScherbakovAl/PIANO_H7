@@ -60,11 +60,13 @@ lv_chart_series_t* ser_on_green;
 lv_chart_series_t* ser_on_red;
 lv_chart_series_t* ser_on_blue;
 lv_chart_cursor_t* c_on;
+lv_chart_cursor_t* ch_on;
 lv_style_t cursor_style;
 lv_chart_series_t* ser_off_green;
 lv_chart_series_t* ser_off_red;
 lv_chart_series_t* ser_off_blue;
 lv_chart_cursor_t* c_off;
+lv_chart_cursor_t* ch_off;
 
 std::string test_t_out_fl; // for test
 std::string test_speed_fl; // for test
@@ -212,11 +214,12 @@ void h7() {
 						UART4_Receive_Settings();
 						compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
 					}
-					checkDataOnSensor(adress);
+					refresh_cursor(adress);
 				}
 				chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
 				l = std::to_string(compsCHART_CALIB[cursor - 1]);
 				r = std::to_string(compsCHART_CALIB[cursor + 1]);
+				lv_chart_set_cursor_point(objects.chart_on, ch_on, ser_on_blue, cursor - 7);
 				lv_chart_refresh(cur_shart);
 			}
 
@@ -227,11 +230,12 @@ void h7() {
 						UART4_Receive_Settings();
 						compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
 					}
-					checkDataOnSensor(adress);
+					refresh_cursor(adress);
 				}
 				chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
 				l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
 				r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
+				lv_chart_set_cursor_point(objects.chart_off, ch_off, ser_off_blue, cursor);
 				lv_chart_refresh(cur_shart);
 			}
 			TIM5->CNT = 0;
@@ -404,7 +408,7 @@ void all_g4_to_H7() {
 	}
 }
 
-void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh cursor"
+void refresh_cursor(const uint8_t& adress) {
 	for (int i = 0; i < 7; ++i) {
 		const int c = (adress * 7) + i;
 		bool fl_c = false;
@@ -425,7 +429,7 @@ void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh curso
 				lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 				sensor_off_1_data_string = std::to_string(compsCHART_0[c]);
 				sensor_off_2_data_string = std::to_string(compsCHART_1[c]);
-				cursor_string = std::to_string(cursor);
+				cursor_string = std::to_string(cursor + 1);
 			}
 			else {
 				cursor = c;
@@ -957,7 +961,9 @@ extern "C" {
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
 		c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
+		ch_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
 		lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
+		lv_chart_set_cursor_point(ob, ch_on, ser_on_blue, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -975,7 +981,9 @@ extern "C" {
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
 		c_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
+		ch_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
 		lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
+		lv_chart_set_cursor_point(ob, ch_off, ser_off_blue, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -1010,11 +1018,25 @@ extern "C" {
 		LL_USART_DisableDMAReq_RX(UART5);
 		cur_disp = on;
 		cur_shart = objects.chart_on;
-		lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
+		// lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
 		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO
+			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
+		}
+	}
+
+	void action_to_disp_calibration_off(lv_event_t* e) {
+		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
+		cur_disp = off;
+		cur_shart = objects.chart_off;
+		// lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
+		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
+		debugg_clear();
+		all_g4_to_H7();
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
@@ -1029,30 +1051,6 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_MANUAL_EDIT_ON);
 	}
 
-	void action_to_disp_graph_resize_on(lv_event_t* e) {
-		debugg_clear();
-		cur_disp = on;
-		cur_shart = objects.chart_on;
-		check_max_min();
-		action_s1__s2_upd(e);
-		lv_obj_set_parent(objects.chart_on, objects.d_chart_graph_resize_on);
-		loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_ON); // TODO loadScreen поставить в самый верх?
-	}
-
-	void action_to_disp_calibration_off(lv_event_t* e) {
-		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-		LL_USART_DisableDMAReq_RX(UART5);
-		cur_disp = off;
-		cur_shart = objects.chart_off;
-		lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
-		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
-		debugg_clear();
-		all_g4_to_H7();
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO
-			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
-		}
-	}
-
 	void action_to_disp_manual_edit_off(lv_event_t* e) {
 		debugg_clear();
 		cur_disp = off;
@@ -1061,6 +1059,16 @@ extern "C" {
 		action_s1__s2_upd(e);
 		lv_obj_set_parent(objects.chart_off, objects.d_chart_manual_edit_off);
 		loadScreen(SCREEN_ID_D_CHART_MANUAL_EDIT_OFF);
+	}
+
+	void action_to_disp_graph_resize_on(lv_event_t* e) {
+		debugg_clear();
+		cur_disp = on;
+		cur_shart = objects.chart_on;
+		check_max_min();
+		action_s1__s2_upd(e);
+		lv_obj_set_parent(objects.chart_on, objects.d_chart_graph_resize_on);
+		loadScreen(SCREEN_ID_D_CHART_GRAPH_RESIZE_ON); // TODO loadScreen поставить в самый верх?
 	}
 
 	void action_to_disp_graph_resize_off(lv_event_t* e) {
@@ -1141,7 +1149,7 @@ extern "C" {
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor);
+			cursor_string = std::to_string(cursor + 1);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1159,7 +1167,7 @@ extern "C" {
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor);
+			cursor_string = std::to_string(cursor + 1);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1177,7 +1185,7 @@ extern "C" {
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor);
+			cursor_string = std::to_string(cursor + 1);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1195,7 +1203,7 @@ extern "C" {
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor);
+			cursor_string = std::to_string(cursor + 1);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
