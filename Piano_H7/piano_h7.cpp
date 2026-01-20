@@ -136,7 +136,7 @@ void h7() {
 
 	// DISP start
 	disp = lv_display_create(320, 480);
-	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888); // LV_COLOR_FORMAT_RGB888  LV_COLOR_FORMAT_RGB565
+	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888);
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
@@ -236,7 +236,7 @@ void h7() {
 			}
 			TIM5->CNT = 0;
 		}
-		
+
 			// if (test_memory < 196) { // for test
 			// 	if (TIM2->CNT > 80000000) {
 			// 		debugg_fn(std::format(" #{} CHART_0 = {}  CHART_1 = {}", test_memory, compsCHART_0[test_memory], compsCHART_1[test_memory]));
@@ -288,9 +288,9 @@ void h7() {
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
 			fl = 0; // for test fl
-	}
+		}
 #endif
-}
+	}
 } // h7
 
 void sync() {

@@ -150,7 +150,8 @@ void LCD_direction(uint8_t direction) {
 	case 0:
 		lcddev.width = LCD_W;
 		lcddev.height = LCD_H;
-		LCD_WriteReg(0x36, (1 << 3) | (1 << 6)); // MADCTL (36h): Memory Data Access Control
+		// для цвета 565 - LCD_WriteReg(0x36, (1 << 3) | (1 << 6));((1 << 3) = RGB<>BRG)
+		LCD_WriteReg(0x36, (1 << 6)); // MADCTL (36h): Memory Data Access Control
 		break;
 	case 1:
 		lcddev.width = LCD_H;

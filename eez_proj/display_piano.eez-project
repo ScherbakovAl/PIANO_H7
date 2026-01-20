@@ -904,9 +904,7 @@
                   "MAIN": {
                     "DEFAULT": {
                       "radius": 8,
-                      "bg_color": "#fb11ae",
-                      "bg_grad_dir": "HOR",
-                      "bg_grad_color": "#000fff"
+                      "bg_color": "#343638"
                     }
                   }
                 }
@@ -1015,9 +1013,7 @@
                   "MAIN": {
                     "DEFAULT": {
                       "radius": 8,
-                      "bg_color": "#ffb700",
-                      "bg_grad_color": "#ff0039",
-                      "bg_grad_dir": "HOR"
+                      "bg_color": "#343638"
                     }
                   }
                 }
@@ -1140,7 +1136,7 @@
               "objID": "e19cb824-1615-41fc-a0ea-a4c33b822cac",
               "type": "LVGLButtonWidget",
               "left": 7,
-              "top": 10,
+              "top": 9,
               "width": 100,
               "height": 60,
               "customInputs": [],
