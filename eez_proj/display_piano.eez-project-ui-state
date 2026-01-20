@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
     "selectedActionObject": "[display_piano.eez-project]:/actions/38",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
@@ -229,8 +229,7 @@
                       },
                       "icon": "svg:page"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -270,7 +269,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1045,7 +1045,7 @@
           "x": -240,
           "y": -160
         },
-        "scale": 2
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1057,7 +1057,8 @@
     "[display_piano.eez-project]:/userPages/1[flow-state]": {
       "selection": {
         "0": {
-          "0": {
+          "0": {},
+          "1": {
             "$selected": true
           },
           "5": {},
@@ -1077,10 +1078,10 @@
       },
       "transform": {
         "translate": {
-          "x": -545.1727272727272,
-          "y": -728.568181818182
+          "x": -157.20400432900408,
+          "y": -234.59659090909116
         },
-        "scale": 2
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1093,7 +1094,9 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {},
+          "1": {
+            "$selected": true
+          },
           "2": {},
           "3": {},
           "4": {},
@@ -1112,10 +1115,10 @@
       },
       "transform": {
         "translate": {
-          "x": -240,
-          "y": -280
+          "x": -126.09999999999997,
+          "y": -265.9166666666667
         },
-        "scale": 2
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1404,6 +1407,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 2,
+  "flowZoom": 1,
   "implementationLanguage": "C++"
 }

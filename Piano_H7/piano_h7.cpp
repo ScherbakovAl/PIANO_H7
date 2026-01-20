@@ -136,7 +136,7 @@ void h7() {
 
 	// DISP start
 	disp = lv_display_create(320, 480);
-	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB565);
+	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888); // LV_COLOR_FORMAT_RGB888  LV_COLOR_FORMAT_RGB565
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
@@ -919,7 +919,7 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
-	const int32_t wh_ = width * height * 2;
+	const int32_t wh_ = width * height * 3;
 
 	// for (int32_t i = 0; i < width * height; i++) {
 		// 	LCD_Send_Data_16(color_p);
