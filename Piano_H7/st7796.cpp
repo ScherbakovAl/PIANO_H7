@@ -150,7 +150,8 @@ void LCD_direction(uint8_t direction) {
 	case 0:
 		lcddev.width = LCD_W;
 		lcddev.height = LCD_H;
-		LCD_WriteReg(0x36, (1 << 3) | (1 << 6)); // MADCTL (36h): Memory Data Access Control
+		// для цвета 565 - LCD_WriteReg(0x36, (1 << 3) | (1 << 6));((1 << 3) = RGB<>BRG)
+		LCD_WriteReg(0x36, (1 << 6)); // MADCTL (36h): Memory Data Access Control
 		break;
 	case 1:
 		lcddev.width = LCD_H;
@@ -234,7 +235,7 @@ void LCD_Init() {
 	LCD_WR_DATA(0x48); // 0x48
 
 	LCD_WR_REG(0x3A); // COLMOD (Interface Pixel Format, Формат цвета)
-	LCD_WR_DATA(0x05); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
+	LCD_WR_DATA(0x77); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
 
 	//	/*
 		// с этими настройками немного цвет меняется
@@ -314,12 +315,12 @@ void LCD_Init() {
 	LL_mDelay(120);
 	//	 */
 
-	//	LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
+		// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
 	LCD_WR_REG(0x21); // INVON (21h): Display Inversion On
 
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
 
-	LCD_direction(3);
+	LCD_direction(0);
 
 	LCD_Clear(0x0000); // test
 	LCD_Clear(0x07E0);

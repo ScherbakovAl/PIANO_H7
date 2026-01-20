@@ -210,13 +210,13 @@ void SysTick_Handler(void)
 void DMA1_Stream2_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Stream2_IRQn 0 */
-        GPIOA->BSRR |= 0x20; // for test // DEBUG
-        GPIOA->BSRR |= 0x200000; // for test // DEBUG
-        GPIOA->BSRR |= 0x20; // for test // DEBUG
+        // GPIOA->BSRR |= 0x20; // for test // DEBUG
+        // GPIOA->BSRR |= 0x200000; // for test // DEBUG
+        // GPIOA->BSRR |= 0x20; // for test // DEBUG
         DMA1_RX();
-        GPIOA->BSRR |= 0x200000; // for test // DEBUG
-        GPIOA->BSRR |= 0x20; // for test // DEBUG
-        GPIOA->BSRR |= 0x200000; // for test // DEBUG
+        // GPIOA->BSRR |= 0x200000; // for test // DEBUG
+        // GPIOA->BSRR |= 0x20; // for test // DEBUG
+        // GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
         /* USER CODE END DMA1_Stream2_IRQn 0 */
   /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
@@ -230,10 +230,10 @@ void DMA1_Stream2_IRQHandler(void)
 void TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM4_IRQn 0 */
-  		// GPIOA->BSRR |= 0x10; // for test // DEBUG      
+  		// GPIOA->BSRR |= 0x20; // for test // DEBUG      
       LL_TIM_ClearFlag_UPDATE(TIM4);
-      lv_tick_inc(5);
-      // GPIOA->BSRR |= 0x100000; // for test // DEBUG
+      lv_tick_inc(1);
+      // GPIOA->BSRR |= 0x200000; // for test // DEBUG
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */
 
@@ -246,7 +246,7 @@ void TIM4_IRQHandler(void)
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-		GPIOA->BSRR |= 0x10; // for test // DEBUG
+		// GPIOA->BSRR |= 0x10; // for test // DEBUG
     
     /* USER CODE END EXTI15_10_IRQn 0 */
     if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
@@ -257,7 +257,7 @@ void EXTI15_10_IRQHandler(void)
       /* USER CODE END LL_EXTI_LINE_13 */
     }
     /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-    GPIOA->BSRR |= 0x100000; // for test // DEBUG
+    // GPIOA->BSRR |= 0x100000; // for test // DEBUG
 
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
@@ -281,9 +281,9 @@ void SPI3_IRQHandler(void)
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
-  		GPIOA->BSRR |= 0x10; // for test // DEBUG
+  		// GPIOA->BSRR |= 0x10; // for test // DEBUG
       DMA2_Stream1_TransferComplete();	// обновление дисплея
-      GPIOA->BSRR |= 0x100000; // for test // DEBUG
+      // GPIOA->BSRR |= 0x100000; // for test // DEBUG
   /* USER CODE END DMA2_Stream1_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
 
@@ -296,9 +296,9 @@ void DMA2_Stream1_IRQHandler(void)
 void DMA2_Stream3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream3_IRQn 0 */
-  		GPIOA->BSRR |= 0x10; // for test // DEBUG      
+  		// GPIOA->BSRR |= 0x10; // for test // DEBUG      
       DMA2_Stream3_i2c(); // touch панель
-      GPIOA->BSRR |= 0x100000; // for test // DEBUG
+      // GPIOA->BSRR |= 0x100000; // for test // DEBUG
   /* USER CODE END DMA2_Stream3_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream3_IRQn 1 */
 
@@ -311,9 +311,9 @@ void DMA2_Stream3_IRQHandler(void)
 void OTG_HS_IRQHandler(void)
 {
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
-  		GPIOA->BSRR |= 0x20; // for test // DEBUG
+  		// GPIOA->BSRR |= 0x10; // for test // DEBUG
       tud_int_handler(BOARD_DEVICE_RHPORT_NUM);
-      GPIOA->BSRR |= 0x200000; // for test // DEBUG
+      // GPIOA->BSRR |= 0x100000; // for test // DEBUG
       return;
   /* USER CODE END OTG_HS_IRQn 0 */
   HAL_HCD_IRQHandler(&hhcd_USB_OTG_HS);

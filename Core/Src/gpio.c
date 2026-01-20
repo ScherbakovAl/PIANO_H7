@@ -162,7 +162,7 @@ void MX_GPIO_Init(void)
   LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_INPUT);
 
   /* EXTI interrupt init*/
-  NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),1, 0));
   NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
