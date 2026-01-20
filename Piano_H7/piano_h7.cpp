@@ -429,10 +429,10 @@ void checkDataOnSensor(const uint8_t& adress) { // TODO rename to "refresh curso
 			}
 			else {
 				cursor = c;
-				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
 				sensor_on_1_data_string = std::to_string(compsCHART_0[c]);
 				sensor_on_2_data_string = std::to_string(compsCHART_1[c]);
-				cursor_string = std::to_string(cursor);
+				cursor_string = std::to_string(cursor - 6);
 			}
 			fl_c = false;
 		}
@@ -947,26 +947,28 @@ void my_flush_wait(lv_display_t* disp) {
 extern "C" {
 	void configCharts() {
 		lv_obj_t* ob = objects.chart_on;
-		lv_chart_set_point_count(ob, 98);
-		ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x04cc4e), LV_CHART_AXIS_PRIMARY_Y);
-		ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
-		ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_SECONDARY_Y); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
-		lv_chart_set_series_ext_y_array(ob, ser_on_green, compsCHART_0);
-		lv_chart_set_series_ext_y_array(ob, ser_on_red, compsCHART_1);
-		lv_chart_set_series_ext_y_array(ob, ser_on_blue, compsCHART_CALIB);
+		lv_chart_set_point_count(ob, 89);
+		ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
+		ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
+		ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
+		lv_chart_set_series_ext_y_array(ob, ser_on_green, &compsCHART_0[7]);
+		lv_chart_set_series_ext_y_array(ob, ser_on_red, &compsCHART_1[7]);
+		lv_chart_set_series_ext_y_array(ob, ser_on_blue, &compsCHART_CALIB[7]);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
 		c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
 		lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
+		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
+		lv_chart_set_div_line_count(ob, 0, 0);
+		lv_obj_set_style_radius(ob, 0, 0);
 
 		ob = objects.chart_off;
-		lv_chart_set_point_count(ob, 98);
-		ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x04cc4e), LV_CHART_AXIS_PRIMARY_Y);
-		ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xcc1200), LV_CHART_AXIS_SECONDARY_Y);
-		ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_SECONDARY_Y);
+		lv_chart_set_point_count(ob, 70);
+		ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X);
+		ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
+		ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
 		lv_chart_set_series_ext_y_array(ob, ser_off_green, &compsCHART_0[98]);
 		lv_chart_set_series_ext_y_array(ob, ser_off_red, &compsCHART_1[98]);
 		lv_chart_set_series_ext_y_array(ob, ser_off_blue, &compsCHART_CALIB[98]);
@@ -976,7 +978,11 @@ extern "C" {
 		lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
 		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 4, 2, LV_PART_INDICATOR); // размер точек на графике
+		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
+		lv_chart_set_div_line_count(ob, 0, 0);
+		lv_obj_set_style_radius(ob, 0, 0);
+
+
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
@@ -1125,16 +1131,17 @@ extern "C" {
 	}
 
 	void action_cursor_minus(lv_event_t* e) {
-		if (cursor > 0) {
+		if (cursor > 2) {
 			cursor = cursor - 1;
 		}
-		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			cursor_string = std::to_string(cursor - 6);
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
 			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
+			cursor_string = std::to_string(cursor);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1142,16 +1149,17 @@ extern "C" {
 	}
 
 	void action_cursor_plus(lv_event_t* e) {
-		if (cursor < 99) {
+		if (cursor < 88) {
 			cursor = cursor + 1;
 		}
-		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			cursor_string = std::to_string(cursor - 6);
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
 			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
+			cursor_string = std::to_string(cursor);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1159,16 +1167,17 @@ extern "C" {
 	}
 
 	void action_cursor_minus10(lv_event_t* e) {
-		if (cursor > 6) {
+		if (cursor > 7) {
 			cursor -= 7;
 		}
-		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			cursor_string = std::to_string(cursor - 6);
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
 			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
+			cursor_string = std::to_string(cursor);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
@@ -1176,16 +1185,17 @@ extern "C" {
 	}
 
 	void action_cursor_plus10(lv_event_t* e) {
-		if (cursor < 93) {
+		if (cursor < 80) {
 			cursor += 7;
 		}
-		cursor_string = std::to_string(cursor);
 		if (cur_disp == on) {
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+			cursor_string = std::to_string(cursor - 6);
+			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
 			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
 			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
 		}
 		else if (cur_disp == off) {
+			cursor_string = std::to_string(cursor);
 			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
 			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
 			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
