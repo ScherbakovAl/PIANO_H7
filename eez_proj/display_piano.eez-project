@@ -1696,7 +1696,7 @@
                           "align": "CENTER",
                           "bg_opa": 0,
                           "text_font": "MONTSERRAT_24",
-                          "text_opa": 8
+                          "text_opa": 20
                         }
                       }
                     }
@@ -1805,7 +1805,7 @@
                         "DEFAULT": {
                           "align": "CENTER",
                           "text_font": "MONTSERRAT_24",
-                          "text_opa": 8
+                          "text_opa": 20
                         }
                       }
                     }
@@ -1914,7 +1914,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8,
+                          "text_opa": 20,
                           "text_font": "MONTSERRAT_24"
                         }
                       }
@@ -2023,7 +2023,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8,
+                          "text_opa": 20,
                           "text_font": "MONTSERRAT_24"
                         }
                       }
@@ -2643,8 +2643,8 @@
                       "pad_right": 1,
                       "pad_top": 1,
                       "pad_bottom": 1,
-                      "pad_row": 1,
-                      "pad_column": 1,
+                      "pad_row": 20,
+                      "pad_column": 60,
                       "bg_color": "#000000"
                     }
                   }
@@ -2831,7 +2831,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8
+                          "text_opa": 25
                         }
                       }
                     }
@@ -2939,7 +2939,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8
+                          "text_opa": 25
                         }
                       }
                     }
@@ -3047,7 +3047,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8
+                          "text_opa": 25
                         }
                       }
                     }
@@ -3155,7 +3155,7 @@
                       "MAIN": {
                         "DEFAULT": {
                           "align": "CENTER",
-                          "text_opa": 8
+                          "text_opa": 25
                         }
                       }
                     }

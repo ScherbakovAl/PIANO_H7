@@ -254,7 +254,7 @@ void create_screen_d_chart_calib_on() {
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "LL");
                 }
             }
@@ -279,7 +279,7 @@ void create_screen_d_chart_calib_on() {
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "RR");
                 }
             }
@@ -303,7 +303,7 @@ void create_screen_d_chart_calib_on() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "L");
                 }
@@ -328,7 +328,7 @@ void create_screen_d_chart_calib_on() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_text_font(obj, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "R");
                 }
@@ -574,7 +574,7 @@ void create_screen_d_chart_calib_off() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "LL");
                 }
             }
@@ -598,7 +598,7 @@ void create_screen_d_chart_calib_off() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "RR");
                 }
             }
@@ -622,7 +622,7 @@ void create_screen_d_chart_calib_off() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "L");
                 }
             }
@@ -646,7 +646,7 @@ void create_screen_d_chart_calib_off() {
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
                     lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
                     lv_obj_set_style_align(obj, LV_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_text_opa(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_set_style_text_opa(obj, 25, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_label_set_text(obj, "R");
                 }
             }
