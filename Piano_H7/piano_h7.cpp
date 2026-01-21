@@ -252,7 +252,7 @@ void h7() {
 #define deb
 #ifdef deb
 		if (fl) {
-			debugg_fn(std::format("tOut = {:.3f}", timerLenght_F));
+			debugg_fn(std::format("tOut = {:.5f}", timerLenght_F));
 			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
 			// debugg_fn(std::format("log = {:.3f}", speed_F));
@@ -541,9 +541,9 @@ void DMA1_RX(void) {
 		float integerPart_F;
 		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
 		int note_ = rxB + noteAdder[rxB];
-		
+
 		// #define speee
-		#ifdef speee
+#ifdef speee
 
 		if (rxB < 98) {
 			timerLenght_F = (float)tOut * div_on;
@@ -578,14 +578,14 @@ void DMA1_RX(void) {
 
 		tud_midi_stream_write(0, note_buf, 6);
 
-		#endif
+#endif
 
-		#ifndef speee
-
-		midi_hi_F = 57.96 + 100 * log10f(25000.0 / (float)tOut);
+#ifndef speee
+		//47.9 + 51.23(17000)-2474.3
+		midi_hi_F = 47.9 + (51.23 * log10f(17000.0 / ((float)tOut-3800.3))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		note_ = rxB + noteAdder[rxB];
-		
+
 		if (midi_hi_F < 1) {
 			midi_hi_F = 1;
 			midi_lo_F = 1;
@@ -595,7 +595,7 @@ void DMA1_RX(void) {
 			midi_hi_F = 127;
 			midi_lo_F = 127;
 		}
-		
+
 		uint8_t note_buf2[] = {
 			0xB0,
 			0x58,
@@ -606,11 +606,11 @@ void DMA1_RX(void) {
 		};
 
 		tud_midi_stream_write(0, note_buf2, 6);
-		
+
 		fl = rxB < 98 ? 1 : 0; // for test // разрешить обновлять цифры на дисплее
-		timerLenght_F = tOut; // DEBUG
+		timerLenght_F = midi_hi_F; // DEBUG
 		// speed_F = midi_hi_F; // DEBUG
-		#endif
+#endif
 	}
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
