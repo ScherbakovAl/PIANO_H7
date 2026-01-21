@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/38",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/17",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -120,12 +120,13 @@
             {
               "type": "row",
               "id": "#f161a8dc-9aa4-4c87-962b-9684b18e2fd1",
-              "weight": 1.1766225799486023,
+              "weight": 2.816678000545607,
               "children": [
                 {
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
                   "weight": 0.8422236429751572,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -191,10 +192,21 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 5.247100694365389,
+              "weight": 3.6070452737683856,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
+                {
+                  "type": "tab",
+                  "id": "#46b8bf1d-7cbd-4847-897d-6236abcac5a5",
+                  "name": "d_main",
+                  "component": "editor",
+                  "config": {
+                    "objectPath": "[display_piano.eez-project]:/userPages/0",
+                    "permanent": false
+                  },
+                  "icon": "svg:page"
+                },
                 {
                   "type": "tab",
                   "id": "#df3ac432-fe03-436b-8e82-76dd0a1ca382",
@@ -224,8 +236,7 @@
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -245,7 +256,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1006,9 +1018,7 @@
       "selection": {
         "0": {
           "0": {
-            "0": {
-              "$selected": true
-            }
+            "0": {}
           },
           "1": {},
           "2": {
@@ -1016,7 +1026,9 @@
           },
           "3": {},
           "4": {},
-          "5": {}
+          "5": {
+            "$selected": true
+          }
         }
       },
       "transform": {

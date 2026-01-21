@@ -248,12 +248,14 @@ void h7() {
 			// 		++test_memory;
 			// 	}
 			// }
-	// #define deb
+
+#define deb
 #ifdef deb
 		if (fl) {
-		// 	// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
+			debugg_fn(std::format("tOut = {:.3f}", timerLenght_F));
+			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
-				// debugg_fn(std::format("spd = {:.3f}", speed_F));
+			// debugg_fn(std::format("log = {:.3f}", speed_F));
 			// 	// test_energy_fl = std::format("{:.3f}", energy_F);
 				// debugg_fn(std::format("engy = {:.3f}", energy_F));
 			// 	// test_midi_hi_fl = std::format("{:.3f}", midi_hi_F);
@@ -270,19 +272,19 @@ void h7() {
 			// 	midi_hi_F,
 			// 	midi_lo_F
 			// ));
-			debugg_fn(std::format(
-				"{}  ship {}     {}-{}-{}    {:.3f}.ms    {:.2f}.Hi   {:.2f}.Lo  {:.3f}.ms",
-				rx_data[0],
-				(rx_data[0] / 7),
-				rx_data[1],
-				rx_data[2],
-				rx_data[3],
-				timer_data_in,
-				midi_hi_F,
-				midi_lo_F,
-				(float)(test_int_timer2 - test_int_timer2_old) / 275000.0f
-			));
-			test_int_timer2_old = test_int_timer2;
+			// debugg_fn(std::format(
+			// 	"{}  ship {}     {}-{}-{}    {:.3f}.ms    {:.2f}.Hi   {:.2f}.Lo  {:.3f}.ms",
+			// 	rx_data[0],
+			// 	(rx_data[0] / 7),
+			// 	rx_data[1],
+			// 	rx_data[2],
+			// 	rx_data[3],
+			// 	timer_data_in,
+			// 	midi_hi_F,
+			// 	midi_lo_F,
+			// 	(float)(test_int_timer2 - test_int_timer2_old) / 275000.0f
+			// ));
+			// test_int_timer2_old = test_int_timer2;
 		// 	// t1 = std::to_string(rx_data[1]);
 			// debugg_fn(std::format("1 = {}", rx_data[1]));
 		// 	// t2 = std::to_string(rx_data[2]);
@@ -507,7 +509,6 @@ const float maxMidi_F = 127.99f;
 void DMA1_RX(void) {
 
 	LL_DMA_ClearFlag_TC2(DMA1);
-	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
@@ -529,58 +530,88 @@ void DMA1_RX(void) {
 
 		if (rxB > 168) { // DEBUG
 			USART_Noise_Error_detected(); // DEBUG
-			debugg_fn("... No > 168");
+			debugg_fn("... rxB > 168");
 		}
 
 		// if (rx_data[1] > 3) { // DEBUG
 		// 	USART_Noise_Error_detected(); // DEBUG
 		// 	debugg_fn("... t > 3");
 		// }
+		uint32_t tOut = 0;
+		float integerPart_F;
+		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+		int note_ = rxB + noteAdder[rxB];
+		
+		// #define speee
+		#ifdef speee
 
-		if (rxB < 168) { // TODO зачем это здесь?
-			uint32_t tOut = 0;
-			tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
-
-			if (rxB < 98) {
-				timerLenght_F = (float)tOut * div_on;
-			}
-			else {
-				timerLenght_F = (float)tOut * div_off;
-			}
-
-			speed_F = distance_F / timerLenght_F;
-			energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
-			midi_hi_F = energy_F / maxMidi_F;
-			float integerPart_F;
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-			int note_ = rxB + noteAdder[rxB];
-
-			if (midi_hi_F < 1) {
-				midi_hi_F = 1;
-				midi_lo_F = 1;
-			}
-
-			if (midi_hi_F > 127) {
-				midi_hi_F = 127;
-				midi_lo_F = 127;
-			}
-
-			uint8_t note_buf[] = {
-				0xB0,
-				0x58,
-				(uint8_t)midi_lo_F,
-				rxB < 98 ? 0x90 : 0x80, // 0x90 note on
-				note_,
-				(uint8_t)midi_hi_F
-			};
-
-			tud_midi_stream_write(0, note_buf, 6);
+		if (rxB < 98) {
+			timerLenght_F = (float)tOut * div_on;
+		}
+		else {
+			timerLenght_F = (float)tOut * div_off;
 		}
 
-		// test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
-		// fl = 1; // for test // разрешить обновлять цифры на дисплее
-	}
+		speed_F = distance_F / timerLenght_F;
+		energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
+		midi_hi_F = energy_F / maxMidi_F;
+		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 
+		if (midi_hi_F < 1) {
+			midi_hi_F = 1;
+			midi_lo_F = 1;
+		}
+
+		if (midi_hi_F > 127) {
+			midi_hi_F = 127;
+			midi_lo_F = 127;
+		}
+
+		uint8_t note_buf[] = {
+			0xB0,
+			0x58,
+			(uint8_t)midi_lo_F,
+			rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+			note_,
+			(uint8_t)midi_hi_F
+		};
+
+		tud_midi_stream_write(0, note_buf, 6);
+
+		#endif
+
+		#ifndef speee
+
+		midi_hi_F = 57.96 + 100 * log10f(25000.0 / (float)tOut);
+		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+		note_ = rxB + noteAdder[rxB];
+		
+		if (midi_hi_F < 1) {
+			midi_hi_F = 1;
+			midi_lo_F = 1;
+		}
+
+		if (midi_hi_F > 127) {
+			midi_hi_F = 127;
+			midi_lo_F = 127;
+		}
+		
+		uint8_t note_buf2[] = {
+			0xB0,
+			0x58,
+			(uint8_t)midi_lo_F,
+			rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+			note_,
+			(uint8_t)midi_hi_F
+		};
+
+		tud_midi_stream_write(0, note_buf2, 6);
+		
+		fl = rxB < 98 ? 1 : 0; // for test // разрешить обновлять цифры на дисплее
+		timerLenght_F = tOut; // DEBUG
+		// speed_F = midi_hi_F; // DEBUG
+		#endif
+	}
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 

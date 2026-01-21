@@ -550,7 +550,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "cursor_minus10"
+      "name": "cursor_minus_7"
     },
     {
       "objID": "d20521de-4585-4a8e-954d-6c5730f7a500",
@@ -558,7 +558,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "cursor_plus10"
+      "name": "cursor_plus_7"
     },
     {
       "objID": "9233586b-ef6a-4125-ec1d-e823f3518cfe",
@@ -1397,7 +1397,7 @@
                       "bg_opa": 255,
                       "bg_color": "#000000",
                       "text_opa": 255,
-                      "text_font": "MONTSERRAT_12",
+                      "text_font": "MONTSERRAT_14",
                       "anim_duration": 6000
                     }
                   }
@@ -1645,7 +1645,7 @@
                   "objID": "1998b307-1edc-41d1-a0d9-f8c631519160",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_minus10",
+                  "action": "cursor_minus_7",
                   "userData": 0
                 }
               ],
@@ -1755,7 +1755,7 @@
                   "objID": "71511cb4-3951-4749-a18f-3d53ec937598",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_plus10",
+                  "action": "cursor_plus_7",
                   "userData": 0
                 }
               ],
@@ -2783,7 +2783,7 @@
                   "objID": "e44d12dd-d408-4bf1-b2d3-e5612226bb1f",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_minus10",
+                  "action": "cursor_minus_7",
                   "userData": 0
                 }
               ],
@@ -2891,7 +2891,7 @@
                   "objID": "f76f4d93-ec46-4fbc-aaed-689d17d2ce5e",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_plus10",
+                  "action": "cursor_plus_7",
                   "userData": 0
                 }
               ],
@@ -4713,7 +4713,7 @@
                   "objID": "c6299e85-d650-48a9-9970-90a15a9dd768",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_minus10",
+                  "action": "cursor_minus_7",
                   "userData": 0
                 }
               ],
@@ -4819,7 +4819,7 @@
                   "objID": "6a363abc-18aa-423c-dbe8-606a43b9a0af",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_plus10",
+                  "action": "cursor_plus_7",
                   "userData": 0
                 }
               ],
@@ -10823,7 +10823,7 @@
                   "objID": "b4c16610-cb22-4866-98a4-633c4c5745b6",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_minus10",
+                  "action": "cursor_minus_7",
                   "userData": 0
                 }
               ],
@@ -10929,7 +10929,7 @@
                   "objID": "669b1afd-352e-44a7-d126-481eded4b947",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "cursor_plus10",
+                  "action": "cursor_plus_7",
                   "userData": 0
                 }
               ],
