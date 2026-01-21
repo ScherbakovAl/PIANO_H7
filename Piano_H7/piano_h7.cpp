@@ -510,8 +510,6 @@ void DMA1_RX(void) {
 	// TIM2->CNT = 0; // for test test_int_timer2 считаем количество тиков процессора
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 
-	// GPIOA->BSRR |= 0x10; // for test // DEBUG
-
 	if (LL_USART_IsActiveFlag_NE(UART5)) { // DEBUG // поиск ошибок связи
 		LL_USART_ClearFlag_NE(UART5);
 		USART_Noise_Error_detected();
@@ -519,8 +517,8 @@ void DMA1_RX(void) {
 	}
 	else {
 
-		// SCB_CleanInvalidateDCache(); // or
-		SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
+		SCB_CleanInvalidateDCache(); // or
+		// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
 
 		const int rxB = rx_data[0];
 
@@ -530,19 +528,11 @@ void DMA1_RX(void) {
 
 
 		if (rxB > 168) { // DEBUG
-			// GPIOA->BSRR |= 0x10; // for test // DEBUG
-			// GPIOA->BSRR |= 0x100000; // for test // DEBUG
-			// GPIOA->BSRR |= 0x10; // for test // DEBUG
-			// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 			USART_Noise_Error_detected(); // DEBUG
 			debugg_fn("... No > 168");
 		}
 
 		// if (rx_data[1] > 3) { // DEBUG
-		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
-		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
-		// 	GPIOA->BSRR |= 0x10; // for test // DEBUG
-		// 	GPIOA->BSRR |= 0x100000; // for test // DEBUG
 		// 	USART_Noise_Error_detected(); // DEBUG
 		// 	debugg_fn("... t > 3");
 		// }
@@ -584,19 +574,7 @@ void DMA1_RX(void) {
 				(uint8_t)midi_hi_F
 			};
 
-			// uint8_t note_buf[] = {
-			// 0xB0,
-			// 0x58,
-			// (uint8_t)midi_lo_F,
-			// 0x80, // 0x90 note on
-			// note_,
-			// (uint8_t)midi_hi_F
-			// };
-
 			tud_midi_stream_write(0, note_buf, 6);
-
-			// mass_to_disp = mass_F[rxB]; // for test
-			// timer_data_in = (float)tOut * 0.0001f; // for test
 		}
 
 		// test_int_timer2 = TIM2->CNT; //  * 2; // for test " * 2" = количество тиков процессора
@@ -606,16 +584,12 @@ void DMA1_RX(void) {
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
-	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 }
 
 void USART_Noise_Error_detected() {
-	// GPIOA->BSRR |= 0x10; // for test // DEBUG
-	// debugg_fn("USART Noise Error detected");
 	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
 	LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
-	SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_data) & ~(uint32_t)0x1F), dataLengthRX);
-	// GPIOA->BSRR |= 0x100000; // for test // DEBUG
+	SCB_CleanInvalidateDCache();
 }
 
 void DMA_UART_ERRORS_HANDLER() {
@@ -918,8 +892,6 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 
 // typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
-	// GPIOA->BSRR |= 0x20; // for test // DEBUG
-
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
@@ -934,16 +906,10 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), wh_ + 32);
 	SCB_CleanInvalidateDCache(); // or
 	Send_DMA_Data8(color_p, wh_);
-
-	// GPIOA->BSRR |= 0x200000; // for test // DEBUG
-
 }
 
 void my_flush_wait(lv_display_t* disp) {
-	GPIOA->BSRR |= 0x20; // for test // DEBUG
-	GPIOA->BSRR |= 0x200000; // for test // DEBUG
 	lv_display_flush_ready(disp);
-
 }
 
 // LVGL ACTIONS
@@ -989,8 +955,6 @@ extern "C" {
 		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
 		lv_chart_set_div_line_count(ob, 0, 0);
 		lv_obj_set_style_radius(ob, 0, 0);
-
-
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
@@ -1138,75 +1102,78 @@ extern "C" {
 		lv_chart_refresh(cur_shart);
 	}
 
+
+	void set_cursor_piont_on() {
+		cursor_string = std::to_string(cursor - 6);
+		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
+		sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
+		sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+	}
+
+	void set_cursor_piont_off() {
+		cursor_string = std::to_string(cursor + 1);
+		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
+		sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+	}
+
 	void action_cursor_minus(lv_event_t* e) {
-		if (cursor > 2) {
-			cursor = cursor - 1;
-		}
 		if (cur_disp == on) {
-			cursor_string = std::to_string(cursor - 6);
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
-			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+			if (cursor > 7) {
+				cursor = cursor - 1;
+			}
+			set_cursor_piont_on();
 		}
-		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor + 1);
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
-			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		else {
+			if (cursor > 0) {
+				cursor = cursor - 1;
+			}
+			set_cursor_piont_off();
 		}
 	}
 
 	void action_cursor_plus(lv_event_t* e) {
-		if (cursor < 88) {
-			cursor = cursor + 1;
-		}
 		if (cur_disp == on) {
-			cursor_string = std::to_string(cursor - 6);
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
-			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+			if (cursor < 95) {
+				cursor = cursor + 1;
+			}
+			set_cursor_piont_on();
 		}
-		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor + 1);
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
-			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		else {
+			if (cursor < 69) {
+				cursor = cursor + 1;
+			}
+			set_cursor_piont_off();
 		}
 	}
 
-	void action_cursor_minus10(lv_event_t* e) {
-		if (cursor > 7) {
-			cursor -= 7;
-		}
+	void action_cursor_minus_7(lv_event_t* e) {
 		if (cur_disp == on) {
-			cursor_string = std::to_string(cursor - 6);
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
-			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+			if (cursor > 13) {
+				cursor = cursor - 7;
+			}
+			set_cursor_piont_on();
 		}
-		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor + 1);
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
-			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		else {
+			if (cursor > 6) {
+				cursor = cursor - 7;
+			}
+			set_cursor_piont_off();
 		}
 	}
 
-	void action_cursor_plus10(lv_event_t* e) {
-		if (cursor < 80) {
-			cursor += 7;
-		}
+	void action_cursor_plus_7(lv_event_t* e) {
 		if (cur_disp == on) {
-			cursor_string = std::to_string(cursor - 6);
-			lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
-			sensor_on_1_data_string = std::to_string(compsCHART_0[cursor]);
-			sensor_on_2_data_string = std::to_string(compsCHART_1[cursor]);
+			if (cursor < 89) {
+				cursor = cursor + 7;
+			}
+			set_cursor_piont_on();
 		}
-		else if (cur_disp == off) {
-			cursor_string = std::to_string(cursor + 1);
-			lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-			sensor_off_1_data_string = std::to_string(compsCHART_0[cursor + 98]);
-			sensor_off_2_data_string = std::to_string(compsCHART_1[cursor + 98]);
+		else {
+			if (cursor < 63) {
+				cursor = cursor + 7;
+			}
+			set_cursor_piont_off();
 		}
 	}
 
