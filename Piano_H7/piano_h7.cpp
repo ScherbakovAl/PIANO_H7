@@ -249,7 +249,7 @@ void h7() {
 			// 	}
 			// }
 
-#define deb
+// #define deb
 #ifdef deb
 		if (fl) {
 			debugg_fn(std::format("tOut = {:.5f}", timerLenght_F));
@@ -537,9 +537,10 @@ void DMA1_RX(void) {
 		// 	USART_Noise_Error_detected(); // DEBUG
 		// 	debugg_fn("... t > 3");
 		// }
+
 		uint32_t tOut = 0;
-		float integerPart_F;
 		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+		float integerPart_F;
 		int note_ = rxB + noteAdder[rxB];
 
 		// #define speee
@@ -581,8 +582,11 @@ void DMA1_RX(void) {
 #endif
 
 #ifndef speee
+		
+		if(tOut < 6461) tOut = 6461;
+
 		//47.9 + 51.23(17000)-2474.3
-		midi_hi_F = 47.9 + (51.23 * log10f(17000.0 / ((float)tOut-3800.3))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
+		midi_hi_F = 55.4f + (58.11f * log10f(17000.0f / ((float)tOut-5465.8f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		note_ = rxB + noteAdder[rxB];
 
@@ -591,10 +595,10 @@ void DMA1_RX(void) {
 			midi_lo_F = 1;
 		}
 
-		if (midi_hi_F > 127) {
-			midi_hi_F = 127;
-			midi_lo_F = 127;
-		}
+		// if (midi_hi_F > 127) {
+		// 	midi_hi_F = 127;
+		// 	midi_lo_F = 127;
+		// }
 
 		uint8_t note_buf2[] = {
 			0xB0,
@@ -607,8 +611,8 @@ void DMA1_RX(void) {
 
 		tud_midi_stream_write(0, note_buf2, 6);
 
-		fl = rxB < 98 ? 1 : 0; // for test // разрешить обновлять цифры на дисплее
-		timerLenght_F = midi_hi_F; // DEBUG
+		// fl = rxB < 98 ? 1 : 0; // for test // разрешить обновлять цифры на дисплее
+		// timerLenght_F = midi_hi_F; // DEBUG
 		// speed_F = midi_hi_F; // DEBUG
 #endif
 	}
