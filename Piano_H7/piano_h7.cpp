@@ -165,18 +165,19 @@ void h7() {
 	send_test_midi();
 
 	sync();
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	initBuffers();
 	configCharts();
 
-// память
-// SaveToMemory();
+	// память
+	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	all_H7_to_g4();
 	LL_USART_EnableDMAReq_RX(UART5);
-	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
 	//---------------------------------
 
@@ -184,25 +185,23 @@ void h7() {
 	lv_timer_handler();
 	ui_tick();
 
-// GPIOA->BSRR = 0x10; // for test // DEBUG
-// GPIOA->BSRR = 0x100000;
-// GPIOA->BSRR = 0x20; // for test // DEBUG
-// GPIOA->BSRR = 0x200000;
-// start PWM
+	// GPIOA->BSRR = 0x10; // for test // DEBUG
+	// GPIOA->BSRR = 0x100000;
+	// GPIOA->BSRR = 0x20; // for test // DEBUG
+	// GPIOA->BSRR = 0x200000;
+	// start PWM
 
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
 
 	pause(5); // DEBUG
-	debugg_clear();
-	debug_counter = 1;
+	// debugg_clear();
+	// debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
 
 	while (1) {
 		tud_task();
-		// GPIOA->BSRR |= 0x10; // for test // DEBUG
 		// lv_timer_handler();
-		// GPIOA->BSRR |= 0x100000; // for test // DEBUG
 		lv_timer_handler_run_in_period(10);
 		ui_tick();
 
@@ -582,11 +581,11 @@ void DMA1_RX(void) {
 #endif
 
 #ifndef speee
-		
-		if(tOut < 6461) tOut = 6461;
+
+		if (tOut < 6461) tOut = 6461;
 
 		//47.9 + 51.23(17000)-2474.3
-		midi_hi_F = 55.4f + (58.11f * log10f(17000.0f / ((float)tOut-5465.8f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
+		midi_hi_F = 55.4f + (58.11f * log10f(17000.0f / ((float)tOut - 5465.8f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		note_ = rxB + noteAdder[rxB];
 
