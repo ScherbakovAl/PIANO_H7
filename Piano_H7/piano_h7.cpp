@@ -91,7 +91,52 @@ float mass_to_disp = 0; // for test
 
 // настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 
+void pwr() {
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
+	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+		LCD_WR_REG(0x10);
+		// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
+		HAL_PWR_EnterSTANDBYMode();
+	}
+	else {
+		// GPIOA->BSRR |= 0x20; // for test // DEBUG
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+		// GPIOA->BSRR |= 0x200000;
+		GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
+}
+
+void to_sleep() {
+	// LCD_stby();
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	HAL_PWR_EnterSTANDBYMode();
+}
+
+
 void h7() {
+
+	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+
+	// pause(2);
+	// LL_mDelay(120);
+	// pwr();
+	// tud_disconnect(); // ?? TODO
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+
+
+
+
 	//	LL_mDelay(100);
 	// TIM init
 	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
@@ -504,6 +549,11 @@ const float div_off = 0.00000000004f; // меньше - громче
 const float deriv_F = 2.0f; // делить на 2 в формуле
 const float maxMidi_F = 127.99f;
 
+const float key_mass_2 = 819.79f;
+const float distance_2 = 17000.0f;
+const float aX = 24568.0f;
+const float aY = -1.2f;
+
 // DMA IQR Handler
 void DMA1_RX(void) {
 
@@ -533,6 +583,25 @@ void DMA1_RX(void) {
 		}
 
 		// if (rx_data[1] > 3) { // DEBUG
+
+// если
+// тут
+// ошибки 
+// ..
+// (определить условия, при которых сюда зайдёт..)
+//
+// то
+// поднимаем флаг тут
+// и 
+// в основном цикле
+// пишем сообщение об ошибке
+// и
+// сбрасываем чипы
+// + синхронизируем заново
+// + обновляем информацию в компараторах и массивах со значениями калибровки
+
+
+
 		// 	USART_Noise_Error_detected(); // DEBUG
 		// 	debugg_fn("... t > 3");
 		// }
@@ -542,20 +611,29 @@ void DMA1_RX(void) {
 		float integerPart_F;
 		int note_ = rxB + noteAdder[rxB];
 
-		// #define speee
+#define speee
 #ifdef speee
 
-		if (rxB < 98) {
-			timerLenght_F = (float)tOut * div_on;
-		}
-		else {
-			timerLenght_F = (float)tOut * div_off;
-		}
+		// if (rxB < 98) {
+		// 	timerLenght_F = (float)tOut * div_on;
+		// }
+		// else {
+		// 	timerLenght_F = (float)tOut * div_off;
+		// }
 
-		speed_F = distance_F / timerLenght_F;
-		energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
-		midi_hi_F = energy_F / maxMidi_F;
+		// //var 1
+		// speed_F = distance_F / timerLenght_F;
+		// energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
+		// midi_hi_F = energy_F / maxMidi_F;
+		// midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
+
+		// VAR 2
+		speed_F = distance_2 / (tOut + aX);
+		energy_F = (key_mass_2 * speed_F * speed_F) / 2.0f;
+		midi_hi_F = energy_F;
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
 
 		if (midi_hi_F < 1) {
 			midi_hi_F = 1;
@@ -578,14 +656,16 @@ void DMA1_RX(void) {
 
 		tud_midi_stream_write(0, note_buf, 6);
 
+
+
 #endif
 
 #ifndef speee
 
-		if (tOut < 6461) tOut = 6461;
+		if (tOut < 5664) tOut = 5664;
 
 		//47.9 + 51.23(17000)-2474.3
-		midi_hi_F = 55.4f + (58.11f * log10f(17000.0f / ((float)tOut - 5465.8f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
+		midi_hi_F = 66.2f + (63.88f * log10f(17000.0f / ((float)tOut - 3764.0f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		note_ = rxB + noteAdder[rxB];
 

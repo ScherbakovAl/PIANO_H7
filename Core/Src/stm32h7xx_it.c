@@ -218,7 +218,7 @@ void DMA1_Stream2_IRQHandler(void)
         // GPIOA->BSRR |= 0x20; // for test // DEBUG
         // GPIOA->BSRR |= 0x200000; // for test // DEBUG
 
-        /* USER CODE END DMA1_Stream2_IRQn 0 */
+  /* USER CODE END DMA1_Stream2_IRQn 0 */
   /* USER CODE BEGIN DMA1_Stream2_IRQn 1 */
 
   /* USER CODE END DMA1_Stream2_IRQn 1 */
@@ -248,15 +248,15 @@ void EXTI15_10_IRQHandler(void)
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
 		// GPIOA->BSRR |= 0x10; // for test // DEBUG
     
-    /* USER CODE END EXTI15_10_IRQn 0 */
-    if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
-    {
-      LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
-      /* USER CODE BEGIN LL_EXTI_LINE_13 */
+  /* USER CODE END EXTI15_10_IRQn 0 */
+  if (LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13) != RESET)
+  {
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+    /* USER CODE BEGIN LL_EXTI_LINE_13 */
       resetPin();
-      /* USER CODE END LL_EXTI_LINE_13 */
-    }
-    /* USER CODE BEGIN EXTI15_10_IRQn 1 */
+    /* USER CODE END LL_EXTI_LINE_13 */
+  }
+  /* USER CODE BEGIN EXTI15_10_IRQn 1 */
     // GPIOA->BSRR |= 0x100000; // for test // DEBUG
 
   /* USER CODE END EXTI15_10_IRQn 1 */

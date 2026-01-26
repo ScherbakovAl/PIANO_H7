@@ -80,7 +80,7 @@ int main(void)
     dfu_boot_flag = (uint32_t*) (&_bflag);
 	if (*dfu_boot_flag == DFU_BOOT_FLAG) {
 		*dfu_boot_flag = 0;
-		JumpAddress = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 4);
+		JumpAddress = *(__IO uint32_t*) (BOOTLOADER_ADDRESS + 8);
 		JumpToApplication = (pFunction) JumpAddress;
 		JumpToApplication();
 
