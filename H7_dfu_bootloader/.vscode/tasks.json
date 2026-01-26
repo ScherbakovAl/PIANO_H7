@@ -1,0 +1,144 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build + Flash",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "CMake: clean rebuild",
+                "CubeProg: Flash project (SWD)"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "B + F",
+                    "detail": "Build + Flash"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "cmake",
+            "label": "CMake: clean rebuild",
+            "command": "cleanRebuild",
+            "targets": [
+                "all"
+            ],
+            "preset": "${command:cmake.activeBuildPresetName}",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake template clean rebuild task",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "C + R",
+                    "detail": "CMake: clean rebuild"
+                }
+            }
+        },
+        {
+            "type": "shell",
+            "label": "CubeProg: List all available communication interfaces",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--list"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9c17c4",
+                    "label": "List",
+                    "detail": "CubeProg: List all available communication interfaces"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "build info",
+            "command": "grep",
+            "args": [
+                "-A",
+                "10",
+                "Memory Configuration",
+                "build/Release/H7_dfu_bootloader.map"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9da13d",
+                    "label": "INFO",
+                    "detail": "grep H7_dfu_bootloader.map - build info"
+                }
+            },
+        },
+        {
+            "type": "shell",
+            "label": "build info2",
+            "command": "arm-none-eabi-size",
+            "args": [
+                "-A",
+                "-d",
+                "build/Release/H7_dfu_bootloader.elf",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9da13d",
+                    "label": "INFO 2",
+                    "detail": "grep H7_dfu_bootloader.elf - build info2"
+                }
+            },
+        },
+        {
+            "type": "shell",
+            "label": "CubeProg: Flash project (SWD)",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=swd",
+                // "sn=24003800070000574B31534E", // только прошивка, не дебаг
+                "--download",
+                "${command:cmake.launchTargetPath}",
+                "-hardRst",
+                "-rst",
+                "--start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#17c4b6",
+                    "label": "$(fold-down) FLASH",
+                    "detail": "CubeProg: Flash project (SWD)"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "CubeProg: Flash project (DFU)",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=usb1",
+                "--download",
+                // "${workspaceFolder}/build/Release/Piano_H7.elf",
+                "${command:cmake.launchTargetPath}"
+                // "-hardRst",
+                // "-rst",
+                // "--start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#17c4b6",
+                    "label": "$(plug) DFU",
+                    "detail": "CubeProg: Flash project (DFU USB)"
+                }
+            },
+            "problemMatcher": []
+        }
+    ]
+}
