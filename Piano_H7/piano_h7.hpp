@@ -108,9 +108,9 @@ extern "C" {
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
 	const uint8_t start_adress_chip_on = 1; // включительно (1)
-	const uint8_t end_adress_chip_on = 13; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t end_adress_chip_on = 3; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно (14)
-	const uint8_t end_adress_chip_off = 23; // включительно всего (23)
+	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
 	const uint32_t start_cursor = 27;
 	volatile uint32_t cursor = start_cursor;
