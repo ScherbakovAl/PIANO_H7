@@ -1407,7 +1407,7 @@ extern "C" {
 		SCB_DisableDCache();
 		SCB_DisableICache();
 		*dfu_boot_flag = 0xDEADBEEF;
-		pause(200000);
+		pause(2000);
 		NVIC_SystemReset();
 	}
 

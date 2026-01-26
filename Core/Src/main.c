@@ -123,7 +123,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_UART5_Init();
-  MX_USB_OTG_HS_HCD_Init();
+  MX_USB_OTG_HS_PCD_Init();
   MX_I2C5_Init();
   MX_SPI3_Init();
   MX_TIM4_Init();
