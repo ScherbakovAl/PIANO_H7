@@ -1,16 +1,5 @@
 {
     "version": "2.0.0",
-    "windows": {
-        "options": {
-            "shell": {
-                "executable": "cmd.exe",
-                "args": [
-                    "/d",
-                    "/c"
-                ]
-            }
-        }
-    },
     "tasks": [
         {
             "label": "Build + Flash",
@@ -66,7 +55,44 @@
             },
             "problemMatcher": []
         },
-                {
+        {
+            "type": "shell",
+            "label": "build info",
+            "command": "grep",
+            "args": [
+                "-A",
+                "10",
+                "Memory Configuration",
+                "build/Release/Piano_H7.map"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9da13d",
+                    "label": "INFO",
+                    "detail": "grep Piano_H7.map - build info"
+                }
+            },
+        },
+        {
+            "type": "shell",
+            "label": "build info2",
+            "command": "arm-none-eabi-size",
+            "args": [
+                "-A",
+                "-d",
+                "build/Release/Piano_H7.elf",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#9da13d",
+                    "label": "INFO 2",
+                    "detail": "grep Piano_H7.map - build info2"
+                }
+            },
+        },
+        {
             "type": "shell",
             "label": "CubeProg: Flash project (SWD)",
             "command": "STM32_Programmer_CLI",

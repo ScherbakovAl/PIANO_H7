@@ -123,27 +123,19 @@ void h7() {
 
 	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
 	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
-	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
-	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
-	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
-	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
 
 	// pause(2);
 	// LL_mDelay(120);
 	// pwr();
-	// tud_disconnect(); // ?? TODO
+	// tud_disconnect(); // TODO // это работает
 	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
 
-
-
-
-	//	LL_mDelay(100);
 	// TIM init
-	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
-
 	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
 	LL_TIM_EnableAllOutputs(TIM1); // PWM - tim clk
 	LL_TIM_EnableIT_TRIG(TIM1);
+
+	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
 
 	LL_TIM_SetAutoReload(TIM3, allChipCount);
 	LL_TIM_EnableCounter(TIM3); // считает номер контроллера g4
@@ -152,7 +144,6 @@ void h7() {
 	LL_TIM_EnableIT_UPDATE(TIM4);
 
 	LL_TIM_EnableCounter(TIM5); // ограничение скорости сканирования плат
-
 	//---------------------------------
 
 	// UART init
@@ -296,7 +287,9 @@ void h7() {
 // #define deb
 #ifdef deb
 		if (fl) {
-			debugg_fn(std::format("tOut = {:.5f}", timerLenght_F));
+			// tud_disconnect();
+			// debugg_fn("usb disconnect!")
+			// debugg_fn(std::format("tOut = {:.5f}", timerLenght_F));
 			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
 			// debugg_fn(std::format("log = {:.3f}", speed_F));

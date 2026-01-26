@@ -165,15 +165,15 @@
      * - gradients use RGB888
      * - bitmaps with transparency may use ARGB8888
      */
-    #define LV_DRAW_SW_SUPPORT_RGB565       1
-    #define LV_DRAW_SW_SUPPORT_RGB565A8     1
+    #define LV_DRAW_SW_SUPPORT_RGB565       0
+    #define LV_DRAW_SW_SUPPORT_RGB565A8     0
     #define LV_DRAW_SW_SUPPORT_RGB888       1
-    #define LV_DRAW_SW_SUPPORT_XRGB8888     1
-    #define LV_DRAW_SW_SUPPORT_ARGB8888     1
-    #define LV_DRAW_SW_SUPPORT_L8           1
-    #define LV_DRAW_SW_SUPPORT_AL88         1
-    #define LV_DRAW_SW_SUPPORT_A8           1
-    #define LV_DRAW_SW_SUPPORT_I1           1
+    #define LV_DRAW_SW_SUPPORT_XRGB8888     0
+    #define LV_DRAW_SW_SUPPORT_ARGB8888     0
+    #define LV_DRAW_SW_SUPPORT_L8           0
+    #define LV_DRAW_SW_SUPPORT_AL88         0
+    #define LV_DRAW_SW_SUPPORT_A8           0
+    #define LV_DRAW_SW_SUPPORT_I1           0
 
     /* The threshold of the luminance to consider a pixel as
      * active in indexed color format */
