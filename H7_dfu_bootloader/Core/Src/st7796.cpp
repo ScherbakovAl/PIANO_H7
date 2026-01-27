@@ -5,7 +5,7 @@
  *      Author: sche
  */
 
-#include "st7796.hpp"
+#include "st7796.h"
 
 const int LCD_W = 320;
 const int LCD_H = 480;

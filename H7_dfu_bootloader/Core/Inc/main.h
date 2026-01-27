@@ -45,9 +45,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "st7796.hpp"
-#include "ft6336.hpp"
-
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

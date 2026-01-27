@@ -5,7 +5,7 @@
  *      Author: sche
  */
 
-#include "ft6336.hpp"
+#include "ft6336.h"
 #include "stm32h7xx_ll_i2c.h"
 #include "stm32h7xx_ll_dma.h"
 

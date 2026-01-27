@@ -27,6 +27,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "st7796.h"
+#include "ft6336.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -135,7 +138,7 @@ int main(void)
 
   // TOUCH init
   // LL_I2C_Enable(I2C5);
-  FT6336_Init();
+  // FT6336_Init();
 
   /* USER CODE END 2 */
 
