@@ -42,7 +42,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usbd_dfu_if.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
