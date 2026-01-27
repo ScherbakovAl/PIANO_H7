@@ -29,6 +29,8 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h7xx_hal.h"
 
+#include "stm32h7xx_ll_dma.h"
+#include "stm32h7xx_ll_i2c.h"
 #include "stm32h7xx_ll_rcc.h"
 #include "stm32h7xx_ll_crs.h"
 #include "stm32h7xx_ll_bus.h"
@@ -37,11 +39,14 @@ extern "C" {
 #include "stm32h7xx_ll_cortex.h"
 #include "stm32h7xx_ll_utils.h"
 #include "stm32h7xx_ll_pwr.h"
-#include "stm32h7xx_ll_dma.h"
+#include "stm32h7xx_ll_spi.h"
 #include "stm32h7xx_ll_gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "st7796.hpp"
+#include "ft6336.hpp"
 
 /* USER CODE END Includes */
 
@@ -68,6 +73,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define CTP_I2C5_SDA_Pin LL_GPIO_PIN_10
+#define CTP_I2C5_SDA_GPIO_Port GPIOC
+#define CTP_I2C5_SCL_Pin LL_GPIO_PIN_11
+#define CTP_I2C5_SCL_GPIO_Port GPIOC
+#define CTP_RST_Pin LL_GPIO_PIN_0
+#define CTP_RST_GPIO_Port GPIOD
+#define LCD_LED_Pin LL_GPIO_PIN_6
+#define LCD_LED_GPIO_Port GPIOD
+#define LCD_SCK_Pin LL_GPIO_PIN_3
+#define LCD_SCK_GPIO_Port GPIOB
+#define LCD_SDI_Pin LL_GPIO_PIN_5
+#define LCD_SDI_GPIO_Port GPIOB
+#define LCD_DC_Pin LL_GPIO_PIN_7
+#define LCD_DC_GPIO_Port GPIOB
+#define LCD_RESET_Pin LL_GPIO_PIN_9
+#define LCD_RESET_GPIO_Port GPIOB
+#define LCD_CS_Pin LL_GPIO_PIN_1
+#define LCD_CS_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

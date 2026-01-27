@@ -18,6 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
+#include "i2c.h"
+#include "spi.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -49,6 +52,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -66,6 +70,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+
 // bootloader
 #define DFU_BOOT_FLAG 0xDEADBEEF
 #define MAIN_FIRMWARE 0x08020000 // здесь основная прошивка
@@ -85,6 +90,7 @@ int main(void)
   }
   *dfu_boot_flag = 0;
   // __disable_irq();
+  
   /* USER CODE END 1 */
 
   /* Enable the CPU Cache */
@@ -107,21 +113,51 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USB_DEVICE_Init();
+  MX_I2C5_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
+
+  // LCD init
+  LL_SPI_Enable(SPI3);
+  LL_SPI_StartMasterTransfer(SPI3);
+  LCD_Init();
+
+  // TOUCH init
+  // LL_I2C_Enable(I2C5);
+  FT6336_Init();
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+  
+  // uint8_t touchStatus = 0;
+
+  while (1) {
+
+    // LL_mDelay(100);
+    // FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
+    // uint8_t touchCount = touchStatus & 0x0F;
+    // if (touchCount > 0) {
+    //   TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+    //   if(TP.point1_x > 50 && TP.point1_x < 100){
+    //     if(TP.point1_y > 50 && TP.point1_y < 100){
+    //       NVIC_SystemReset();
+    //     }
+    //   }
+    // }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -200,6 +236,29 @@ void SystemClock_Config(void)
   }
 }
 
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  LL_RCC_PLL3P_Enable();
+  LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_2_4);
+  LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
+  LL_RCC_PLL3_SetM(10);
+  LL_RCC_PLL3_SetN(150);
+  LL_RCC_PLL3_SetP(2);
+  LL_RCC_PLL3_SetQ(1);
+  LL_RCC_PLL3_SetR(2);
+  LL_RCC_PLL3_Enable();
+
+   /* Wait till PLL is ready */
+  while(LL_RCC_PLL3_IsReady() != 1)
+  {
+  }
+
+}
+
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
@@ -213,8 +272,7 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
+  while (1) {
   }
   /* USER CODE END Error_Handler_Debug */
 }

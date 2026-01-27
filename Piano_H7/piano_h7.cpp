@@ -1405,6 +1405,7 @@ extern "C" {
 	void action_piano_off(lv_event_t* e) {
 		SCB_DisableDCache();
 		SCB_DisableICache();
+		SCB_CleanInvalidateDCache();
 
 		extern int* _bflag;
 		uint32_t* dfu_boot_flag;
