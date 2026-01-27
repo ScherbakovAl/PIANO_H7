@@ -11,8 +11,9 @@
 #include "gpio.h"
 #include "stm32h7xx_ll_gpio.h"
 
-// #ifdef __cplusplus
-// extern "C" {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define FT6X36_ADDR 0x38 << 1 
 	const int SCREEN_WIDTH = 480;
@@ -75,5 +76,6 @@
 	extern volatile uint8_t ft6336_dma_rx_complete;
 	extern volatile uint8_t ft6336_dma_error;
 
-// }
-// #endif // extern "C"
+#ifdef __cplusplus
+}
+#endif // extern "C"

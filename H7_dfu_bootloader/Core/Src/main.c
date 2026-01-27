@@ -138,28 +138,31 @@ int main(void)
 
   // TOUCH init
   // LL_I2C_Enable(I2C5);
-  // FT6336_Init();
+  FT6336_Init();
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   
-  // uint8_t touchStatus = 0;
+  uint8_t touchStatus = 0;
 
   while (1) {
 
-    // LL_mDelay(100);
-    // FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
-    // uint8_t touchCount = touchStatus & 0x0F;
-    // if (touchCount > 0) {
-    //   TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
-    //   if(TP.point1_x > 50 && TP.point1_x < 100){
-    //     if(TP.point1_y > 50 && TP.point1_y < 100){
-    //       NVIC_SystemReset();
-    //     }
-    //   }
-    // }
+    LL_mDelay(100);
+    FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
+    uint8_t touchCount = touchStatus & 0x0F;
+    if (touchCount > 0) {
+      TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+      if(TP.point1_x > 50 && TP.point1_x < 100){
+        if(TP.point1_y > 50 && TP.point1_y < 100){
+          SCB_DisableDCache();
+		      SCB_DisableICache();
+          LL_mDelay(200);
+          NVIC_SystemReset();
+        }
+      }
+    }
 
     /* USER CODE END WHILE */
 

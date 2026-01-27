@@ -10,9 +10,10 @@
 #include <stdint.h>
 #include "spi.h"
 
-// #ifdef __cplusplus
-// extern "C" {
- //#define WHITE       0xFFFF
+#ifdef __cplusplus
+extern "C" {
+#endif
+// #define WHITE       0xFFFF
 #define BLACK      	0x0000
 #define BLUE       	0x001F
 #define BRED        0XF81F
@@ -73,5 +74,6 @@ void LCD_CS_L();
 void LCD_BL_H();
 void LCD_BL_L();
 
-// }
-// #endif // extern "C"
+#ifdef __cplusplus
+}
+#endif // extern "C"
