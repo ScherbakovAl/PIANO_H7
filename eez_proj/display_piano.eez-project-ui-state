@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
     "selectedActionObject": "[display_piano.eez-project]:/actions/17",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/35",
     "subnavigationSelectedItems": {
@@ -218,7 +218,8 @@
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "tabset",
@@ -256,8 +257,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1022,13 +1022,12 @@
           },
           "1": {},
           "2": {
-            "0": {}
+            "0": {},
+            "$selected": true
           },
           "3": {},
           "4": {},
-          "5": {
-            "$selected": true
-          }
+          "5": {}
         }
       },
       "transform": {

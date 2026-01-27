@@ -49,7 +49,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -67,11 +66,34 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+// bootloader
+#define DFU_BOOT_FLAG 0xDEADBEEF
+#define MAIN_FIRMWARE 0x08020000 // здесь основная прошивка
+// #define BOOTLOADER_ADDRESS 0x08000000 // здесь начало всех программ по умолчанию для старта
+// #define BOOTLOADER_ADDRESS 0x1FF09800 // << здесь usbDFU вшитый в контроллер
+// #define FLASH_DESC_STR      "@Internal Flash   /0x08000000/03*016Ka,01*016Kg,01*064Kg,07*128Kg,04*016Kg,01*064Kg,07*128Kg"
+  void (*JumpToApplication)(void);
+  uint32_t JumpAddress;
+  extern int _bflag;
+  uint32_t* dfu_boot_flag;
+  dfu_boot_flag = (uint32_t*)(&_bflag);
+  if (*dfu_boot_flag != DFU_BOOT_FLAG) {
+    *dfu_boot_flag = 0;
+    JumpAddress = *(__IO uint32_t*) (MAIN_FIRMWARE + 4); // здесь должно быть " + 4 ", а в скрипте компоновщика " - 8 " !!
+    JumpToApplication = (void*)JumpAddress;
+    JumpToApplication();
+  }
+  *dfu_boot_flag = 0;
+  // __disable_irq();
   /* USER CODE END 1 */
 
-  /* MPU Configuration--------------------------------------------------------*/
-  MPU_Config();
+  /* Enable the CPU Cache */
+
+  /* Enable I-Cache---------------------------------------------------------*/
+  SCB_EnableICache();
+
+  /* Enable D-Cache---------------------------------------------------------*/
+  SCB_EnableDCache();
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -145,7 +167,7 @@ void SystemClock_Config(void)
   LL_RCC_PLL1_SetN(110);
   LL_RCC_PLL1_SetP(1);
   LL_RCC_PLL1_SetQ(2);
-  LL_RCC_PLL1_SetR(2);
+  LL_RCC_PLL1_SetR(1);
   LL_RCC_PLL1_Enable();
 
    /* Wait till PLL is ready */
@@ -181,22 +203,6 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
- /* MPU Configuration */
-
-void MPU_Config(void)
-{
-
-  /* Disables the MPU */
-  LL_MPU_Disable();
-
-  /** Initializes and configures the Region and the memory to be protected
-  */
-  LL_MPU_ConfigRegion(LL_MPU_REGION_NUMBER0, 0x87, 0x0, LL_MPU_REGION_SIZE_4GB|LL_MPU_TEX_LEVEL0|LL_MPU_REGION_NO_ACCESS|LL_MPU_INSTRUCTION_ACCESS_DISABLE|LL_MPU_ACCESS_SHAREABLE|LL_MPU_ACCESS_NOT_CACHEABLE|LL_MPU_ACCESS_NOT_BUFFERABLE);
-  /* Enables the MPU */
-  LL_MPU_Enable(LL_MPU_CTRL_PRIVILEGED_DEFAULT);
-
-}
 
 /**
   * @brief  This function is executed in case of error occurrence.

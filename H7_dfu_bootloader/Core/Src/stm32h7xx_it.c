@@ -210,6 +210,9 @@ void EXTI15_10_IRQHandler(void)
   {
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
     /* USER CODE BEGIN LL_EXTI_LINE_13 */
+    SCB_DisableDCache();
+		SCB_DisableICache();
+    LL_mDelay(200);
     NVIC_SystemReset();
     /* USER CODE END LL_EXTI_LINE_13 */
   }

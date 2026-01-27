@@ -74,7 +74,7 @@
   */
 
 /* USER CODE BEGIN EXPORTED_MACRO */
-
+#define FLASH_END_ADDR       (uint32_t)(0x081FFFFF)
 /* USER CODE END EXPORTED_MACRO */
 
 /**

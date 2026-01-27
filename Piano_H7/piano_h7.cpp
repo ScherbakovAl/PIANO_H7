@@ -216,6 +216,10 @@ void h7() {
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
 	//---------------------------------
+	debugg_fn(""); // DEBUG
+	debugg_fn(""); // DEBUG
+	debugg_fn(">>>  HELLOO xpoxp  <<<<"); // DEBUG
+	debugg_fn(""); // DEBUG
 
 	tud_task();
 	lv_timer_handler();
@@ -229,6 +233,8 @@ void h7() {
 
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	//---------------------------------
+
+
 
 	pause(5); // DEBUG
 	// debugg_clear();
@@ -1395,12 +1401,17 @@ extern "C" {
 			}
 		}
 	}
-	extern uint32_t* dfu_boot_flag;
+
 	void action_piano_off(lv_event_t* e) {
 		SCB_DisableDCache();
 		SCB_DisableICache();
+
+		extern int* _bflag;
+		uint32_t* dfu_boot_flag;
+		dfu_boot_flag = (uint32_t*)(&_bflag);
 		*dfu_boot_flag = 0xDEADBEEF;
-		pause(2000);
+
+		pause(200);
 		NVIC_SystemReset();
 	}
 
