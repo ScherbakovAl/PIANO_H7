@@ -200,7 +200,7 @@ void h7() {
 	pause(10);
 	send_test_midi();
 
-	sync();
+	// sync();
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	initBuffers();
 	configCharts();
@@ -210,15 +210,15 @@ void h7() {
 	ReadOnMemory(); // восстановление графика при включении
 	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
-	LL_USART_DisableDMAReq_RX(UART5);
-	all_H7_to_g4();
-	LL_USART_EnableDMAReq_RX(UART5);
+	// LL_USART_DisableDMAReq_RX(UART5);
+	// all_H7_to_g4();
+	// LL_USART_EnableDMAReq_RX(UART5);
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 	debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
 	//---------------------------------
 	debugg_fn(""); // DEBUG
 	debugg_fn(""); // DEBUG
-	debugg_fn(">>>  HELLOO rit !  <<<<"); // DEBUG
+	debugg_fn(">>>  HELLOO tit !  <<<<"); // DEBUG
 	debugg_fn(""); // DEBUG
 
 	tud_task();
