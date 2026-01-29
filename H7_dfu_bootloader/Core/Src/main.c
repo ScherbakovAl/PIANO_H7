@@ -86,7 +86,6 @@ int main(void) {
   dfu_boot_flag = (uint32_t*)(&_bflag);
   if (*dfu_boot_flag != DFU_BOOT_FLAG) {
     *dfu_boot_flag = 0;
-    // __disable_irq(); // TODO это надо?
     // Установка нового вектора прерываний
     SCB->VTOR = MAIN_FIRMWARE; // TODO это надо?
     // Установка указателя стека
@@ -97,7 +96,6 @@ int main(void) {
     JumpToApplication();
   }
   *dfu_boot_flag = 0;
-  // __disable_irq();
 
   /* USER CODE END 1 */
 
