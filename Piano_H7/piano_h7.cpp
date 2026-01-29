@@ -218,7 +218,7 @@ void h7() {
 	//---------------------------------
 	debugg_fn(""); // DEBUG
 	debugg_fn(""); // DEBUG
-	debugg_fn(">>>  HELLOO uiuiui !  <<<<"); // DEBUG
+	debugg_fn(">>>  HELLOO rit !  <<<<"); // DEBUG
 	debugg_fn(""); // DEBUG
 
 	tud_task();

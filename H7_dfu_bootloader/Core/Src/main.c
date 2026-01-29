@@ -69,8 +69,7 @@ void PeriphCommonClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
+int main(void) {
 
   /* USER CODE BEGIN 1 */
 
@@ -87,13 +86,19 @@ int main(void)
   dfu_boot_flag = (uint32_t*)(&_bflag);
   if (*dfu_boot_flag != DFU_BOOT_FLAG) {
     *dfu_boot_flag = 0;
+    // __disable_irq(); // TODO это надо?
+    // Установка нового вектора прерываний
+    SCB->VTOR = MAIN_FIRMWARE; // TODO это надо?
+    // Установка указателя стека
+    __set_MSP(*(__IO uint32_t*)MAIN_FIRMWARE); // TODO это надо?
+
     JumpAddress = *(__IO uint32_t*) (MAIN_FIRMWARE + 4); // здесь должно быть " + 4 ", а в скрипте компоновщика " - 8 " !!
-    JumpToApplication = (void*)JumpAddress;
+    JumpToApplication = (void (*)(void))JumpAddress;
     JumpToApplication();
   }
   *dfu_boot_flag = 0;
   // __disable_irq();
-  
+
   /* USER CODE END 1 */
 
   /* Enable the CPU Cache */
@@ -144,7 +149,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  
+
   uint8_t touchStatus = 0;
 
   while (1) {
@@ -154,10 +159,10 @@ int main(void)
     uint8_t touchCount = touchStatus & 0x0F;
     if (touchCount > 0) {
       TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
-      if(TP.point1_x > 50 && TP.point1_x < 100){
-        if(TP.point1_y > 50 && TP.point1_y < 100){
+      if (TP.point1_x > 50 && TP.point1_x < 100) {
+        if (TP.point1_y > 50 && TP.point1_y < 100) {
           SCB_DisableDCache();
-		      SCB_DisableICache();
+          SCB_DisableICache();
           LL_mDelay(200);
           NVIC_SystemReset();
         }
@@ -175,29 +180,24 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
-void SystemClock_Config(void)
-{
+void SystemClock_Config(void) {
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_3)
-  {
+  while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3) {
   }
   LL_PWR_ConfigSupply(LL_PWR_LDO_SUPPLY);
   LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE0);
-  while (LL_PWR_IsActiveFlag_VOS() == 0)
-  {
+  while (LL_PWR_IsActiveFlag_VOS() == 0) {
   }
   LL_RCC_HSE_Enable();
 
    /* Wait till HSE is ready */
-  while(LL_RCC_HSE_IsReady() != 1)
-  {
+  while (LL_RCC_HSE_IsReady() != 1) {
 
   }
   LL_RCC_HSI48_Enable();
 
    /* Wait till HSI48 is ready */
-  while(LL_RCC_HSI48_IsReady() != 1)
-  {
+  while (LL_RCC_HSI48_IsReady() != 1) {
 
   }
   LL_RCC_PLL_SetSource(LL_RCC_PLLSOURCE_HSE);
@@ -213,18 +213,16 @@ void SystemClock_Config(void)
   LL_RCC_PLL1_Enable();
 
    /* Wait till PLL is ready */
-  while(LL_RCC_PLL1_IsReady() != 1)
-  {
+  while (LL_RCC_PLL1_IsReady() != 1) {
   }
 
    /* Intermediate AHB prescaler 2 when target frequency clock is higher than 80 MHz */
-   LL_RCC_SetAHBPrescaler(LL_RCC_AHB_DIV_2);
+  LL_RCC_SetAHBPrescaler(LL_RCC_AHB_DIV_2);
 
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL1);
 
    /* Wait till System clock is ready */
-  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL1)
-  {
+  while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL1) {
 
   }
   LL_RCC_SetSysPrescaler(LL_RCC_SYSCLK_DIV_1);
@@ -236,8 +234,7 @@ void SystemClock_Config(void)
   LL_SetSystemCoreClock(550000000);
 
    /* Update the time base */
-  if (HAL_InitTick (TICK_INT_PRIORITY) != HAL_OK)
-  {
+  if (HAL_InitTick(TICK_INT_PRIORITY) != HAL_OK) {
     Error_Handler();
   }
 }
@@ -246,8 +243,7 @@ void SystemClock_Config(void)
   * @brief Peripherals Common Clock Configuration
   * @retval None
   */
-void PeriphCommonClock_Config(void)
-{
+void PeriphCommonClock_Config(void) {
   LL_RCC_PLL3P_Enable();
   LL_RCC_PLL3_SetVCOInputRange(LL_RCC_PLLINPUTRANGE_2_4);
   LL_RCC_PLL3_SetVCOOutputRange(LL_RCC_PLLVCORANGE_WIDE);
@@ -259,8 +255,7 @@ void PeriphCommonClock_Config(void)
   LL_RCC_PLL3_Enable();
 
    /* Wait till PLL is ready */
-  while(LL_RCC_PLL3_IsReady() != 1)
-  {
+  while (LL_RCC_PLL3_IsReady() != 1) {
   }
 
 }
@@ -273,8 +268,7 @@ void PeriphCommonClock_Config(void)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
-{
+void Error_Handler(void) {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
@@ -290,8 +284,7 @@ void Error_Handler(void)
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t *file, uint32_t line)
-{
+void assert_failed(uint8_t* file, uint32_t line) {
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
