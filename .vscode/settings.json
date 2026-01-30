@@ -92,6 +92,6 @@
         "typeindex": "cpp",
         "variant": "cpp"
     },
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
     "todo-tree.tree.scanMode": "open files"
 }

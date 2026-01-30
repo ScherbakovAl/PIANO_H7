@@ -99,7 +99,7 @@
             "args": [
                 "--connect",
                 "port=swd",
-                // "sn=24003800070000574B31534E", // только прошивка, не дебаг
+                "sn=470065000D0000544B52524E", // только прошивка, не дебаг
                 "--download",
                 "${command:cmake.launchTargetPath}",
                 "-hardRst",
@@ -136,6 +136,28 @@
                     "color": "#17c4b6",
                     "label": "$(plug) DFU",
                     "detail": "CubeProg: Flash project (DFU USB)"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Reset MCU",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=swd",
+                "sn=470065000D0000544B52524E", // только прошивка, не дебаг
+                "-hardRst",
+                "-rst",
+                "--start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#ff9800",
+                    "label": "$(notebook-revert) RESET",
+                    "detail": "Reset microcontroller"
                 }
             },
             "problemMatcher": []

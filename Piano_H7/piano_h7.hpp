@@ -207,6 +207,8 @@ extern "C" {
 	void debugg_clear();
 	void resetPin();
 	void send_test_midi();
+	void G4_echo(int a);
+	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
 
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);

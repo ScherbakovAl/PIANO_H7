@@ -54,6 +54,7 @@ extern void action_calib_all(lv_event_t * e);
 extern void action_read_all(lv_event_t * e);
 extern void action_to_disp_flash(lv_event_t * e);
 extern void action_set_number_g4s(lv_event_t * e);
+extern void action_h7_g4(lv_event_t * e);
 
 
 #ifdef __cplusplus

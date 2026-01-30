@@ -121,7 +121,7 @@ void to_sleep() {
 	HAL_PWR_EnterSTANDBYMode();
 }
 
-
+// добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
 void h7() {
 
 	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
@@ -130,7 +130,7 @@ void h7() {
 	// pause(2);
 	// LL_mDelay(120);
 	// pwr();
-	// tud_disconnect(); // TODO // это работает
+	// tud_disconnect(); // TODO tud_disconnect() // это работает
 	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
 
 	// TIM init
@@ -234,7 +234,7 @@ void h7() {
 	// GPIOA->BSRR = 0x200000;
 	// start PWM
 
-	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim  - не стартуют чипы если выкл
 	//---------------------------------
 
 
@@ -298,6 +298,10 @@ void h7() {
 		if (fl) {
 			// tud_disconnect();
 			// debugg_fn("usb disconnect!")
+
+			debugg_fn(std::format("  .   .    .   . . "));
+			debugg_fn(std::format("tx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
+			debugg_fn(std::format("rx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
 
 			// debugg_fn(std::format("tOut = { :.5f }", rx_settings[1]));
 			// debugg_fn(std::format("rx_settings = {:}", rx_settings[1]));
@@ -371,7 +375,7 @@ void sync() {
 int sync_sender(const uint8_t& i) {
 	int fs = 0;
 	UART4_SendAddress(i);
-	pause(4);
+	pause(3);
 	UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 	UART4_Receive_Settings();
 	if (b_ != 0 && a_ != 0 && rx_settings[0] != i) {
@@ -495,7 +499,7 @@ void refresh_cursor(const uint8_t& adress) {
 
 void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
 	UART4_SendAddress(adress);
-	pause(4); // 4 for release, 10-debug g4
+	pause(3); // 4 for release, 10-debug g4
 	UART4_Send_Settings(com, compN, dot, value);
 	UART4_Receive_Settings();
 	pause(1); // 1 for release, 4-debug g4
@@ -515,6 +519,7 @@ void UART4_SendAddress(const uint8_t& slave_address) {
 	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	LL_USART_TransmitData9(UART5, address_byte);
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
+	pause(1);
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
@@ -1143,47 +1148,89 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_FLASH);
 	}
 
-	void action_set_number_g4s(lv_event_t* e) {
-		UART4_SendAddress(0x1);
-		pause(5);
-		tx_settings[0] = command_flash::set_number;
-		tx_settings[1] = 0x5;
-		tx_settings[2] = 0;
-		tx_settings[3] = 0;
-		tx_settings[4] = 0;
+	void G4_echo(int a) {
+		UART4_SendAddress(a);
+		Set_tx_s(command_flash::echo, 0, 0, 0, 0);
 		UART4_Send_Settings_flash();
 		UART4_Receive_Settings_flash();
-		debugg_fn(std::format("  .   .    .   . . "));
-		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
-		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
-
-		UART4_SendAddress(0x10);
-		pause(5);
-		tx_settings[0] = command_flash::echo;
-		tx_settings[1] = 0;
-		tx_settings[2] = 0;
-		tx_settings[3] = 0;
-		tx_settings[4] = 0;
-		UART4_Send_Settings_flash();
-		UART4_Receive_Settings_flash();
-		debugg_fn(std::format("  .   .    .   . . "));
-		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
-		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
-
-		UART4_SendAddress(0x10);
-		pause(5);
-		tx_settings[0] = command_flash::echo;
-		tx_settings[1] = 0;
-		tx_settings[2] = 0;
-		tx_settings[3] = 0;
-		tx_settings[4] = 0;
-		UART4_Send_Settings_flash();
-		UART4_Receive_Settings_flash();
-		debugg_fn(std::format("  .   .    .   . . "));
-		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
-		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
 	}
 
+	void action_set_number_g4s(lv_event_t* e) {
+		UART4_SendAddress(0x1);
+		uint8_t new_adress = 0x35; // DEBUG new_adress = 0x35
+		Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
+		UART4_Send_Settings_flash();
+
+		uint8_t a = 0;
+		uint8_t b = 0;
+		UART4_Receive_Settings_flash();
+		a = tx_settings[1];
+		UART4_Receive_Settings_flash();
+		b = tx_settings[1];
+
+		if (a == new_adress && b == new_adress) {
+			debugg_fn(std::format("  number ok {}", tx_settings[1]));
+		}
+		else {
+			debugg_fn(std::format("  bugg ! {}", tx_settings[1]));
+		}
+
+		G4_echo(new_adress);
+	}
+
+	void action_h7_g4(lv_event_t* e) {
+		const uint32_t start_adress_memory_read = 0x08000000;
+		uint8_t* pFlashAddr = (uint8_t*)start_adress_memory_read;
+		for (uint32_t i = 0; i < bin_data_length; ++i) {
+			bin_data[i] = pFlashAddr[i];
+		}
+		debugg_fn(std::format("  FLASH -> bin_data END"));
+
+		UART4_SendAddress(0x35);
+		Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
+		UART4_Send_Settings_flash();
+
+		// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
+		UART4_Receive_Settings();
+
+		int bug = 0;
+			pause(1);
+		for (uint32_t i = 0; i < bin_data_length;) {
+			tx_settings[1] = bin_data[i++];
+			tx_settings[2] = bin_data[i++];
+			tx_settings[3] = bin_data[i++];
+			tx_settings[4] = bin_data[i++];
+			pause(1);
+			UART4_Send_Settings_flash();
+			UART4_Receive_Settings();
+			if (rx_settings[1] == tx_settings[1] &&
+				rx_settings[2] == tx_settings[2] &&
+				rx_settings[3] == tx_settings[3] &&
+				rx_settings[4] == tx_settings[4]) {
+			}
+			else {
+				++bug;
+			}
+		}
+		UART4_Receive_Settings();
+
+		debugg_fn(std::format("  bin_data H7 -> g4 END"));
+		if (bug) {
+			debugg_fn(std::format("  bin_data H7 -> g4 FAIL {} bugs..", bug));
+		}
+		else {
+			debugg_fn(std::format("  bin_data H7 -> g4 OK"));
+		}
+	}
+
+
+	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
+		tx_settings[0] = a;
+		tx_settings[1] = b;
+		tx_settings[2] = c;
+		tx_settings[3] = d;
+		tx_settings[4] = e;
+	}
 
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
 		debugg_clear();

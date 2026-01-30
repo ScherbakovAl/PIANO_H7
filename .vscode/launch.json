@@ -20,7 +20,7 @@
             "interface": "swd",
             "showDevDebugOutput": "raw", // Включаем подробный вывод GDB
             // "serialNumber": "24003800070000574B31534E", // black stmH7
-            // "serialNumber": "7400410007000059334D524E", // blue stmG4
+            "serialNumber": "470065000D0000544B52524E", // blue stmG4
             // "runToEntryPoint": "main",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32H723.svd",
             "v1": false, //Change it depending on ST Link version
@@ -54,7 +54,7 @@
             "interface": "swd",
             "showDevDebugOutput": "raw", // Включаем подробный вывод GDB
             // "serialNumber": "24003800070000574B31534E", // black stmH7
-            // "serialNumber": "7400410007000059334D524E", // blue stmG4
+            "serialNumber": "470065000D0000544B52524E", // blue stmG4
             // "runToEntryPoint": "main",
             "svdFile": "${config:STM32VSCodeExtension.cubeCLT.path}/STMicroelectronics_CMSIS_SVD/STM32H723.svd",
             "v1": false, //Change it depending on ST Link version
