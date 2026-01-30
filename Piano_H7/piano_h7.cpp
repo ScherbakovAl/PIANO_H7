@@ -33,6 +33,9 @@ std::string chart_calib_online;
 std::string l;
 std::string r;
 
+// bin_data
+uint8_t bin_data[2048] = {}; // массив для отправки прошивки через dfu
+const uint32_t bin_data_length = sizeof(bin_data);
 
 int fl = 0; // for test fl
 
@@ -208,18 +211,18 @@ void h7() {
 	// память
 	// SaveToMemory();
 	ReadOnMemory(); // восстановление графика при включении
-	debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+	// debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	// LL_USART_DisableDMAReq_RX(UART5);
 	// all_H7_to_g4();
 	// LL_USART_EnableDMAReq_RX(UART5);
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
-	debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
+	// debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
 	//---------------------------------
-	debugg_fn(""); // DEBUG
-	debugg_fn(""); // DEBUG
-	debugg_fn(">>>  HELLOO tit !  <<<<"); // DEBUG
-	debugg_fn(""); // DEBUG
+	// debugg_fn(""); // DEBUG
+	// debugg_fn(""); // DEBUG
+	// debugg_fn(">>>  HELLOO tit !  <<<<"); // DEBUG
+	// debugg_fn(""); // DEBUG
 
 	tud_task();
 	lv_timer_handler();
@@ -295,7 +298,9 @@ void h7() {
 		if (fl) {
 			// tud_disconnect();
 			// debugg_fn("usb disconnect!")
-			// debugg_fn(std::format("tOut = {:.5f}", timerLenght_F));
+
+			// debugg_fn(std::format("tOut = { :.5f }", rx_settings[1]));
+			// debugg_fn(std::format("rx_settings = {:}", rx_settings[1]));
 			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
 			// debugg_fn(std::format("log = {:.3f}", speed_F));
@@ -488,8 +493,7 @@ void refresh_cursor(const uint8_t& adress) {
 	}
 }
 
-void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot,
-	const uint32_t& value) {
+void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
 	UART4_SendAddress(adress);
 	pause(4); // 4 for release, 10-debug g4
 	UART4_Send_Settings(com, compN, dot, value);
@@ -538,6 +542,22 @@ void UART4_Receive_Settings() {
 	dot_ = rx_settings[2];
 	a_ = rx_settings[3];
 	b_ = rx_settings[4];
+}
+
+void UART4_Send_Settings_flash() { // tx_settings[0] - [4]
+	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
+	for (uint16_t i = 0; i < tx_settings_length; i++) {
+		LL_USART_TransmitData9(UART5, tx_settings[i]);
+		while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
+	}
+	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
+}
+
+void UART4_Receive_Settings_flash() { // rx_settings[0] - [4]
+	for (uint8_t i = 0; i < rx_settings_length; i++) {
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
+	}
 }
 //---------------------------------
 
@@ -1071,7 +1091,7 @@ extern "C" {
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
-		pause(100);
+		// pause(100);
 		if (cur_disp == current_display::on) {
 			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
@@ -1084,8 +1104,8 @@ extern "C" {
 		}
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
-		debugg_clear();
-		sync();
+		// debugg_clear();
+		// sync(); // TODO включить обратно (выключено для тестирования)
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
@@ -1095,7 +1115,6 @@ extern "C" {
 		LL_USART_DisableDMAReq_RX(UART5);
 		cur_disp = on;
 		cur_shart = objects.chart_on;
-		// lv_obj_set_parent(objects.chart_on, objects.d_chart_calib_on);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
@@ -1109,7 +1128,6 @@ extern "C" {
 		LL_USART_DisableDMAReq_RX(UART5);
 		cur_disp = off;
 		cur_shart = objects.chart_off;
-		// lv_obj_set_parent(objects.chart_off, objects.d_chart_calib_off);
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		all_g4_to_H7();
@@ -1117,6 +1135,55 @@ extern "C" {
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
+
+	void action_to_disp_flash(lv_event_t* e) {
+		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
+		cur_disp = d_flash;
+		loadScreen(SCREEN_ID_D_FLASH);
+	}
+
+	void action_set_number_g4s(lv_event_t* e) {
+		UART4_SendAddress(0x1);
+		pause(5);
+		tx_settings[0] = command_flash::set_number;
+		tx_settings[1] = 0x5;
+		tx_settings[2] = 0;
+		tx_settings[3] = 0;
+		tx_settings[4] = 0;
+		UART4_Send_Settings_flash();
+		UART4_Receive_Settings_flash();
+		debugg_fn(std::format("  .   .    .   . . "));
+		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
+		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
+
+		UART4_SendAddress(0x10);
+		pause(5);
+		tx_settings[0] = command_flash::echo;
+		tx_settings[1] = 0;
+		tx_settings[2] = 0;
+		tx_settings[3] = 0;
+		tx_settings[4] = 0;
+		UART4_Send_Settings_flash();
+		UART4_Receive_Settings_flash();
+		debugg_fn(std::format("  .   .    .   . . "));
+		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
+		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
+
+		UART4_SendAddress(0x10);
+		pause(5);
+		tx_settings[0] = command_flash::echo;
+		tx_settings[1] = 0;
+		tx_settings[2] = 0;
+		tx_settings[3] = 0;
+		tx_settings[4] = 0;
+		UART4_Send_Settings_flash();
+		UART4_Receive_Settings_flash();
+		debugg_fn(std::format("  .   .    .   . . "));
+		debugg_fn(std::format("tx = {}-{}-{}-{}-{}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
+		debugg_fn(std::format("rx = {}-{}-{}-{}-{}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
+	}
+
 
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
 		debugg_clear();

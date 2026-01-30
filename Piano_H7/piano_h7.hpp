@@ -70,7 +70,8 @@ extern "C" {
 		on,
 		off,
 		d_none,
-		dis_main
+		dis_main,
+		d_flash
 	};
 
 	enum color_but {
@@ -91,19 +92,34 @@ extern "C" {
 		calib_none
 	};
 
+	enum command_flash {
+		reset = 1,
+		jump_to_piano_g4,
+		set_number,
+		data_from_H7_to_array_g4,
+		data_from_array_g4_to_H7,
+		copy_array_to_flash,
+		echo
+	};
 
-	// пины тестовой колодки
-	// pin 2 - tim trig
-	// pin 4 - tim slc
-	// pin 6 - Urx
-	// pin 8 - Utx
+	enum response {
+		ok = 203,
+		fail = 153
+	};
 
-	// TODO сделать проверку: сколько раз заходит в циклы While при работе с uart?
 
-	// TODO проверить UART TX должен быть подтянут к UP?
+		// пины тестовой колодки
+		// pin 2 - tim trig
+		// pin 4 - tim slc
+		// pin 6 - Urx
+		// pin 8 - Utx
 
-	// номер 95 у последней верхней клавиши
-	// ***** 390(263)-14000(22723)us пролёт молоточка
+		// TODO сделать проверку: сколько раз заходит в циклы While при работе с uart?
+
+		// TODO проверить UART TX должен быть подтянут к UP?
+
+		// номер 95 у последней верхней клавиши
+		// ***** 390(263)-14000(22723)us пролёт молоточка
 
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
@@ -176,6 +192,8 @@ extern "C" {
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
+	void UART4_Send_Settings_flash();
+	void UART4_Receive_Settings_flash();
 	void DMA1_RX();
 	void USART_Noise_Error_detected();
 	void DMA_UART_ERRORS_HANDLER();
@@ -193,7 +211,7 @@ extern "C" {
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
-	void my_flush_wait(lv_display_t *disp);
+	void my_flush_wait(lv_display_t* disp);
 
 	void DMA2_Stream1_TransferComplete();
 	void DMA2_Stream3_i2c();
