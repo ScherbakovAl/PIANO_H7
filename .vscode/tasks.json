@@ -161,6 +161,27 @@
                 }
             },
             "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Flash G4 bootloader (DFU)",
+            "command": "STM32_Programmer_CLI",
+            "args": [
+                "--connect",
+                "port=usb1",
+                "--download",
+                "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
+                "0x080C0000"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#c417a8",
+                    "label": "$(plug) G4 DFU",
+                    "detail": "Flash G4 bootloader (DFU USB)"
+                }
+            },
+            "problemMatcher": []
         }
     ]
 }

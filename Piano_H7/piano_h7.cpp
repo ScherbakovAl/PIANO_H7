@@ -35,10 +35,12 @@ std::string r;
 
 static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
 static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
-static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок)
+static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
+// надо 6 копирований делать в G4                    ^^^^^^^^^^^^^
+// 						const uint32_t Flash_Address = 0x080E0000; - здесь лежит калибровка
 
-static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4)
-static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4)
+static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
+static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4) 16я банка - размер на ~5 банок
 int numbers_chips[30] = {};
 
 int fl = 0; // for test fl
