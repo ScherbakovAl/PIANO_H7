@@ -33,9 +33,9 @@ std::string chart_calib_online;
 std::string l;
 std::string r;
 
-// bin_data
-uint8_t bin_data[2048] = {}; // массив для отправки прошивки через dfu
-const uint32_t bin_data_length = sizeof(bin_data);
+// bin_data ( выровнено по 4)
+__attribute__((aligned(32))) volatile uint32_t bin_data_32[512] = {}; // массив для отправки прошивки через dfu
+const uint32_t bin_data_32_length = sizeof(bin_data_32); // 2kB
 
 int fl = 0; // for test fl
 
@@ -1050,6 +1050,159 @@ void my_flush_wait(lv_display_t* disp) {
 	lv_display_flush_ready(disp);
 }
 
+
+/**
+ * @brief Чтение данных из Flash памяти в формате uint32_t
+ * @param Address: Адрес начала чтения во Flash (должен быть выровнен по 4 байта)
+ * @param pData: Указатель на массив uint32_t для сохранения прочитанных данных
+ * @param Size: Размер данных в БАЙТАХ (не в элементах uint32_t!)
+ * @note  Функция безопасна для вызова из прерывания
+ * @note  Размер Size будет округлен вверх до кратного 4
+ *
+ * Пример использования:
+ * __attribute__((aligned(32))) volatile uint32_t bin_data_32[512];
+ * Read_uint32(0x08008000, bin_data_32, 2048); // Прочитать 2048 байт (512 uint32_t)
+ */
+void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size) {
+
+	if (pData == NULL || Size == 0) {
+		return;
+	}
+
+	// Проверка, что адрес находится в области флеш-памяти
+	if (Address < FLASH_BASE || Address >= (FLASH_BASE + FLASH_SIZE)) {
+		return;
+	}
+
+	// Проверка выравнивания адреса по 4 байта для оптимальной работы
+	if (Address % 4 != 0) {
+		return;
+	}
+
+	// Вычисляем количество uint32_t элементов (округляем вверх)
+	uint32_t count = (Size + 3) / 4;
+
+	// Проверка, что чтение не выходит за границы флеш-памяти
+	if ((Address + (count * 4)) > (FLASH_BASE + FLASH_SIZE)) {
+		return;
+	}
+
+	// Прямое чтение из памяти uint32_t словами (быстрее чем побайтно)
+	volatile uint32_t* pFlashAddr = (volatile uint32_t*)Address;
+
+	// Используем критическую секцию для безопасности вызова из прерывания
+	uint32_t primask = __get_PRIMASK();
+	// __disable_irq();
+
+	for (uint32_t i = 0; i < count; i++) {
+		pData[i] = pFlashAddr[i];
+	}
+
+	__set_PRIMASK(primask);
+}
+
+/**
+ * @brief Запись данных в Flash память в формате uint32_t
+ * @param Address: Адрес начала записи во Flash (должен быть выровнен по 8 байт)
+ * @param Data: Указатель на массив uint32_t с данными для записи
+ * @param size: Размер данных в БАЙТАХ (не в элементах uint32_t!)
+ * @note  Функция безопасна для вызова из прерывания
+ * @note  Размер size будет округлен вверх до кратного 8 (т.к. запись doubleword)
+ * @note  Перед записью необходимо стереть страницу Flash с помощью Erase()
+ *
+ * Пример использования:
+ * __attribute__((aligned(32))) volatile uint32_t bin_data_32[512] = {данные};
+ * uint32_t addr = 0x08008000;
+ * FlashPageInfo_t info = GetPageAndBank(addr, 2048);
+ * Erase(info.start_page, info.bank);
+ * Flash_uint32(addr, bin_data_32, 2048); // Записать 2048 байт (512 uint32_t)
+ */
+/*void Flash_uint32(uint32_t Address, volatile uint32_t* Data, uint32_t size) {
+	// Проверка выравнивания адреса по 8 байт для DOUBLEWORD
+	if (Address % 8 != 0) {
+		return;
+	}
+
+	// Проверяем корректность параметров
+	if (size == 0 || Data == NULL) {
+		return;
+	}
+
+	// Используем критическую секцию для безопасности вызова из прерывания
+	uint32_t primask = __get_PRIMASK();
+	// __disable_irq();
+
+	HAL_FLASH_Unlock();
+
+	// Барьер памяти перед началом операций
+	__DMB();
+
+	// Вычисляем количество DOUBLEWORD для записи (каждое = 8 байт = 2 uint32_t)
+	uint32_t doublewords_count = (size + 7) / 8;
+
+	// Записываем данные в цикле
+	for (uint32_t i = 0; i < doublewords_count; i++) {
+		uint32_t current_address = Address + (i * 8);
+		uint64_t current_data;
+
+		// Индекс в массиве uint32_t (каждый doubleword = 2 uint32_t)
+		uint32_t idx = i * 2;
+
+		// Формируем 64-битное значение из двух 32-битных
+		// Little Endian: младшие биты идут первыми
+		if ((i * 8 + 8) <= size) {
+			// Полный doubleword
+			current_data = ((uint64_t)Data[idx]) | (((uint64_t)Data[idx + 1]) << 32);
+		} else {
+			// Последний неполный doubleword - заполняем FF
+			current_data = 0xFFFFFFFFFFFFFFFF;
+			uint32_t remaining_bytes = size - (i * 8);
+
+			if (remaining_bytes >= 4) {
+				// Первые 4 байта из Data[idx]
+				current_data = (uint64_t)Data[idx];
+				if (remaining_bytes > 4) {
+					// Частично второй uint32_t
+					uint32_t partial = Data[idx + 1];
+					uint32_t valid_bytes = remaining_bytes - 4;
+					uint32_t mask = (1UL << (valid_bytes * 8)) - 1;
+					partial &= mask;
+					current_data |= ((uint64_t)partial) << 32;
+				}
+			} else {
+				// Меньше 4 байт - только часть первого uint32_t
+				uint32_t partial = Data[idx];
+				uint32_t mask = (1UL << (remaining_bytes * 8)) - 1;
+				partial &= mask;
+				current_data = (uint64_t)partial;
+			}
+		}
+
+		// Выполняем запись
+		HAL_StatusTypeDef status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, current_address, current_data);
+
+		// Барьер памяти после записи
+		__DMB();
+
+		FLASH_WaitForLastOperation(FLASH_TIMEOUT_VALUE);
+
+		// Проверяем статус
+		// if (status != HAL_OK) {
+		//     __DMB();
+		//     Lock();
+		//     __set_PRIMASK(primask);
+		//     return;
+		// }
+	}
+
+	// Барьер памяти перед завершением
+	__DMB();
+	HAL_FLASH_Lock();
+
+	__set_PRIMASK(primask);
+}
+*/
+
 // LVGL ACTIONS
 #ifdef __cplusplus
 extern "C" {
@@ -1156,7 +1309,7 @@ extern "C" {
 	}
 
 	void action_set_number_g4s(lv_event_t* e) {
-		UART4_SendAddress(0x1);
+		UART4_SendAddress(0x1); // вызвать по адресу
 		uint8_t new_adress = 0x35; // DEBUG new_adress = 0x35
 		Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
 		UART4_Send_Settings_flash();
@@ -1179,118 +1332,100 @@ extern "C" {
 	}
 
 	void action_h7_g4(lv_event_t* e) {
-		const uint32_t start_adress_memory_read = 0x08000000;
-		uint8_t* pFlashAddr = (uint8_t*)start_adress_memory_read;
-		for (uint32_t i = 0; i < bin_data_length; ++i) {
-			bin_data[i] = pFlashAddr[i];
-		}
-		debugg_fn(std::format("  FLASH -> bin_data END"));
+		const uint32_t start_adress_memory_read = 0x08000000; // TODO какой адрес?
+		const int chip_number = 0x35; // TODO где задаётся адрес?
 
-		UART4_SendAddress(0x35);
+		// чтение из памяти в буфер
+		Read_uint32(start_adress_memory_read, bin_data_32, 2048);
+		debugg_fn(std::format("  READ  bin_data  OK"));
+
+
+		UART4_SendAddress(chip_number); // TODO  какой чип шьём сейчас?
 		Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
 		UART4_Send_Settings_flash();
 
 		// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-		UART4_Receive_Settings();
+		UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
 
 		int bug = 0;
 		pause(1);
-		for (uint32_t i = 0; i < bin_data_length;) {
-			tx_settings[1] = bin_data[i++];
-			tx_settings[2] = bin_data[i++];
-			tx_settings[3] = bin_data[i++];
-			tx_settings[4] = bin_data[i++];
+		for (uint32_t i = 0; i < bin_data_32_length / 4; ++i) {
+			uint32_to_bytes_pointer(bin_data_32[i], tx_settings); // TODO если сразу читать из памяти?
+			tx_settings[4] = (uint8_t)i;
 			pause(1);
 			UART4_Send_Settings_flash();
 			UART4_Receive_Settings();
-			if (rx_settings[1] == tx_settings[1] &&
-				rx_settings[2] == tx_settings[2] &&
-				rx_settings[3] == tx_settings[3] &&
-				rx_settings[4] == tx_settings[4]) {
-			}
-			else {
+			if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
 				++bug;
 			}
 		}
 		UART4_Receive_Settings();
+		debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
 
-		debugg_fn(std::format("  bin_data H7 -> g4 END"));
 		if (bug) {
-			debugg_fn(std::format("  bin_data H7 -> g4 FAIL {} bugs..", bug));
+			debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", chip_number, bug));
 		}
 		else {
-			debugg_fn(std::format("  bin_data H7 -> g4 OK"));
+			debugg_fn(std::format("{}  bin_data H7 -> g4 OK", chip_number));
 		}
 	}
 
-
-#include <cstdint>
-
-// Из 32-битного в 4 байта
-	void uint32_to_bytes(uint32_t value, uint8_t* bytes) {
-		bytes[0] = (value >> 24) & 0xFF;  // Старший байт
-		bytes[1] = (value >> 16) & 0xFF;
-		bytes[2] = (value >> 8) & 0xFF;
-		bytes[3] = value & 0xFF;           // Младший байт
+	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes) {
+		*((uint32_t*)bytes) = value;
 	}
 
-	// Из 4 байтов в 32-битное
-	uint32_t bytes_to_uint32(const uint8_t* bytes) {
-		return ((uint32_t)bytes[0] << 24) |
-			((uint32_t)bytes[1] << 16) |
-			((uint32_t)bytes[2] << 8) |
-			(uint32_t)bytes[3];
+	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes) {
+		return *((uint32_t*)bytes);
 	}
-
 
 
 	void action_flash(lv_event_t* e) {
-		UART4_SendAddress(0x35);
+		const uint32_t addr = 0x08008000; // TODO какой адрес?
+		const int chip_number = 0x35; // TODO где задаётся адрес?
+
+		UART4_SendAddress(chip_number);
 		Set_tx_s(command_flash::copy_array_to_flash, 0x11, 0x12, 0x13, 0x14);
 		UART4_Send_Settings_flash();
 
 		// теперь внутри From_array_g4_to_H7();
-		UART4_Receive_Settings();
+		UART4_Receive_Settings(); // принимает ответ 0x06 0x11 0x12 0x13 0x14
 
 		// **  ****  ****  ****  ****  ****  ****  ****  ****  **
 		pause(2);
 
-		// 1 отправить адрес
+		// 1 отправить адрес // TODO
 		// надо отформатировать!
-		const uint32_t addr = 0x08008000;
-		uint8_t a[4] = {};
-		uint32_to_bytes(addr, a);
-		Set_tx_s(command_flash::copy_array_to_flash, a[0], a[1], a[2], a[3]);
+		uint32_to_bytes_pointer(addr, tx_settings);
+		tx_settings[4] = chip_number; // просто так ..
 		UART4_Send_Settings_flash();
 
 
 		// 2 принять адрес для проверки
 		UART4_Receive_Settings();
 		pause(2);
-		uint32_t addr_back = 0x0;
-		addr_back = bytes_to_uint32((uint8_t*)rx_settings[1]);
+		uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
 		if (addr_back == addr) {
-			debugg_fn(std::format("  addr  ok  {}", addr_back));
-			// Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58);
+			debugg_fn(std::format("  addr  ok  {:x}", addr_back));
+			Set_tx_s(response::ok, 0x45, 0x46, 0x47, 0x48);
 		}
 		else {
-			debugg_fn(std::format("  addr  fail  {}", addr_back));
-			// Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
+			debugg_fn(std::format("  addr  fail  {:x}", addr_back));
+			Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
 		}
 
 
 		// 3 если ок - то разрешаем запись
-		Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58);
+		// Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58); // для тестирования
 		UART4_Send_Settings_flash();
 
 
 
 		//3.2
-		UART4_Receive_Settings();
+		UART4_Receive_Settings(); // 32
 
 
 		//3.5
-		UART4_Receive_Settings();
+		UART4_Receive_Settings(); // 35
 
 
 

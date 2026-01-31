@@ -133,9 +133,9 @@ extern "C" {
 
 	uint8_t rx_data[4] = { };
 	const uint32_t dataLengthRX = sizeof(rx_data);
-	uint8_t tx_settings[5] = { };
+	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
 	const uint8_t tx_settings_length = sizeof(tx_settings);
-	uint8_t rx_settings[5] = { };
+	__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
 	const uint8_t rx_settings_length = sizeof(rx_settings);
 	uint8_t compN_ = 0;
 	uint8_t dot_ = 0;
@@ -219,6 +219,11 @@ extern "C" {
 	void DMA2_Stream3_i2c();
 
 	void configCharts();
+
+	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
+	// void Flash_uint32(uint32_t Address, volatile uint32_t* Data, uint32_t size);
+	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
+	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 }
 #endif // extern "C"
 
