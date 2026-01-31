@@ -33,9 +33,8 @@ std::string chart_calib_online;
 std::string l;
 std::string r;
 
-// bin_data ( выровнено по 4)
-__attribute__((aligned(32))) volatile uint32_t bin_data_32[512] = {}; // массив для отправки прошивки через dfu
-const uint32_t bin_data_32_length = sizeof(bin_data_32); // 2kB
+static const uint32_t ADRESS_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4)
+static const uint32_t MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4)
 
 int fl = 0; // for test fl
 
@@ -559,6 +558,13 @@ void UART4_Send_Settings_flash() { // tx_settings[0] - [4]
 }
 
 void UART4_Receive_Settings_flash() { // rx_settings[0] - [4]
+	for (uint8_t i = 0; i < rx_settings_length; i++) {
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
+	}
+}
+
+void UART4_g4_echo() { // rx_settings[0] - [4]
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
@@ -1310,7 +1316,7 @@ extern "C" {
 
 	void action_set_number_g4s(lv_event_t* e) {
 		UART4_SendAddress(0x1); // вызвать по адресу
-		uint8_t new_adress = 0x35; // DEBUG new_adress = 0x35
+		uint8_t new_adress = 0x1; // DEBUG new_adress = 0x35
 		Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
 		UART4_Send_Settings_flash();
 
@@ -1332,11 +1338,9 @@ extern "C" {
 	}
 
 	void action_h7_g4(lv_event_t* e) {
-		const uint32_t start_adress_memory_read = 0x08000000; // TODO какой адрес?
-		const int chip_number = 0x35; // TODO где задаётся адрес?
+		const uint32_t start_adress_memory_read = 0x08000000; // TODO где в памяти h7 лежит прошивка для g4
+		const int chip_number = 0x35; // TODO где задаётся адрес для g4?
 
-		// чтение из памяти в буфер
-		Read_uint32(start_adress_memory_read, bin_data_32, 2048);
 		debugg_fn(std::format("  READ  bin_data  OK"));
 
 
@@ -1347,10 +1351,13 @@ extern "C" {
 		// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
 		UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
 
+		uint32_t primask = __get_PRIMASK();
+		
+		volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
 		int bug = 0;
 		pause(1);
-		for (uint32_t i = 0; i < bin_data_32_length / 4; ++i) {
-			uint32_to_bytes_pointer(bin_data_32[i], tx_settings); // TODO если сразу читать из памяти?
+		for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
+			uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
 			tx_settings[4] = (uint8_t)i;
 			pause(1);
 			UART4_Send_Settings_flash();
@@ -1359,6 +1366,9 @@ extern "C" {
 				++bug;
 			}
 		}
+
+		__set_PRIMASK(primask);
+
 		UART4_Receive_Settings();
 		debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
 
