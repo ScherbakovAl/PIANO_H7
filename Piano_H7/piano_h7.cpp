@@ -33,8 +33,13 @@ std::string chart_calib_online;
 std::string l;
 std::string r;
 
-static const uint32_t ADRESS_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4)
-static const uint32_t MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4)
+static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
+static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
+static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок)
+
+static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4)
+static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4)
+int numbers_chips[30] = {};
 
 int fl = 0; // for test fl
 
@@ -566,7 +571,16 @@ void UART4_Receive_Settings_flash() { // rx_settings[0] - [4]
 
 void UART4_g4_echo() { // rx_settings[0] - [4]
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		// Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
+		TIM2->CNT = 0;
+		const uint32_t timeout = 10 * 275; // 10us * 275 тиков/us
+
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
+			if (TIM2->CNT >= timeout) {
+				// Время ожидания истекло, выходим без чтения
+				return;
+			}
+		}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 }
@@ -937,7 +951,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 10 == 0)debugg_clear();
+	if (debug_counter % 30 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
@@ -1311,35 +1325,58 @@ extern "C" {
 		UART4_SendAddress(a);
 		Set_tx_s(command_flash::echo, 0, 0, 0, 0);
 		UART4_Send_Settings_flash();
-		UART4_Receive_Settings_flash();
+		rx_settings[0] = 0;
+		UART4_g4_echo();
 	}
 
-	void action_set_number_g4s(lv_event_t* e) {
-		UART4_SendAddress(0x1); // вызвать по адресу
-		uint8_t new_adress = 0x1; // DEBUG new_adress = 0x35
-		Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
-		UART4_Send_Settings_flash();
+	void action__echo_g4s(lv_event_t* e) {
 
-		uint8_t a = 0;
-		uint8_t b = 0;
-		UART4_Receive_Settings_flash();
-		a = tx_settings[1];
-		UART4_Receive_Settings_flash();
-		b = tx_settings[1];
-
-		if (a == new_adress && b == new_adress) {
-			debugg_fn(std::format("  number ok {}", tx_settings[1]));
+		for (int i = 0; i < 30; ++i) {
+			G4_echo(i);
+			G4_echo(i);
+			G4_echo(i);
+			if (rx_settings[0]) {
+				numbers_chips[i] = rx_settings[0];
+			}
+			else {
+				numbers_chips[i] = 0;
+			}
 		}
-		else {
-			debugg_fn(std::format("  bugg ! {}", tx_settings[1]));
+		for (int i = 0; i < 30; ++i) {
+			if (numbers_chips[i]) {
+				debugg_fn(std::format("{}  ch .. {}", i, numbers_chips[i]));
+			}
 		}
+		// UART4_SendAddress(0x1); // вызвать по адресу
+		// uint8_t new_adress = 0x1; // DEBUG new_adress = 0x35
+		// Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
+		// UART4_Send_Settings_flash();
 
-		G4_echo(new_adress);
+		// uint8_t a = 0;
+		// uint8_t b = 0;
+		// UART4_Receive_Settings_flash();
+		// a = tx_settings[1];
+		// UART4_Receive_Settings_flash();
+		// b = tx_settings[1];
+
+		// if (a == new_adress && b == new_adress) {
+		// 	debugg_fn(std::format("  number ok {}", tx_settings[1]));
+		// }
+		// else {
+		// 	debugg_fn(std::format("  bugg ! {}", tx_settings[1]));
+		// }
+
+		// Set_tx_s(new_adress, 0, 0, 0, 0);
+		// UART4_Send_Settings_flash();
+	}
+
+	void action_reset_number_echo_g4(lv_event_t* e) {
+		// irt = 0;
 	}
 
 	void action_h7_g4(lv_event_t* e) {
 		const uint32_t start_adress_memory_read = 0x08000000; // TODO где в памяти h7 лежит прошивка для g4
-		const int chip_number = 0x35; // TODO где задаётся адрес для g4?
+		const int chip_number = 0x1; // TODO где задаётся адрес для g4?
 
 		debugg_fn(std::format("  READ  bin_data  OK"));
 
@@ -1352,7 +1389,7 @@ extern "C" {
 		UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
 
 		uint32_t primask = __get_PRIMASK();
-		
+
 		volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
 		int bug = 0;
 		pause(1);
@@ -1391,7 +1428,7 @@ extern "C" {
 
 	void action_flash(lv_event_t* e) {
 		const uint32_t addr = 0x08008000; // TODO какой адрес?
-		const int chip_number = 0x35; // TODO где задаётся адрес?
+		const int chip_number = 0x1; // TODO где задаётся адрес?
 
 		UART4_SendAddress(chip_number);
 		Set_tx_s(command_flash::copy_array_to_flash, 0x11, 0x12, 0x13, 0x14);

@@ -792,7 +792,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "set_number_g4s",
+      "name": "_echo_g4s",
       "description": "установить номер чипа g4"
     },
     {
@@ -810,6 +810,14 @@
       "localVariables": [],
       "userProperties": [],
       "name": "flash"
+    },
+    {
+      "objID": "6bf67516-e3ab-4ab5-ec12-9a7e9c127c57",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "reset_number_echo_g4"
     }
   ],
   "userPages": [
@@ -1730,7 +1738,7 @@
                   "objID": "ea7af261-abda-4a9d-a2b9-9b6bcfda8377",
                   "eventName": "RELEASED",
                   "handlerType": "action",
-                  "action": "set_number_g4s",
+                  "action": "_echo_g4s",
                   "userData": 0
                 }
               ],
@@ -1744,8 +1752,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 86,
-                  "height": 32,
+                  "width": 36,
+                  "height": 16,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -1783,7 +1791,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "set number\n       g4s",
+                  "text": "echo",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -1866,7 +1874,7 @@
               "groupIndex": 0,
               "text": "debugg",
               "textType": "expression",
-              "longMode": "SCROLL",
+              "longMode": "SCROLL_CIRCULAR",
               "recolor": false,
               "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n"
             },
@@ -2067,6 +2075,110 @@
               "states": "",
               "localStyles": {
                 "objID": "ae74a9d2-d528-4ed2-c678-c064d98ee887",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "bg_color": "#343638"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "a9c5e2b5-5379-4ade-8bf4-8cd99c7aa348",
+              "type": "LVGLButtonWidget",
+              "left": 0,
+              "top": 71,
+              "width": 100,
+              "height": 50,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "ed881f40-33f7-45c0-9523-496e971f676c",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [
+                {
+                  "objID": "ed302c86-19cf-403e-f6d5-5613284c512a",
+                  "eventName": "RELEASED",
+                  "handlerType": "action",
+                  "action": "reset_number_echo_g4",
+                  "userData": 0
+                }
+              ],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [
+                {
+                  "objID": "7cc92c9a-9bbe-4586-a22b-54e4e974767a",
+                  "type": "LVGLLabelWidget",
+                  "left": 0,
+                  "top": 0,
+                  "width": 5,
+                  "height": 16,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "2a886680-0d0d-4fa9-efd3-2f3fb19a1fa5",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "19d7bfc1-f5fd-4a36-c1b7-9ee97d7e6d67",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "align": "CENTER"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "-",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                }
+              ],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "ab23329a-34dc-4c25-a673-e08d0e5e0f31",
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
