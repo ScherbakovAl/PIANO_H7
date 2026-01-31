@@ -37,7 +37,7 @@ static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
 static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
 static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
 // надо 6 копирований делать в G4                    ^^^^^^^^^^^^^
-// 						const uint32_t Flash_Address = 0x080E0000; - здесь лежит калибровка
+const uint32_t Flash_Address = 0x080E0000; // -здесь лежит калибровка
 
 static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
 static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4) 16я банка - размер на ~5 банок
@@ -1377,45 +1377,67 @@ extern "C" {
 	}
 
 	void action_h7_g4(lv_event_t* e) {
-		const uint32_t start_adress_memory_read = 0x08000000; // TODO где в памяти h7 лежит прошивка для g4
-		const int chip_number = 0x1; // TODO где задаётся адрес для g4?
+		uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
 
-		debugg_fn(std::format("  READ  bin_data  OK"));
+		for (int x = 0; x < 30; ++x) {
+
+			const int chip_number = numbers_chips[x];
+			int bug = 0;
+
+			if (chip_number) {
+
+				for (int ii = 0; ii < 6; ++ii) {
+
+					UART4_SendAddress(chip_number);
+					Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
+					UART4_Send_Settings_flash();
+
+					// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
+
+					UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
+
+					uint32_t primask = __get_PRIMASK();
+
+					volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
+					pause(1);
+					for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
+						uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
+						tx_settings[4] = (uint8_t)i;
+						pause(1);
+						UART4_Send_Settings_flash();
+						UART4_Receive_Settings();
+						if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
+							++bug;
+						}
+					}
+
+					__set_PRIMASK(primask);
+
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+
+					//     action_flash.....
+
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 
 
-		UART4_SendAddress(chip_number); // TODO  какой чип шьём сейчас?
-		Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
-		UART4_Send_Settings_flash();
 
-		// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-		UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
+					start_adress_memory_read += 0x800;
+				}
 
-		uint32_t primask = __get_PRIMASK();
+				UART4_Receive_Settings();
+				debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
 
-		volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
-		int bug = 0;
-		pause(1);
-		for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
-			uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
-			tx_settings[4] = (uint8_t)i;
-			pause(1);
-			UART4_Send_Settings_flash();
-			UART4_Receive_Settings();
-			if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
-				++bug;
+				if (bug) {
+					debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", chip_number, bug));
+				}
+				else {
+					debugg_fn(std::format("{}  bin_data H7 -> g4 OK", chip_number));
+				}
 			}
-		}
-
-		__set_PRIMASK(primask);
-
-		UART4_Receive_Settings();
-		debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
-
-		if (bug) {
-			debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", chip_number, bug));
-		}
-		else {
-			debugg_fn(std::format("{}  bin_data H7 -> g4 OK", chip_number));
 		}
 	}
 

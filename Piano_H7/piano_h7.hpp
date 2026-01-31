@@ -155,7 +155,7 @@ extern "C" {
 	int8_t noteAdder[196] = {};
 	float mass_F[196] = {};
 
-	const uint32_t Flash_Address = 0x080E0000; // здесь сохраняется калибровка >> FLASH
+	const uint32_t Flash_Address = 0x080E0000; //
 
 	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
