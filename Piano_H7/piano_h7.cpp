@@ -1194,7 +1194,7 @@ extern "C" {
 		UART4_Receive_Settings();
 
 		int bug = 0;
-			pause(1);
+		pause(1);
 		for (uint32_t i = 0; i < bin_data_length;) {
 			tx_settings[1] = bin_data[i++];
 			tx_settings[2] = bin_data[i++];
@@ -1222,6 +1222,101 @@ extern "C" {
 			debugg_fn(std::format("  bin_data H7 -> g4 OK"));
 		}
 	}
+
+
+#include <cstdint>
+
+// Из 32-битного в 4 байта
+	void uint32_to_bytes(uint32_t value, uint8_t* bytes) {
+		bytes[0] = (value >> 24) & 0xFF;  // Старший байт
+		bytes[1] = (value >> 16) & 0xFF;
+		bytes[2] = (value >> 8) & 0xFF;
+		bytes[3] = value & 0xFF;           // Младший байт
+	}
+
+	// Из 4 байтов в 32-битное
+	uint32_t bytes_to_uint32(const uint8_t* bytes) {
+		return ((uint32_t)bytes[0] << 24) |
+			((uint32_t)bytes[1] << 16) |
+			((uint32_t)bytes[2] << 8) |
+			(uint32_t)bytes[3];
+	}
+
+
+
+	void action_flash(lv_event_t* e) {
+		UART4_SendAddress(0x35);
+		Set_tx_s(command_flash::copy_array_to_flash, 0x11, 0x12, 0x13, 0x14);
+		UART4_Send_Settings_flash();
+
+		// теперь внутри From_array_g4_to_H7();
+		UART4_Receive_Settings();
+
+		// **  ****  ****  ****  ****  ****  ****  ****  ****  **
+		pause(2);
+
+		// 1 отправить адрес
+		// надо отформатировать!
+		const uint32_t addr = 0x08008000;
+		uint8_t a[4] = {};
+		uint32_to_bytes(addr, a);
+		Set_tx_s(command_flash::copy_array_to_flash, a[0], a[1], a[2], a[3]);
+		UART4_Send_Settings_flash();
+
+
+		// 2 принять адрес для проверки
+		UART4_Receive_Settings();
+		pause(2);
+		uint32_t addr_back = 0x0;
+		addr_back = bytes_to_uint32((uint8_t*)rx_settings[1]);
+		if (addr_back == addr) {
+			debugg_fn(std::format("  addr  ok  {}", addr_back));
+			// Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58);
+		}
+		else {
+			debugg_fn(std::format("  addr  fail  {}", addr_back));
+			// Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
+		}
+
+
+		// 3 если ок - то разрешаем запись
+		Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58);
+		UART4_Send_Settings_flash();
+
+
+
+		//3.2
+		UART4_Receive_Settings();
+
+
+		//3.5
+		UART4_Receive_Settings();
+
+
+
+		// 4
+		UART4_Receive_Settings();
+
+
+		if (rx_settings[1] == response::ok) {
+			debugg_fn(std::format("  FLASH G4 ok  "));
+		}
+		else {
+			debugg_fn(std::format("  FLASH G4 fail  ((  "));
+		}
+
+
+
+
+
+
+
+
+
+
+
+	}
+
 
 
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
