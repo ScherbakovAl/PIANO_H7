@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/48",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/46",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/0",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -1023,7 +1023,8 @@
           "0": {},
           "1": {},
           "3": {},
-          "4": {}
+          "4": {},
+          "5": {}
         }
       },
       "transform": {
@@ -1352,10 +1353,7 @@
   "lvglExpandedPropertiesGroup": [
     "TEXT",
     "MISCELLANEOUS",
-    "POSITION AND SIZE",
-    "BACKGROUND",
-    "PADDING",
-    "SHADOW"
+    "BACKGROUND"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,

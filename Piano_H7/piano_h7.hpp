@@ -124,7 +124,7 @@ extern "C" {
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
 	const uint8_t start_adress_chip_on = 1; // включительно (1)
-	const uint8_t end_adress_chip_on = 3; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t end_adress_chip_on = 1; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно (14)
 	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
@@ -155,7 +155,7 @@ extern "C" {
 	int8_t noteAdder[196] = {};
 	float mass_F[196] = {};
 
-	const uint32_t Flash_Address = 0x080E0000; //
+	// const uint32_t Flash_Address = 0x080E0000; //
 
 	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
@@ -224,6 +224,7 @@ extern "C" {
 	// void Flash_uint32(uint32_t Address, volatile uint32_t* Data, uint32_t size);
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
+	void flash_g4(const uint32_t addr, const int chip_number);
 }
 #endif // extern "C"
 

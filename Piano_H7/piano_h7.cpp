@@ -953,7 +953,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 30 == 0)debugg_clear();
+	if (debug_counter % 9 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
@@ -1271,7 +1271,7 @@ extern "C" {
 	}
 
 	void action_to_main_disp(lv_event_t* e) {
-		// pause(100);
+		pause(2);
 		if (cur_disp == current_display::on) {
 			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
@@ -1284,8 +1284,8 @@ extern "C" {
 		}
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
-		// debugg_clear();
-		// sync(); // TODO включить обратно (выключено для тестирования)
+		debugg_clear();
+		sync(); // TODO включить обратно (выключено для тестирования)
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
@@ -1378,6 +1378,28 @@ extern "C" {
 
 	void action_h7_g4(lv_event_t* e) {
 		uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
+		uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
+		// g4 echo ....
+		for (int i = 0; i < 30; ++i) {
+			G4_echo(i);
+			G4_echo(i);
+			G4_echo(i);
+			if (rx_settings[0]) {
+				numbers_chips[i] = rx_settings[0];
+			}
+			else {
+				numbers_chips[i] = 0;
+			}
+		}
+		for (int i = 0; i < 30; ++i) {
+			if (numbers_chips[i]) {
+				debugg_fn(std::format("{}  ch .. {}", i, numbers_chips[i]));
+			}
+		}
+		numbers_chips[0] = 0;
+		numbers_chips[2] = 0; // DEBUG пока смотрим только на №1
+		numbers_chips[3] = 0;
+		// g4 echo ....
 
 		for (int x = 0; x < 30; ++x) {
 
@@ -1392,12 +1414,12 @@ extern "C" {
 					Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
 					UART4_Send_Settings_flash();
 
-					// теперь внутри    From_H7_to_array_g4(); *  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-
+					// теперь внутри    From_H7_to_array_g4(); 
+					// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
 					UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
+					// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
 
 					uint32_t primask = __get_PRIMASK();
-
 					volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
 					pause(1);
 					for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
@@ -1410,14 +1432,15 @@ extern "C" {
 							++bug;
 						}
 					}
-
 					__set_PRIMASK(primask);
+					UART4_Receive_Settings();
+					pause(2);
 
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 
-					//     action_flash.....
+					flash_g4(mem, chip_number);
 
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
@@ -1426,9 +1449,10 @@ extern "C" {
 
 
 					start_adress_memory_read += 0x800;
+					mem += 0x800;
+					// UART4_Receive_Settings(); // принимает ok
 				}
 
-				UART4_Receive_Settings();
 				debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
 
 				if (bug) {
@@ -1436,6 +1460,15 @@ extern "C" {
 				}
 				else {
 					debugg_fn(std::format("{}  bin_data H7 -> g4 OK", chip_number));
+				}
+			}
+
+			// TODO добавить отправку адреса, на который прыгать
+			if (!bug) {
+				if (chip_number) {
+					UART4_SendAddress(chip_number);
+					Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
+					UART4_Send_Settings_flash();
 				}
 			}
 		}
@@ -1449,17 +1482,16 @@ extern "C" {
 		return *((uint32_t*)bytes);
 	}
 
-
-	void action_flash(lv_event_t* e) {
-		const uint32_t addr = 0x08008000; // TODO какой адрес?
-		const int chip_number = 0x1; // TODO где задаётся адрес?
+	void flash_g4(const uint32_t addr, const int chip_number) {
+		// const uint32_t addr = 0x08008000; // TODO какой адрес?
+		// const int chip_number = 0x1; // TODO где задаётся адрес?
 
 		UART4_SendAddress(chip_number);
-		Set_tx_s(command_flash::copy_array_to_flash, 0x11, 0x12, 0x13, 0x14);
+		Set_tx_s(command_flash::copy_array_to_flash, 0x61, 0x62, 0x63, 0x64);
 		UART4_Send_Settings_flash();
 
 		// теперь внутри From_array_g4_to_H7();
-		UART4_Receive_Settings(); // принимает ответ 0x06 0x11 0x12 0x13 0x14
+		UART4_Receive_Settings(); // принимает ответ 0x06 0x61 0x62 0x63 0x64
 
 		// **  ****  ****  ****  ****  ****  ****  ****  ****  **
 		pause(2);
@@ -1470,10 +1502,9 @@ extern "C" {
 		tx_settings[4] = chip_number; // просто так ..
 		UART4_Send_Settings_flash();
 
-
 		// 2 принять адрес для проверки
 		UART4_Receive_Settings();
-		pause(2);
+		pause(1);
 		uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
 		if (addr_back == addr) {
 			debugg_fn(std::format("  addr  ok  {:x}", addr_back));
@@ -1484,9 +1515,7 @@ extern "C" {
 			Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
 		}
 
-
 		// 3 если ок - то разрешаем запись
-		// Set_tx_s(response::ok, 0x55, 0x56, 0x57, 0x58); // для тестирования
 		UART4_Send_Settings_flash();
 
 
@@ -1503,24 +1532,18 @@ extern "C" {
 		// 4
 		UART4_Receive_Settings();
 
-
 		if (rx_settings[1] == response::ok) {
 			debugg_fn(std::format("  FLASH G4 ok  "));
 		}
 		else {
 			debugg_fn(std::format("  FLASH G4 fail  ((  "));
 		}
+	}
 
-
-
-
-
-
-
-
-
-
-
+	void action_flash(lv_event_t* e) {
+		UART4_SendAddress(1);
+		Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
+		UART4_Send_Settings_flash();
 	}
 
 
