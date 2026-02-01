@@ -570,22 +570,6 @@ void UART4_Receive_Settings_flash() { // rx_settings[0] - [4]
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 }
-
-void UART4_g4_echo() { // rx_settings[0] - [4]
-	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		// Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
-		TIM2->CNT = 0;
-		const uint32_t timeout = 10 * 275; // 10us * 275 тиков/us
-
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
-			if (TIM2->CNT >= timeout) {
-				// Время ожидания истекло, выходим без чтения
-				return;
-			}
-		}
-		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
-	}
-}
 //---------------------------------
 
 const float key_mass = 0.008f; // 8 гр -->> переехал в массив
@@ -1006,16 +990,6 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 }
 
 void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
-	// if (touchpad_pressed) {
-	// 	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
-	// 	data->point.x = TP.point1_x;
-	// 	data->point.y = TP.point1_y;
-	// 	data->state = LV_INDEV_STATE_PRESSED;
-	// }
-	// else {
-	// 	data->state = LV_INDEV_STATE_RELEASED;
-	// }
-
 	uint8_t touchStatus = 0;
 	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
 	uint8_t touchCount = touchStatus & 0x0F;
@@ -1056,22 +1030,51 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 3;
-
-	// for (int32_t i = 0; i < width * height; i++) {
-		// 	LCD_Send_Data_16(color_p);
-		// 	++color_p;
-		// }
-		// lv_display_flush_ready(disp);
-
-	// SCB_CleanInvalidateDCache_by_Addr((uint32_t*)(((uint32_t)color_p) & ~(uint32_t)0x1F), wh_ + 32);
 	SCB_CleanInvalidateDCache(); // or
 	Send_DMA_Data8(color_p, wh_);
 }
 
-void my_flush_wait(lv_display_t* disp) {
-	lv_display_flush_ready(disp);
-}
+void configCharts() {
+	lv_obj_t* ob = objects.chart_on;
+	lv_chart_set_point_count(ob, 89);
+	ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
+	ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
+	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
+	lv_chart_set_series_ext_y_array(ob, ser_on_green, &compsCHART_0[7]);
+	lv_chart_set_series_ext_y_array(ob, ser_on_red, &compsCHART_1[7]);
+	lv_chart_set_series_ext_y_array(ob, ser_on_blue, &compsCHART_CALIB[7]);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
+	c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
+	ch_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
+	lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
+	lv_chart_set_cursor_point(ob, ch_on, ser_on_blue, cursor);
+	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
+	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
+	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
+	lv_chart_set_div_line_count(ob, 0, 0);
+	lv_obj_set_style_radius(ob, 0, 0);
 
+	ob = objects.chart_off;
+	lv_chart_set_point_count(ob, 70);
+	ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X);
+	ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
+	ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
+	lv_chart_set_series_ext_y_array(ob, ser_off_green, &compsCHART_0[98]);
+	lv_chart_set_series_ext_y_array(ob, ser_off_red, &compsCHART_1[98]);
+	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &compsCHART_CALIB[98]);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
+	c_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
+	ch_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
+	lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
+	lv_chart_set_cursor_point(ob, ch_off, ser_off_blue, cursor);
+	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
+	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
+	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
+	lv_chart_set_div_line_count(ob, 0, 0);
+	lv_obj_set_style_radius(ob, 0, 0);
+}
 
 /**
  * @brief Чтение данных из Flash памяти в формате uint32_t
@@ -1225,50 +1228,107 @@ void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size) {
 }
 */
 
+static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes) {
+	*((uint32_t*)bytes) = value;
+}
+
+static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes) {
+	return *((uint32_t*)bytes);
+}
+
+void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
+	tx_settings[0] = a;
+	tx_settings[1] = b;
+	tx_settings[2] = c;
+	tx_settings[3] = d;
+	tx_settings[4] = e;
+}
+
+void UART4_g4_echo() {
+	for (uint8_t i = 0; i < rx_settings_length; i++) {
+		// Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
+		TIM2->CNT = 0;
+		const uint32_t timeout = 10 * 275; // 10us * 275 тиков/us
+
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
+			if (TIM2->CNT >= timeout) {
+				// Время ожидания истекло, выходим без чтения
+				return;
+			}
+		}
+		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
+	}
+}
+
+void G4_echo(int a) {
+	UART4_SendAddress(a);
+	Set_tx_s(command_flash::echo, 0, 0, 0, 0);
+	UART4_Send_Settings_flash();
+	rx_settings[0] = 0;
+	UART4_g4_echo();
+}
+
+void flash_g4(const uint32_t addr, const int chip_number) {
+	// const uint32_t addr = 0x08008000; // TODO какой адрес?
+	// const int chip_number = 0x1; // TODO где задаётся адрес?
+
+	UART4_SendAddress(chip_number);
+	Set_tx_s(command_flash::copy_array_to_flash, 0x61, 0x62, 0x63, 0x64);
+	UART4_Send_Settings_flash();
+
+	// теперь внутри From_array_g4_to_H7();
+	UART4_Receive_Settings(); // принимает ответ 0x06 0x61 0x62 0x63 0x64
+
+	// **  ****  ****  ****  ****  ****  ****  ****  ****  **
+	pause(2);
+
+	// 1 отправить адрес // TODO
+	// надо отформатировать!
+	uint32_to_bytes_pointer(addr, tx_settings);
+	tx_settings[4] = chip_number; // просто так ..
+	UART4_Send_Settings_flash();
+
+	// 2 принять адрес для проверки
+	UART4_Receive_Settings();
+	pause(1);
+	uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
+	if (addr_back == addr) {
+		debugg_fn(std::format("  addr  ok  {:x}", addr_back));
+		Set_tx_s(response::ok, 0x45, 0x46, 0x47, 0x48);
+	}
+	else {
+		debugg_fn(std::format("  addr  fail  {:x}", addr_back));
+		Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
+	}
+
+	// 3 если ок - то разрешаем запись
+	UART4_Send_Settings_flash();
+
+
+
+	//3.2
+	UART4_Receive_Settings(); // 32
+
+
+	//3.5
+	UART4_Receive_Settings(); // 35
+
+
+
+	// 4
+	UART4_Receive_Settings();
+
+	if (rx_settings[1] == response::ok) {
+		debugg_fn(std::format("  FLASH G4 ok  "));
+	}
+	else {
+		debugg_fn(std::format("  FLASH G4 fail  ((  "));
+	}
+}
+
 // LVGL ACTIONS
 #ifdef __cplusplus
 extern "C" {
-	void configCharts() {
-		lv_obj_t* ob = objects.chart_on;
-		lv_chart_set_point_count(ob, 89);
-		ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
-		ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
-		ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
-		lv_chart_set_series_ext_y_array(ob, ser_on_green, &compsCHART_0[7]);
-		lv_chart_set_series_ext_y_array(ob, ser_on_red, &compsCHART_1[7]);
-		lv_chart_set_series_ext_y_array(ob, ser_on_blue, &compsCHART_CALIB[7]);
-		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
-		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
-		c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
-		ch_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-		lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
-		lv_chart_set_cursor_point(ob, ch_on, ser_on_blue, cursor);
-		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
-		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
-		lv_chart_set_div_line_count(ob, 0, 0);
-		lv_obj_set_style_radius(ob, 0, 0);
-
-		ob = objects.chart_off;
-		lv_chart_set_point_count(ob, 70);
-		ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_X);
-		ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_X);
-		ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_X);
-		lv_chart_set_series_ext_y_array(ob, ser_off_green, &compsCHART_0[98]);
-		lv_chart_set_series_ext_y_array(ob, ser_off_red, &compsCHART_1[98]);
-		lv_chart_set_series_ext_y_array(ob, ser_off_blue, &compsCHART_CALIB[98]);
-		lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
-		lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
-		c_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
-		ch_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-		lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
-		lv_chart_set_cursor_point(ob, ch_off, ser_off_blue, cursor);
-		lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
-		lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-		lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
-		lv_chart_set_div_line_count(ob, 0, 0);
-		lv_obj_set_style_radius(ob, 0, 0);
-	}
 
 	void action_to_main_disp(lv_event_t* e) {
 		pause(2);
@@ -1285,7 +1345,9 @@ extern "C" {
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
+
 		// sync(); // TODO включить обратно (выключено для тестирования)
+
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
@@ -1298,7 +1360,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
-		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO
+		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips[i]
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
@@ -1311,10 +1373,11 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		all_g4_to_H7();
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips[i]
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
+
 
 	void action_to_disp_flash(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
@@ -1323,16 +1386,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_FLASH);
 	}
 
-	void G4_echo(int a) {
-		UART4_SendAddress(a);
-		Set_tx_s(command_flash::echo, 0, 0, 0, 0);
-		UART4_Send_Settings_flash();
-		rx_settings[0] = 0;
-		UART4_g4_echo();
-	}
-
 	void action__echo_g4s(lv_event_t* e) {
-
 		for (int i = 0; i < 30; ++i) {
 			G4_echo(i);
 			G4_echo(i);
@@ -1344,42 +1398,21 @@ extern "C" {
 				numbers_chips[i] = 0;
 			}
 		}
+		std::string str = "ships .. ";
 		for (int i = 0; i < 30; ++i) {
 			if (numbers_chips[i]) {
-				debugg_fn(std::format("{}  ch .. {}", i, numbers_chips[i]));
+				str += std::format(" {}", numbers_chips[i]);
 			}
 		}
-		// UART4_SendAddress(0x1); // вызвать по адресу
-		// uint8_t new_adress = 0x1; // DEBUG new_adress = 0x35
-		// Set_tx_s(command_flash::set_number, new_adress, 0, 0, 0);
-		// UART4_Send_Settings_flash();
-
-		// uint8_t a = 0;
-		// uint8_t b = 0;
-		// UART4_Receive_Settings_flash();
-		// a = tx_settings[1];
-		// UART4_Receive_Settings_flash();
-		// b = tx_settings[1];
-
-		// if (a == new_adress && b == new_adress) {
-		// 	debugg_fn(std::format("  number ok {}", tx_settings[1]));
-		// }
-		// else {
-		// 	debugg_fn(std::format("  bugg ! {}", tx_settings[1]));
-		// }
-
-		// Set_tx_s(new_adress, 0, 0, 0, 0);
-		// UART4_Send_Settings_flash();
+		debugg_fn(str);
 	}
 
-	void action_reset_number_echo_g4(lv_event_t* e) {
-		// irt = 0;
-	}
-
-	void action_h7_g4(lv_event_t* e) {
+	void action_h7_g4(lv_event_t* e) { // копирует и шъёт одной кнопкой все чипы
 		uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
 		uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
-		// g4 echo ....
+		std::string str2 = "ships flash ok .. ";
+
+		// g4 echo .... // TODO зачем, если уже собрал номера чипов?
 		for (int i = 0; i < 30; ++i) {
 			G4_echo(i);
 			G4_echo(i);
@@ -1391,24 +1424,28 @@ extern "C" {
 				numbers_chips[i] = 0;
 			}
 		}
+		std::string str = "ships .. ";
 		for (int i = 0; i < 30; ++i) {
 			if (numbers_chips[i]) {
-				debugg_fn(std::format("{}  ch .. {}", i, numbers_chips[i]));
+				str += std::format(" {}", numbers_chips[i]);
 			}
 		}
+		debugg_fn(str);
+
 		numbers_chips[0] = 0;
 		numbers_chips[2] = 0; // DEBUG пока смотрим только на №1
 		numbers_chips[3] = 0;
-		// g4 echo ....
+		// g4 echo .... // TODO зачем, если уже собрал номера чипов?
 
 		for (int x = 0; x < 30; ++x) {
-
+			start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
+			mem = ADRESS_G4_MAIN_FIRMWARE;
 			const int chip_number = numbers_chips[x];
 			int bug = 0;
 
 			if (chip_number) {
 
-				for (int ii = 0; ii < 6; ++ii) {
+				for (int ii = 0; ii < 6; ++ii) { // количество страниц (6) в g4, которые занимает прошивка g4
 
 					UART4_SendAddress(chip_number);
 					Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
@@ -1446,22 +1483,18 @@ extern "C" {
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 
-
-
 					start_adress_memory_read += 0x800;
 					mem += 0x800;
-					// UART4_Receive_Settings(); // принимает ok
 				}
-
-				debugg_fn(std::format("{}  bin_data H7 -> g4 END", chip_number));
 
 				if (bug) {
 					debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", chip_number, bug));
 				}
 				else {
-					debugg_fn(std::format("{}  bin_data H7 -> g4 OK", chip_number));
+					str2 += std::format(" {}", chip_number);
 				}
 			}
+			debugg_fn(str2);
 
 			// TODO добавить отправку адреса, на который прыгать
 			if (!bug) {
@@ -1474,87 +1507,16 @@ extern "C" {
 		}
 	}
 
-	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes) {
-		*((uint32_t*)bytes) = value;
+
+	void action_flash(lv_event_t* e) { // >> jump_to_piano_g4 // TODO deprecated!
+		// UART4_SendAddress(1);
+		// Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
+		// UART4_Send_Settings_flash();
+	}
+	void action_reset_number_echo_g4(lv_event_t* e) { // TODO deprecated!
+	// irt = 0;
 	}
 
-	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes) {
-		return *((uint32_t*)bytes);
-	}
-
-	void flash_g4(const uint32_t addr, const int chip_number) {
-		// const uint32_t addr = 0x08008000; // TODO какой адрес?
-		// const int chip_number = 0x1; // TODO где задаётся адрес?
-
-		UART4_SendAddress(chip_number);
-		Set_tx_s(command_flash::copy_array_to_flash, 0x61, 0x62, 0x63, 0x64);
-		UART4_Send_Settings_flash();
-
-		// теперь внутри From_array_g4_to_H7();
-		UART4_Receive_Settings(); // принимает ответ 0x06 0x61 0x62 0x63 0x64
-
-		// **  ****  ****  ****  ****  ****  ****  ****  ****  **
-		pause(2);
-
-		// 1 отправить адрес // TODO
-		// надо отформатировать!
-		uint32_to_bytes_pointer(addr, tx_settings);
-		tx_settings[4] = chip_number; // просто так ..
-		UART4_Send_Settings_flash();
-
-		// 2 принять адрес для проверки
-		UART4_Receive_Settings();
-		pause(1);
-		uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
-		if (addr_back == addr) {
-			debugg_fn(std::format("  addr  ok  {:x}", addr_back));
-			Set_tx_s(response::ok, 0x45, 0x46, 0x47, 0x48);
-		}
-		else {
-			debugg_fn(std::format("  addr  fail  {:x}", addr_back));
-			Set_tx_s(response::fail, 0x55, 0x56, 0x57, 0x58);
-		}
-
-		// 3 если ок - то разрешаем запись
-		UART4_Send_Settings_flash();
-
-
-
-		//3.2
-		UART4_Receive_Settings(); // 32
-
-
-		//3.5
-		UART4_Receive_Settings(); // 35
-
-
-
-		// 4
-		UART4_Receive_Settings();
-
-		if (rx_settings[1] == response::ok) {
-			debugg_fn(std::format("  FLASH G4 ok  "));
-		}
-		else {
-			debugg_fn(std::format("  FLASH G4 fail  ((  "));
-		}
-	}
-
-	void action_flash(lv_event_t* e) {
-		UART4_SendAddress(1);
-		Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
-		UART4_Send_Settings_flash();
-	}
-
-
-
-	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
-		tx_settings[0] = a;
-		tx_settings[1] = b;
-		tx_settings[2] = c;
-		tx_settings[3] = d;
-		tx_settings[4] = e;
-	}
 
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
 		debugg_clear();
@@ -1652,7 +1614,6 @@ extern "C" {
 		sensor_off_2_data_string = std::to_string(compsCHART_1[cu]);
 		lv_chart_refresh(cur_shart);
 	}
-
 
 	void set_cursor_piont_on() {
 		cursor_string = std::to_string(cursor - 6);
