@@ -1285,7 +1285,7 @@ extern "C" {
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
-		sync(); // TODO включить обратно (выключено для тестирования)
+		// sync(); // TODO включить обратно (выключено для тестирования)
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
