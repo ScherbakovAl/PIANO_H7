@@ -212,7 +212,7 @@ void h7() {
 	pause(10);
 	send_test_midi();
 
-	// sync();
+	sync();
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	initBuffers();
 	configCharts();
@@ -1299,6 +1299,7 @@ void data_from_H7_to_g4() {
 	uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
 	uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
 	std::string ships_ok = "ships flash ok .. ";
+	int bug = 0;
 
 	// g4 echo .... // TODO зачем, если уже собрал номера чипов?
 	G4_echo();
@@ -1307,7 +1308,6 @@ void data_from_H7_to_g4() {
 	for (auto n : numbers_chips) {
 		start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
 		mem = ADRESS_G4_MAIN_FIRMWARE;
-		int bug = 0;
 
 		if (n) {
 
@@ -1351,7 +1351,19 @@ void data_from_H7_to_g4() {
 				start_adress_memory_read += 0x800;
 				mem += 0x800;
 			}
-
+		}
+		// debugg_fn(ships_ok);
+	}
+	// прыгаем по предустановленному в G4 адресу (0x08008000)
+	if (!bug) {
+		for (auto n : numbers_chips) {
+			if (n) {
+				UART4_SendAddress(n);
+				Set_tx_s(command_for_flash_g4::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
+				UART4_Send_Settings_flash();
+				UART4_timeout_10us_receive();
+				pause(50000); // 50ms
+			}
 			if (bug) {
 				debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", n, bug));
 			}
@@ -1359,19 +1371,7 @@ void data_from_H7_to_g4() {
 				ships_ok += std::format(" {}", n);
 			}
 		}
-		// debugg_fn(ships_ok);
-
-		// прыгаем по предустановленному в G4 адресу (0x08008000)
-		if (!bug) {
-			if (n) {
-				UART4_SendAddress(n);
-				Set_tx_s(command_for_flash_g4::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
-				UART4_Send_Settings_flash();
-				UART4_timeout_10us_receive();
-			}
-		}
 	}
-	pause(50);
 }
 
 void flash_g4(const uint32_t addr, const int chip_number) {
@@ -1430,16 +1430,16 @@ extern "C" {
 
 	void action_to_main_disp(lv_event_t* e) {
 		pause(2);
-		// if (cur_disp == current_display::on) {
-		// 	for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-		// 		sender(command::all_calib, adress, 0, 0, ::stop_calibration);
-		// 	}
-		// }
-		// if (cur_disp == current_display::off) {
-		// 	for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-		// 		sender(command::all_calib, adress, 0, 0, ::stop_calibration);
-		// 	}
-		// }
+		if (cur_disp == current_display::on) {
+			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+			}
+		}
+		if (cur_disp == current_display::off) {
+			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+			}
+		}
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
