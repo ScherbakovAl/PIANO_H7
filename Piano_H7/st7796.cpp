@@ -23,72 +23,8 @@ void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
 	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
 	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
 	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
-	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff);
+	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff); // TODO (uint32_t*) а если + " * " ??
 	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
-}
-
-void Send_DMA_Data16(uint16_t* buff, uint16_t dataSize) {
-
-	//	LCD_DC_D();
-	//
-	//	LL_SPI_Disable(SPI3);
-	//	LL_SPI_SetDataWidth(SPI3, LL_SPI_DATAWIDTH_8BIT);
-	//	LL_SPI_Enable(SPI3);
-	//	LL_SPI_EnableDMAReq_TX(SPI3);
-	//	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
-	//
-	//	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	//
-	////	LL_SPI_SetTransferBitOrder(SPI3, uint32_t LL_SPI_LSB_FIRST); //  LL_SPI_LSB_FIRST  LL_SPI_MSB_FIRST
-	//
-	////	LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_BYTE);
-	//	LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_HALFWORD);
-	//
-	////	LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_1, LL_DMA_MDATAALIGN_BYTE);
-	//	LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_HALFWORD);
-	//
-	//	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1,
-	//			LL_SPI_DMA_GetTxRegAddr(SPI3));
-	//	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t) color_p);
-	//	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, width * height);
-	//
-	//	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
-	//
-	////	LL_SPI_SetDataWidth(SPI3, LL_SPI_DATAWIDTH_8BIT);
-
-	LL_SPI_SetDataWidth(SPI3, LL_SPI_DATAWIDTH_16BIT);
-
-	LL_SPI_Disable(SPI3);
-	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_ClearFlag_TC3(DMA2);
-	LL_DMA_ClearFlag_TE3(DMA2);
-	LL_SPI_EnableDMAReq_TX(SPI3);
-	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
-	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1,
-		LL_SPI_DMA_GetTxRegAddr(SPI3));
-	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff);
-	//	LL_DMA_ConfigAddresses(DMA2, LL_DMA_STREAM_1, (uint32_t) buff,
-	//			LL_SPI_DMA_GetRegAddr(SPI3),
-	//			LL_DMA_GetDataTransferDirection(DMA2, LL_DMA_STREAM_1));
-	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
-	LL_SPI_Enable(SPI3);
-	//	while (!flag_DMA_STREAM1_bsy) {
-	//	}
-	//	flag_DMA_STREAM1_bsy = 0;
-	LL_mDelay(1);
-
-	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	LL_SPI_Disable(SPI3);
-	LL_DMA_ClearFlag_TC3(DMA2);
-	LL_DMA_ClearFlag_TE3(DMA2);
-	LL_SPI_DisableDMAReq_TX(SPI3);
-	LL_DMA_DisableIT_TC(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_DisableIT_TE(DMA2, LL_DMA_STREAM_1);
-	LL_SPI_Enable(SPI3);
-	LL_SPI_SetDataWidth(SPI3, LL_SPI_DATAWIDTH_8BIT);
 }
 
 void LCD_Send_Data_8(uint8_t data) {
@@ -178,7 +114,9 @@ void LCD_Clear(uint16_t Color) {
 	LCD_DC_D();
 	for (int i = 0; i < lcddev.height; i++) {
 		for (int m = 0; m < lcddev.width; m++) {
-			LCD_Send_Data_16_(Color);
+			LCD_Send_Data_8(Color);
+			LCD_Send_Data_8(Color);
+			LCD_Send_Data_8(Color);
 		}
 	}
 }
@@ -188,7 +126,9 @@ void LCD_rect_test(int x1, int y1, int x2, int y2, uint16_t Color) {
 	LCD_DC_D();
 	for (int i = 0; i < x2 - x1; i++) {
 		for (int m = 0; m < y2 - y1; m++) {
-			LCD_Send_Data_16_(Color);
+			LCD_Send_Data_8(Color);
+			LCD_Send_Data_8(Color);
+			LCD_Send_Data_8(Color);
 		}
 	}
 }
@@ -313,9 +253,8 @@ void LCD_Init() {
 	LCD_WR_DATA(0x69); // 69h disable command 2 part II
 
 	LL_mDelay(120);
-	//	 */
 
-		// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
+	// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
 	LCD_WR_REG(0x21); // INVON (21h): Display Inversion On
 
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
@@ -323,27 +262,17 @@ void LCD_Init() {
 
 	LCD_direction(0);
 
-	LCD_Clear(0x0000); // test
-	LCD_Clear(0x07E0);
 	LCD_Clear(0x0000);
-	LCD_Clear(0x07E0);
-
-	//	while (1) {
-	for (int a = 0; a < 50; ++a) {
-		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, RED);
-		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, GREEN);
-		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, BLUE);
-		// LL_mDelay(6);
-
-		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, 0x0);
-		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, 0x0);
-		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, 0x0);
-	}
-	//	}
 
 	// DMA
 	LL_SPI_EnableDMAReq_TX(SPI3);
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
+
+	for (int a = 0; a < 50; ++a) {
+		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, 0xFFFF);
+		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, 0xFFFF);
+		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, 0xFFFF);
+	}
 }
 
 void LCD_RES_H() {

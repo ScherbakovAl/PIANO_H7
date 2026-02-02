@@ -79,6 +79,7 @@ int main(void) {
 // #define BOOTLOADER_ADDRESS 0x08000000 // здесь начало всех программ по умолчанию для старта
 // #define BOOTLOADER_ADDRESS 0x1FF09800 // << здесь usbDFU вшитый в контроллер
 // #define FLASH_DESC_STR      "@Internal Flash   /0x08000000/03*016Ka,01*016Kg,01*064Kg,07*128Kg,04*016Kg,01*064Kg,07*128Kg"
+  
   void (*JumpToApplication)(void);
   uint32_t JumpAddress;
   extern int _bflag;
@@ -86,10 +87,11 @@ int main(void) {
   dfu_boot_flag = (uint32_t*)(&_bflag);
   if (*dfu_boot_flag != DFU_BOOT_FLAG) {
     *dfu_boot_flag = 0;
+
     // Установка нового вектора прерываний
-    SCB->VTOR = MAIN_FIRMWARE; // TODO это надо?
+    SCB->VTOR = MAIN_FIRMWARE;
     // Установка указателя стека
-    __set_MSP(*(__IO uint32_t*)MAIN_FIRMWARE); // TODO это надо?
+    __set_MSP(*(__IO uint32_t*)MAIN_FIRMWARE);
 
     JumpAddress = *(__IO uint32_t*) (MAIN_FIRMWARE + 4); // здесь должно быть " + 4 ", а в скрипте компоновщика " - 8 " !!
     JumpToApplication = (void (*)(void))JumpAddress;

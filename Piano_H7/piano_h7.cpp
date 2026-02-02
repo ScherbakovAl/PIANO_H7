@@ -96,7 +96,6 @@ std::string calib_all_str;
 volatile uint32_t test_int_timer2 = 0; // for test
 volatile uint32_t oldCursor = start_cursor;
 float mass_to_disp = 0; // for test
-//---------------------------------
 
 // настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 
@@ -358,14 +357,17 @@ void h7() {
 } // h7
 
 void sync() {
+
+	// action__echo_g4s(); // TODO echo?
+
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
-	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) {
+	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) { // TODO numbers_chips
 		fl_sync += sync_sender(i);
 	}
-	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) {
+	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) { // TODO numbers_chips
 		fl_sync += sync_sender(i);
 	}
 	if (fl_sync == 0) {
@@ -377,12 +379,13 @@ void sync() {
 	LL_USART_EnableDMAReq_RX(UART5);
 	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 }
-
+	
 int sync_sender(const uint8_t& i) {
 	int fs = 0;
 	UART4_SendAddress(i);
 	pause(3);
 	UART4_Send_Settings(command::sync_timer, 0, 0, 0);
+	pause(1);
 	UART4_Receive_Settings();
 	if (b_ != 0 && a_ != 0 && rx_settings[0] != i) {
 		debugg_fn("Sync err, mcu  #" + std::to_string(i));
@@ -755,26 +758,27 @@ void DMA_UART_ERRORS_HANDLER() {
 	// }
 }
 
+// пометочки - вычисление скорости молоточка
 // tim_IN = 100ns на значение
 // 35445 = 22.211 midi
-
+//
 // v = s / t
 // s - расстояние
 // s = 2 mm = 0.002 m
 // t - время
 // t = 62000 ns = 0.000062 s
-
+//
 // v = 0.002 / 0.000062 = 32,258064516 м/с;
 // v = 2000 / 62 = 32,258064516; ~~~
 // v = 2000000 / 62000 = 32,258064516;
-
+//
 // A - кинетическая энергия
 // A = M * v * v / 2;
-
+//
 // М - масса (кг)
 // M = 8 g = 0.008 kg
 // v * v - скорость в квадрате (м/с)
-
+//
 // A = 0.02 * 32,258064516 * 32,258064516 / 2 = 10,405827263;
 //---------------------------------
 
@@ -1030,7 +1034,7 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 3;
-	SCB_CleanInvalidateDCache(); // or
+	SCB_CleanInvalidateDCache();
 	Send_DMA_Data8(color_p, wh_);
 }
 
@@ -1801,7 +1805,7 @@ extern "C" {
 		}
 	}
 
-	void action_piano_off(lv_event_t* e) {
+	void action_piano_off(lv_event_t* e) { // NVIC_SystemReset();
 		SCB_DisableDCache();
 		SCB_DisableICache();
 		SCB_CleanInvalidateDCache();

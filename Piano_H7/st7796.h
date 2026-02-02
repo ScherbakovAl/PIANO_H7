@@ -46,7 +46,6 @@ struct lcd_dev {
 };
 
 void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize);
-void Send_DMA_Data16(uint16_t* buff, uint16_t dataSize);
 void LCD_Send_Data_8(uint8_t data);
 void LCD_Send_Data_16(uint16_t* Data);
 void LCD_Send_Data_16_(uint16_t Data);
