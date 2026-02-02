@@ -49,7 +49,8 @@ extern "C" {
 		buff_to_flash,
 		flash_to_buff,
 		read_comp_value_flash,
-		all_calib
+		all_calib,
+		// echo = 11 // TODO реализовать для основной прошивки
 	};
 
 	enum subcommand {
@@ -92,39 +93,27 @@ extern "C" {
 		calib_none
 	};
 
-	enum command_flash {
-		reset = 10,
+	enum command_for_flash_g4 {
+		echo = 11,
 		jump_to_piano_g4,
-		set_number,
+		reset, // 200ms delay
 		data_from_H7_to_array_g4,
-		data_from_array_g4_to_H7,
-		copy_array_to_flash,
-		echo
+		copy_array_to_flash_g4,
+		jump_g4_to_adress // TODO сделать
 	};
 
 	enum response {
-		ok = 203,
-		fail = 153
+		ok = 0xCD,
+		fail = 0xFA
 	};
 
-
-		// пины тестовой колодки
-		// pin 2 - tim trig
-		// pin 4 - tim slc
-		// pin 6 - Urx
-		// pin 8 - Utx
-
-		// TODO сделать проверку: сколько раз заходит в циклы While при работе с uart?
-
-		// TODO проверить UART TX должен быть подтянут к UP?
-
-		// номер 95 у последней верхней клавиши
-		// ***** 390(263)-14000(22723)us пролёт молоточка
+	// номер 95 у последней верхней клавиши
+	// ***** 390(263)-14000(22723)us пролёт молоточка
 
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
-	const uint8_t start_adress_chip_on = 1; // включительно (1)
-	const uint8_t end_adress_chip_on = 1; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t start_adress_chip_on = 5; // включительно (1)
+	const uint8_t end_adress_chip_on = 5; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно (14)
 	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
@@ -207,8 +196,9 @@ extern "C" {
 	void debugg_clear();
 	void resetPin();
 	void send_test_midi();
-	void G4_echo(int a);
+	void G4_echo();
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
+	void UART4_timeout_10us_receive();
 
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
@@ -224,6 +214,7 @@ extern "C" {
 	// void Flash_uint32(uint32_t Address, volatile uint32_t* Data, uint32_t size);
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
+	void data_from_H7_to_g4();
 	void flash_g4(const uint32_t addr, const int chip_number);
 }
 #endif // extern "C"

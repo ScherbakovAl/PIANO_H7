@@ -1439,7 +1439,7 @@
                       "bg_opa": 255,
                       "bg_color": "#000000",
                       "text_opa": 255,
-                      "text_font": "MONTSERRAT_14",
+                      "text_font": "MONTSERRAT_10",
                       "anim_duration": 6000
                     }
                   }
@@ -1864,7 +1864,7 @@
                       "bg_opa": 255,
                       "bg_color": "#000000",
                       "text_opa": 255,
-                      "text_font": "MONTSERRAT_14",
+                      "text_font": "MONTSERRAT_10",
                       "anim_duration": 6000
                     }
                   }
@@ -1876,7 +1876,7 @@
               "textType": "expression",
               "longMode": "SCROLL",
               "recolor": false,
-              "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n"
+              "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n "
             },
             {
               "objID": "32ddf65e-971c-4600-c37d-697d69c73701",

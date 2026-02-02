@@ -7,6 +7,7 @@
 
 #include <format>
 #include "piano_h7.hpp"
+#include "vector"
 
 std::string ch_o;
 std::string ch_f;
@@ -40,8 +41,8 @@ static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хвата
 const uint32_t Flash_Address = 0x080E0000; // -здесь лежит калибровка
 
 static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
-static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4) 16я банка - размер на ~5 банок
-int numbers_chips[30] = {};
+static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4) 16я банка - размер на 7 банок
+std::vector<int> numbers_chips;
 
 int fl = 0; // for test fl
 
@@ -129,6 +130,9 @@ void to_sleep() {
 // добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
 void h7() {
 
+	for (int i = 0; i < 30; ++i) {
+		numbers_chips.push_back(0);
+	}
 	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
 	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
 
@@ -379,14 +383,15 @@ void sync() {
 	LL_USART_EnableDMAReq_RX(UART5);
 	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 }
-	
+
 int sync_sender(const uint8_t& i) {
 	int fs = 0;
 	UART4_SendAddress(i);
 	pause(3);
 	UART4_Send_Settings(command::sync_timer, 0, 0, 0);
-	pause(1);
-	UART4_Receive_Settings();
+	// pause(1);
+	// UART4_Receive_Settings();
+	UART4_timeout_10us_receive();
 	if (b_ != 0 && a_ != 0 && rx_settings[0] != i) {
 		debugg_fn("Sync err, mcu  #" + std::to_string(i));
 		++fs;
@@ -395,7 +400,7 @@ int sync_sender(const uint8_t& i) {
 	return fs;
 }
 
-void check_max_min() {
+void check_max_min() { // TODO не требуется
 	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
 	m_m = mm;
 	if (cur_disp == on) {
@@ -444,11 +449,11 @@ void check_max_min() {
 
 void all_H7_to_g4() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) { // TODO numbers_chips
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) { // TODO numbers_chips
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 2, compsCHART_0[i] - (compsCHART_0[i] / 10));
@@ -457,13 +462,13 @@ void all_H7_to_g4() {
 
 void all_g4_to_H7() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) { // TODO numbers_chips
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
 		compsCHART_1[i] = convert_8_16(a_, b_);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) { // TODO numbers_chips
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
@@ -885,7 +890,7 @@ void chart_correction(const uint32_t& x, const plus_minus& pm) {
 	lv_chart_refresh(cur_shart);
 }
 
-void SaveToMemory() {
+void SaveToMemory() { // TODO посмотреть новые функции записи-считывания в память от ИИ, может их использовать?
 
 	SCB_DisableICache();
 	SCB_DisableDCache();
@@ -941,7 +946,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {  // DEBUG
-	if (debug_counter % 9 == 0)debugg_clear();
+	if (debug_counter % 27 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
@@ -1248,11 +1253,11 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
-void UART4_g4_echo() {
+void UART4_timeout_10us_receive() {
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
 		// Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
 		TIM2->CNT = 0;
-		const uint32_t timeout = 10 * 275; // 10us * 275 тиков/us
+		const uint32_t timeout = 15 * 275; // 10us * 275 тиков/us
 
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
 			if (TIM2->CNT >= timeout) {
@@ -1264,24 +1269,118 @@ void UART4_g4_echo() {
 	}
 }
 
-void G4_echo(int a) {
-	UART4_SendAddress(a);
-	Set_tx_s(command_flash::echo, 0, 0, 0, 0);
-	UART4_Send_Settings_flash();
-	rx_settings[0] = 0;
-	UART4_g4_echo();
+void G4_echo() {
+	std::string str = "ships .. ";
+	int x = 0;
+	for (auto& n : numbers_chips) {
+		for (int ii = 0; ii < 3; ++ii) {
+			UART4_SendAddress(x);
+			Set_tx_s(command_for_flash_g4::echo, 0, 0, 0, 0);
+			UART4_Send_Settings_flash();
+			rx_settings[0] = 0;
+			UART4_timeout_10us_receive();
+		}
+		if (rx_settings[0]) {
+			n = rx_settings[0];
+			str += std::format(" {}", n);
+		}
+		else {
+			n = 0;
+		}
+		if (bytes_to_uint32_pointer(&rx_settings[1])) { // проверка, что приняты "0 0 0 0"
+			str += "\n  * * NOISE!!! * *  \n";
+		}
+		++x;
+	}
+	debugg_fn(str);
+}
+
+void data_from_H7_to_g4() {
+	uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
+	uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
+	std::string ships_ok = "ships flash ok .. ";
+
+	// g4 echo .... // TODO зачем, если уже собрал номера чипов?
+	G4_echo();
+	// g4 echo .... // TODO зачем, если уже собрал номера чипов?
+
+	for (auto n : numbers_chips) {
+		start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
+		mem = ADRESS_G4_MAIN_FIRMWARE;
+		int bug = 0;
+
+		if (n) {
+
+			for (int ii = 0; ii < 7; ++ii) { // количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
+				UART4_SendAddress(n);
+				Set_tx_s(command_for_flash_g4::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
+				UART4_Send_Settings_flash();
+
+				// теперь внутри    From_H7_to_array_g4(); 
+				// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
+				UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
+				// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
+
+				uint32_t primask = __get_PRIMASK();
+				volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
+				pause(1);
+				for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
+					uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
+					tx_settings[4] = (uint8_t)i;
+					pause(1);
+					UART4_Send_Settings_flash();
+					UART4_Receive_Settings();
+					if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
+						++bug;
+					}
+				}
+				__set_PRIMASK(primask);
+				UART4_Receive_Settings(); // response::ok
+				pause(2);
+
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+
+				flash_g4(mem, n);
+
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+
+				start_adress_memory_read += 0x800;
+				mem += 0x800;
+			}
+
+			if (bug) {
+				debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", n, bug));
+			}
+			else {
+				ships_ok += std::format(" {}", n);
+			}
+		}
+		// debugg_fn(ships_ok);
+
+		// прыгаем по предустановленному в G4 адресу (0x08008000)
+		if (!bug) {
+			if (n) {
+				UART4_SendAddress(n);
+				Set_tx_s(command_for_flash_g4::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
+				UART4_Send_Settings_flash();
+				UART4_timeout_10us_receive();
+			}
+		}
+	}
+	pause(50);
 }
 
 void flash_g4(const uint32_t addr, const int chip_number) {
-	// const uint32_t addr = 0x08008000; // TODO какой адрес?
-	// const int chip_number = 0x1; // TODO где задаётся адрес?
-
 	UART4_SendAddress(chip_number);
-	Set_tx_s(command_flash::copy_array_to_flash, 0x61, 0x62, 0x63, 0x64);
+	Set_tx_s(command_for_flash_g4::copy_array_to_flash_g4, 0x61, 0x62, 0x63, 0x64);
 	UART4_Send_Settings_flash();
 
 	// теперь внутри From_array_g4_to_H7();
-	UART4_Receive_Settings(); // принимает ответ 0x06 0x61 0x62 0x63 0x64
+	UART4_Receive_Settings(); // принимает ответ 0x15 0x61 0x62 0x63 0x64
 
 	// **  ****  ****  ****  ****  ****  ****  ****  ****  **
 	pause(2);
@@ -1308,25 +1407,20 @@ void flash_g4(const uint32_t addr, const int chip_number) {
 	// 3 если ок - то разрешаем запись
 	UART4_Send_Settings_flash();
 
-
-
 	//3.2
 	UART4_Receive_Settings(); // 32
 
-
 	//3.5
 	UART4_Receive_Settings(); // 35
-
-
 
 	// 4
 	UART4_Receive_Settings();
 
 	if (rx_settings[1] == response::ok) {
-		debugg_fn(std::format("  FLASH G4 ok  "));
+		debugg_fn(std::format("  FLASH G4 ok  {}", chip_number));
 	}
 	else {
-		debugg_fn(std::format("  FLASH G4 fail  ((  "));
+		debugg_fn(std::format("  FLASH G4 fail  ((  {}", chip_number));
 	}
 }
 
@@ -1336,21 +1430,21 @@ extern "C" {
 
 	void action_to_main_disp(lv_event_t* e) {
 		pause(2);
-		if (cur_disp == current_display::on) {
-			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
-			}
-		}
-		if (cur_disp == current_display::off) {
-			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
-			}
-		}
+		// if (cur_disp == current_display::on) {
+		// 	for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+		// 		sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+		// 	}
+		// }
+		// if (cur_disp == current_display::off) {
+		// 	for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+		// 		sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+		// 	}
+		// }
 		cur_disp = dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
 
-		// sync(); // TODO включить обратно (выключено для тестирования)
+		sync();
 
 		LL_USART_EnableDMAReq_RX(UART5);
 		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
@@ -1391,124 +1485,11 @@ extern "C" {
 	}
 
 	void action__echo_g4s(lv_event_t* e) {
-		for (int i = 0; i < 30; ++i) {
-			G4_echo(i);
-			G4_echo(i);
-			G4_echo(i);
-			if (rx_settings[0]) {
-				numbers_chips[i] = rx_settings[0];
-			}
-			else {
-				numbers_chips[i] = 0;
-			}
-		}
-		std::string str = "ships .. ";
-		for (int i = 0; i < 30; ++i) {
-			if (numbers_chips[i]) {
-				str += std::format(" {}", numbers_chips[i]);
-			}
-		}
-		debugg_fn(str);
+		G4_echo();
 	}
 
 	void action_h7_g4(lv_event_t* e) { // копирует и шъёт одной кнопкой все чипы
-		uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
-		uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
-		std::string str2 = "ships flash ok .. ";
-
-		// g4 echo .... // TODO зачем, если уже собрал номера чипов?
-		for (int i = 0; i < 30; ++i) {
-			G4_echo(i);
-			G4_echo(i);
-			G4_echo(i);
-			if (rx_settings[0]) {
-				numbers_chips[i] = rx_settings[0];
-			}
-			else {
-				numbers_chips[i] = 0;
-			}
-		}
-		std::string str = "ships .. ";
-		for (int i = 0; i < 30; ++i) {
-			if (numbers_chips[i]) {
-				str += std::format(" {}", numbers_chips[i]);
-			}
-		}
-		debugg_fn(str);
-
-		numbers_chips[0] = 0;
-		numbers_chips[2] = 0; // DEBUG пока смотрим только на №1
-		numbers_chips[3] = 0;
-		// g4 echo .... // TODO зачем, если уже собрал номера чипов?
-
-		for (int x = 0; x < 30; ++x) {
-			start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
-			mem = ADRESS_G4_MAIN_FIRMWARE;
-			const int chip_number = numbers_chips[x];
-			int bug = 0;
-
-			if (chip_number) {
-
-				for (int ii = 0; ii < 6; ++ii) { // количество страниц (6) в g4, которые занимает прошивка g4
-
-					UART4_SendAddress(chip_number);
-					Set_tx_s(command_flash::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
-					UART4_Send_Settings_flash();
-
-					// теперь внутри    From_H7_to_array_g4(); 
-					// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-					UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
-					// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
-
-					uint32_t primask = __get_PRIMASK();
-					volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
-					pause(1);
-					for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
-						uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
-						tx_settings[4] = (uint8_t)i;
-						pause(1);
-						UART4_Send_Settings_flash();
-						UART4_Receive_Settings();
-						if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
-							++bug;
-						}
-					}
-					__set_PRIMASK(primask);
-					UART4_Receive_Settings();
-					pause(2);
-
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-
-					flash_g4(mem, chip_number);
-
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-					// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-
-					start_adress_memory_read += 0x800;
-					mem += 0x800;
-				}
-
-				if (bug) {
-					debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", chip_number, bug));
-				}
-				else {
-					str2 += std::format(" {}", chip_number);
-				}
-			}
-			debugg_fn(str2);
-
-			// TODO добавить отправку адреса, на который прыгать
-			if (!bug) {
-				if (chip_number) {
-					UART4_SendAddress(chip_number);
-					Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
-					UART4_Send_Settings_flash();
-				}
-			}
-		}
+		data_from_H7_to_g4();
 	}
 
 
