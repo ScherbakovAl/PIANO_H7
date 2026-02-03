@@ -57,6 +57,7 @@ extern void action__echo_g4s(lv_event_t * e);
 extern void action_h7_g4(lv_event_t * e);
 extern void action_jump(lv_event_t * e);
 extern void action_reset_bootloader_g4(lv_event_t * e);
+extern void action_reset_main_to_bootloader(lv_event_t * e);
 
 
 #ifdef __cplusplus

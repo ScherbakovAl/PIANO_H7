@@ -251,13 +251,18 @@ void h7() {
 	pause(5); // DEBUG
 	// debugg_clear();
 	// debug_counter = 1;
-	int test_int_timer2_old = test_int_timer2;
+	// int test_int_timer2_old = test_int_timer2;
 
-	// LL_USART_DisableDMAReq_RX(UART5);
-	// jump_g4s_to_adress(); // TODO добавить проверку того, в каком состоянии чип загружается..
- 	// sync();
-	// all_H7_to_g4();
-	// LL_USART_EnableDMAReq_RX(UART5);
+	LL_USART_DisableDMAReq_RX(UART5);
+	G4_echo();
+	if (ship_is == state::bootloader) {
+		jump_g4s_to_adress();
+		pause(50000);
+	}
+	all_H7_to_g4();
+	sync(); // включает прерывания, осторожно!
+	
+	// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 
 
@@ -368,7 +373,7 @@ void h7() {
 	}
 } // h7
 
-void sync() {
+void sync() { // включает прерывания, осторожно!
 
 	// action__echo_g4s(); // TODO echo?
 
@@ -543,7 +548,7 @@ void UART4_SendAddress(const uint8_t& slave_address) {
 	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	LL_USART_TransmitData9(UART5, address_byte);
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
-	pause(3);
+	pause(2);
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
@@ -1280,6 +1285,7 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 
 void G4_echo() {
 	std::string str = "ships .. ";
+	std::string stat;
 	for (int i = 0; i < 5; ++i) {
 		rx_settings[i] = 0;
 	}
@@ -1290,8 +1296,16 @@ void G4_echo() {
 			Set_tx_s(command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
 			UART4_Send_Settings_bootloader();
 			rx_settings[0] = 0;
-			if (UART4_Receive_timeout_10us() && rx_settings[0]) {
+			if (UART4_Receive_timeout_10us() && rx_settings[0]) { // TODO странно, ну ладно
 				str += " UART timeout " + std::to_string(n);
+			}
+			if (rx_settings[4] == 1) {
+				ship_is = state::bootloader;
+				stat = " bootloaders";
+			}
+			else {
+				ship_is = state::piano;
+				stat = " pianos";
 			}
 		}
 		if (rx_settings[0]) {
@@ -1301,11 +1315,12 @@ void G4_echo() {
 		else {
 			n = 0;
 		}
-		if (bytes_to_uint32_pointer(&rx_settings[1])) { // проверка, что приняты "0 0 0 0"
+		if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
 			str += "\n  * * NOISE!!! * *  ";
 		}
 		++x;
 	}
+	str += stat;
 	debugg_fn(str);
 }
 
@@ -1480,6 +1495,7 @@ void jump_g4s_to_adress() {
 			UART4_Send_Settings_bootloader();
 			UART4_Receive_Settings_bootloader(); // принять (полученный g4 адрес)
 			uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
+			pause(1);
 
 			// если ок, то прыгаем
 			if (addr_back == ADRESS_G4_MAIN_FIRMWARE_ALT) {
@@ -1503,6 +1519,21 @@ void jump_g4s_to_adress() {
 		return;
 	}
 	// pause(50000); // 50ms
+}
+
+void reset_main_to_bootloader() {
+	G4_echo();
+	if (ship_is == state::piano) {
+		for (auto n : numbers_chips) {
+			if (n) {
+				UART4_SendAddress(n);
+				UART4_Send_Settings(command::reset_to_bootloader, 3, 2, 1);
+			}
+		}
+	}
+	else {
+		debugg_fn(" state NOT MAIN ");
+	}
 }
 
 // LVGL ACTIONS
@@ -1530,10 +1561,11 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
 
+		all_H7_to_g4();
 		sync();
 
-		LL_USART_EnableDMAReq_RX(UART5);
-		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
+		// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
+		// LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 	}
 
 	void action_to_disp_calibration_on(lv_event_t* e) {
@@ -1586,8 +1618,11 @@ extern "C" {
 		reset_bootloaders();
 	}
 
+	void action_reset_main_to_bootloader(lv_event_t* e) {
+		reset_main_to_bootloader();
+	}
 
-	// other
+		// other
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
 		debugg_clear();
 		cur_disp = on;

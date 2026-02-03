@@ -48,7 +48,7 @@ extern "C" {
 		set_comp_value, // TODO добавить проверки (принять ответ)
 		read_comp_setting, // TODO реализовать
 		all_calib,
-		reset, // TODO реализовать
+		reset_to_bootloader,
 		echo = 11 // TODO реализовать для основной прошивки
 	};
 
@@ -106,13 +106,18 @@ extern "C" {
 		fail = 0xDD
 	};
 
+	enum state{
+		bootloader = 1,
+		piano
+	};
+
 	// номер 95 у последней верхней клавиши
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 
 	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
-	const uint8_t start_adress_chip_on = 3; // включительно (1)
-	const uint8_t end_adress_chip_on = 5; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
+	const uint8_t start_adress_chip_on = 5; // включительно (1)
+	const uint8_t end_adress_chip_on = 7; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно (14)
 	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
@@ -129,6 +134,7 @@ extern "C" {
 	uint8_t dot_ = 0;
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
+	state ship_is = state::bootloader;
 
 	int32_t def_on[2] = { 2600, 1000 }; // [0]-green, [1]-red
 	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
@@ -215,6 +221,7 @@ extern "C" {
 	void data_from_H7_to_g4();
 	void flash_g4(const uint32_t addr, const int chip_number);
 	void jump_g4s_to_adress();
+	void reset_main_to_bootloader();
 }
 #endif // extern "C"
 

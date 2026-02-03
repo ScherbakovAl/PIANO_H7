@@ -818,6 +818,14 @@
       "localVariables": [],
       "userProperties": [],
       "name": "reset_bootloader_g4"
+    },
+    {
+      "objID": "eefdb3b2-ac3d-481c-8041-b67145959fab",
+      "components": [],
+      "connectionLines": [],
+      "localVariables": [],
+      "userProperties": [],
+      "name": "reset_main_to_bootloader"
     }
   ],
   "userPages": [
@@ -1614,7 +1622,7 @@
               "type": "LVGLButtonWidget",
               "left": 2,
               "top": 411,
-              "width": 50,
+              "width": 145,
               "height": 67,
               "customInputs": [],
               "customOutputs": [],
@@ -1720,7 +1728,7 @@
             {
               "objID": "abc61380-a576-46c6-854e-a0d1a8496701",
               "type": "LVGLButtonWidget",
-              "left": 0,
+              "left": 1,
               "top": 0,
               "width": 100,
               "height": 50,
@@ -1881,7 +1889,7 @@
             {
               "objID": "32ddf65e-971c-4600-c37d-697d69c73701",
               "type": "LVGLButtonWidget",
-              "left": 110,
+              "left": 121,
               "top": 71,
               "width": 198,
               "height": 50,
@@ -1913,7 +1921,7 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 104,
+                  "width": 159,
                   "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
@@ -1952,7 +1960,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "copy and flash\n      H7 > g4",
+                  "text": "copy  &  flash  &  jump\n           H7  >>  g4",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -1985,8 +1993,8 @@
             {
               "objID": "2d388e94-0f13-417a-b4e1-8fa07b6a710f",
               "type": "LVGLButtonWidget",
-              "left": 220,
-              "top": 142,
+              "left": 219,
+              "top": 133,
               "width": 100,
               "height": 50,
               "customInputs": [],
@@ -2017,8 +2025,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 39,
-                  "height": 16,
+                  "width": 58,
+                  "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -2056,7 +2064,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "jump",
+                  "text": "jump to\n  main",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2089,7 +2097,7 @@
             {
               "objID": "a9c5e2b5-5379-4ade-8bf4-8cd99c7aa348",
               "type": "LVGLButtonWidget",
-              "left": 0,
+              "left": 1,
               "top": 71,
               "width": 100,
               "height": 50,
@@ -2160,7 +2168,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "     reset\nbootloader",
+                  "text": "bootloader\n     reset",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2179,6 +2187,110 @@
               "states": "",
               "localStyles": {
                 "objID": "ab23329a-34dc-4c25-a673-e08d0e5e0f31",
+                "definition": {
+                  "MAIN": {
+                    "DEFAULT": {
+                      "bg_color": "#343638"
+                    }
+                  }
+                }
+              },
+              "group": "",
+              "groupIndex": 0
+            },
+            {
+              "objID": "a6de472c-b66e-470b-ad1a-b7b419e9d813",
+              "type": "LVGLButtonWidget",
+              "left": 1,
+              "top": 133,
+              "width": 119,
+              "height": 50,
+              "customInputs": [],
+              "customOutputs": [],
+              "style": {
+                "objID": "0aad3ae8-3ecb-415a-8cb8-8ed4a8f28204",
+                "useStyle": "default",
+                "conditionalStyles": [],
+                "childStyles": []
+              },
+              "timeline": [],
+              "eventHandlers": [
+                {
+                  "objID": "701baea3-f75e-4dfc-c21d-a25903b9fb19",
+                  "eventName": "RELEASED",
+                  "handlerType": "action",
+                  "action": "reset_main_to_bootloader",
+                  "userData": 0
+                }
+              ],
+              "leftUnit": "px",
+              "topUnit": "px",
+              "widthUnit": "px",
+              "heightUnit": "px",
+              "children": [
+                {
+                  "objID": "2a44f6c6-7836-4119-a9a9-da598034510b",
+                  "type": "LVGLLabelWidget",
+                  "left": 0,
+                  "top": 0,
+                  "width": 99,
+                  "height": 32,
+                  "customInputs": [],
+                  "customOutputs": [],
+                  "style": {
+                    "objID": "80cc1aa7-4a23-4b8e-d909-40e0e4cf0a06",
+                    "useStyle": "default",
+                    "conditionalStyles": [],
+                    "childStyles": []
+                  },
+                  "timeline": [],
+                  "eventHandlers": [],
+                  "leftUnit": "px",
+                  "topUnit": "px",
+                  "widthUnit": "content",
+                  "heightUnit": "content",
+                  "children": [],
+                  "widgetFlags": "",
+                  "hiddenFlagType": "literal",
+                  "clickableFlagType": "literal",
+                  "flagScrollbarMode": "",
+                  "flagScrollDirection": "",
+                  "scrollSnapX": "",
+                  "scrollSnapY": "",
+                  "checkedStateType": "literal",
+                  "disabledStateType": "literal",
+                  "states": "",
+                  "localStyles": {
+                    "objID": "ccfcc229-d70b-4a9e-c52f-4d95fc51dcdc",
+                    "definition": {
+                      "MAIN": {
+                        "DEFAULT": {
+                          "align": "CENTER"
+                        }
+                      }
+                    }
+                  },
+                  "group": "",
+                  "groupIndex": 0,
+                  "text": "  main reset\nto bootloader",
+                  "textType": "literal",
+                  "longMode": "WRAP",
+                  "recolor": false
+                }
+              ],
+              "widgetFlags": "",
+              "hiddenFlagType": "literal",
+              "clickableFlag": true,
+              "clickableFlagType": "literal",
+              "flagScrollbarMode": "",
+              "flagScrollDirection": "",
+              "scrollSnapX": "",
+              "scrollSnapY": "",
+              "checkedStateType": "literal",
+              "disabledStateType": "literal",
+              "states": "",
+              "localStyles": {
+                "objID": "d4b56b05-1834-46e6-fafb-5f3ad6d5cad6",
                 "definition": {
                   "MAIN": {
                     "DEFAULT": {
