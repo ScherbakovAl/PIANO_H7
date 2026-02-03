@@ -41,16 +41,15 @@ extern "C" {
 		s1s2 off;
 	};
 
-	enum command {
+	enum command { // 
 		sync_timer = 1,
 		cal,
-		read_comp_value,
-		set_comp_value,
-		buff_to_flash,
-		flash_to_buff,
-		read_comp_value_flash,
+		read_comp_value, // TODO добавить проверки (принять ответ)
+		set_comp_value, // TODO добавить проверки (принять ответ)
+		read_comp_setting, // TODO реализовать
 		all_calib,
-		// echo = 11 // TODO реализовать для основной прошивки
+		reset, // TODO реализовать
+		echo = 11 // TODO реализовать для основной прошивки
 	};
 
 	enum subcommand {
@@ -94,17 +93,17 @@ extern "C" {
 	};
 
 	enum command_for_flash_g4 {
-		echo = 11,
-		jump_to_piano_g4,
-		reset, // 200ms delay
+		echo_bootloader = 11,
+		reset_bootloader, // 200ms delay // TODO надо реализовать
 		data_from_H7_to_array_g4,
 		copy_array_to_flash_g4,
-		jump_g4_to_adress // TODO сделать
+		jump_to_piano_g4, // прыжок по зашитому в g4 адресу
+		jump_g4_to_adress // TODO сделать // прыжок по указанному адресу
 	};
 
 	enum response {
-		ok = 0xCD,
-		fail = 0xFA
+		ok = 0x0C,
+		fail = 0xDD
 	};
 
 	// номер 95 у последней верхней клавиши
@@ -130,7 +129,6 @@ extern "C" {
 	uint8_t dot_ = 0;
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
-	// int f = 0; // TODO используеся где?
 
 	int32_t def_on[2] = { 2600, 1000 }; // [0]-green, [1]-red
 	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
@@ -144,7 +142,6 @@ extern "C" {
 	int8_t noteAdder[196] = {};
 	float mass_F[196] = {};
 
-	// const uint32_t Flash_Address = 0x080E0000; //
 
 	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
@@ -181,8 +178,8 @@ extern "C" {
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();
-	void UART4_Send_Settings_flash();
-	void UART4_Receive_Settings_flash();
+	void UART4_Send_Settings_bootloader();
+	void UART4_Receive_Settings_bootloader();
 	void DMA1_RX();
 	void USART_Noise_Error_detected();
 	void DMA_UART_ERRORS_HANDLER();
@@ -197,8 +194,9 @@ extern "C" {
 	void resetPin();
 	void send_test_midi();
 	void G4_echo();
+	void reset_bootloaders();
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
-	void UART4_timeout_10us_receive();
+	int UART4_Receive_timeout_10us();
 
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
@@ -216,6 +214,7 @@ extern "C" {
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void data_from_H7_to_g4();
 	void flash_g4(const uint32_t addr, const int chip_number);
+	void jump_g4s_to_adress();
 }
 #endif // extern "C"
 

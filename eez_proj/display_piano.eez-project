@@ -809,7 +809,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "flash"
+      "name": "jump"
     },
     {
       "objID": "6bf67516-e3ab-4ab5-ec12-9a7e9c127c57",
@@ -817,7 +817,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "reset_number_echo_g4"
+      "name": "reset_bootloader_g4"
     }
   ],
   "userPages": [
@@ -1449,7 +1449,7 @@
               "groupIndex": 0,
               "text": "debugg",
               "textType": "expression",
-              "longMode": "SCROLL",
+              "longMode": "WRAP",
               "recolor": false,
               "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n"
             },
@@ -1827,7 +1827,7 @@
               "left": 0,
               "top": 192,
               "width": 320,
-              "height": 170,
+              "height": 210,
               "customInputs": [],
               "customOutputs": [],
               "style": {
@@ -1874,9 +1874,9 @@
               "groupIndex": 0,
               "text": "debugg",
               "textType": "expression",
-              "longMode": "SCROLL",
+              "longMode": "WRAP",
               "recolor": false,
-              "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n "
+              "previewValue": " 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 2\\n 22222222222222222222222222222222222222222222222222222222222222222222222222225555555555555   ))))))     0000000000000 ggggggggggg"
             },
             {
               "objID": "32ddf65e-971c-4600-c37d-697d69c73701",
@@ -2003,7 +2003,7 @@
                   "objID": "5e5aa897-47ef-42ae-9ed6-82cd922987db",
                   "eventName": "RELEASED",
                   "handlerType": "action",
-                  "action": "flash",
+                  "action": "jump",
                   "userData": 0
                 }
               ],
@@ -2107,7 +2107,7 @@
                   "objID": "ed302c86-19cf-403e-f6d5-5613284c512a",
                   "eventName": "RELEASED",
                   "handlerType": "action",
-                  "action": "reset_number_echo_g4",
+                  "action": "reset_bootloader_g4",
                   "userData": 0
                 }
               ],
@@ -2121,8 +2121,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 5,
-                  "height": 16,
+                  "width": 80,
+                  "height": 32,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -2160,7 +2160,7 @@
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "-",
+                  "text": "     reset\nbootloader",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false

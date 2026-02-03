@@ -55,8 +55,8 @@ extern void action_read_all(lv_event_t * e);
 extern void action_to_disp_flash(lv_event_t * e);
 extern void action__echo_g4s(lv_event_t * e);
 extern void action_h7_g4(lv_event_t * e);
-extern void action_flash(lv_event_t * e);
-extern void action_reset_number_echo_g4(lv_event_t * e);
+extern void action_jump(lv_event_t * e);
+extern void action_reset_bootloader_g4(lv_event_t * e);
 
 
 #ifdef __cplusplus

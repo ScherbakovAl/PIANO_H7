@@ -38,10 +38,11 @@ static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
 static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
 static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
 // надо 6 копирований делать в G4                    ^^^^^^^^^^^^^
-const uint32_t Flash_Address = 0x080E0000; // -здесь лежит калибровка
+static const uint32_t FLASH_ADDRESS = 0x080E0000; // -здесь лежит калибровка
 
 static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
-static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // здесь основная прошивка (в памяти g4) 16я банка - размер на 7 банок
+static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
+static const uint32_t ADRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
 std::vector<int> numbers_chips;
 
 int fl = 0; // for test fl
@@ -212,7 +213,6 @@ void h7() {
 	pause(10);
 	send_test_midi();
 
-	sync();
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	initBuffers();
 	configCharts();
@@ -253,6 +253,14 @@ void h7() {
 	// debug_counter = 1;
 	int test_int_timer2_old = test_int_timer2;
 
+	// LL_USART_DisableDMAReq_RX(UART5);
+	// jump_g4s_to_adress(); // TODO добавить проверку того, в каком состоянии чип загружается..
+ 	// sync();
+	// all_H7_to_g4();
+	// LL_USART_EnableDMAReq_RX(UART5);
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+
+
 	while (1) {
 		tud_task();
 		// lv_timer_handler();
@@ -261,7 +269,7 @@ void h7() {
 
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == on) {
-				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+				for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {  // TODO numbers_chips
 					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
 					for (int i = 0; i < 7; ++i) {
 						UART4_Receive_Settings();
@@ -391,7 +399,9 @@ int sync_sender(const uint8_t& i) {
 	UART4_Send_Settings(command::sync_timer, 0, 0, 0);
 	// pause(1);
 	// UART4_Receive_Settings();
-	UART4_timeout_10us_receive();
+	if (UART4_Receive_timeout_10us()) {
+		debugg_fn("UART timeout " + std::to_string(i));
+	}
 	if (b_ != 0 && a_ != 0 && rx_settings[0] != i) {
 		debugg_fn("Sync err, mcu  #" + std::to_string(i));
 		++fs;
@@ -533,7 +543,7 @@ void UART4_SendAddress(const uint8_t& slave_address) {
 	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	LL_USART_TransmitData9(UART5, address_byte);
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
-	pause(1);
+	pause(3);
 }
 
 void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value) {
@@ -563,7 +573,7 @@ void UART4_Receive_Settings() {
 	b_ = rx_settings[4];
 }
 
-void UART4_Send_Settings_flash() { // tx_settings[0] - [4]
+void UART4_Send_Settings_bootloader() { // tx_settings[0] - [4]
 	while (!LL_USART_IsActiveFlag_TXE(UART5)) {}
 	for (uint16_t i = 0; i < tx_settings_length; i++) {
 		LL_USART_TransmitData9(UART5, tx_settings[i]);
@@ -572,13 +582,28 @@ void UART4_Send_Settings_flash() { // tx_settings[0] - [4]
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
-void UART4_Receive_Settings_flash() { // rx_settings[0] - [4]
+void UART4_Receive_Settings_bootloader() { // rx_settings[0] - [4]
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 }
-//---------------------------------
+
+int UART4_Receive_timeout_10us() {
+	for (uint8_t i = 0; i < rx_settings_length; i++) { // Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
+		TIM2->CNT = 0;
+		const uint32_t timeout = 15 * 275; // 10us * 275 тиков/us
+
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
+			if (TIM2->CNT >= timeout) { // Время ожидания истекло, выходим без чтения
+				return 1;
+			}
+		}
+		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
+	}
+	return 0;
+}
+
 
 const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
@@ -898,7 +923,7 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 
 	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
-	uint32_t Addr = Flash_Address;
+	uint32_t Addr = FLASH_ADDRESS;
 	for (uint32_t i = 0; i < sizeCHART_BUFFER; i += 8) {
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&compsCHART_0[i]) != HAL_OK) {
 			HAL_FLASH_Lock();
@@ -931,8 +956,8 @@ void ReadOnMemory() {
 	// }
 	// else {
 	for (int i = 0; i < sizeCHART_BUFFER; ++i) {
-		compsCHART_0[i] = *(volatile uint32_t*)(Flash_Address + (i * sizeof(uint32_t)));
-		compsCHART_1[i] = *(volatile uint32_t*)(Flash_Address + (i * sizeof(uint32_t)) + 0x320);
+		compsCHART_0[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)));
+		compsCHART_1[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)) + 0x320);
 	}
 // }
 }
@@ -1253,32 +1278,21 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
-void UART4_timeout_10us_receive() {
-	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		// Таймаут 10us (275 тиков таймера TIM2 на 275MHz)
-		TIM2->CNT = 0;
-		const uint32_t timeout = 15 * 275; // 10us * 275 тиков/us
-
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
-			if (TIM2->CNT >= timeout) {
-				// Время ожидания истекло, выходим без чтения
-				return;
-			}
-		}
-		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
-	}
-}
-
 void G4_echo() {
 	std::string str = "ships .. ";
+	for (int i = 0; i < 5; ++i) {
+		rx_settings[i] = 0;
+	}
 	int x = 0;
 	for (auto& n : numbers_chips) {
 		for (int ii = 0; ii < 3; ++ii) {
 			UART4_SendAddress(x);
-			Set_tx_s(command_for_flash_g4::echo, 0, 0, 0, 0);
-			UART4_Send_Settings_flash();
+			Set_tx_s(command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
+			UART4_Send_Settings_bootloader();
 			rx_settings[0] = 0;
-			UART4_timeout_10us_receive();
+			if (UART4_Receive_timeout_10us() && rx_settings[0]) {
+				str += " UART timeout " + std::to_string(n);
+			}
 		}
 		if (rx_settings[0]) {
 			n = rx_settings[0];
@@ -1288,16 +1302,28 @@ void G4_echo() {
 			n = 0;
 		}
 		if (bytes_to_uint32_pointer(&rx_settings[1])) { // проверка, что приняты "0 0 0 0"
-			str += "\n  * * NOISE!!! * *  \n";
+			str += "\n  * * NOISE!!! * *  ";
 		}
 		++x;
 	}
 	debugg_fn(str);
 }
 
+void reset_bootloaders() {
+	for (auto n : numbers_chips) {
+		if (n) {
+			UART4_SendAddress(n);
+			Set_tx_s(command_for_flash_g4::reset_bootloader, 0x04, 0x03, 0x02, 0x01); // 200ms delay
+			UART4_Send_Settings_bootloader();
+			UART4_Receive_Settings_bootloader();
+		}
+	}
+	pause(500000);
+}
+
 void data_from_H7_to_g4() {
 	uint32_t start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом, 6 копирований надо сделать
-	uint32_t mem = ADRESS_G4_MAIN_FIRMWARE;
+	uint32_t mem = ADRESS_G4_MAIN_FIRMWARE_ALT;
 	std::string ships_ok = "ships flash ok .. ";
 	int bug = 0;
 
@@ -1307,18 +1333,18 @@ void data_from_H7_to_g4() {
 
 	for (auto n : numbers_chips) {
 		start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
-		mem = ADRESS_G4_MAIN_FIRMWARE;
+		mem = ADRESS_G4_MAIN_FIRMWARE_ALT;
 
 		if (n) {
 
 			for (int ii = 0; ii < 7; ++ii) { // количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
 				UART4_SendAddress(n);
 				Set_tx_s(command_for_flash_g4::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
-				UART4_Send_Settings_flash();
+				UART4_Send_Settings_bootloader();
 
 				// теперь внутри    From_H7_to_array_g4(); 
 				// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-				UART4_Receive_Settings(); // >> 0x11, 0x12, 0x13, 0x14
+				UART4_Receive_Settings_bootloader(); // >> 0x11, 0x12, 0x13, 0x14
 				// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
 
 				uint32_t primask = __get_PRIMASK();
@@ -1328,14 +1354,15 @@ void data_from_H7_to_g4() {
 					uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
 					tx_settings[4] = (uint8_t)i;
 					pause(1);
-					UART4_Send_Settings_flash();
-					UART4_Receive_Settings();
+					UART4_Send_Settings_bootloader();
+					UART4_Receive_Settings_bootloader();
 					if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
 						++bug;
 					}
 				}
+
 				__set_PRIMASK(primask);
-				UART4_Receive_Settings(); // response::ok
+				UART4_Receive_Settings_bootloader(); // response::ok
 				pause(2);
 
 				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
@@ -1350,53 +1377,59 @@ void data_from_H7_to_g4() {
 
 				start_adress_memory_read += 0x800;
 				mem += 0x800;
+				pause(2);
 			}
 		}
 		// debugg_fn(ships_ok);
 	}
 	// прыгаем по предустановленному в G4 адресу (0x08008000)
-	if (!bug) {
-		for (auto n : numbers_chips) {
-			if (n) {
-				UART4_SendAddress(n);
-				Set_tx_s(command_for_flash_g4::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
-				UART4_Send_Settings_flash();
-				UART4_timeout_10us_receive();
-				pause(50000); // 50ms
-			}
-			if (bug) {
-				debugg_fn(std::format("{}  bin_data H7 -> g4 FAIL {} bugs..", n, bug));
-			}
-			else {
-				ships_ok += std::format(" {}", n);
-			}
-		}
-	}
+	// if (!bug) {
+	// 	debugg_fn("\n \n    JUMPING ");
+	// 	for (auto n : numbers_chips) {
+	// 		if (n) {
+	// 			UART4_SendAddress(n);
+	// 			Set_tx_s(command_for_flash_g4::jump_to_piano_g4, 0x03, 0x02, 0x01, 0x00);
+	// 			UART4_Send_Settings_bootloader();
+	// 			UART4_Receive_Settings_bootloader();
+	// 			UART4_Receive_Settings_bootloader();
+	// 			UART4_Receive_Settings_bootloader();
+	// 			if (rx_settings[0] != n) {
+	// 				debugg_fn(std::format(" start {} fail \n", n)); // DEBUG
+	// 			}
+	// 			pause(200);
+	// 		}
+	// 	}
+	// }
+	// else {
+	// 	debugg_fn(std::format("{} -- copy bugs", bug));
+	// }
+	jump_g4s_to_adress();
 }
 
 void flash_g4(const uint32_t addr, const int chip_number) {
+
+
 	UART4_SendAddress(chip_number);
 	Set_tx_s(command_for_flash_g4::copy_array_to_flash_g4, 0x61, 0x62, 0x63, 0x64);
-	UART4_Send_Settings_flash();
+	UART4_Send_Settings_bootloader();
 
 	// теперь внутри From_array_g4_to_H7();
-	UART4_Receive_Settings(); // принимает ответ 0x15 0x61 0x62 0x63 0x64
+	UART4_Receive_Settings_bootloader(); // принимает ответ 0x15 0x61 0x62 0x63 0x64
 
 	// **  ****  ****  ****  ****  ****  ****  ****  ****  **
 	pause(2);
 
-	// 1 отправить адрес // TODO
-	// надо отформатировать!
+	// 1 отправка адреса
 	uint32_to_bytes_pointer(addr, tx_settings);
 	tx_settings[4] = chip_number; // просто так ..
-	UART4_Send_Settings_flash();
+	UART4_Send_Settings_bootloader();
 
 	// 2 принять адрес для проверки
-	UART4_Receive_Settings();
+	UART4_Receive_Settings_bootloader();
 	pause(1);
 	uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
 	if (addr_back == addr) {
-		debugg_fn(std::format("  addr  ok  {:x}", addr_back));
+		// debugg_fn(std::format("  addr  ok  {:x}", addr_back));
 		Set_tx_s(response::ok, 0x45, 0x46, 0x47, 0x48);
 	}
 	else {
@@ -1405,38 +1438,91 @@ void flash_g4(const uint32_t addr, const int chip_number) {
 	}
 
 	// 3 если ок - то разрешаем запись
-	UART4_Send_Settings_flash();
+	UART4_Send_Settings_bootloader();
 
 	//3.2
-	UART4_Receive_Settings(); // 32
+	UART4_Receive_Settings_bootloader(); // 32
 
 	//3.5
-	UART4_Receive_Settings(); // 35
+	UART4_Receive_Settings_bootloader(); // 35
 
 	// 4
-	UART4_Receive_Settings();
+	UART4_Receive_Settings_bootloader(); // fail or ok
 
 	if (rx_settings[1] == response::ok) {
-		debugg_fn(std::format("  FLASH G4 ok  {}", chip_number));
+		// debugg_fn(std::format("  FLASH G4 ok  {}", chip_number));
 	}
 	else {
 		debugg_fn(std::format("  FLASH G4 fail  ((  {}", chip_number));
 	}
 }
 
+void jump_g4s_to_adress() {
+	int bug = 0;
+	G4_echo();
+	for (auto n : numbers_chips) {
+
+		if (n) {
+			UART4_SendAddress(n);
+			Set_tx_s(command_for_flash_g4::jump_g4_to_adress, 0x88, 0x88, 0x88, 0x88);
+			UART4_Send_Settings_bootloader();
+			UART4_Receive_Settings_bootloader();
+			UART4_Receive_Settings_bootloader(); // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
+
+			if (bytes_to_uint32_pointer(&rx_settings[1]) != bytes_to_uint32_pointer(&tx_settings[1])) {
+				++bug;
+			}
+			pause(4);
+
+			// отправка адреса
+			uint32_to_bytes_pointer(ADRESS_G4_MAIN_FIRMWARE_ALT, tx_settings);
+			tx_settings[4] = n;
+			UART4_Send_Settings_bootloader();
+			UART4_Receive_Settings_bootloader(); // принять (полученный g4 адрес)
+			uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
+
+			// если ок, то прыгаем
+			if (addr_back == ADRESS_G4_MAIN_FIRMWARE_ALT) {
+				Set_tx_s(response::ok, 0x03, 0x02, 0x01, 0x00);
+				UART4_Send_Settings_bootloader();
+			}
+			else {
+				debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, ADRESS_G4_MAIN_FIRMWARE_ALT));
+			}
+			UART4_Receive_Settings_bootloader();
+			UART4_Receive_Settings_bootloader();
+			if (rx_settings[0] != n) {
+				debugg_fn(std::format(" start {} fail \n", n)); // DEBUG
+			}
+			pause(200);
+		}
+	}
+
+	if (bug) {
+		debugg_fn(std::format(" jump to address FAIL {} bugs", bug));
+		return;
+	}
+	// pause(50000); // 50ms
+}
+
 // LVGL ACTIONS
 #ifdef __cplusplus
 extern "C" {
 
+	// to dispays
 	void action_to_main_disp(lv_event_t* e) {
+
+		LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть сдесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
+
+
 		pause(2);
 		if (cur_disp == current_display::on) {
-			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
+			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips
 				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
 			}
 		}
 		if (cur_disp == current_display::off) {
-			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips
 				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
 			}
 		}
@@ -1476,7 +1562,6 @@ extern "C" {
 		}
 	}
 
-
 	void action_to_disp_flash(lv_event_t* e) {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 		LL_USART_DisableDMAReq_RX(UART5);
@@ -1484,6 +1569,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_FLASH);
 	}
 
+	// buttons
 	void action__echo_g4s(lv_event_t* e) {
 		G4_echo();
 	}
@@ -1492,17 +1578,16 @@ extern "C" {
 		data_from_H7_to_g4();
 	}
 
-
-	void action_flash(lv_event_t* e) { // >> jump_to_piano_g4 // TODO deprecated!
-		// UART4_SendAddress(1);
-		// Set_tx_s(command_flash::jump_to_piano_g4, 0x11, 0x12, 0x13, 0x14);
-		// UART4_Send_Settings_flash();
+	void action_jump(lv_event_t* e) { // >> jump_to_piano_g4 по адресу // TODO ?
+		jump_g4s_to_adress();
 	}
-	void action_reset_number_echo_g4(lv_event_t* e) { // TODO deprecated!
-	// irt = 0;
+
+	void action_reset_bootloader_g4(lv_event_t* e) { // TODO реализовать
+		reset_bootloaders();
 	}
 
 
+	// other
 	void action_to_disp_manual_edit_on(lv_event_t* e) {
 		debugg_clear();
 		cur_disp = on;
