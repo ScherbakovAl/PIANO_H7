@@ -260,7 +260,7 @@ void h7() {
 		pause(50000);
 	}
 	all_H7_to_g4();
-	sync(); // включает прерывания, осторожно!
+	sync(); // включает прерывания и таймер, осторожно!
 	
 	// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk

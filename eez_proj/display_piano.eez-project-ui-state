@@ -1,7 +1,7 @@
 {
   "navigation": {
     "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/46",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/50",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/0",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -998,7 +998,9 @@
             "0": {}
           },
           "4": {},
-          "5": {},
+          "5": {
+            "$selected": true
+          },
           "6": {}
         }
       },
@@ -1022,17 +1024,16 @@
           "0": {},
           "1": {},
           "2": {},
-          "3": {
-            "$selected": true
-          },
+          "3": {},
           "4": {},
-          "5": {}
+          "5": {},
+          "6": {}
         }
       },
       "transform": {
         "translate": {
           "x": -280,
-          "y": -420
+          "y": -540
         },
         "scale": 2
       },
