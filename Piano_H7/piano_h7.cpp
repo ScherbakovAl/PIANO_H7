@@ -290,7 +290,7 @@ void h7() {
 			}
 
 			if (cur_disp == off) {
-				for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
+				for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips
 					sender(command::all_calib, adress, 0, 0, subcommand::read_calibration);
 					for (int i = 0; i < 7; ++i) {
 						UART4_Receive_Settings();
@@ -1576,7 +1576,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
-		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips[i]
+		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
@@ -1589,7 +1589,7 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		all_g4_to_H7();
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips[i]
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips
 			sender(command::all_calib, adress, 0, 0, subcommand::start_calibration);
 		}
 	}
