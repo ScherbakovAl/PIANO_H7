@@ -64,8 +64,13 @@
 #define FLASH_DESC_STR      "@Internal Flash   /0x08000000/1*128Ka,7*128Kg"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-#define FLASH_ERASE_TIME    (uint16_t)50
-#define FLASH_PROGRAM_TIME  (uint16_t)50
+/* Уменьшенные таймауты для увеличения скорости загрузки
+ * FLASH_ERASE_TIME: время стирания сектора (мс)
+ * FLASH_PROGRAM_TIME: время программирования блока (мс)
+ * Меньшие значения = быстрее загрузка, но нужен запас для надежности
+ */
+#define FLASH_ERASE_TIME    (uint16_t)10
+#define FLASH_PROGRAM_TIME  (uint16_t)5
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
