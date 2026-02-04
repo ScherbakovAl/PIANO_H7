@@ -55,7 +55,7 @@ void LCD_WriteRAM_Prepare(void);
 void LCD_WriteReg(uint8_t LCD_Reg, uint16_t LCD_RegValue);
 void LCD_direction(uint8_t direction);
 void LCD_Clear(uint16_t Color);
-void LCD_rect_test(int x1, int x2, int y1, int y2, uint16_t Color);
+void LCD_rect_test(int x1, int y1, int x2, int y2, uint16_t Color);
 void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos);
 void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd, uint16_t yEnd);
 void LCD_RESET(void);

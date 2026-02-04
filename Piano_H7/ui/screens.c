@@ -210,6 +210,7 @@ void create_screen_d_flash() {
     objects.d_flash = obj;
     lv_obj_set_pos(obj, 0, 0);
     lv_obj_set_size(obj, 320, 480);
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_SNAPPABLE|LV_OBJ_FLAG_SCROLLABLE|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER);
     {
         lv_obj_t *parent_obj = obj;
         {

@@ -1,0 +1,743 @@
+Checking Core/Src/dma.c ...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:122:4: information: Include file: "stm32h743xx.h" not found. [missingInclude]
+  #include "stm32h743xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:162:4: information: Include file: "stm32h725xx.h" not found. [missingInclude]
+  #include "stm32h725xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H725xx;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:158:4: information: Include file: "stm32h730xx.h" not found. [missingInclude]
+  #include "stm32h730xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H730xx;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:160:4: information: Include file: "stm32h730xxq.h" not found. [missingInclude]
+  #include "stm32h730xxq.h"
+   ^
+Checking Core/Src/dma.c: STM32H730xxQ;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:156:4: information: Include file: "stm32h733xx.h" not found. [missingInclude]
+  #include "stm32h733xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H733xx;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:154:4: information: Include file: "stm32h735xx.h" not found. [missingInclude]
+  #include "stm32h735xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/dma.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:128:4: information: Include file: "stm32h742xx.h" not found. [missingInclude]
+  #include "stm32h742xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/dma.c: STM32H743xx;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:132:4: information: Include file: "stm32h745xg.h" not found. [missingInclude]
+  #include "stm32h745xg.h"
+   ^
+Checking Core/Src/dma.c: STM32H745xG;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:130:4: information: Include file: "stm32h745xx.h" not found. [missingInclude]
+  #include "stm32h745xx.h"
+   ^
+Checking Core/Src/dma.c: STM32H745xx;__ICCARM__...
+Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h:138:4: information: Include file: "stm32h747xg.h" not found. [missingInclude]
+  #include "stm32h747xg.h"
+   ^
+Checking Core/Src/dma.c: STM32H747xG;__ICCARM__...
+Core/Src/dma.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+1/20 files checked 0% done
+Checking Core/Src/ft6336.cpp ...
+Checking Core/Src/ft6336.cpp: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Core/Src/ft6336.cpp:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+Core/Src/ft6336.cpp:41:30: warning: inconclusive: Possible null pointer dereference: pData [nullPointer]
+  LL_I2C_TransmitData8(I2C5, pData[i]);
+                             ^
+Core/Src/ft6336.cpp:146:29: note: Calling function 'FT6336_WriteRegister', 2nd argument '0x00' value is 0
+ FT6336_WriteRegister(0x00, 0x00, 1);
+                            ^
+Core/Src/ft6336.cpp:41:30: note: Null pointer dereference
+  LL_I2C_TransmitData8(I2C5, pData[i]);
+                             ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:258:21: style: C-style pointer casting [cstyleCast]
+  return (uint32_t)(READ_REG(*((uint32_t *)UID_BASE_ADDRESS)));
+                    ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:267:21: style: C-style pointer casting [cstyleCast]
+  return (uint32_t)(READ_REG(*((uint32_t *)(UID_BASE_ADDRESS + 4U))));
+                    ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:276:21: style: C-style pointer casting [cstyleCast]
+  return (uint32_t)(READ_REG(*((uint32_t *)(UID_BASE_ADDRESS + 8U))));
+                    ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:287:21: style: C-style pointer casting [cstyleCast]
+  return (uint16_t)(READ_REG(*((uint32_t *)FLASHSIZE_BASE_ADDRESS)));
+                    ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:330:22: style: C-style pointer casting [cstyleCast]
+   return (uint16_t)(READ_REG(*((uint32_t *)PACKAGE_BASE_ADDRESS)));
+                     ^
+Checking Core/Src/ft6336.cpp: STM32H725xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H730xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H733xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H735xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H742xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H743xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H745xG;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H745xx;__ICCARM__...
+Checking Core/Src/ft6336.cpp: STM32H747xG;__ICCARM__...
+Core/Src/ft6336.cpp:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 386 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+2/20 files checked 3% done
+Checking Core/Src/gpio.c ...
+Checking Core/Src/gpio.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/gpio.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/gpio.c: STM32H747xG;__ICCARM__...
+Core/Src/gpio.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+3/20 files checked 5% done
+Checking Core/Src/i2c.c ...
+Checking Core/Src/i2c.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/i2c.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/i2c.c: STM32H747xG;__ICCARM__...
+Core/Src/i2c.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+4/20 files checked 6% done
+Checking Core/Src/main.c ...
+Core/Src/main.c:24:2: information: Include file: "usb_device.h" not found. [missingInclude]
+#include "usb_device.h"
+ ^
+Checking Core/Src/main.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Core/Src/main.c:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+Core/Src/main.c:83:10: style: The scope of the variable 'JumpToApplication' can be reduced. [variableScope]
+  void (*JumpToApplication)(void);
+         ^
+Core/Src/main.c:84:12: style: The scope of the variable 'JumpAddress' can be reduced. [variableScope]
+  uint32_t JumpAddress;
+           ^
+Checking Core/Src/main.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/main.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/main.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/main.c: STM32H747xG;__ICCARM__...
+Core/Src/main.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 366 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+5/20 files checked 10% done
+Checking Core/Src/spi.c ...
+Checking Core/Src/spi.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/spi.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/spi.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/spi.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/spi.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/spi.c: STM32H747xG;__ICCARM__...
+Core/Src/spi.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+6/20 files checked 12% done
+Checking Core/Src/st7796.cpp ...
+Checking Core/Src/st7796.cpp: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H725xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H730xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H733xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H735xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/st7796.cpp: STM32H742xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H743xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H745xG;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H745xx;__ICCARM__...
+Checking Core/Src/st7796.cpp: STM32H747xG;__ICCARM__...
+Core/Src/st7796.cpp:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+7/20 files checked 16% done
+Checking Core/Src/stm32h7xx_hal_msp.c ...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_hal_msp.c: STM32H747xG;__ICCARM__...
+Core/Src/stm32h7xx_hal_msp.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+8/20 files checked 17% done
+Checking Core/Src/stm32h7xx_it.c ...
+Checking Core/Src/stm32h7xx_it.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx...
+Checking Core/Src/stm32h7xx_it.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/stm32h7xx_it.c: STM32H747xG;__ICCARM__...
+Core/Src/stm32h7xx_it.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+9/20 files checked 20% done
+Checking Core/Src/syscalls.c ...
+Core/Src/syscalls.c:80:50: style: Parameter 'ptr' can be declared as pointer to const [constParameterPointer]
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+                                                 ^
+Checking Core/Src/syscalls.c: __PICOLIBC__...
+Core/Src/syscalls.c:80:50: style: Parameter 'ptr' can be declared as pointer to const. However it seems that '_write' is a callback function, if 'ptr' is declared with const you might also need to cast function pointer(s). [constParameterCallback]
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+                                                 ^
+Core/Src/syscalls.c:227:20: note: You might need to cast the function pointer here
+__strong_reference(_write, write);
+                   ^
+Core/Src/syscalls.c:80:50: note: Parameter 'ptr' can be declared as pointer to const
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+                                                 ^
+10/20 files checked 22% done
+Checking Core/Src/sysmem.c ...
+Checking Core/Src/sysmem.c: __PICOLIBC__...
+11/20 files checked 24% done
+Checking Core/Src/system_stm32h7xx.c ...
+Checking Core/Src/system_stm32h7xx.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H725xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H730xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H730xxQ;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H733xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H735xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H742xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H743xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H745xG;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H745xx;__ICCARM__...
+Checking Core/Src/system_stm32h7xx.c: STM32H747xG;__ICCARM__...
+Core/Src/system_stm32h7xx.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 306 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+12/20 files checked 33% done
+Checking USB_DEVICE/App/usb_device.c ...
+USB_DEVICE/App/usb_device.h:32:2: information: Include file: "usbd_def.h" not found. [missingInclude]
+#include "usbd_def.h"
+ ^
+USB_DEVICE/App/usb_device.c:24:2: information: Include file: "usbd_core.h" not found. [missingInclude]
+#include "usbd_core.h"
+ ^
+USB_DEVICE/App/usbd_desc.h:29:2: information: Include file: "usbd_def.h" not found. [missingInclude]
+#include "usbd_def.h"
+ ^
+USB_DEVICE/App/usb_device.c:26:2: information: Include file: "usbd_dfu.h" not found. [missingInclude]
+#include "usbd_dfu.h"
+ ^
+USB_DEVICE/App/usbd_dfu_if.h:29:2: information: Include file: "usbd_dfu.h" not found. [missingInclude]
+#include "usbd_dfu.h"
+ ^
+Checking USB_DEVICE/App/usb_device.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H725xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H730xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H730xxQ;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H733xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H735xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H742xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H743xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H745xG;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H745xx;__ICCARM__...
+Checking USB_DEVICE/App/usb_device.c: STM32H747xG;__ICCARM__...
+USB_DEVICE/App/usb_device.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 395 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+13/20 files checked 34% done
+Checking USB_DEVICE/App/usbd_desc.c ...
+USB_DEVICE/App/usbd_desc.c:22:2: information: Include file: "usbd_core.h" not found. [missingInclude]
+#include "usbd_core.h"
+ ^
+USB_DEVICE/App/usbd_desc.c:24:2: information: Include file: "usbd_conf.h" not found. [missingInclude]
+#include "usbd_conf.h"
+ ^
+USB_DEVICE/App/usbd_desc.c:149:60: error: There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it. [unknownMacro]
+__ALIGN_BEGIN uint8_t USBD_HS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
+                                                           ^
+Checking USB_DEVICE/App/usbd_desc.c: __ICCARM__...
+14/20 files checked 40% done
+Checking USB_DEVICE/App/usbd_dfu_if.c ...
+USB_DEVICE/App/usbd_dfu_if.c:276:12: style: Variable 'psrc' can be declared as pointer to const [constVariablePointer]
+  uint8_t *psrc = src;
+           ^
+Checking USB_DEVICE/App/usbd_dfu_if.c: __ICCARM__...
+15/20 files checked 44% done
+Checking USB_DEVICE/Target/usbd_conf.c ...
+USB_DEVICE/Target/usbd_conf.c:24:2: information: Include file: "usbd_def.h" not found. [missingInclude]
+#include "usbd_def.h"
+ ^
+USB_DEVICE/Target/usbd_conf.c:25:2: information: Include file: "usbd_core.h" not found. [missingInclude]
+#include "usbd_core.h"
+ ^
+USB_DEVICE/Target/usbd_conf.c:26:2: information: Include file: "usbd_dfu.h" not found. [missingInclude]
+#include "usbd_dfu.h"
+ ^
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H723xx;STM32H725xx;STM32H730xx;STM32H730xxQ;STM32H733xx;STM32H735xx;STM32H742xx;STM32H743xx;STM32H745xG;STM32H745xx;STM32H747xG;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;STM32H7A3xx;STM32H7A3xxQ;STM32H7B0xx;STM32H7B0xxQ;STM32H7B3xx;STM32H7B3xxQ;__ICCARM__...
+USB_DEVICE/Target/usbd_conf.c:66:41: style: Parameter 'pcdHandle' can be declared as pointer to const [constParameterPointer]
+void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
+                                        ^
+USB_DEVICE/Target/usbd_conf.c:88:43: style: Parameter 'pcdHandle' can be declared as pointer to const [constParameterPointer]
+void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
+                                          ^
+USB_DEVICE/Target/usbd_conf.c:610:19: style: Variable 'mem' is not assigned a value. [unassignedVariable]
+  static uint32_t mem[(sizeof(USBD_DFU_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+                  ^
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H725xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H730xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H730xxQ;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H733xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H735xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H742xx;STM32H743xx;STM32H745xx;STM32H747xx;STM32H750xx;STM32H753xx;STM32H755xx;STM32H757xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H742xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H743xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H745xG;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H745xx;__ICCARM__...
+Checking USB_DEVICE/Target/usbd_conf.c: STM32H747xG;__ICCARM__...
+USB_DEVICE/Target/usbd_conf.c:0:0: information: Too many #ifdef configurations - cppcheck only checks 12 of 396 configurations. Use --force to check all configurations. [toomanyconfigs]
+
+^
+16/20 files checked 53% done
+Checking Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c ...
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:56:2: information: Include file: "usbd_dfu.h" not found. [missingInclude]
+#include "usbd_dfu.h"
+ ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:57:2: information: Include file: "usbd_ctlreq.h" not found. [missingInclude]
+#include "usbd_ctlreq.h"
+ ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:165:72: error: There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it. [unknownMacro]
+__ALIGN_BEGIN static uint8_t USBD_DFU_CfgDesc[USB_DFU_CONFIG_DESC_SIZ] __ALIGN_END =
+                                                                       ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c: USE_USBD_COMPOSITE...
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:354:12: style: The scope of the variable 'pbuf' can be reduced. [variableScope]
+  uint8_t *pbuf;
+           ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:355:12: style: The scope of the variable 'len' can be reduced. [variableScope]
+  uint16_t len;
+           ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:853:28: style: Variable 'pDfuFunc' can be declared as pointer to const [constVariablePointer]
+  USBD_DFUFuncDescTypeDef *pDfuFunc = (USBD_DFUFuncDescTypeDef *)USBD_DFU_GetDfuFuncDesc(pdev->pConfDesc);
+                           ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:1139:28: style: Variable 'pDfuFunc' can be declared as pointer to const [constVariablePointer]
+  USBD_DFUFuncDescTypeDef *pDfuFunc = (USBD_DFUFuncDescTypeDef *)USBD_DFU_GetDfuFuncDesc(pdev->pConfDesc);
+                           ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:1311:26: style: Variable 'DfuInterface' can be declared as pointer to const [constVariablePointer]
+  USBD_DFU_MediaTypeDef *DfuInterface = (USBD_DFU_MediaTypeDef *)pdev->pUserData[pdev->classId];
+                         ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:1312:28: style: Variable 'pDfuFunc' can be declared as pointer to const [constVariablePointer]
+  USBD_DFUFuncDescTypeDef *pDfuFunc = (USBD_DFUFuncDescTypeDef *)USBD_DFU_GetDfuFuncDesc(pdev->pConfDesc);
+                           ^
+Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c:1364:27: style: Variable 'desc' can be declared as pointer to const [constVariablePointer]
+  USBD_ConfigDescTypeDef *desc = (USBD_ConfigDescTypeDef *)(void *)pConfDesc;
+                          ^
+17/20 files checked 72% done
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c ...
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:20:2: information: Include file: "usbd_core.h" not found. [missingInclude]
+#include "usbd_core.h"
+ ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:0:0: information: Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches. [normalCheckLevelMaxBranches]
+
+^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:652:24: style: Condition '(uint16_t)idx!=0xFFU' is always true [knownConditionTrueFalse]
+    if (((uint16_t)idx != 0xFFU) && (idx < USBD_MAX_SUPPORTED_CLASS))
+                       ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:650:26: note: Calling function 'USBD_CoreFindEP' returns 0
+    idx = USBD_CoreFindEP(pdev, (epnum & 0x7FU));
+                         ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:650:26: note: Assignment 'idx=USBD_CoreFindEP(pdev,epnum&0x7FU)', assigned value is 0
+    idx = USBD_CoreFindEP(pdev, (epnum & 0x7FU));
+                         ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:652:24: note: Condition '(uint16_t)idx!=0xFFU' is always true
+    if (((uint16_t)idx != 0xFFU) && (idx < USBD_MAX_SUPPORTED_CLASS))
+                       ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:743:24: style: Condition '(uint16_t)idx!=0xFFU' is always true [knownConditionTrueFalse]
+    if (((uint16_t)idx != 0xFFU) && (idx < USBD_MAX_SUPPORTED_CLASS))
+                       ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:741:26: note: Calling function 'USBD_CoreFindEP' returns 0
+    idx = USBD_CoreFindEP(pdev, ((uint8_t)epnum | 0x80U));
+                         ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:741:26: note: Assignment 'idx=USBD_CoreFindEP(pdev,(uint8_t)epnum|0x80U)', assigned value is 0
+    idx = USBD_CoreFindEP(pdev, ((uint8_t)epnum | 0x80U));
+                         ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:743:24: note: Condition '(uint16_t)idx!=0xFFU' is always true
+    if (((uint16_t)idx != 0xFFU) && (idx < USBD_MAX_SUPPORTED_CLASS))
+                       ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:589:25: style: The scope of the variable 'pep' can be reduced. [variableScope]
+  USBD_EndpointTypeDef *pep;
+                        ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:684:25: style: The scope of the variable 'pep' can be reduced. [variableScope]
+  USBD_EndpointTypeDef *pep;
+                        ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:685:22: style: The scope of the variable 'ret' can be reduced. [variableScope]
+  USBD_StatusTypeDef ret;
+                     ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:686:11: style: The scope of the variable 'idx' can be reduced. [variableScope]
+  uint8_t idx;
+          ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:1154:27: style: Variable 'desc' can be declared as pointer to const [constVariablePointer]
+  USBD_ConfigDescTypeDef *desc = (USBD_ConfigDescTypeDef *)(void *)pConfDesc;
+                          ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c: USBD_HS_TESTMODE_ENABLE...
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:23:2: information: Include file: "usbd_composite_builder.h" not found. [missingInclude]
+#include "usbd_composite_builder.h"
+ ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c: USE_USBD_COMPOSITE...
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:1040:45: style: Parameter 'pdev' can be declared as pointer to const [constParameterPointer]
+uint8_t USBD_CoreFindIF(USBD_HandleTypeDef *pdev, uint8_t index)
+                                            ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:1080:45: style: Parameter 'pdev' can be declared as pointer to const [constParameterPointer]
+uint8_t USBD_CoreFindEP(USBD_HandleTypeDef *pdev, uint8_t index)
+                                            ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c: USE_USBD_COMPOSITE;USE_USB_HS...
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c: USE_USB_HS...
+18/20 files checked 86% done
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c ...
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:20:2: information: Include file: "usbd_ctlreq.h" not found. [missingInclude]
+#include "usbd_ctlreq.h"
+ ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:21:2: information: Include file: "usbd_ioreq.h" not found. [missingInclude]
+#include "usbd_ioreq.h"
+ ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:170:11: style: The scope of the variable 'idx' can be reduced. [variableScope]
+  uint8_t idx;
+          ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:684:12: style: The scope of the variable 'dev_addr' can be reduced. [variableScope]
+  uint8_t  dev_addr;
+           ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:1035:12: style: Variable 'pbuff' can be declared as pointer to const [constVariablePointer]
+  uint8_t *pbuff = buf;
+           ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:24:2: information: Include file: "usbd_composite_builder.h" not found. [missingInclude]
+#include "usbd_composite_builder.h"
+ ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c: USE_USBD_COMPOSITE...
+19/20 files checked 97% done
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c ...
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c:20:2: information: Include file: "usbd_ioreq.h" not found. [missingInclude]
+#include "usbd_ioreq.h"
+ ^
+Checking Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c: USBD_AVOID_PACKET_SPLIT_MPS...
+20/20 files checked 100% done
+Core/Src/ft6336.cpp:160:13: style: The function 'AdjustTouchCoordinates' is never used. [unusedFunction]
+static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
+            ^
+Core/Src/stm32h7xx_hal_msp.c:63:6: style: The function 'HAL_MspInit' is never used. [unusedFunction]
+void HAL_MspInit(void)
+     ^
+Core/Src/stm32h7xx_it.c:69:6: style: The function 'NMI_Handler' is never used. [unusedFunction]
+void NMI_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:84:6: style: The function 'HardFault_Handler' is never used. [unusedFunction]
+void HardFault_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:99:6: style: The function 'MemManage_Handler' is never used. [unusedFunction]
+void MemManage_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:114:6: style: The function 'BusFault_Handler' is never used. [unusedFunction]
+void BusFault_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:129:6: style: The function 'UsageFault_Handler' is never used. [unusedFunction]
+void UsageFault_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:144:6: style: The function 'SVC_Handler' is never used. [unusedFunction]
+void SVC_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:157:6: style: The function 'DebugMon_Handler' is never used. [unusedFunction]
+void DebugMon_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:170:6: style: The function 'PendSV_Handler' is never used. [unusedFunction]
+void PendSV_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:183:6: style: The function 'SysTick_Handler' is never used. [unusedFunction]
+void SysTick_Handler(void)
+     ^
+Core/Src/stm32h7xx_it.c:204:6: style: The function 'DMA1_Stream0_IRQHandler' is never used. [unusedFunction]
+void DMA1_Stream0_IRQHandler(void)
+     ^
+Core/Src/stm32h7xx_it.c:217:6: style: The function 'DMA1_Stream1_IRQHandler' is never used. [unusedFunction]
+void DMA1_Stream1_IRQHandler(void)
+     ^
+Core/Src/stm32h7xx_it.c:230:6: style: The function 'EXTI15_10_IRQHandler' is never used. [unusedFunction]
+void EXTI15_10_IRQHandler(void)
+     ^
+Core/Src/stm32h7xx_it.c:253:6: style: The function 'SPI3_IRQHandler' is never used. [unusedFunction]
+void SPI3_IRQHandler(void)
+     ^
+Core/Src/stm32h7xx_it.c:266:6: style: The function 'OTG_HS_IRQHandler' is never used. [unusedFunction]
+void OTG_HS_IRQHandler(void)
+     ^
+Core/Src/syscalls.c:44:6: style: The function 'initialise_monitor_handles' is never used. [unusedFunction]
+void initialise_monitor_handles()
+     ^
+Core/Src/system_stm32h7xx.c:178:6: style: The function 'SystemInit' is never used. [unusedFunction]
+void SystemInit (void)
+     ^
+Core/Src/system_stm32h7xx.c:352:6: style: The function 'SystemCoreClockUpdate' is never used. [unusedFunction]
+void SystemCoreClockUpdate (void)
+     ^
+Core/Src/system_stm32h7xx.c:474:6: style: The function 'ExitRun0Mode' is never used. [unusedFunction]
+void ExitRun0Mode(void)
+     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:241:26: style: The function 'LL_SYSTICK_IsActiveCounterFlag' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_SYSTICK_IsActiveCounterFlag(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:254:22: style: The function 'LL_SYSTICK_SetClkSource' is never used. [unusedFunction]
+__STATIC_INLINE void LL_SYSTICK_SetClkSource(uint32_t Source)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:266:26: style: The function 'LL_SYSTICK_GetClkSource' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_SYSTICK_GetClkSource(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:276:22: style: The function 'LL_SYSTICK_EnableIT' is never used. [unusedFunction]
+__STATIC_INLINE void LL_SYSTICK_EnableIT(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:286:22: style: The function 'LL_SYSTICK_DisableIT' is never used. [unusedFunction]
+__STATIC_INLINE void LL_SYSTICK_DisableIT(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:296:26: style: The function 'LL_SYSTICK_IsEnabledIT' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_SYSTICK_IsEnabledIT(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:314:22: style: The function 'LL_LPM_EnableSleep' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_EnableSleep(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:325:22: style: The function 'LL_LPM_EnableDeepSleep' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_EnableDeepSleep(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:338:22: style: The function 'LL_LPM_EnableSleepOnExit' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_EnableSleepOnExit(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:349:22: style: The function 'LL_LPM_DisableSleepOnExit' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_DisableSleepOnExit(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:361:22: style: The function 'LL_LPM_EnableEventOnPend' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_EnableEventOnPend(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:373:22: style: The function 'LL_LPM_DisableEventOnPend' is never used. [unusedFunction]
+__STATIC_INLINE void LL_LPM_DisableEventOnPend(void)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:396:22: style: The function 'LL_HANDLER_EnableFault' is never used. [unusedFunction]
+__STATIC_INLINE void LL_HANDLER_EnableFault(uint32_t Fault)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:411:22: style: The function 'LL_HANDLER_DisableFault' is never used. [unusedFunction]
+__STATIC_INLINE void LL_HANDLER_DisableFault(uint32_t Fault)
+                     ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:430:26: style: The function 'LL_CPUID_GetImplementer' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_CPUID_GetImplementer(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:440:26: style: The function 'LL_CPUID_GetVariant' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_CPUID_GetVariant(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:450:26: style: The function 'LL_CPUID_GetConstant' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_CPUID_GetConstant(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:460:26: style: The function 'LL_CPUID_GetParNo' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_CPUID_GetParNo(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h:470:26: style: The function 'LL_CPUID_GetRevision' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_CPUID_GetRevision(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:256:26: style: The function 'LL_GetUID_Word0' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_GetUID_Word0(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:265:26: style: The function 'LL_GetUID_Word1' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_GetUID_Word1(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:274:26: style: The function 'LL_GetUID_Word2' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_GetUID_Word2(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:285:26: style: The function 'LL_GetFlashSize' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_GetFlashSize(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:324:26: style: The function 'LL_GetPackageType' is never used. [unusedFunction]
+__STATIC_INLINE uint32_t LL_GetPackageType(void)
+                         ^
+Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h:351:22: style: The function 'LL_InitTick' is never used. [unusedFunction]
+__STATIC_INLINE void LL_InitTick(uint32_t HCLKFrequency, uint32_t Ticks)
+                     ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:149:20: style: The function 'USBD_DeInit' is never used. [unusedFunction]
+USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
+                   ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:246:20: style: The function 'USBD_RegisterClassComposite' is never used. [unusedFunction]
+USBD_StatusTypeDef USBD_RegisterClassComposite(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass,
+                   ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:297:21: style: The function 'USBD_UnRegisterClassComposite' is never used. [unusedFunction]
+USBD_StatusTypeDef  USBD_UnRegisterClassComposite(USBD_HandleTypeDef *pdev)
+                    ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:1123:9: style: The function 'USBD_CoreGetEPAdd' is never used. [unusedFunction]
+uint8_t USBD_CoreGetEPAdd(USBD_HandleTypeDef *pdev, uint8_t ep_dir, uint8_t ep_type, uint8_t ClassId)
+        ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:1151:7: style: The function 'USBD_GetEpDesc' is never used. [unusedFunction]
+void *USBD_GetEpDesc(uint8_t *pConfDesc, uint8_t EpAddr)
+      ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c:996:6: style: The function 'USBD_GetString' is never used. [unusedFunction]
+void USBD_GetString(uint8_t *desc, uint8_t *unicode, uint16_t *len)
+     ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c:206:10: style: The function 'USBD_GetRxCount' is never used. [unusedFunction]
+uint32_t USBD_GetRxCount(USBD_HandleTypeDef *pdev, uint8_t ep_addr)
+         ^
+USB_DEVICE/Target/usbd_conf.c:66:6: style: The function 'HAL_PCD_MspInit' is never used. [unusedFunction]
+void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
+     ^
+USB_DEVICE/Target/usbd_conf.c:88:6: style: The function 'HAL_PCD_MspDeInit' is never used. [unusedFunction]
+void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
+     ^
+USB_DEVICE/Target/usbd_conf.c:115:6: style: The function 'HAL_PCD_SetupStageCallback' is never used. [unusedFunction]
+void HAL_PCD_SetupStageCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:130:6: style: The function 'HAL_PCD_DataOutStageCallback' is never used. [unusedFunction]
+void HAL_PCD_DataOutStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+     ^
+USB_DEVICE/Target/usbd_conf.c:145:6: style: The function 'HAL_PCD_DataInStageCallback' is never used. [unusedFunction]
+void HAL_PCD_DataInStageCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+     ^
+USB_DEVICE/Target/usbd_conf.c:159:6: style: The function 'HAL_PCD_SOFCallback' is never used. [unusedFunction]
+void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:173:6: style: The function 'HAL_PCD_ResetCallback' is never used. [unusedFunction]
+void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:206:6: style: The function 'HAL_PCD_SuspendCallback' is never used. [unusedFunction]
+void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:231:6: style: The function 'HAL_PCD_ResumeCallback' is never used. [unusedFunction]
+void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:249:6: style: The function 'HAL_PCD_ISOOUTIncompleteCallback' is never used. [unusedFunction]
+void HAL_PCD_ISOOUTIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+     ^
+USB_DEVICE/Target/usbd_conf.c:264:6: style: The function 'HAL_PCD_ISOINIncompleteCallback' is never used. [unusedFunction]
+void HAL_PCD_ISOINIncompleteCallback(PCD_HandleTypeDef *hpcd, uint8_t epnum)
+     ^
+USB_DEVICE/Target/usbd_conf.c:278:6: style: The function 'HAL_PCD_ConnectCallback' is never used. [unusedFunction]
+void HAL_PCD_ConnectCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:292:6: style: The function 'HAL_PCD_DisconnectCallback' is never used. [unusedFunction]
+void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd)
+     ^
+USB_DEVICE/Target/usbd_conf.c:432:20: style: The function 'USBD_LL_CloseEP' is never used. [unusedFunction]
+USBD_StatusTypeDef USBD_LL_CloseEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr)
+                   ^
+USB_DEVICE/Target/usbd_conf.c:450:20: style: The function 'USBD_LL_FlushEP' is never used. [unusedFunction]
+USBD_StatusTypeDef USBD_LL_FlushEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr)
+                   ^
+USB_DEVICE/Target/usbd_conf.c:607:7: style: The function 'USBD_static_malloc' is never used. [unusedFunction]
+void *USBD_static_malloc(uint32_t size)
+      ^
+USB_DEVICE/Target/usbd_conf.c:619:6: style: The function 'USBD_static_free' is never used. [unusedFunction]
+void USBD_static_free(void *p)
+     ^
+USB_DEVICE/Target/usbd_conf.c:629:6: style: The function 'USBD_LL_Delay' is never used. [unusedFunction]
+void USBD_LL_Delay(uint32_t Delay)
+     ^
+Core/Src/main.c:183:6: style: The function 'SystemClock_Config' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+void SystemClock_Config(void) {
+     ^
+Core/Src/main.c:246:6: style: The function 'PeriphCommonClock_Config' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+void PeriphCommonClock_Config(void) {
+     ^
+Core/Src/syscalls.c:48:5: style: The function '_getpid' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _getpid(void)
+    ^
+Core/Src/syscalls.c:53:5: style: The function '_kill' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _kill(int pid, int sig)
+    ^
+Core/Src/syscalls.c:61:6: style: The function '_exit' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+void _exit (int status)
+     ^
+Core/Src/syscalls.c:67:27: style: The function '_read' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+__attribute__((weak)) int _read(int file, char *ptr, int len)
+                          ^
+Core/Src/syscalls.c:80:27: style: The function '_write' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+                          ^
+Core/Src/syscalls.c:92:5: style: The function '_close' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _close(int file)
+    ^
+Core/Src/syscalls.c:99:5: style: The function '_fstat' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _fstat(int file, struct stat *st)
+    ^
+Core/Src/syscalls.c:106:5: style: The function '_isatty' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _isatty(int file)
+    ^
+Core/Src/syscalls.c:112:5: style: The function '_lseek' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _lseek(int file, int ptr, int dir)
+    ^
+Core/Src/syscalls.c:120:5: style: The function '_open' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _open(char *path, int flags, ...)
+    ^
+Core/Src/syscalls.c:128:5: style: The function '_wait' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _wait(int *status)
+    ^
+Core/Src/syscalls.c:135:5: style: The function '_unlink' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _unlink(char *name)
+    ^
+Core/Src/syscalls.c:142:9: style: The function '_times' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+clock_t _times(struct tms *buf)
+        ^
+Core/Src/syscalls.c:148:5: style: The function '_stat' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _stat(const char *file, struct stat *st)
+    ^
+Core/Src/syscalls.c:155:5: style: The function '_link' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _link(char *old, char *new)
+    ^
+Core/Src/syscalls.c:163:5: style: The function '_fork' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _fork(void)
+    ^
+Core/Src/syscalls.c:169:5: style: The function '_execve' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+int _execve(char *name, char **argv, char **env)
+    ^
+Core/Src/sysmem.c:54:7: style: The function '_sbrk' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+void *_sbrk(ptrdiff_t incr)
+      ^
+Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c:440:20: style: The function 'USBD_RunTestMode' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+USBD_StatusTypeDef USBD_RunTestMode(USBD_HandleTypeDef *pdev)
+                   ^
+USB_DEVICE/Target/usbd_conf.c:639:20: style: The function 'USBD_Get_USB_Status' should have static linkage since it is not used outside of its translation unit. [staticFunction]
+USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
+                   ^
+nofile:0:0: information: Active checkers: There was critical errors (use --checkers-report=<filename> to see details) [checkersReport]
+

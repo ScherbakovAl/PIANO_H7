@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.19.1"/>
+    <errors>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h743xx.h&quot; not found." verbose="Include file: &quot;stm32h743xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="122" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h725xx.h&quot; not found." verbose="Include file: &quot;stm32h725xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="162" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h730xx.h&quot; not found." verbose="Include file: &quot;stm32h730xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="158" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h730xxq.h&quot; not found." verbose="Include file: &quot;stm32h730xxq.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="160" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h733xx.h&quot; not found." verbose="Include file: &quot;stm32h733xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="156" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h735xx.h&quot; not found." verbose="Include file: &quot;stm32h735xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="154" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h742xx.h&quot; not found." verbose="Include file: &quot;stm32h742xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="128" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h745xg.h&quot; not found." verbose="Include file: &quot;stm32h745xg.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="132" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h745xx.h&quot; not found." verbose="Include file: &quot;stm32h745xx.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="130" column="4"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;stm32h747xg.h&quot; not found." verbose="Include file: &quot;stm32h747xg.h&quot; not found.">
+            <location file="Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h" line="138" column="4"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/dma.c" line="0" column="0"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="Core/Src/ft6336.cpp">
+            <location file="Core/Src/ft6336.cpp" line="0" column="0"/>
+        </error>
+        <error id="nullPointer" severity="warning" msg="Possible null pointer dereference: pData" verbose="Possible null pointer dereference: pData" cwe="476" inconclusive="true" file0="Core/Src/ft6336.cpp">
+            <location file="Core/Src/ft6336.cpp" line="41" column="30" info="Null pointer dereference"/>
+            <location file="Core/Src/ft6336.cpp" line="146" column="29" info="Calling function &apos;FT6336_WriteRegister&apos;, 2nd argument &apos;0x00&apos; value is 0"/>
+            <symbol>pData</symbol>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected." cwe="398" file0="Core/Src/ft6336.cpp">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="258" column="21"/>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected." cwe="398" file0="Core/Src/ft6336.cpp">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="267" column="21"/>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected." cwe="398" file0="Core/Src/ft6336.cpp">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="276" column="21"/>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected." cwe="398" file0="Core/Src/ft6336.cpp">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="287" column="21"/>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected." cwe="398" file0="Core/Src/ft6336.cpp">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="330" column="22"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 386 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 386 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/ft6336.cpp" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/gpio.c" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/i2c.c" line="0" column="0"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usb_device.h&quot; not found." verbose="Include file: &quot;usb_device.h&quot; not found.">
+            <location file="Core/Src/main.c" line="24" column="2"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="Core/Src/main.c">
+            <location file="Core/Src/main.c" line="0" column="0"/>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;JumpToApplication&apos; can be reduced." verbose="The scope of the variable &apos;JumpToApplication&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Core/Src/main.c">
+            <location file="Core/Src/main.c" line="83" column="10"/>
+            <symbol>JumpToApplication</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;JumpAddress&apos; can be reduced." verbose="The scope of the variable &apos;JumpAddress&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Core/Src/main.c">
+            <location file="Core/Src/main.c" line="84" column="12"/>
+            <symbol>JumpAddress</symbol>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 366 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 366 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/main.c" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/spi.c" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/st7796.cpp" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/stm32h7xx_hal_msp.c" line="0" column="0"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 525 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/stm32h7xx_it.c" line="0" column="0"/>
+        </error>
+        <error id="constParameterPointer" severity="style" msg="Parameter &apos;ptr&apos; can be declared as pointer to const" verbose="Parameter &apos;ptr&apos; can be declared as pointer to const" cwe="398" file0="Core/Src/syscalls.c">
+            <location file="Core/Src/syscalls.c" line="80" column="50" info="Parameter &apos;ptr&apos; can be declared as pointer to const"/>
+            <symbol>ptr</symbol>
+        </error>
+        <error id="constParameterCallback" severity="style" msg="Parameter &apos;ptr&apos; can be declared as pointer to const. However it seems that &apos;_write&apos; is a callback function, if &apos;ptr&apos; is declared with const you might also need to cast function pointer(s)." verbose="Parameter &apos;ptr&apos; can be declared as pointer to const. However it seems that &apos;_write&apos; is a callback function, if &apos;ptr&apos; is declared with const you might also need to cast function pointer(s)." cwe="398" file0="Core/Src/syscalls.c">
+            <location file="Core/Src/syscalls.c" line="80" column="50" info="Parameter &apos;ptr&apos; can be declared as pointer to const"/>
+            <location file="Core/Src/syscalls.c" line="227" column="20" info="You might need to cast the function pointer here"/>
+            <symbol>ptr</symbol>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 306 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 306 configurations. Use --force to check all configurations." cwe="398">
+            <location file="Core/Src/system_stm32h7xx.c" line="0" column="0"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_def.h&quot; not found." verbose="Include file: &quot;usbd_def.h&quot; not found.">
+            <location file="USB_DEVICE/App/usb_device.h" line="32" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_core.h&quot; not found." verbose="Include file: &quot;usbd_core.h&quot; not found.">
+            <location file="USB_DEVICE/App/usb_device.c" line="24" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_def.h&quot; not found." verbose="Include file: &quot;usbd_def.h&quot; not found.">
+            <location file="USB_DEVICE/App/usbd_desc.h" line="29" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_dfu.h&quot; not found." verbose="Include file: &quot;usbd_dfu.h&quot; not found.">
+            <location file="USB_DEVICE/App/usb_device.c" line="26" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_dfu.h&quot; not found." verbose="Include file: &quot;usbd_dfu.h&quot; not found.">
+            <location file="USB_DEVICE/App/usbd_dfu_if.h" line="29" column="2"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 395 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 395 configurations. Use --force to check all configurations." cwe="398">
+            <location file="USB_DEVICE/App/usb_device.c" line="0" column="0"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_core.h&quot; not found." verbose="Include file: &quot;usbd_core.h&quot; not found.">
+            <location file="USB_DEVICE/App/usbd_desc.c" line="22" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_conf.h&quot; not found." verbose="Include file: &quot;usbd_conf.h&quot; not found.">
+            <location file="USB_DEVICE/App/usbd_desc.c" line="24" column="2"/>
+        </error>
+        <error id="unknownMacro" severity="error" msg="There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it." verbose="There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it." file0="USB_DEVICE/App/usbd_desc.c">
+            <location file="USB_DEVICE/App/usbd_desc.c" line="149" column="60"/>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;psrc&apos; can be declared as pointer to const" verbose="Variable &apos;psrc&apos; can be declared as pointer to const" cwe="398" file0="USB_DEVICE/App/usbd_dfu_if.c">
+            <location file="USB_DEVICE/App/usbd_dfu_if.c" line="276" column="12" info="Variable &apos;psrc&apos; can be declared as pointer to const"/>
+            <symbol>psrc</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_def.h&quot; not found." verbose="Include file: &quot;usbd_def.h&quot; not found.">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="24" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_core.h&quot; not found." verbose="Include file: &quot;usbd_core.h&quot; not found.">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="25" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_dfu.h&quot; not found." verbose="Include file: &quot;usbd_dfu.h&quot; not found.">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="26" column="2"/>
+        </error>
+        <error id="constParameterPointer" severity="style" msg="Parameter &apos;pcdHandle&apos; can be declared as pointer to const" verbose="Parameter &apos;pcdHandle&apos; can be declared as pointer to const" cwe="398" file0="USB_DEVICE/Target/usbd_conf.c">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="66" column="41" info="Parameter &apos;pcdHandle&apos; can be declared as pointer to const"/>
+            <symbol>pcdHandle</symbol>
+        </error>
+        <error id="constParameterPointer" severity="style" msg="Parameter &apos;pcdHandle&apos; can be declared as pointer to const" verbose="Parameter &apos;pcdHandle&apos; can be declared as pointer to const" cwe="398" file0="USB_DEVICE/Target/usbd_conf.c">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="88" column="43" info="Parameter &apos;pcdHandle&apos; can be declared as pointer to const"/>
+            <symbol>pcdHandle</symbol>
+        </error>
+        <error id="unassignedVariable" severity="style" msg="Variable &apos;mem&apos; is not assigned a value." verbose="Variable &apos;mem&apos; is not assigned a value." cwe="665" file0="USB_DEVICE/Target/usbd_conf.c">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="610" column="19"/>
+            <symbol>mem</symbol>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 396 configurations. Use --force to check all configurations." verbose="Too many #ifdef configurations - cppcheck only checks 12 of 396 configurations. Use --force to check all configurations." cwe="398">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="0" column="0"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_dfu.h&quot; not found." verbose="Include file: &quot;usbd_dfu.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="56" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_ctlreq.h&quot; not found." verbose="Include file: &quot;usbd_ctlreq.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="57" column="2"/>
+        </error>
+        <error id="unknownMacro" severity="error" msg="There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it." verbose="There is an unknown macro here somewhere. Configuration is required. If __ALIGN_END is a macro then please configure it." file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="165" column="72"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="0" column="0"/>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;pbuf&apos; can be reduced." verbose="The scope of the variable &apos;pbuf&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="354" column="12"/>
+            <symbol>pbuf</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;len&apos; can be reduced." verbose="The scope of the variable &apos;len&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="355" column="12"/>
+            <symbol>len</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" verbose="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="853" column="28" info="Variable &apos;pDfuFunc&apos; can be declared as pointer to const"/>
+            <symbol>pDfuFunc</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" verbose="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="1139" column="28" info="Variable &apos;pDfuFunc&apos; can be declared as pointer to const"/>
+            <symbol>pDfuFunc</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;DfuInterface&apos; can be declared as pointer to const" verbose="Variable &apos;DfuInterface&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="1311" column="26" info="Variable &apos;DfuInterface&apos; can be declared as pointer to const"/>
+            <symbol>DfuInterface</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" verbose="Variable &apos;pDfuFunc&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="1312" column="28" info="Variable &apos;pDfuFunc&apos; can be declared as pointer to const"/>
+            <symbol>pDfuFunc</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;desc&apos; can be declared as pointer to const" verbose="Variable &apos;desc&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Class/DFU/Src/usbd_dfu.c" line="1364" column="27" info="Variable &apos;desc&apos; can be declared as pointer to const"/>
+            <symbol>desc</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_core.h&quot; not found." verbose="Include file: &quot;usbd_core.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="20" column="2"/>
+        </error>
+        <error id="normalCheckLevelMaxBranches" severity="information" msg="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." verbose="Limiting analysis of branches. Use --check-level=exhaustive to analyze all branches." file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="0" column="0"/>
+        </error>
+        <error id="knownConditionTrueFalse" severity="style" msg="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true" verbose="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true" cwe="571" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="652" column="24" info="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true"/>
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="650" column="26" info="Assignment &apos;idx=USBD_CoreFindEP(pdev,epnum&amp;0x7FU)&apos;, assigned value is 0"/>
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="650" column="26" info="Calling function &apos;USBD_CoreFindEP&apos; returns 0"/>
+        </error>
+        <error id="knownConditionTrueFalse" severity="style" msg="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true" verbose="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true" cwe="571" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="743" column="24" info="Condition &apos;(uint16_t)idx!=0xFFU&apos; is always true"/>
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="741" column="26" info="Assignment &apos;idx=USBD_CoreFindEP(pdev,(uint8_t)epnum|0x80U)&apos;, assigned value is 0"/>
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="741" column="26" info="Calling function &apos;USBD_CoreFindEP&apos; returns 0"/>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;pep&apos; can be reduced." verbose="The scope of the variable &apos;pep&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="589" column="25"/>
+            <symbol>pep</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;pep&apos; can be reduced." verbose="The scope of the variable &apos;pep&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="684" column="25"/>
+            <symbol>pep</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;ret&apos; can be reduced." verbose="The scope of the variable &apos;ret&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="685" column="22"/>
+            <symbol>ret</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;idx&apos; can be reduced." verbose="The scope of the variable &apos;idx&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="686" column="11"/>
+            <symbol>idx</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;desc&apos; can be declared as pointer to const" verbose="Variable &apos;desc&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="1154" column="27" info="Variable &apos;desc&apos; can be declared as pointer to const"/>
+            <symbol>desc</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_composite_builder.h&quot; not found." verbose="Include file: &quot;usbd_composite_builder.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="23" column="2"/>
+        </error>
+        <error id="constParameterPointer" severity="style" msg="Parameter &apos;pdev&apos; can be declared as pointer to const" verbose="Parameter &apos;pdev&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="1040" column="45" info="Parameter &apos;pdev&apos; can be declared as pointer to const"/>
+            <symbol>pdev</symbol>
+        </error>
+        <error id="constParameterPointer" severity="style" msg="Parameter &apos;pdev&apos; can be declared as pointer to const" verbose="Parameter &apos;pdev&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="1080" column="45" info="Parameter &apos;pdev&apos; can be declared as pointer to const"/>
+            <symbol>pdev</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_ctlreq.h&quot; not found." verbose="Include file: &quot;usbd_ctlreq.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="20" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_ioreq.h&quot; not found." verbose="Include file: &quot;usbd_ioreq.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="21" column="2"/>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;idx&apos; can be reduced." verbose="The scope of the variable &apos;idx&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="170" column="11"/>
+            <symbol>idx</symbol>
+        </error>
+        <error id="variableScope" severity="style" msg="The scope of the variable &apos;dev_addr&apos; can be reduced." verbose="The scope of the variable &apos;dev_addr&apos; can be reduced. Warning: Be careful when fixing this message, especially when there are inner loops. Here is an example where cppcheck will write that the scope for &apos;i&apos; can be reduced:\012void f(int x)\012{\012    int i = 0;\012    if (x) {\012        // it&apos;s safe to move &apos;int i = 0;&apos; here\012        for (int n = 0; n &lt; 10; ++n) {\012            // it is possible but not safe to move &apos;int i = 0;&apos; here\012            do_something(&amp;i);\012        }\012    }\012}\012When you see this message it is always safe to reduce the variable scope 1 level." cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="684" column="12"/>
+            <symbol>dev_addr</symbol>
+        </error>
+        <error id="constVariablePointer" severity="style" msg="Variable &apos;pbuff&apos; can be declared as pointer to const" verbose="Variable &apos;pbuff&apos; can be declared as pointer to const" cwe="398" file0="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="1035" column="12" info="Variable &apos;pbuff&apos; can be declared as pointer to const"/>
+            <symbol>pbuff</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_composite_builder.h&quot; not found." verbose="Include file: &quot;usbd_composite_builder.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="24" column="2"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Include file: &quot;usbd_ioreq.h&quot; not found." verbose="Include file: &quot;usbd_ioreq.h&quot; not found.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c" line="20" column="2"/>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;AdjustTouchCoordinates&apos; is never used." verbose="The function &apos;AdjustTouchCoordinates&apos; is never used." cwe="561">
+            <location file="Core/Src/ft6336.cpp" line="160" column="13"/>
+            <symbol>AdjustTouchCoordinates</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_MspInit&apos; is never used." verbose="The function &apos;HAL_MspInit&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_hal_msp.c" line="63" column="6"/>
+            <symbol>HAL_MspInit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;NMI_Handler&apos; is never used." verbose="The function &apos;NMI_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="69" column="6"/>
+            <symbol>NMI_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HardFault_Handler&apos; is never used." verbose="The function &apos;HardFault_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="84" column="6"/>
+            <symbol>HardFault_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;MemManage_Handler&apos; is never used." verbose="The function &apos;MemManage_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="99" column="6"/>
+            <symbol>MemManage_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;BusFault_Handler&apos; is never used." verbose="The function &apos;BusFault_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="114" column="6"/>
+            <symbol>BusFault_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;UsageFault_Handler&apos; is never used." verbose="The function &apos;UsageFault_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="129" column="6"/>
+            <symbol>UsageFault_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;SVC_Handler&apos; is never used." verbose="The function &apos;SVC_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="144" column="6"/>
+            <symbol>SVC_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;DebugMon_Handler&apos; is never used." verbose="The function &apos;DebugMon_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="157" column="6"/>
+            <symbol>DebugMon_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;PendSV_Handler&apos; is never used." verbose="The function &apos;PendSV_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="170" column="6"/>
+            <symbol>PendSV_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;SysTick_Handler&apos; is never used." verbose="The function &apos;SysTick_Handler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="183" column="6"/>
+            <symbol>SysTick_Handler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;DMA1_Stream0_IRQHandler&apos; is never used." verbose="The function &apos;DMA1_Stream0_IRQHandler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="204" column="6"/>
+            <symbol>DMA1_Stream0_IRQHandler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;DMA1_Stream1_IRQHandler&apos; is never used." verbose="The function &apos;DMA1_Stream1_IRQHandler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="217" column="6"/>
+            <symbol>DMA1_Stream1_IRQHandler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;EXTI15_10_IRQHandler&apos; is never used." verbose="The function &apos;EXTI15_10_IRQHandler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="230" column="6"/>
+            <symbol>EXTI15_10_IRQHandler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;SPI3_IRQHandler&apos; is never used." verbose="The function &apos;SPI3_IRQHandler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="253" column="6"/>
+            <symbol>SPI3_IRQHandler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;OTG_HS_IRQHandler&apos; is never used." verbose="The function &apos;OTG_HS_IRQHandler&apos; is never used." cwe="561">
+            <location file="Core/Src/stm32h7xx_it.c" line="266" column="6"/>
+            <symbol>OTG_HS_IRQHandler</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;initialise_monitor_handles&apos; is never used." verbose="The function &apos;initialise_monitor_handles&apos; is never used." cwe="561">
+            <location file="Core/Src/syscalls.c" line="44" column="6"/>
+            <symbol>initialise_monitor_handles</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;SystemInit&apos; is never used." verbose="The function &apos;SystemInit&apos; is never used." cwe="561">
+            <location file="Core/Src/system_stm32h7xx.c" line="178" column="6"/>
+            <symbol>SystemInit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;SystemCoreClockUpdate&apos; is never used." verbose="The function &apos;SystemCoreClockUpdate&apos; is never used." cwe="561">
+            <location file="Core/Src/system_stm32h7xx.c" line="352" column="6"/>
+            <symbol>SystemCoreClockUpdate</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;ExitRun0Mode&apos; is never used." verbose="The function &apos;ExitRun0Mode&apos; is never used." cwe="561">
+            <location file="Core/Src/system_stm32h7xx.c" line="474" column="6"/>
+            <symbol>ExitRun0Mode</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_IsActiveCounterFlag&apos; is never used." verbose="The function &apos;LL_SYSTICK_IsActiveCounterFlag&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="241" column="26"/>
+            <symbol>LL_SYSTICK_IsActiveCounterFlag</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_SetClkSource&apos; is never used." verbose="The function &apos;LL_SYSTICK_SetClkSource&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="254" column="22"/>
+            <symbol>LL_SYSTICK_SetClkSource</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_GetClkSource&apos; is never used." verbose="The function &apos;LL_SYSTICK_GetClkSource&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="266" column="26"/>
+            <symbol>LL_SYSTICK_GetClkSource</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_EnableIT&apos; is never used." verbose="The function &apos;LL_SYSTICK_EnableIT&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="276" column="22"/>
+            <symbol>LL_SYSTICK_EnableIT</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_DisableIT&apos; is never used." verbose="The function &apos;LL_SYSTICK_DisableIT&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="286" column="22"/>
+            <symbol>LL_SYSTICK_DisableIT</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_SYSTICK_IsEnabledIT&apos; is never used." verbose="The function &apos;LL_SYSTICK_IsEnabledIT&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="296" column="26"/>
+            <symbol>LL_SYSTICK_IsEnabledIT</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_EnableSleep&apos; is never used." verbose="The function &apos;LL_LPM_EnableSleep&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="314" column="22"/>
+            <symbol>LL_LPM_EnableSleep</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_EnableDeepSleep&apos; is never used." verbose="The function &apos;LL_LPM_EnableDeepSleep&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="325" column="22"/>
+            <symbol>LL_LPM_EnableDeepSleep</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_EnableSleepOnExit&apos; is never used." verbose="The function &apos;LL_LPM_EnableSleepOnExit&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="338" column="22"/>
+            <symbol>LL_LPM_EnableSleepOnExit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_DisableSleepOnExit&apos; is never used." verbose="The function &apos;LL_LPM_DisableSleepOnExit&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="349" column="22"/>
+            <symbol>LL_LPM_DisableSleepOnExit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_EnableEventOnPend&apos; is never used." verbose="The function &apos;LL_LPM_EnableEventOnPend&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="361" column="22"/>
+            <symbol>LL_LPM_EnableEventOnPend</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_LPM_DisableEventOnPend&apos; is never used." verbose="The function &apos;LL_LPM_DisableEventOnPend&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="373" column="22"/>
+            <symbol>LL_LPM_DisableEventOnPend</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_HANDLER_EnableFault&apos; is never used." verbose="The function &apos;LL_HANDLER_EnableFault&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="396" column="22"/>
+            <symbol>LL_HANDLER_EnableFault</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_HANDLER_DisableFault&apos; is never used." verbose="The function &apos;LL_HANDLER_DisableFault&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="411" column="22"/>
+            <symbol>LL_HANDLER_DisableFault</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_CPUID_GetImplementer&apos; is never used." verbose="The function &apos;LL_CPUID_GetImplementer&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="430" column="26"/>
+            <symbol>LL_CPUID_GetImplementer</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_CPUID_GetVariant&apos; is never used." verbose="The function &apos;LL_CPUID_GetVariant&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="440" column="26"/>
+            <symbol>LL_CPUID_GetVariant</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_CPUID_GetConstant&apos; is never used." verbose="The function &apos;LL_CPUID_GetConstant&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="450" column="26"/>
+            <symbol>LL_CPUID_GetConstant</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_CPUID_GetParNo&apos; is never used." verbose="The function &apos;LL_CPUID_GetParNo&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="460" column="26"/>
+            <symbol>LL_CPUID_GetParNo</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_CPUID_GetRevision&apos; is never used." verbose="The function &apos;LL_CPUID_GetRevision&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_cortex.h" line="470" column="26"/>
+            <symbol>LL_CPUID_GetRevision</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_GetUID_Word0&apos; is never used." verbose="The function &apos;LL_GetUID_Word0&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="256" column="26"/>
+            <symbol>LL_GetUID_Word0</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_GetUID_Word1&apos; is never used." verbose="The function &apos;LL_GetUID_Word1&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="265" column="26"/>
+            <symbol>LL_GetUID_Word1</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_GetUID_Word2&apos; is never used." verbose="The function &apos;LL_GetUID_Word2&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="274" column="26"/>
+            <symbol>LL_GetUID_Word2</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_GetFlashSize&apos; is never used." verbose="The function &apos;LL_GetFlashSize&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="285" column="26"/>
+            <symbol>LL_GetFlashSize</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_GetPackageType&apos; is never used." verbose="The function &apos;LL_GetPackageType&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="324" column="26"/>
+            <symbol>LL_GetPackageType</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;LL_InitTick&apos; is never used." verbose="The function &apos;LL_InitTick&apos; is never used." cwe="561">
+            <location file="Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_utils.h" line="351" column="22"/>
+            <symbol>LL_InitTick</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_DeInit&apos; is never used." verbose="The function &apos;USBD_DeInit&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="149" column="20"/>
+            <symbol>USBD_DeInit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_RegisterClassComposite&apos; is never used." verbose="The function &apos;USBD_RegisterClassComposite&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="246" column="20"/>
+            <symbol>USBD_RegisterClassComposite</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_UnRegisterClassComposite&apos; is never used." verbose="The function &apos;USBD_UnRegisterClassComposite&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="297" column="21"/>
+            <symbol>USBD_UnRegisterClassComposite</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_CoreGetEPAdd&apos; is never used." verbose="The function &apos;USBD_CoreGetEPAdd&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="1123" column="9"/>
+            <symbol>USBD_CoreGetEPAdd</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_GetEpDesc&apos; is never used." verbose="The function &apos;USBD_GetEpDesc&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="1151" column="7"/>
+            <symbol>USBD_GetEpDesc</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_GetString&apos; is never used." verbose="The function &apos;USBD_GetString&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c" line="996" column="6"/>
+            <symbol>USBD_GetString</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_GetRxCount&apos; is never used." verbose="The function &apos;USBD_GetRxCount&apos; is never used." cwe="561">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c" line="206" column="10"/>
+            <symbol>USBD_GetRxCount</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_MspInit&apos; is never used." verbose="The function &apos;HAL_PCD_MspInit&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="66" column="6"/>
+            <symbol>HAL_PCD_MspInit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_MspDeInit&apos; is never used." verbose="The function &apos;HAL_PCD_MspDeInit&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="88" column="6"/>
+            <symbol>HAL_PCD_MspDeInit</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_SetupStageCallback&apos; is never used." verbose="The function &apos;HAL_PCD_SetupStageCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="115" column="6"/>
+            <symbol>HAL_PCD_SetupStageCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_DataOutStageCallback&apos; is never used." verbose="The function &apos;HAL_PCD_DataOutStageCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="130" column="6"/>
+            <symbol>HAL_PCD_DataOutStageCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_DataInStageCallback&apos; is never used." verbose="The function &apos;HAL_PCD_DataInStageCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="145" column="6"/>
+            <symbol>HAL_PCD_DataInStageCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_SOFCallback&apos; is never used." verbose="The function &apos;HAL_PCD_SOFCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="159" column="6"/>
+            <symbol>HAL_PCD_SOFCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_ResetCallback&apos; is never used." verbose="The function &apos;HAL_PCD_ResetCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="173" column="6"/>
+            <symbol>HAL_PCD_ResetCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_SuspendCallback&apos; is never used." verbose="The function &apos;HAL_PCD_SuspendCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="206" column="6"/>
+            <symbol>HAL_PCD_SuspendCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_ResumeCallback&apos; is never used." verbose="The function &apos;HAL_PCD_ResumeCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="231" column="6"/>
+            <symbol>HAL_PCD_ResumeCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_ISOOUTIncompleteCallback&apos; is never used." verbose="The function &apos;HAL_PCD_ISOOUTIncompleteCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="249" column="6"/>
+            <symbol>HAL_PCD_ISOOUTIncompleteCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_ISOINIncompleteCallback&apos; is never used." verbose="The function &apos;HAL_PCD_ISOINIncompleteCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="264" column="6"/>
+            <symbol>HAL_PCD_ISOINIncompleteCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_ConnectCallback&apos; is never used." verbose="The function &apos;HAL_PCD_ConnectCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="278" column="6"/>
+            <symbol>HAL_PCD_ConnectCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;HAL_PCD_DisconnectCallback&apos; is never used." verbose="The function &apos;HAL_PCD_DisconnectCallback&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="292" column="6"/>
+            <symbol>HAL_PCD_DisconnectCallback</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_LL_CloseEP&apos; is never used." verbose="The function &apos;USBD_LL_CloseEP&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="432" column="20"/>
+            <symbol>USBD_LL_CloseEP</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_LL_FlushEP&apos; is never used." verbose="The function &apos;USBD_LL_FlushEP&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="450" column="20"/>
+            <symbol>USBD_LL_FlushEP</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_static_malloc&apos; is never used." verbose="The function &apos;USBD_static_malloc&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="607" column="7"/>
+            <symbol>USBD_static_malloc</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_static_free&apos; is never used." verbose="The function &apos;USBD_static_free&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="619" column="6"/>
+            <symbol>USBD_static_free</symbol>
+        </error>
+        <error id="unusedFunction" severity="style" msg="The function &apos;USBD_LL_Delay&apos; is never used." verbose="The function &apos;USBD_LL_Delay&apos; is never used." cwe="561">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="629" column="6"/>
+            <symbol>USBD_LL_Delay</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;SystemClock_Config&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;SystemClock_Config&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/main.c" line="183" column="6"/>
+            <symbol>SystemClock_Config</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;PeriphCommonClock_Config&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;PeriphCommonClock_Config&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/main.c" line="246" column="6"/>
+            <symbol>PeriphCommonClock_Config</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_getpid&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_getpid&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="48" column="5"/>
+            <symbol>_getpid</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_kill&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_kill&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="53" column="5"/>
+            <symbol>_kill</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_exit&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_exit&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="61" column="6"/>
+            <symbol>_exit</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_read&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_read&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="67" column="27"/>
+            <symbol>_read</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_write&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_write&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="80" column="27"/>
+            <symbol>_write</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_close&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_close&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="92" column="5"/>
+            <symbol>_close</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_fstat&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_fstat&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="99" column="5"/>
+            <symbol>_fstat</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_isatty&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_isatty&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="106" column="5"/>
+            <symbol>_isatty</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_lseek&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_lseek&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="112" column="5"/>
+            <symbol>_lseek</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_open&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_open&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="120" column="5"/>
+            <symbol>_open</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_wait&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_wait&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="128" column="5"/>
+            <symbol>_wait</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_unlink&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_unlink&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="135" column="5"/>
+            <symbol>_unlink</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_times&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_times&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="142" column="9"/>
+            <symbol>_times</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_stat&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_stat&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="148" column="5"/>
+            <symbol>_stat</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_link&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_link&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="155" column="5"/>
+            <symbol>_link</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_fork&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_fork&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="163" column="5"/>
+            <symbol>_fork</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_execve&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_execve&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/syscalls.c" line="169" column="5"/>
+            <symbol>_execve</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;_sbrk&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;_sbrk&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Core/Src/sysmem.c" line="54" column="7"/>
+            <symbol>_sbrk</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;USBD_RunTestMode&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;USBD_RunTestMode&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c" line="440" column="20"/>
+            <symbol>USBD_RunTestMode</symbol>
+        </error>
+        <error id="staticFunction" severity="style" msg="The function &apos;USBD_Get_USB_Status&apos; should have static linkage since it is not used outside of its translation unit." verbose="The function &apos;USBD_Get_USB_Status&apos; should have static linkage since it is not used outside of its translation unit.">
+            <location file="USB_DEVICE/Target/usbd_conf.c" line="639" column="20"/>
+            <symbol>USBD_Get_USB_Status</symbol>
+        </error>
+        <error id="checkersReport" severity="information" msg="Active checkers: There was critical errors (use --checkers-report=&lt;filename&gt; to see details)" verbose="Active checkers: There was critical errors (use --checkers-report=&lt;filename&gt; to see details)"/>
+    </errors>
+</results>

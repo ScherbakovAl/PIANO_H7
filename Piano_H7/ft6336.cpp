@@ -165,11 +165,11 @@ static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
 }
 
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
-	TouchPoints_HandleTypeDef touchPoints;
-	TouchPoints.point1_x = 0;
-	TouchPoints.point1_y = 0;
-	TouchPoints.point2_x = 0;
-	TouchPoints.point2_y = 0;
+	TouchPoints_HandleTypeDef touchPoints = {0};
+	// TouchPoints.point1_x = 0;
+	// TouchPoints.point1_y = 0;
+	// TouchPoints.point2_x = 0;
+	// TouchPoints.point2_y = 0;
 	uint8_t touchStatus = 0;
 	uint8_t touchData[8];
 

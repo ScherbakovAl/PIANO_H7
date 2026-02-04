@@ -2303,9 +2303,9 @@
               "groupIndex": 0
             }
           ],
-          "widgetFlags": "CLICKABLE|PRESS_LOCK|CLICK_FOCUSABLE|GESTURE_BUBBLE|SNAPPABLE|SCROLLABLE|SCROLL_ELASTIC|SCROLL_MOMENTUM|SCROLL_CHAIN_HOR|SCROLL_CHAIN_VER",
+          "widgetFlags": "CLICKABLE",
           "hiddenFlagType": "literal",
-          "clickableFlag": true,
+          "clickableFlag": false,
           "clickableFlagType": "literal",
           "checkedStateType": "literal",
           "disabledStateType": "literal",

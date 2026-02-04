@@ -856,11 +856,11 @@ int32_t convert_8_16(const uint8_t& a, const uint8_t& b) {
 }
 
 conv_16_8 convert_16_8(const uint32_t& a) {
-	conv_16_8 r;
+	conv_16_8 result;
 	// TODO AI - Проблема: Неправильный порядок операций. Должно быть r.a = (a & (0xff << 8)) >> 8; или r.a = (a >> 8) & 0xff;
-	r.a = (a & 0xff << 8) >> 8;
-	r.b = a & 0xff;
-	return r;
+	result.a = (a & 0xff << 8) >> 8;
+	result.b = a & 0xff;
+	return result;
 }
 
 void chart_correction(const uint32_t& x, const plus_minus& pm) {
