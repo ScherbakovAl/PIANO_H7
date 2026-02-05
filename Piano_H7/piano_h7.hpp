@@ -106,7 +106,7 @@ extern "C" {
 		fail = 0xDD
 	};
 
-	enum state{
+	enum state {
 		bootloader = 1,
 		piano
 	};

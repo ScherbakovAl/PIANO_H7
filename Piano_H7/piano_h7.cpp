@@ -45,6 +45,48 @@ static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адре
 static const uint32_t ADRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
 std::vector<int> numbers_chips;
 
+
+enum class dot {
+	reed = 1,
+	green,
+	grey
+};
+
+enum class states {
+	boot = 1,
+	main
+};
+
+enum class typeAction{
+	on = 1,
+	off
+};
+
+
+struct comparators {
+	uint8_t number_comparator = 0;
+	uint8_t adress = 0;
+};
+
+struct Board {
+	uint8_t number_chip = 0;
+	std::vector<comparators> comp;
+	typeAction typ = typeAction::on;
+	states st = states::boot;
+};
+
+std::vector<Board> chips;
+
+
+
+
+
+
+
+
+
+
+
 int fl = 0; // for test fl
 
 float timerLenght_F = 0; // for test
@@ -261,7 +303,7 @@ void h7() {
 	}
 	all_H7_to_g4();
 	sync(); // включает прерывания и таймер, осторожно!
-	
+
 	// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
 	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 
@@ -1543,18 +1585,17 @@ extern "C" {
 	// to dispays
 	void action_to_main_disp(lv_event_t* e) {
 
-		LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть сдесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
-
+		LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть здесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
 
 		pause(2);
 		if (cur_disp == current_display::on) {
 			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips
-				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+				sender(command::all_calib, adress, 0, 0, subcommand::stop_calibration);
 			}
 		}
 		if (cur_disp == current_display::off) {
 			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips
-				sender(command::all_calib, adress, 0, 0, ::stop_calibration);
+				sender(command::all_calib, adress, 0, 0, subcommand::stop_calibration);
 			}
 		}
 		cur_disp = dis_main;
