@@ -41,7 +41,7 @@ extern "C" {
 		s1s2 off;
 	};
 
-	enum command { // 
+	enum class command { // 
 		sync_timer = 1,
 		cal,
 		read_comp_value, // TODO добавить проверки (принять ответ)
@@ -49,10 +49,12 @@ extern "C" {
 		read_comp_setting, // TODO реализовать
 		all_calib,
 		reset_to_bootloader,
+		mute, // TODO реализовать (chips ON - mute)
+		unmute, // TODO реализовать
 		echo = 11 // TODO реализовать для основной прошивки
 	};
 
-	enum subcommand {
+	enum class subcommand {
 		start_calibration = 1,
 		read_calibration,
 		stop_calibration,
@@ -60,13 +62,13 @@ extern "C" {
 		nothing
 	};
 
-	enum plus_minus {
+	enum class plus_minus {
 		plus,
 		minus,
 		none
 	};
 
-	enum current_display {
+	enum class current_display {
 		on,
 		off,
 		d_none,
@@ -74,25 +76,25 @@ extern "C" {
 		d_flash
 	};
 
-	enum color_but {
+	enum class color_but {
 		green,
 		red,
 		c_none
 	};
 
-	enum but_top_bot {
+	enum class but_top_bot {
 		top,
 		bot,
 		t_none
 	};
 
-	enum calib_all_on_off {
+	enum class calib_all_on_off {
 		calib_on,
 		calib_off,
 		calib_none
 	};
 
-	enum command_for_flash_g4 {
+	enum class command_for_flash_g4 {
 		echo_bootloader = 11,
 		reset_bootloader, // 200ms delay // TODO надо реализовать
 		data_from_H7_to_array_g4,
@@ -101,12 +103,12 @@ extern "C" {
 		jump_g4_to_adress // TODO сделать // прыжок по указанному адресу
 	};
 
-	enum response {
+	enum class response {
 		ok = 0x0C,
 		fail = 0xDD
 	};
 
-	enum state {
+	enum class state {
 		bootloader = 1,
 		piano
 	};
@@ -122,7 +124,7 @@ extern "C" {
 	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
 	const uint32_t start_cursor = 27;
-	volatile uint32_t cursor = start_cursor;
+	volatile uint32_t cursor = start_cursor; // TODO volatile?
 
 	uint8_t rx_data[4] = { };
 	const uint32_t dataLengthRX = sizeof(rx_data);
@@ -140,10 +142,23 @@ extern "C" {
 	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
 
 	const int32_t sizeCHART_BUFFER = 196;
-	int32_t compsCHART_0[sizeCHART_BUFFER] = {}; // green
-	int32_t compsCHART_1[sizeCHART_BUFFER] = {}; // red
+	int32_t compsCHART_green[sizeCHART_BUFFER] = {}; // green
+	int32_t compsCHART_red[sizeCHART_BUFFER] = {}; // red
 	int32_t compsCHART_CALIB[sizeCHART_BUFFER] = {};
 	int32_t compsCHART_CALIB_old[sizeCHART_BUFFER] = {};
+
+	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
+	// new variant
+	const int division_on_off = 14;
+	const int32_t size_BUFFER_on = 92;
+	const int32_t size_BUFFER_off = 68;
+	int32_t green_on[size_BUFFER_on] = {};
+	int32_t red_on[size_BUFFER_on] = {};
+	int32_t green_off[size_BUFFER_off] = {};
+	int32_t red_off[size_BUFFER_off] = {};
+	int32_t calib_on[size_BUFFER_on] = {};
+	int32_t calib_off[size_BUFFER_off] = {};
+	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
 	int8_t noteAdder[196] = {};
 	float mass_F[196] = {};
@@ -167,10 +182,10 @@ extern "C" {
 	int touchpad_x = 0;
 	int touchpad_y = 0;
 
-	current_display cur_disp = d_none;
-	color_but col_but = c_none;
-	but_top_bot top_bot = t_none;
-	calib_all_on_off calib_all_OnOff = calib_none;
+	current_display cur_disp = current_display::d_none;
+	color_but col_but = color_but::c_none;
+	but_top_bot top_bot = but_top_bot::t_none;
+	calib_all_on_off calib_all_OnOff = calib_all_on_off::calib_none;
 
 	void h7();
 	void sync();
