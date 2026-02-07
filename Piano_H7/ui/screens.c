@@ -522,7 +522,7 @@ void create_screen_d_chart_calib_on() {
             objects.button_calibration_sensor_on_1 = obj;
             lv_obj_set_pos(obj, 110, 436);
             lv_obj_set_size(obj, 96, 42);
-            lv_obj_add_event_cb(obj, action_calib_sensor_1_on, LV_EVENT_PRESSED, (void *)0);
+            lv_obj_add_event_cb(obj, action_calib_sensor_on_green, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_obj_set_style_radius(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -549,7 +549,7 @@ void create_screen_d_chart_calib_on() {
             objects.button_calibration_sensor_on_2 = obj;
             lv_obj_set_pos(obj, 222, 436);
             lv_obj_set_size(obj, 96, 42);
-            lv_obj_add_event_cb(obj, action_calib_sensor_2_on, LV_EVENT_PRESSED, (void *)0);
+            lv_obj_add_event_cb(obj, action_calib_sensor_on_red, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_obj_set_style_radius(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -839,7 +839,7 @@ void create_screen_d_chart_calib_off() {
             objects.button_calibration_sensor_on_3 = obj;
             lv_obj_set_pos(obj, 110, 436);
             lv_obj_set_size(obj, 96, 42);
-            lv_obj_add_event_cb(obj, action_calib_sensor_1_off, LV_EVENT_PRESSED, (void *)0);
+            lv_obj_add_event_cb(obj, action_calib_sensor_off_green, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_radius(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -866,7 +866,7 @@ void create_screen_d_chart_calib_off() {
             objects.button_calibration_sensor_on_4 = obj;
             lv_obj_set_pos(obj, 222, 436);
             lv_obj_set_size(obj, 96, 42);
-            lv_obj_add_event_cb(obj, action_calib_sensor_2_off, LV_EVENT_PRESSED, (void *)0);
+            lv_obj_add_event_cb(obj, action_calib_sensor_off_red, LV_EVENT_PRESSED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_radius(obj, 8, LV_PART_MAIN | LV_STATE_DEFAULT);

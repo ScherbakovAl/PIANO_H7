@@ -41,6 +41,12 @@ extern "C" {
 		s1s2 off;
 	};
 
+	enum class dot {
+		green = 0,
+		red = 1,
+		grey
+	};
+
 	enum class command { // 
 		sync_timer = 1,
 		cal,
@@ -149,19 +155,23 @@ extern "C" {
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 	// new variant
-	const int division_on_off = 14;
-	const int32_t size_BUFFER_on = 92;
-	const int32_t size_BUFFER_off = 68;
-	int32_t green_on[size_BUFFER_on] = {};
-	int32_t red_on[size_BUFFER_on] = {};
-	int32_t green_off[size_BUFFER_off] = {};
-	int32_t red_off[size_BUFFER_off] = {};
-	int32_t calib_on[size_BUFFER_on] = {};
-	int32_t calib_off[size_BUFFER_off] = {};
+	const uint32_t division_on_off = 14;
+	const uint32_t size_BUFFER = 200;
+	const uint32_t buffer_division = 100;
+
+	int32_t buffer_green[size_BUFFER] = {};
+	int32_t buffer_red[size_BUFFER] = {};
+	int32_t buffer_calib[size_BUFFER] = {};
+	int32_t buffer_calib_old[size_BUFFER] = {};
+
+	int32_t green_on_default = 2601;
+	int32_t red_on_default = 1001;
+	int32_t green_off_default = 2102;
+	int32_t red_off_default = 2402;
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
-	int8_t noteAdder[196] = {};
-	float mass_F[196] = {};
+	int8_t noteAdder[size_BUFFER] = {};
+	float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
 
 
 	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
@@ -178,9 +188,9 @@ extern "C" {
 	int32_t off_red_min = 0;
 	int divis = 100'000'000;
 
-	volatile int touchpad_pressed = 0;
-	int touchpad_x = 0;
-	int touchpad_y = 0;
+	volatile int touchpad_pressed = 0; // TODO deprecated?
+	int touchpad_x = 0; // TODO deprecated?
+	int touchpad_y = 0; // TODO deprecated?
 
 	current_display cur_disp = current_display::d_none;
 	color_but col_but = color_but::c_none;
@@ -195,7 +205,7 @@ extern "C" {
 	void all_H7_to_g4();
 	void all_g4_to_H7();
 	void refresh_cursor(const uint8_t& adress);
-	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
+	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	void UART4_Receive_Settings();

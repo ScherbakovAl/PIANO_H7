@@ -493,7 +493,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "calib_sensor_1_on"
+      "name": "calib_sensor_on_green"
     },
     {
       "objID": "2cfec87c-0494-48f6-acd7-866c42bf2c0f",
@@ -501,7 +501,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "calib_sensor_2_on"
+      "name": "calib_sensor_on_red"
     },
     {
       "objID": "bbf5948d-fb55-4479-dc63-c1ed992e8cf3",
@@ -509,7 +509,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "calib_sensor_1_off"
+      "name": "calib_sensor_off_green"
     },
     {
       "objID": "70202cc9-f68a-401e-ecdb-408d067ed76c",
@@ -517,7 +517,7 @@
       "connectionLines": [],
       "localVariables": [],
       "userProperties": [],
-      "name": "calib_sensor_2_off"
+      "name": "calib_sensor_off_red"
     },
     {
       "objID": "4bbc68f6-3f3c-4fcd-f285-87ade9a1c5dd",
@@ -1854,12 +1854,10 @@
               "heightUnit": "px",
               "children": [],
               "widgetFlags": "",
+              "hiddenFlag": false,
               "hiddenFlagType": "literal",
+              "clickableFlag": false,
               "clickableFlagType": "literal",
-              "flagScrollbarMode": "",
-              "flagScrollDirection": "",
-              "scrollSnapX": "",
-              "scrollSnapY": "",
               "checkedStateType": "literal",
               "disabledStateType": "literal",
               "states": "",
@@ -2974,7 +2972,7 @@
                   "objID": "49102e40-ae02-4404-8c3d-93491b537a2b",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "calib_sensor_1_on",
+                  "action": "calib_sensor_on_green",
                   "userData": 0
                 }
               ],
@@ -3084,7 +3082,7 @@
                   "objID": "646e5233-ff97-4ecd-8b49-6518412aa3d6",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "calib_sensor_2_on",
+                  "action": "calib_sensor_on_red",
                   "userData": 0
                 }
               ],
@@ -4106,7 +4104,7 @@
                   "objID": "fbf202bf-0be0-4390-8b85-f08fc50baeba",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "calib_sensor_1_off",
+                  "action": "calib_sensor_off_green",
                   "userData": 0
                 }
               ],
@@ -4218,7 +4216,7 @@
                   "objID": "e2cf2865-e5ac-4565-d138-768d30370a50",
                   "eventName": "PRESSED",
                   "handlerType": "action",
-                  "action": "calib_sensor_2_off",
+                  "action": "calib_sensor_off_red",
                   "userData": 0
                 }
               ],
