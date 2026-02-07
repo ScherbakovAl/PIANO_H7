@@ -47,7 +47,7 @@ extern "C" {
 		grey
 	};
 
-	enum class command { // 
+	enum class command { // TODO G4 обновить код
 		sync_timer = 1,
 		cal,
 		read_comp_value, // TODO добавить проверки (принять ответ)
@@ -148,14 +148,15 @@ extern "C" {
 	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
 
 	const int32_t sizeCHART_BUFFER = 196;
-	int32_t compsCHART_green[sizeCHART_BUFFER] = {}; // green
+	int32_t compsCHART_green[sizeCHART_BUFFER] = {}; // green // TODO vector переделать это в vector
 	int32_t compsCHART_red[sizeCHART_BUFFER] = {}; // red
 	int32_t compsCHART_CALIB[sizeCHART_BUFFER] = {};
 	int32_t compsCHART_CALIB_old[sizeCHART_BUFFER] = {};
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
-	// new variant
-	const uint32_t division_on_off = 14;
+	// new variants      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+
+	const uint32_t division_on_off = 14; // точка разделения on-off
 	const uint32_t size_BUFFER = 200;
 	const uint32_t buffer_division = 100;
 
@@ -168,6 +169,7 @@ extern "C" {
 	int32_t red_on_default = 1001;
 	int32_t green_off_default = 2102;
 	int32_t red_off_default = 2402;
+
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
 	int8_t noteAdder[size_BUFFER] = {};

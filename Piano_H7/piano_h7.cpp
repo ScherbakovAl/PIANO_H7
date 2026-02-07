@@ -70,7 +70,7 @@ enum class typeAction {
 };
 
 struct comparator {
-	uint8_t adress = 0;
+	uint8_t address = 0;
 	uint8_t number_chip = 0;
 	uint8_t number_comparator = 0;
 };
@@ -84,7 +84,8 @@ struct Chip {
 
 
 std::vector<Chip> vChips;
-std::map<uint8_t, comparator> mComparator;
+std::map<uint8_t, comparator> mComparatorCursor_on;
+std::map<uint8_t, comparator> mComparatorCursor_off;
 
 const uint8_t count_comparators = 7;
 chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
@@ -92,7 +93,15 @@ chip_states chip_state = chip_states::boot; // TODO переименовать, 
 //  Элементы с 3-го по 7-й (индексы 3-6)
 //  for (auto n : v | std::views::drop(3) | std::views::take(4)) 
 void init_chips() {
+	vChips.clear();
 	vChips.reserve(allChipCount);
+	mComparatorCursor_on.clear();
+	mComparatorCursor_off.clear();
+	// buffer_on.clear(); // TODO vecotor buffer реализовать
+	// buffer_on.reserve(allChipCount * count_comparators);
+	// buffer_off.clear(); // TODO vecotor buffer реализовать
+	// buffer_off.reserve(allChipCount * count_comparators);
+
 	std::string str = "ships .. ";
 	std::string stat;
 
@@ -112,16 +121,14 @@ void init_chips() {
 			vtc.reserve(count_comparators);
 
 			for (uint8_t y = 0; y < count_comparators; ++y) {
-				uint8_t addr = 0;
+				const uint8_t addr = (x * count_comparators) + y;;
 				if (x < division_on_off) {
-					addr = (x * count_comparators) + y;
+					mComparatorCursor_on.emplace(addr, comparator(addr, x, y));
 				}
 				else {
-					addr = buffer_division + (x * count_comparators) + y;
+					mComparatorCursor_off.emplace(addr, comparator(addr, x, y));
 				}
 				vtc.push_back({ addr, x, y });
-				// mComparator = { {addr, {addr, x, y}} };
-				mComparator.emplace(addr, mComparator(addr, x, y)); // TODO как правильно?
 			}
 			vChips.push_back({ x, vtc, (x < division_on_off ? typeAction::on : typeAction::off), chip_state });
 
@@ -423,10 +430,13 @@ void h7() {
 
 
 	while (1) {
+
+		GPIOA->BSRR = 0x10; // for test // DEBUG
 		tud_task();
 		// lv_timer_handler();
-		lv_timer_handler_run_in_period(10);
+		lv_timer_handler_run_in_period(5);
 		ui_tick();
+		GPIOA->BSRR = 0x100000; // for test // DEBUG
 
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
 			if (cur_disp == current_display::on) {
@@ -447,13 +457,13 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (auto n : vChips) {  // TODO numbers_chips ok
+				for (const auto& n : vChips) {  // TODO numbers_chips ok
 					if (n.typ == typeAction::on) {
 						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (auto c : n.comp) {
+						for (const auto& c : n.comp) {
 							UART4_Receive_Settings();
 							// compsCHART_CALIB[c.adress] = convert_8_16(a_, b_);
-							buffer_calib[c.adress] = convert_8_16(a_, b_);
+							buffer_calib[c.address] = convert_8_16(a_, b_);
 						}
 					}
 					refresh_cursor(n.number_chip); // TODO refresh_cursor переделать нормально
@@ -483,13 +493,13 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (auto n : vChips) { // TODO numbers_chips ok
+				for (const auto& n : vChips) { // TODO numbers_chips ok
 					if (n.typ == typeAction::off) {
 						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (auto c : n.comp) {
+						for (const auto& c : n.comp) {
 							UART4_Receive_Settings();
 							// compsCHART_CALIB[c.adress] = convert_8_16(a_, b_);
-							buffer_calib[c.adress] = convert_8_16(a_, b_);
+							buffer_calib[c.address] = convert_8_16(a_, b_);
 						}
 					}
 					refresh_cursor(n.number_chip); // TODO refresh_cursor переделать нормально
@@ -570,10 +580,10 @@ void sync() { // включает прерывания, осторожно!
 	/*
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
-	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) {
 		fl_sync += sync_sender(i);
 	}
-	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) {
 		fl_sync += sync_sender(i);
 	}
 	if (fl_sync == 0) {
@@ -586,8 +596,8 @@ void sync() { // включает прерывания, осторожно!
 
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
-	for (auto n : vChips) {
-		fl_sync += sync_sender(n.number_chip);
+	for (const auto& n : vChips) {  // TODO numbers_chips ok
+		fl_sync += sync_sender(n.number_chip);  // TODO numbers_chips ok
 	}
 	if (fl_sync) {
 		debugg_fn(std::format("Sync {} bugs", fl_sync));
@@ -669,23 +679,23 @@ void all_H7_to_g4() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
 	/*
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
 		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
 		sender(command::set_comp_value, i / 7, i % 7, 2, compsCHART_0[i] - (compsCHART_0[i] / 10));
 	}
 	*/
 
-	for (auto n : vChips) {
-		for (auto c : n.comp) {
-			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::green, buffer_green[c.adress]);
-			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::red, buffer_red[c.adress]);
+	for (const auto& n : vChips) {
+		for (const auto& c : n.comp) {
+			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::green, buffer_green[c.address]);// TODO numbers_chips ok
+			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::red, buffer_red[c.address]); // TODO numbers_chips ok
 			if (n.typ == typeAction::off) {
-				sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::grey, buffer_green[c.adress] - (buffer_green[c.adress] / 10));
+				sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::grey, buffer_green[c.address] - (buffer_green[c.address] / 10));
 			}
 		}
 	}
@@ -695,13 +705,13 @@ void all_g4_to_H7() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
 	/*
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
 		compsCHART_1[i] = convert_8_16(a_, b_);
 	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) { // TODO numbers_chips ok
+	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
 		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
 		compsCHART_0[i] = convert_8_16(a_, b_);
 		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
@@ -709,13 +719,13 @@ void all_g4_to_H7() {
 	}
 	*/
 
-	for (auto n : vChips) {
-		for (auto c : n.comp) {
+	for (const auto& n : vChips) {
+		for (const auto& c : n.comp) {
 			if (n.typ == typeAction::on) {
-				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::green, 0);
-				buffer_green[c.adress] = convert_8_16(a_, b_);
-				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::red, 0);
-				buffer_red[c.adress] = convert_8_16(a_, b_);
+				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::green, 0); // TODO numbers_chips ok
+				buffer_green[c.address] = convert_8_16(a_, b_);
+				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::red, 0); // TODO numbers_chips ok
+				buffer_red[c.address] = convert_8_16(a_, b_);
 			}
 		}
 	}
@@ -1790,14 +1800,14 @@ extern "C" {
 		if (cur_disp == current_display::on) {
 
 			/*
-			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips ok
+			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 				sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::stop_calibration);
 			}
 			*/
 
-			for (auto n : vChips) {
+			for (const auto& n : vChips) {
 				if (n.typ == typeAction::on) {
-					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
+					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration); // TODO numbers_chips ok
 				}
 				else {
 					sender(command::unmute, n.number_chip, 0, dot::green, 0); // TODO chips OFF - unmute
@@ -1807,14 +1817,14 @@ extern "C" {
 		if (cur_disp == current_display::off) {
 
 			/*
-			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips ok
+			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
 				sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::stop_calibration);
 			}
 			*/
 
-			for (auto n : vChips) {
+			for (const auto& n : vChips) {
 				if (n.typ == typeAction::off) {
-					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
+					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration); // TODO numbers_chips ok
 				}
 				else {
 					sender(command::unmute, n.number_chip, 0, dot::green, 0);  // TODO chips ON - unmute
@@ -1843,14 +1853,14 @@ extern "C" {
 		all_g4_to_H7();
 
 		/*
-		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) { // TODO numbers_chips ok
+		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 			sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::start_calibration);
 		}
 		*/
 
-		for (auto n : vChips) {
+		for (const auto& n : vChips) {
 			if (n.typ == typeAction::on) {
-				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
+				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);// TODO numbers_chips ok
 			}
 			else {
 				sender(command::mute, n.number_chip, 0, dot::green, 0);  // TODO chips OFF - mute
@@ -1868,14 +1878,14 @@ extern "C" {
 		all_g4_to_H7();
 
 		/*
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips ok
+		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
 			sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::start_calibration);
 		}
 		*/
 
-		for (auto n : vChips) {
+		for (const auto& n : vChips) {
 			if (n.typ == typeAction::off) {
-				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
+				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration); // TODO numbers_chips ok
 			}
 			else {
 				sender(command::mute, n.number_chip, 0, dot::green, 0);  // TODO chips ON - mute
@@ -1970,8 +1980,8 @@ extern "C" {
 	void action_calib_sensor_on_green(lv_event_t* e) { // TODO numbers_chips
 		// const uint8_t adr = cursor / 7;
 		// const uint8_t c = cursor % 7;
-		auto it = mComparator.find(cursor);
-		if (it != mComparator.end()) {
+		auto it = mComparatorCursor_on.find(cursor);
+		if (it != mComparatorCursor_on.end()) {
 			sender(command::set_comp_value, it->second.number_chip, it->second.number_comparator, dot::green, buffer_calib[cursor]);
 			// sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
 			buffer_green[cursor] = convert_8_16(a_, b_);
@@ -2041,7 +2051,7 @@ extern "C" {
 		// 	}
 		// 	set_cursor_piont_off();
 		// }
-		if (mComparator.contains(cursor - 1)) {
+		if (mComparatorCursor_on.contains(cursor - 1)) {
 			cursor -= 1;
 		}
 	}
@@ -2059,7 +2069,7 @@ extern "C" {
 		// 	}
 		// 	set_cursor_piont_off();
 		// }
-		if (mComparator.contains(cursor + 1)) {
+		if (mComparatorCursor_on.contains(cursor + 1)) {
 			cursor += 1;
 		}
 	}
@@ -2077,7 +2087,7 @@ extern "C" {
 		// 	}
 		// 	set_cursor_piont_off();
 		// }
-		if (mComparator.contains(cursor - 7)) {
+		if (mComparatorCursor_on.contains(cursor - 7)) {
 			cursor -= 7;
 		}
 	}
@@ -2095,7 +2105,7 @@ extern "C" {
 		// 	}
 		// 	set_cursor_piont_off();
 		// }
-		if (mComparator.contains(cursor + 7)) {
+		if (mComparatorCursor_on.contains(cursor + 7)) {
 			cursor += 7;
 		}
 	}

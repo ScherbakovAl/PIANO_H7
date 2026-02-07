@@ -41,10 +41,6 @@ typedef struct _objects_t {
     lv_obj_t *chart_on;
     lv_obj_t *button_to_main;
     lv_obj_t *obj8;
-    lv_obj_t *sub_10;
-    lv_obj_t *add_10;
-    lv_obj_t *sub_1;
-    lv_obj_t *add_1;
     lv_obj_t *button_calibration_sensor_on_1;
     lv_obj_t *obj9;
     lv_obj_t *button_calibration_sensor_on_2;
@@ -54,6 +50,10 @@ typedef struct _objects_t {
     lv_obj_t *label_string_sensor_8;
     lv_obj_t *label_string_sensor_9;
     lv_obj_t *label_string_sensor_13;
+    lv_obj_t *add_1;
+    lv_obj_t *sub_1;
+    lv_obj_t *add_10;
+    lv_obj_t *sub_10;
     lv_obj_t *chart_off;
     lv_obj_t *button_to_main_1;
     lv_obj_t *obj11;
