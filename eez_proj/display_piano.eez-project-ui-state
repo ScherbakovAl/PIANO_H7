@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/50",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/12",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/0",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -126,6 +126,7 @@
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
                   "weight": 0.8422236429751572,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -198,16 +199,15 @@
                 {
                   "type": "tab",
                   "id": "#e35000eb-889a-4109-81c7-81575dc3cf70",
-                  "name": "d_flash",
+                  "name": "d_chart_calib_on",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/1",
+                    "objectPath": "[display_piano.eez-project]:/userPages/2",
                     "permanent": false
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -227,7 +227,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -1050,14 +1051,14 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {
-            "$selected": true
-          },
+          "1": {},
           "2": {},
           "3": {},
           "4": {},
           "5": {},
-          "6": {},
+          "6": {
+            "$selected": true
+          },
           "7": {},
           "8": {},
           "9": {},

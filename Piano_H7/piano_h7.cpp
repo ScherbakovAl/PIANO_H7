@@ -5,10 +5,11 @@
  *      Author: sche
  */
 
-#include <format>
-#include "piano_h7.hpp"
 #include "vector"
 #include "map"
+#include <ranges>
+#include <format>
+#include "piano_h7.hpp"
 
 std::string ch_o;
 std::string ch_f;
@@ -58,7 +59,7 @@ std::vector<int> numbers_chips;
 // };
 
 
-enum class states {
+enum class chip_states {
 	boot = 1,
 	main
 };
@@ -68,27 +69,28 @@ enum class typeAction {
 	off
 };
 
-struct comparators {
+struct comparator {
 	uint8_t adress = 0;
 	uint8_t number_chip = 0;
 	uint8_t number_comparator = 0;
 };
 
-struct Board {
+struct Chip {
 	uint8_t number_chip = 0;
-	std::vector<comparators> comp;
+	std::vector<comparator> comp;
 	typeAction typ = typeAction::on;
-	states st = states::boot;
+	chip_states st = chip_states::boot;
 };
 
 
-std::vector<Board> vChips;
-std::map<int, comparators> mComparator;
+std::vector<Chip> vChips;
+std::map<uint8_t, comparator> mComparator;
 
 const uint8_t count_comparators = 7;
-states chip_state = states::boot; // TODO переименовать, когда удалю class state
+chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
 
-
+//  Элементы с 3-го по 7-й (индексы 3-6)
+//  for (auto n : v | std::views::drop(3) | std::views::take(4)) 
 void init_chips() {
 	vChips.reserve(allChipCount);
 	std::string str = "ships .. ";
@@ -103,10 +105,10 @@ void init_chips() {
 		// if (UART4_Receive_timeout_10us()) {
 		// 	str += " UART timeout " + std::to_string(i);
 		// }
-		chip_state = (states)rx_settings[4];
+		chip_state = (chip_states)rx_settings[4];
 
 		if (rx_settings[0]) {
-			std::vector<comparators> vtc;
+			std::vector<comparator> vtc;
 			vtc.reserve(count_comparators);
 
 			for (uint8_t y = 0; y < count_comparators; ++y) {
@@ -118,7 +120,8 @@ void init_chips() {
 					addr = buffer_division + (x * count_comparators) + y;
 				}
 				vtc.push_back({ addr, x, y });
-				mComparator = { {addr, {addr, x, y}} };
+				// mComparator = { {addr, {addr, x, y}} };
+				mComparator.emplace(addr, mComparator(addr, x, y)); // TODO как правильно?
 			}
 			vChips.push_back({ x, vtc, (x < division_on_off ? typeAction::on : typeAction::off), chip_state });
 
@@ -127,7 +130,7 @@ void init_chips() {
 	}
 
 
-	if (chip_state == states::boot) {
+	if (chip_state == chip_states::boot) {
 		stat = " bootloaders";
 	}
 	else {
@@ -408,7 +411,7 @@ void h7() {
 	LL_USART_DisableDMAReq_RX(UART5);
 	// G4_echo();
 	init_chips();
-	if (chip_state == states::boot) {
+	if (chip_state == chip_states::boot) {
 		jump_g4s_to_adress();
 		pause(50000);
 	}
@@ -429,7 +432,7 @@ void h7() {
 			if (cur_disp == current_display::on) {
 
 				/*
-				// for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {  // TODO numbers_chips ok
+				// for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
 				// 	sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::read_calibration);
 				// 	for (int i = 0; i < 7; ++i) {
 				// 		UART4_Receive_Settings();
@@ -444,7 +447,7 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (auto n : vChips) {
+				for (auto n : vChips) {  // TODO numbers_chips ok
 					if (n.typ == typeAction::on) {
 						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
 						for (auto c : n.comp) {
@@ -465,7 +468,7 @@ void h7() {
 			if (cur_disp == current_display::off) {
 
 				/*
-				// for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) { // TODO numbers_chips ok
+				// for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
 				// 	sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::read_calibration);
 				// 	for (int i = 0; i < 7; ++i) {
 				// 		UART4_Receive_Settings();
@@ -480,7 +483,7 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (auto n : vChips) {
+				for (auto n : vChips) { // TODO numbers_chips ok
 					if (n.typ == typeAction::off) {
 						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
 						for (auto c : n.comp) {
@@ -2026,73 +2029,85 @@ extern "C" {
 	}
 
 	void action_cursor_minus(lv_event_t* e) {
-		if (cur_disp == current_display::on) {
-			if (cursor > 7) {
-				cursor = cursor - 1;
-			}
-			set_cursor_piont_on();
-		}
-		else {
-			if (cursor > 0) {
-				cursor = cursor - 1;
-			}
-			set_cursor_piont_off();
+		// if (cur_disp == current_display::on) { // TODO удалить это
+		// 	if (cursor > 7) {
+		// 		cursor = cursor - 1;
+		// 	}
+		// 	set_cursor_piont_on();
+		// }
+		// else {
+		// 	if (cursor > 0) {
+		// 		cursor = cursor - 1;
+		// 	}
+		// 	set_cursor_piont_off();
+		// }
+		if (mComparator.contains(cursor - 1)) {
+			cursor -= 1;
 		}
 	}
 
 	void action_cursor_plus(lv_event_t* e) {
-		if (cur_disp == current_display::on) {
-			if (cursor < 95) {
-				cursor = cursor + 1;
-			}
-			set_cursor_piont_on();
-		}
-		else {
-			if (cursor < 69) {
-				cursor = cursor + 1;
-			}
-			set_cursor_piont_off();
+		// if (cur_disp == current_display::on) { // TODO удалить это
+		// 	if (cursor < 95) {
+		// 		cursor = cursor + 1;
+		// 	}
+		// 	set_cursor_piont_on();
+		// }
+		// else {
+		// 	if (cursor < 69) {
+		// 		cursor = cursor + 1;
+		// 	}
+		// 	set_cursor_piont_off();
+		// }
+		if (mComparator.contains(cursor + 1)) {
+			cursor += 1;
 		}
 	}
 
 	void action_cursor_minus_7(lv_event_t* e) {
-		if (cur_disp == current_display::on) {
-			if (cursor > 13) {
-				cursor = cursor - 7;
-			}
-			set_cursor_piont_on();
-		}
-		else {
-			if (cursor > 6) {
-				cursor = cursor - 7;
-			}
-			set_cursor_piont_off();
+		// if (cur_disp == current_display::on) { // TODO удалить это
+		// 	if (cursor > 13) {
+		// 		cursor = cursor - 7;
+		// 	}
+		// 	set_cursor_piont_on();
+		// }
+		// else {
+		// 	if (cursor > 6) {
+		// 		cursor = cursor - 7;
+		// 	}
+		// 	set_cursor_piont_off();
+		// }
+		if (mComparator.contains(cursor - 7)) {
+			cursor -= 7;
 		}
 	}
 
 	void action_cursor_plus_7(lv_event_t* e) {
-		if (cur_disp == current_display::on) {
-			if (cursor < 89) {
-				cursor = cursor + 7;
-			}
-			set_cursor_piont_on();
-		}
-		else {
-			if (cursor < 63) {
-				cursor = cursor + 7;
-			}
-			set_cursor_piont_off();
+		// if (cur_disp == current_display::on) { // TODO удалить это
+		// 	if (cursor < 89) {
+		// 		cursor = cursor + 7;
+		// 	}
+		// 	set_cursor_piont_on();
+		// }
+		// else {
+		// 	if (cursor < 63) {
+		// 		cursor = cursor + 7;
+		// 	}
+		// 	set_cursor_piont_off();
+		// }
+		if (mComparator.contains(cursor + 7)) {
+			cursor += 7;
 		}
 	}
 
 	void action_save_calibration(lv_event_t* e) {
 		SaveToMemory();
-		debugg_fn("Save calib"); // DEBUG
+		debugg_fn(" calib saved "); // DEBUG
 	}
 
 	void action_restore_calibration(lv_event_t* e) {
 		ReadOnMemory();
-		debugg_fn("Restore calib"); // DEBUG
+		debugg_fn(" calib restored "); // DEBUG
 	}
 
 	void action_to_disp_divisible_edit(lv_event_t* e) {
