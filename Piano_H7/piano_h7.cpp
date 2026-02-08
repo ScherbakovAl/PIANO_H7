@@ -70,6 +70,7 @@ enum class typeAction {
 };
 
 struct comparator {
+	uint8_t cursor = 0;
 	uint8_t address = 0;
 	uint8_t number_chip = 0;
 	uint8_t number_comparator = 0;
@@ -105,9 +106,9 @@ void init_chips() {
 	std::string str = "ships .. ";
 	std::string stat;
 
-	for (uint8_t x = 0; x < allChipCount; ++x) {
+	for (uint8_t chip = 0; chip < allChipCount; ++chip) {
 		rx_settings[0] = 0;
-		UART4_SendAddress(x);
+		UART4_SendAddress(chip);
 		Set_tx_s((uint8_t)command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
 		UART4_Send_Settings_bootloader();
 		UART4_Receive_timeout_10us();
@@ -116,23 +117,29 @@ void init_chips() {
 		// }
 		chip_state = (chip_states)rx_settings[4];
 
-		if (rx_settings[0]) {
-			std::vector<comparator> vtc;
-			vtc.reserve(count_comparators);
+		if (rx_settings[0]) {  // TODO numbers_chips
+			
+			uint8_t cursor = 0;
+			uint8_t addr = 0;
+			std::vector<comparator> vComparators;
+			vComparators.reserve(count_comparators);
 
-			for (uint8_t y = 0; y < count_comparators; ++y) {
-				const uint8_t addr = (x * count_comparators) + y;;
-				if (x < division_on_off) {
-					mComparatorCursor_on.emplace(addr, comparator(addr, x, y));
+			for (uint8_t comp = 0; comp < count_comparators; ++comp) {
+				if (chip < division_on_off) {
+					cursor = ((chip - 1) * count_comparators) + comp;
+					addr = cursor;
+					mComparatorCursor_on.emplace(cursor, comparator(cursor, addr, chip, comp));
 				}
 				else {
-					mComparatorCursor_off.emplace(addr, comparator(addr, x, y));
+					cursor = ((chip - division_on_off) * count_comparators) + comp;
+					addr = cursor + buffer_division;
+					mComparatorCursor_off.emplace(cursor, comparator(cursor, addr, chip, comp));
 				}
-				vtc.push_back({ addr, x, y });
+				vComparators.push_back(comparator(cursor, addr, chip, comp));
 			}
-			vChips.push_back({ x, vtc, (x < division_on_off ? typeAction::on : typeAction::off), chip_state });
+			vChips.push_back({ chip, vComparators, (chip < division_on_off ? typeAction::on : typeAction::off), chip_state });
 
-			str += std::format(" {}", x);
+			str += std::format(" {}", chip);
 		}
 	}
 
@@ -457,7 +464,7 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (const auto& n : vChips) {  // TODO numbers_chips ok
+				for (const auto& n : vChips) { // TODO numbers_chips ok
 					if (n.typ == typeAction::on) {
 						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
 						for (const auto& c : n.comp) {
@@ -597,7 +604,7 @@ void sync() { // включает прерывания, осторожно!
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
 	for (const auto& n : vChips) {  // TODO numbers_chips ok
-		fl_sync += sync_sender(n.number_chip);  // TODO numbers_chips ok
+		fl_sync += sync_sender(n.number_chip);
 	}
 	if (fl_sync) {
 		debugg_fn(std::format("Sync {} bugs", fl_sync));
@@ -693,7 +700,7 @@ void all_H7_to_g4() {
 	for (const auto& n : vChips) {
 		for (const auto& c : n.comp) {
 			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::green, buffer_green[c.address]);// TODO numbers_chips ok
-			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::red, buffer_red[c.address]); // TODO numbers_chips ok
+			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::red, buffer_red[c.address]);
 			if (n.typ == typeAction::off) {
 				sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::grey, buffer_green[c.address] - (buffer_green[c.address] / 10));
 			}
@@ -724,7 +731,7 @@ void all_g4_to_H7() {
 			if (n.typ == typeAction::on) {
 				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::green, 0); // TODO numbers_chips ok
 				buffer_green[c.address] = convert_8_16(a_, b_);
-				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::red, 0); // TODO numbers_chips ok
+				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::red, 0);
 				buffer_red[c.address] = convert_8_16(a_, b_);
 			}
 		}
