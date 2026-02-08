@@ -464,16 +464,15 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (const auto& n : vChips) { // TODO numbers_chips ok
-					if (n.typ == typeAction::on) {
-						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& c : n.comp) {
+				for (const auto& chip : vChips) { // TODO numbers_chips ok
+					if (chip.typ == typeAction::on) {
+						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+						for (const auto& comp : chip.comp) {
 							UART4_Receive_Settings();
-							// compsCHART_CALIB[c.adress] = convert_8_16(a_, b_);
-							buffer_calib[c.address] = convert_8_16(a_, b_);
+							buffer_calib[comp.address] = convert_8_16(a_, b_);
 						}
 					}
-					refresh_cursor(n.number_chip); // TODO refresh_cursor переделать нормально
+					refresh_cursor(chip.number_chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
@@ -500,16 +499,15 @@ void h7() {
 				// lv_chart_refresh(cur_shart);
 				*/
 
-				for (const auto& n : vChips) { // TODO numbers_chips ok
-					if (n.typ == typeAction::off) {
-						sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& c : n.comp) {
+				for (const auto& chip : vChips) { // TODO numbers_chips ok
+					if (chip.typ == typeAction::off) {
+						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+						for (const auto& comp : chip.comp) {
 							UART4_Receive_Settings();
-							// compsCHART_CALIB[c.adress] = convert_8_16(a_, b_);
-							buffer_calib[c.address] = convert_8_16(a_, b_);
+							buffer_calib[comp.address] = convert_8_16(a_, b_);
 						}
 					}
-					refresh_cursor(n.number_chip); // TODO refresh_cursor переделать нормально
+					refresh_cursor(chip.number_chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
@@ -603,8 +601,8 @@ void sync() { // включает прерывания, осторожно!
 
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
-	for (const auto& n : vChips) {  // TODO numbers_chips ok
-		fl_sync += sync_sender(n.number_chip);
+	for (const auto& chip : vChips) {  // TODO numbers_chips ok
+		fl_sync += sync_sender(chip.number_chip);
 	}
 	if (fl_sync) {
 		debugg_fn(std::format("Sync {} bugs", fl_sync));
@@ -697,12 +695,12 @@ void all_H7_to_g4() {
 	}
 	*/
 
-	for (const auto& n : vChips) {
-		for (const auto& c : n.comp) {
-			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::green, buffer_green[c.address]);// TODO numbers_chips ok
-			sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::red, buffer_red[c.address]);
-			if (n.typ == typeAction::off) {
-				sender(command::set_comp_value, n.number_chip, c.number_comparator, dot::grey, buffer_green[c.address] - (buffer_green[c.address] / 10));
+	for (const auto& chip : vChips) {
+		for (const auto& comp : chip.comp) {
+			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::green, buffer_green[comp.address]); // TODO numbers_chips ok
+			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::red, buffer_red[comp.address]);
+			if (chip.typ == typeAction::off) {
+				sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::grey, buffer_green[comp.address] - (buffer_green[comp.address] / 10));
 			}
 		}
 	}
@@ -726,13 +724,13 @@ void all_g4_to_H7() {
 	}
 	*/
 
-	for (const auto& n : vChips) {
-		for (const auto& c : n.comp) {
-			if (n.typ == typeAction::on) {
-				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::green, 0); // TODO numbers_chips ok
-				buffer_green[c.address] = convert_8_16(a_, b_);
-				sender(command::read_comp_value, n.number_chip, c.number_comparator, dot::red, 0);
-				buffer_red[c.address] = convert_8_16(a_, b_);
+	for (const auto& chip : vChips) {
+		for (const auto& comp : chip.comp) {
+			if (chip.typ == typeAction::on) {
+				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0); // TODO numbers_chips ok
+				buffer_green[comp.address] = convert_8_16(a_, b_);
+				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::red, 0);
+				buffer_red[comp.address] = convert_8_16(a_, b_);
 			}
 		}
 	}
