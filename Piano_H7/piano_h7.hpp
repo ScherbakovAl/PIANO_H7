@@ -338,8 +338,6 @@ extern "C" {
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 
-	// void my_flush_wait(lv_display_t* disp);
-
 	void DMA2_Stream1_TransferComplete();
 	void DMA2_Stream3_i2c();
 
@@ -404,6 +402,59 @@ extern "C" {
 
 }
 #endif // extern "C"
+
+/*
+
+действия:
+
+d_main
+d_flash
+d_chart_calib_on
+d_chart_calib_off
+
+save_calibration
+restore_calibration
+piano_off (jump to dfu)
+
+to_main_disp
+to_disp_flash
+to_disp_calibration_on
+to_disp_calibration_off
+
+_echo_g4s
+reset_bootloader_g4
+reset_main_to_bootloader
+h7-g4
+jump
+
+calib_sensor_on_green
+calib_sensor_on_red
+calib_sensor_off_green
+calib_sensor_off_red
+
+
+
+
+
+переменные:
+
+debugg
+cursor_string
+L
+R
+CHART_CALIB_online
+sensor_on_1_data_string
+sensor_on_2_data_string
+sensor_off_1_data_string
+sensor_off_2_data_string
+
+*/
+
+
+
+
+
+
 
 //		GPIOC->BSRR = 0x200; // pC9
 //		GPIOC->BSRR = 0x2000000; // pC9
