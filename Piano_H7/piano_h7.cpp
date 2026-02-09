@@ -11,45 +11,6 @@
 #include <format>
 #include "piano_h7.hpp"
 
-std::string ch_o;
-std::string ch_f;
-std::string s1_on_min;
-std::string s1_on_max;
-std::string s2_on_min;
-std::string s2_on_max;
-std::string s1_off_min;
-std::string s1_off_max;
-std::string s2_off_min;
-std::string s2_off_max;
-std::string sensor_on_1_data_string;
-std::string sensor_on_2_data_string;
-std::string sensor_off_1_data_string;
-std::string sensor_off_2_data_string;
-std::string divisible_eez_string;
-std::string cursor_string;
-std::string disp_on_off_button;
-std::string disp_on_off_button_3;
-std::string top_bot_str;
-std::string top_bot_str_2;
-std::string debugg;  // DEBUG
-std::string chart_calib_online;
-std::string l;
-std::string r;
-
-static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
-static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
-static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
-// надо 6 копирований делать в G4                    ^^^^^^^^^^^^^
-static const uint32_t FLASH_ADDRESS = 0x080E0000; // -здесь лежит калибровка
-
-static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
-static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
-static const uint32_t ADRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
-static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 7;// количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
-
-std::vector<int> numbers_chips;
-
-
 // inline constexpr uint32_t NOTE_OFFSETS[196] = {
 //     // Индексы для коррекции MIDI номера
 //     // Эти значения зависят от конкретной клавиатуры
@@ -60,54 +21,183 @@ std::vector<int> numbers_chips;
 // };
 
 
-enum class chip_states {
-	boot = 1,
-	main
-};
+void pwr() {
+	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
+	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+		LCD_WR_REG(0x10);
+		// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
+		HAL_PWR_EnterSTANDBYMode();
+	}
+	else {
+		// GPIOA->BSRR |= 0x20; // for test // DEBUG
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+		// GPIOA->BSRR |= 0x200000;
+		GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	}
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
+}
 
-enum class typeAction {
-	on = 1,
-	off
-};
+void to_sleep() {
+	// LCD_stby();
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	HAL_PWR_EnterSTANDBYMode();
+}
 
-struct cursor_min_max {
-	uint8_t cursor_on_min = 0;
-	uint8_t cursor_on_max = 0;
-	uint8_t cursor_off_min = 0;
-	uint8_t cursor_off_max = 0;
-};
+void init() {
 
-struct comparator {
-	uint8_t cursor = 0;
-	uint8_t address = 0;
-	uint8_t number_chip = 0;
-	uint8_t number_comparator = 0;
-	bool    is_active = false;
-};
+	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
 
-struct Chip {
-	uint8_t number_chip = 0; // переделать в просто "number"
-	std::vector<comparator> comp; // переделать в "comps"
-	typeAction typ = typeAction::on;
-	chip_states st = chip_states::boot;
-};
+	// pause(2);
+	// LL_mDelay(120);
+	// pwr();
+	// tud_disconnect(); // TODO tud_disconnect() // это работает
+	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
+
+	init_LL();
+	init_LCD_touch();
+	lv_init();
+	disp_start();
+	touch_start();
+	ui_init();
+	tusb_init();
+
+	tud_task();
+	lv_timer_handler();
+	ui_tick();
+
+	// pause(10);
+	// send_test_midi();
+
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+
+	initBuffers();
+	configCharts();
+
+	// память
+	// SaveToMemory();
+	// ReadOnMemory(); // восстановление графика при включении
+	// debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
+	// LL_TIM_DisableCounter(TIM1); // PWM - tim clk
+	// LL_USART_DisableDMAReq_RX(UART5);
+	// all_H7_to_g4();
+	// LL_USART_EnableDMAReq_RX(UART5);
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	// debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
+	//---------------------------------
+	// debugg_fn(""); // DEBUG
+	// debugg_fn(""); // DEBUG
+	// debugg_fn(">>>  HELLOO tit !  <<<<"); // DEBUG
+	// debugg_fn(""); // DEBUG
+
+	// tud_task();
+	// lv_timer_handler();
+	// ui_tick();
+
+	// GPIOA->BSRR = 0x10; // for test // DEBUG
+	// GPIOA->BSRR = 0x100000;
+	// GPIOA->BSRR = 0x20; // for test // DEBUG
+	// GPIOA->BSRR = 0x200000;
+	// start PWM
+
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim  - не стартуют чипы если выкл
+	//---------------------------------
 
 
-std::vector<Chip> vChips;
-std::map<uint8_t, comparator> mComparatorCursor_on;
-std::map<uint8_t, comparator> mComparatorCursor_off;
 
+	// pause(5); // DEBUG
+	// debugg_clear();
+	// debug_counter = 1;
+	// int test_int_timer2_old = test_int_timer2;
 
-void refresh_cursor(const Chip& comp);
-const comparator& searcher_addr_in_cursor(const uint32_t& chip);
-static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
+	LL_USART_DisableDMAReq_RX(UART5);
 
-const uint8_t count_comparators = 7;
-chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
-cursor_min_max c_mi_ma; // TODO реализовать мин-макс
+	init_chips();
 
-//  Элементы с 3-го по 7-й (индексы 3-6)
-//  for (auto n : v | std::views::drop(3) | std::views::take(4)) 
+	if (chip_state == chip_states::boot) {
+		jump_g4s_to_adress();
+		pause(50000);
+	}
+
+	all_H7_to_g4();
+
+	sync(); // включает прерывания и таймер, осторожно!
+
+	// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
+	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+
+}
+
+void init_LL() {
+
+	// TIM init
+	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
+	LL_TIM_EnableAllOutputs(TIM1); // PWM - tim clk
+	LL_TIM_EnableIT_TRIG(TIM1);
+
+	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
+
+	LL_TIM_SetAutoReload(TIM3, allChipCount);
+	LL_TIM_EnableCounter(TIM3); // считает номер контроллера g4
+
+	LL_TIM_EnableCounter(TIM4); // для LVGL
+	LL_TIM_EnableIT_UPDATE(TIM4);
+
+	LL_TIM_EnableCounter(TIM5); // ограничение скорости сканирования плат
+
+	// UART init
+	LL_USART_Enable(UART5);
+	LL_USART_EnableDMAReq_RX(UART5);
+
+	// DMA RX для получения данных
+	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
+	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART5->RDR));
+	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
+	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
+	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
+	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+
+}
+
+void init_LCD_touch() {
+
+	// LCD init
+	LL_SPI_Enable(SPI3);
+	LL_SPI_StartMasterTransfer(SPI3);
+	LCD_Init();
+
+	// TOUCH init
+	// LL_I2C_Enable(I2C5);
+	FT6336_Init();
+
+}
+
+void disp_start() {
+
+	// DISP start
+	disp = lv_display_create(320, 480);
+	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888);
+	lv_display_set_flush_cb(disp, my_flush_cb);
+	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
+	// lv_display_set_flush_wait_cb(disp, my_flush_wait);
+
+}
+
+void touch_start() {
+
+	// TOUCH start
+	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
+	indev = lv_indev_create();
+	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
+	lv_indev_set_read_cb(indev, my_input_read);
+
+}
+
 void init_chips() {
 	vChips.clear();
 	vChips.reserve(allChipCount);
@@ -174,233 +264,29 @@ void init_chips() {
 	strOut += stat;
 
 	debugg_fn(strOut);
-	cursor = vChips.front().comp.front().cursor;
-	c_mi_ma.cursor_on_min = vChips.front().comp.front().address;
-	c_mi_ma.cursor_on_max = 0;
-	c_mi_ma.cursor_off_min = 0;
-	c_mi_ma.cursor_off_max = vChips.back().comp.back().address;;
-}
 
-int fl = 0; // for test fl
+	// c_mi_ma.cursor_on_min = vChips.front().comp.front().address; // TODO установить края отображаемого графика
+	// c_mi_ma.cursor_on_max = 0;
+	// c_mi_ma.cursor_off_min = 0;
+	// c_mi_ma.cursor_off_max = vChips.back().comp.back().address;
 
-float timerLenght_F = 0; // for test
-float speed_F = 0; // for test
-float energy_F = 0; // for test
-float midi_hi_F = 0; // for test
-float midi_lo_F = 0; // for test
-uint32_t debug_counter = 0;
-int tt1 = 0;
-int tt2 = 0;
-int tt3 = 0;
-float timer_data_in = 0;
+	// lv_obj_t* ob = objects.chart_on;
+	// lv_chart_set_point_count(ob, buffer_division);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_green, buffer_green);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_red, buffer_red);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_blue, buffer_calib);
+	// ob = objects.chart_off;
+	// lv_chart_set_point_count(ob, buffer_division);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_green, &buffer_green[buffer_division]);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[buffer_division]);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_calib[buffer_division]);
 
-#define BYTES_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)) // TODO 565 or 888? (было 565)
-#define BUFF_SIZE (480 * 20 * BYTES_PER_PIXEL)
-static lv_color16_t buf_1[BUFF_SIZE]; // TODO 16 or 8
-static lv_color16_t buf_2[BUFF_SIZE];
-
-lv_display_t* disp;
-lv_indev_t* indev;
-
-lv_obj_t* cur_shart;
-lv_chart_series_t* ser_on_green;
-lv_chart_series_t* ser_on_red;
-lv_chart_series_t* ser_on_blue;
-lv_chart_cursor_t* c_on;
-lv_chart_cursor_t* ch_on;
-lv_style_t cursor_style;
-lv_chart_series_t* ser_off_green;
-lv_chart_series_t* ser_off_red;
-lv_chart_series_t* ser_off_blue;
-lv_chart_cursor_t* c_off;
-lv_chart_cursor_t* ch_off;
-
-std::string test_t_out_fl; // for test
-std::string test_speed_fl; // for test
-std::string test_energy_fl; // for test
-std::string test_midi_hi_fl; // for test
-std::string test_midi_lo_fl; // for test
-std::string note; // for test
-std::string mass_str;
-std::string tim_str_in; // for test
-std::string t1; // for test
-std::string t2; // for test
-std::string t3; // for test
-std::string timer_data; // for test
-
-
-std::string test_timer2; // for test
-std::string calib_all_str;
-volatile uint32_t test_int_timer2 = 0; // for test
-volatile uint32_t oldCursor = start_cursor;
-float mass_to_disp = 0; // for test
-
-// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
-
-void pwr() {
-	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv управление питанием
-	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
-		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-		LCD_WR_REG(0x10);
-		// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
-		HAL_PWR_EnterSTANDBYMode();
-	}
-	else {
-		// GPIOA->BSRR |= 0x20; // for test // DEBUG
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-		// GPIOA->BSRR |= 0x200000;
-		GPIOD->BSRR = 0x40;// pD6 - LED подсветка
-	}
-//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ управление питанием
-}
-
-void to_sleep() {
-	// LCD_stby();
-	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-	HAL_PWR_EnterSTANDBYMode();
 }
 
 // добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
 void h7() {
 
-	for (int i = 0; i < 30; ++i) {
-		numbers_chips.push_back(0);
-	}
-	// GPIOD->BSRR = 0x40;// pD6 - LED подсветка
-	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
-
-	// pause(2);
-	// LL_mDelay(120);
-	// pwr();
-	// tud_disconnect(); // TODO tud_disconnect() // это работает
-	// GPIOD->BSRR = 0x400000;// pD6 - LED подсветка
-
-	// TIM init
-	LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH2);
-	LL_TIM_EnableAllOutputs(TIM1); // PWM - tim clk
-	LL_TIM_EnableIT_TRIG(TIM1);
-
-	LL_TIM_EnableCounter(TIM2); // просто счётчик (275Mhz)
-
-	LL_TIM_SetAutoReload(TIM3, allChipCount);
-	LL_TIM_EnableCounter(TIM3); // считает номер контроллера g4
-
-	LL_TIM_EnableCounter(TIM4); // для LVGL
-	LL_TIM_EnableIT_UPDATE(TIM4);
-
-	LL_TIM_EnableCounter(TIM5); // ограничение скорости сканирования плат
-	//---------------------------------
-
-	// UART init
-	LL_USART_Enable(UART5);
-	LL_USART_EnableDMAReq_RX(UART5);
-	//---------------------------------
-
-	// DMA RX для получения данных
-	LL_DMA_DisableStream(DMA1, LL_DMA_STREAM_2);
-	LL_DMA_SetPeriphAddress(DMA1, LL_DMA_STREAM_2, (uint32_t) & (UART5->RDR));
-	LL_DMA_SetMemoryAddress(DMA1, LL_DMA_STREAM_2, (uint32_t)rx_data);
-	LL_DMA_SetDataLength(DMA1, LL_DMA_STREAM_2, dataLengthRX);
-	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
-	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	//---------------------------------
-
-	// LCD init
-	LL_SPI_Enable(SPI3);
-	LL_SPI_StartMasterTransfer(SPI3);
-	LCD_Init();
-
-	// TOUCH init
-	// LL_I2C_Enable(I2C5);
-	FT6336_Init();
-
-	// LVGL init
-	lv_init();
-
-	// DISP start
-	disp = lv_display_create(320, 480);
-	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888);
-	lv_display_set_flush_cb(disp, my_flush_cb);
-	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
-
-	// lv_display_set_flush_wait_cb(disp, my_flush_wait);
-
-	// TOUCH start
-	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
-	indev = lv_indev_create();
-	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-	lv_indev_set_read_cb(indev, my_input_read);
-
-	// GUI start
-	ui_init();
-
-	// USB init
-	tusb_init();
-	//---------------------------------
-
-	tud_task();
-	lv_timer_handler();
-	ui_tick();
-
-	pause(10);
-	send_test_midi();
-
-	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-	initBuffers();
-	configCharts();
-
-	// память
-	// SaveToMemory();
-	// ReadOnMemory(); // восстановление графика при включении
-	// debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
-	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
-	// LL_USART_DisableDMAReq_RX(UART5);
-	// all_H7_to_g4();
-	// LL_USART_EnableDMAReq_RX(UART5);
-	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
-	// debugg_fn("   -- H7 > >>>> > G4 DONE! --)"); // DEBUG
-	//---------------------------------
-	// debugg_fn(""); // DEBUG
-	// debugg_fn(""); // DEBUG
-	// debugg_fn(">>>  HELLOO tit !  <<<<"); // DEBUG
-	// debugg_fn(""); // DEBUG
-
-	tud_task();
-	lv_timer_handler();
-	ui_tick();
-
-	// GPIOA->BSRR = 0x10; // for test // DEBUG
-	// GPIOA->BSRR = 0x100000;
-	// GPIOA->BSRR = 0x20; // for test // DEBUG
-	// GPIOA->BSRR = 0x200000;
-	// start PWM
-
-	// LL_TIM_EnableCounter(TIM1); // PWM - tim  - не стартуют чипы если выкл
-	//---------------------------------
-
-
-
-	pause(5); // DEBUG
-	// debugg_clear();
-	// debug_counter = 1;
-	// int test_int_timer2_old = test_int_timer2;
-
-	LL_USART_DisableDMAReq_RX(UART5);
-	init_chips();
-	if (chip_state == chip_states::boot) {
-		jump_g4s_to_adress();
-		pause(50000);
-	}
-	all_H7_to_g4();
-	sync(); // включает прерывания и таймер, осторожно!
-
-	// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
-	// LL_TIM_EnableCounter(TIM1); // PWM - tim clk
-
+	init();
 
 	while (1) {
 
@@ -412,39 +298,46 @@ void h7() {
 
 			if (cur_disp == current_display::on) {
 
-				for (const auto& chip : vChips | std::views::take(on_off_division)) { // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
-					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-					for (const auto& comp : chip.comp) {
-						UART4_Receive_Settings();
-						buffer_calib[comp.address] = convert_8_16(a_, b_);
+				//  Элементы с 3-го по 7-й (индексы 3-6)
+				//  for (auto n : v | std::views::drop(3) | std::views::take(4)) 
+				for (const auto& chip : vChips) { // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
+					if (chip.typ == typeAction::on) {
+						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+						for (const auto& comp : chip.comparators) {
+							UART4_Receive_Settings();
+							buffer_calib[comp.address] = convert_8_16(a_, b_);
+						}
+						refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 					}
-					refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
 				r = std::to_string(buffer_calib[cursor + 1]);
-				lv_chart_set_cursor_point(objects.chart_on, ch_on, ser_on_blue, cursor);
+				lv_chart_set_cursor_point(objects.chart_on, cursor_on_hor, ser_on_blue, cursor);
 				lv_chart_refresh(cur_shart);
 			}
 
 			if (cur_disp == current_display::off) {
 
-				for (const auto& chip : vChips | std::views::drop(on_off_division) | std::views::take(allChipCount - on_off_division)) {  // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
-					// if ( off ) // TODO реализовать
-					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-					for (const auto& comp : chip.comp) {
-						UART4_Receive_Settings();
-						buffer_calib[comp.address] = convert_8_16(a_, b_);
+				for (const auto& chip : vChips) {  // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
+					if (chip.typ == typeAction::off) {
+						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+						for (const auto& comp : chip.comparators) {
+							UART4_Receive_Settings();
+							buffer_calib[comp.address] = convert_8_16(a_, b_);
+						}
+						refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 					}
-					refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
 				r = std::to_string(buffer_calib[cursor + 1]);
-				lv_chart_set_cursor_point(objects.chart_on, ch_on, ser_on_blue, cursor);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor);
 				lv_chart_refresh(cur_shart);
 			}
+
 			TIM5->CNT = 0;
+
 		}
 
 		if (fl) { // DEBUG
@@ -592,7 +485,7 @@ void all_H7_to_g4() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
 	for (const auto& chip : vChips) {
-		for (const auto& comp : chip.comp) {
+		for (const auto& comp : chip.comparators) {
 			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::green, buffer_green[comp.address]);
 			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::red, buffer_red[comp.address]);
 			if (chip.typ == typeAction::off) {
@@ -606,7 +499,7 @@ void all_g4_to_H7() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
 	for (const auto& chip : vChips) {
-		for (const auto& comp : chip.comp) {
+		for (const auto& comp : chip.comparators) {
 			if (chip.typ == typeAction::on) {
 				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0);
 				buffer_green[comp.address] = convert_8_16(a_, b_);
@@ -619,7 +512,7 @@ void all_g4_to_H7() {
 
 void refresh_cursor(const Chip& chip) { // TODO refresh cursor пересобрать
 	bool fl_c = false;
-	for (const auto& comp : chip.comp) {
+	for (const auto& comp : chip.comparators) {
 		const auto& addr = comp.address;
 		if (buffer_calib[addr] < 4080 && buffer_calib[addr] > 2) {
 
@@ -636,13 +529,13 @@ void refresh_cursor(const Chip& chip) { // TODO refresh cursor пересобр�
 		if (fl_c) {
 			cursor = comp.cursor;
 			if (addr > buffer_division) {
-				lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor);
 				sensor_off_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_off_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
 			}
 			else {
-				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor);
 				sensor_on_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_on_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
@@ -944,27 +837,33 @@ void DMA_UART_ERRORS_HANDLER() {
 //---------------------------------
 
 void initBuffers() {
-	for (int i = 0; i < 196; ++i) { // TODO deprecated
-		if (i < 98) {
-			compsCHART_green[i] = def_on[0];
-			compsCHART_red[i] = def_on[1];
-		}
-		else {
-			compsCHART_green[i] = def_off[0];
-			compsCHART_red[i] = def_off[1];
-		}
-		compsCHART_CALIB[i] = 800;
-	}
+	// for (int i = 0; i < 196; ++i) { // TODO deprecated
+	// 	if (i < 98) {
+	// 		compsCHART_green[i] = def_on[0];
+	// 		compsCHART_red[i] = def_on[1];
+	// 	}
+	// 	else {
+	// 		compsCHART_green[i] = def_off[0];
+	// 		compsCHART_red[i] = def_off[1];
+	// 	}
+	// 	compsCHART_CALIB[i] = 800;
+	// }
 
 	for (uint32_t i = 0; i < buffer_division; ++i) {
-		buffer_green[i] = green_on_default;
-		buffer_red[i] = red_on_default;
-		buffer_calib[i] = 0;
+		// buffer_green[i] = green_on_default;
+		// buffer_red[i] = red_on_default;
+		// buffer_calib[i] = 0;
+		buffer_green[i] = i;
+		buffer_red[i] = i + 100;
+		buffer_calib[i] = i + 200;
 	}
 	for (uint32_t i = buffer_division; i < size_BUFFER; ++i) {
-		buffer_green[i] = green_off_default;
-		buffer_red[i] = red_off_default;
-		buffer_calib[i] = 0;
+		// buffer_green[i] = green_off_default;
+		// buffer_red[i] = red_off_default;
+		// buffer_calib[i] = 0;
+		buffer_green[i] = i + 200;
+		buffer_red[i] = i + 300;
+		buffer_calib[i] = i + 400;
 	}
 
 	for (uint i = 0; i < size_BUFFER; ++i) { // TODO note shift // TODO проверить здесь что происходит...
@@ -1221,10 +1120,10 @@ void configCharts() {
 	lv_chart_set_series_ext_y_array(ob, ser_on_blue, buffer_calib);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
-	c_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
-	ch_on = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_chart_set_cursor_point(ob, c_on, ser_on_green, cursor);
-	lv_chart_set_cursor_point(ob, ch_on, ser_on_blue, cursor);
+	cursor_on_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
+	cursor_on_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
+	lv_chart_set_cursor_point(ob, cursor_on_vert, ser_on_green, cursor);
+	lv_chart_set_cursor_point(ob, cursor_on_hor, ser_on_blue, cursor);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -1241,10 +1140,10 @@ void configCharts() {
 	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_calib[buffer_division]);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
-	c_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
-	ch_off = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_chart_set_cursor_point(ob, c_off, ser_off_green, cursor);
-	lv_chart_set_cursor_point(ob, ch_off, ser_off_blue, cursor);
+	cursor_off_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
+	cursor_off_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
+	lv_chart_set_cursor_point(ob, cursor_off_vert, ser_off_green, cursor);
+	lv_chart_set_cursor_point(ob, cursor_off_hor, ser_off_blue, cursor);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -1743,6 +1642,8 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
+		cursor = vChips.front().comparators.front().cursor;
+		lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
 
 		for (const auto& chip : vChips) {
 			if (chip.typ == typeAction::on) {
@@ -1762,6 +1663,8 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		all_g4_to_H7();
+		cursor = vChips.back().comparators.back().cursor;
+		lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
 
 		for (const auto& chip : vChips) {
 			if (chip.typ == typeAction::off) {
@@ -1892,7 +1795,7 @@ extern "C" {
 
 	void set_cursor_piont_on(const comparator& comp) {
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+		lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor);
 		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 		sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
 
@@ -1900,7 +1803,7 @@ extern "C" {
 
 	void set_cursor_piont_off(const comparator& comp) {
 		cursor_string = std::to_string(cursor);
-		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
+		lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor);
 		sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
 		sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
 
