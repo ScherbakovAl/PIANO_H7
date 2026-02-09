@@ -47,27 +47,6 @@ extern "C" {
 		grey
 	};
 
-	enum class command { // TODO G4 обновить код
-		sync_timer = 1,
-		cal,
-		read_comp_value, // TODO добавить проверки (принять ответ)
-		set_comp_value, // TODO добавить проверки (принять ответ)
-		read_comp_setting, // TODO реализовать
-		all_calib,
-		reset_to_bootloader,
-		mute, // TODO реализовать (chips ON - mute)
-		unmute, // TODO реализовать
-		echo = 11 // TODO реализовать для основной прошивки
-	};
-
-	enum class subcommand {
-		start_calibration = 1,
-		read_calibration,
-		stop_calibration,
-		working,
-		nothing
-	};
-
 	enum class plus_minus {
 		plus,
 		minus,
@@ -100,36 +79,58 @@ extern "C" {
 		calib_none
 	};
 
-	enum class command_for_flash_g4 {
-		echo_bootloader = 11,
-		reset_bootloader, // 200ms delay // TODO надо реализовать
+	enum class response {
+		ok = 0x0C,
+		fail = 0xDD
+	};
+
+	enum class state { // TODO deprecated
+		bootloader = 1,
+		piano
+	};
+
+	enum class command { // TODO G4 обновить код
+		sync_timer = 1,
+		cal,
+		read_comp_value, // TODO добавить проверки (принять ответ)
+		set_comp_value, // TODO добавить проверки (принять ответ)
+		read_comp_setting, // TODO реализовать
+		all_calib,
+		reset_to_bootloader,
+		mute, // TODO реализовать (chips ON - mute)
+		unmute, // TODO реализовать
+		echo = 11 // TODO реализовать для основной прошивки
+	};
+
+	enum class subcommand {
+		start_calibration = 1,
+		read_calibration,
+		stop_calibration,
+		working,
+		nothing
+	};
+
+	enum class bootloader_command {
+		echo = 11,
+		reset, // 200ms delay // TODO надо реализовать
 		data_from_H7_to_array_g4,
 		copy_array_to_flash_g4,
 		jump_to_piano_g4, // прыжок по зашитому в g4 адресу
 		jump_g4_to_adress // TODO сделать // прыжок по указанному адресу
 	};
 
-	enum class response {
-		ok = 0x0C,
-		fail = 0xDD
-	};
-
-	enum class state {
-		bootloader = 1,
-		piano
-	};
 
 	// номер 95 у последней верхней клавиши
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 
-	const int allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
+	const uint32_t allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
 
 	const uint8_t start_adress_chip_on = 5; // включительно (1)
 	const uint8_t end_adress_chip_on = 7; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
 	const uint8_t start_adress_chip_off = 14; // включительно (14)
 	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
 
-	const uint32_t start_cursor = 27;
+	const uint32_t start_cursor = 35;
 	volatile uint32_t cursor = start_cursor; // TODO volatile?
 
 	uint8_t rx_data[4] = { };
@@ -156,9 +157,9 @@ extern "C" {
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 	// new variants      vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
-	const uint32_t division_on_off = 14; // точка разделения on-off
-	const uint32_t size_BUFFER = 200;
-	const uint32_t buffer_division = 100;
+	const uint32_t size_BUFFER = 200; // чётное
+	const uint32_t buffer_division = size_BUFFER / 2;
+	const uint32_t on_off_division = 14; // точка разделения on-off
 
 	int32_t buffer_green[size_BUFFER] = {};
 	int32_t buffer_red[size_BUFFER] = {};
@@ -206,7 +207,6 @@ extern "C" {
 	void check_max_min();
 	void all_H7_to_g4();
 	void all_g4_to_H7();
-	void refresh_cursor(const uint8_t& adress);
 	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
 	void UART4_SendAddress(const uint8_t& slave_address);
 	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
@@ -246,7 +246,7 @@ extern "C" {
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void data_from_H7_to_g4();
-	void flash_g4(const uint32_t addr, const int chip_number);
+	void flash_g4(const uint32_t& addr, const int& chip_number);
 	void jump_g4s_to_adress();
 	void reset_main_to_bootloader();
 }

@@ -45,6 +45,7 @@ static const uint32_t FLASH_ADDRESS = 0x080E0000; // -здесь лежит ка
 static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
 static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
 static const uint32_t ADRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
+static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 7;// количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
 
 std::vector<int> numbers_chips;
 
@@ -69,16 +70,24 @@ enum class typeAction {
 	off
 };
 
+struct cursor_min_max {
+	uint8_t cursor_on_min = 0;
+	uint8_t cursor_on_max = 0;
+	uint8_t cursor_off_min = 0;
+	uint8_t cursor_off_max = 0;
+};
+
 struct comparator {
 	uint8_t cursor = 0;
 	uint8_t address = 0;
 	uint8_t number_chip = 0;
 	uint8_t number_comparator = 0;
+	bool    is_active = false;
 };
 
 struct Chip {
-	uint8_t number_chip = 0;
-	std::vector<comparator> comp;
+	uint8_t number_chip = 0; // переделать в просто "number"
+	std::vector<comparator> comp; // переделать в "comps"
 	typeAction typ = typeAction::on;
 	chip_states st = chip_states::boot;
 };
@@ -88,8 +97,14 @@ std::vector<Chip> vChips;
 std::map<uint8_t, comparator> mComparatorCursor_on;
 std::map<uint8_t, comparator> mComparatorCursor_off;
 
+
+void refresh_cursor(const Chip& comp);
+const comparator& searcher_addr_in_cursor(const uint32_t& chip);
+static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
+
 const uint8_t count_comparators = 7;
 chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
+cursor_min_max c_mi_ma; // TODO реализовать мин-макс
 
 //  Элементы с 3-го по 7-й (индексы 3-6)
 //  for (auto n : v | std::views::drop(3) | std::views::take(4)) 
@@ -102,44 +117,50 @@ void init_chips() {
 	// buffer_on.reserve(allChipCount * count_comparators);
 	// buffer_off.clear(); // TODO vecotor buffer реализовать
 	// buffer_off.reserve(allChipCount * count_comparators);
+	for (int i = 0; i < rx_settings_length; ++i) {
+		rx_settings[i] = 0;
+	}
 
-	std::string str = "ships .. ";
+	std::string strOut = "ships .. ";
 	std::string stat;
 
 	for (uint8_t chip = 0; chip < allChipCount; ++chip) {
 		rx_settings[0] = 0;
 		UART4_SendAddress(chip);
-		Set_tx_s((uint8_t)command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
+		Set_tx_s((uint8_t)bootloader_command::echo, 0, 0, 0, 0);
 		UART4_Send_Settings_bootloader();
 		UART4_Receive_timeout_10us();
+		if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
+			strOut += "\n  * * NOISE!!! * *  ";
+		}
 		// if (UART4_Receive_timeout_10us()) {
-		// 	str += " UART timeout " + std::to_string(i);
+		// 	strOut += " UART timeout " + std::to_string(i);
 		// }
 		chip_state = (chip_states)rx_settings[4];
 
-		if (rx_settings[0]) {  // TODO numbers_chips
-			
+		if (rx_settings[0]) {
+
 			uint8_t cursor = 0;
 			uint8_t addr = 0;
 			std::vector<comparator> vComparators;
 			vComparators.reserve(count_comparators);
 
 			for (uint8_t comp = 0; comp < count_comparators; ++comp) {
-				if (chip < division_on_off) {
-					cursor = ((chip - 1) * count_comparators) + comp;
+				if (chip < on_off_division) {
+					cursor = (chip * count_comparators) + comp;
 					addr = cursor;
-					mComparatorCursor_on.emplace(cursor, comparator(cursor, addr, chip, comp));
+					mComparatorCursor_on.emplace(cursor, comparator(cursor, addr, chip, comp, true));
 				}
 				else {
-					cursor = ((chip - division_on_off) * count_comparators) + comp;
+					cursor = ((chip - on_off_division) * count_comparators) + comp;
 					addr = cursor + buffer_division;
-					mComparatorCursor_off.emplace(cursor, comparator(cursor, addr, chip, comp));
+					mComparatorCursor_off.emplace(cursor, comparator(cursor, addr, chip, comp, true));
 				}
-				vComparators.push_back(comparator(cursor, addr, chip, comp));
+				vComparators.push_back(comparator(cursor, addr, chip, comp, true));
 			}
-			vChips.push_back({ chip, vComparators, (chip < division_on_off ? typeAction::on : typeAction::off), chip_state });
+			vChips.push_back({ chip, vComparators, (chip < on_off_division ? typeAction::on : typeAction::off), chip_state });
 
-			str += std::format(" {}", chip);
+			strOut += std::format(" {}", chip);
 		}
 	}
 
@@ -150,69 +171,15 @@ void init_chips() {
 	else {
 		stat = " pianos";
 	}
-	str += stat;
+	strOut += stat;
 
-	debugg_fn(str);
-
-
+	debugg_fn(strOut);
+	cursor = vChips.front().comp.front().cursor;
+	c_mi_ma.cursor_on_min = vChips.front().comp.front().address;
+	c_mi_ma.cursor_on_max = 0;
+	c_mi_ma.cursor_off_min = 0;
+	c_mi_ma.cursor_off_max = vChips.back().comp.back().address;;
 }
-// 	std::string str = "ships .. ";
-// 	std::string stat;
-// 	for (int i = 0; i < 5; ++i) {
-// 		rx_settings[i] = 0;
-// 	}
-// 	int x = 0;
-// 	for (auto& n : numbers_chips) {
-// 		for (int ii = 0; ii < 3; ++ii) {
-// 			UART4_SendAddress(x);
-// 			Set_tx_s((uint8_t)command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
-// 			UART4_Send_Settings_bootloader();
-// 			rx_settings[0] = 0;
-// 			if (UART4_Receive_timeout_10us() && rx_settings[0]) { // TODO странно, ну ладно
-// 				str += " UART timeout " + std::to_string(n);
-// 			}
-// 			if (rx_settings[4] == 1) {
-// 				ship_is = state::bootloader;
-// 				stat = " bootloaders";
-// 			}
-// 			else {
-// 				ship_is = state::piano;
-// 				stat = " pianos";
-// 			}
-// 		}
-// 		if (rx_settings[0]) {
-// 			n = rx_settings[0];
-// 			str += std::format(" {}", n);
-// 		}
-// 		else {
-// 			n = 0;
-// 		}
-// 		if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
-// 			str += "\n  * * NOISE!!! * *  ";
-// 		}
-// 		++x;
-// 	}
-// 	str += stat;
-// 	debugg_fn(str);
-// }
-
-// void reset_bootloaders() {
-// 	for (auto n : numbers_chips) {
-// 		if (n) {
-// 			UART4_SendAddress(n);
-// 			Set_tx_s((uint8_t)command_for_flash_g4::reset_bootloader, 0x04, 0x03, 0x02, 0x01); // 200ms delay
-// 			UART4_Send_Settings_bootloader();
-// 			UART4_Receive_Settings_bootloader();
-// 		}
-// 	}
-// 	pause(500000);
-
-
-
-
-
-
-
 
 int fl = 0; // for test fl
 
@@ -388,7 +355,7 @@ void h7() {
 
 	// память
 	// SaveToMemory();
-	ReadOnMemory(); // восстановление графика при включении
+	// ReadOnMemory(); // восстановление графика при включении
 	// debugg_fn("   -- -- Restore Calib DONE! -- --)"); // DEBUG
 	LL_TIM_DisableCounter(TIM1); // PWM - tim clk
 	// LL_USART_DisableDMAReq_RX(UART5);
@@ -423,7 +390,6 @@ void h7() {
 	// int test_int_timer2_old = test_int_timer2;
 
 	LL_USART_DisableDMAReq_RX(UART5);
-	// G4_echo();
 	init_chips();
 	if (chip_state == chip_states::boot) {
 		jump_g4s_to_adress();
@@ -438,41 +404,21 @@ void h7() {
 
 	while (1) {
 
-		GPIOA->BSRR = 0x10; // for test // DEBUG
 		tud_task();
-		// lv_timer_handler();
 		lv_timer_handler_run_in_period(5);
 		ui_tick();
-		GPIOA->BSRR = 0x100000; // for test // DEBUG
 
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
+
 			if (cur_disp == current_display::on) {
 
-				/*
-				// for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-				// 	sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::read_calibration);
-				// 	for (int i = 0; i < 7; ++i) {
-				// 		UART4_Receive_Settings();
-				// 		compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
-				// 	}
-				// 	refresh_cursor(adress);
-				// }
-				// chart_calib_online = std::to_string(compsCHART_CALIB[cursor]);
-				// l = std::to_string(compsCHART_CALIB[cursor - 1]);
-				// r = std::to_string(compsCHART_CALIB[cursor + 1]);
-				// lv_chart_set_cursor_point(objects.chart_on, ch_on, ser_on_blue, cursor - 7);
-				// lv_chart_refresh(cur_shart);
-				*/
-
-				for (const auto& chip : vChips) { // TODO numbers_chips ok
-					if (chip.typ == typeAction::on) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& comp : chip.comp) {
-							UART4_Receive_Settings();
-							buffer_calib[comp.address] = convert_8_16(a_, b_);
-						}
+				for (const auto& chip : vChips | std::views::take(on_off_division)) { // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
+					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+					for (const auto& comp : chip.comp) {
+						UART4_Receive_Settings();
+						buffer_calib[comp.address] = convert_8_16(a_, b_);
 					}
-					refresh_cursor(chip.number_chip); // TODO refresh_cursor переделать нормально
+					refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
@@ -483,31 +429,14 @@ void h7() {
 
 			if (cur_disp == current_display::off) {
 
-				/*
-				// for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-				// 	sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::read_calibration);
-				// 	for (int i = 0; i < 7; ++i) {
-				// 		UART4_Receive_Settings();
-				// 		compsCHART_CALIB[(adress * 7) + i] = convert_8_16(a_, b_);
-				// 	}
-				// 	refresh_cursor(adress);
-				// }
-				// chart_calib_online = std::to_string(compsCHART_CALIB[cursor + 98]);
-				// l = std::to_string(compsCHART_CALIB[cursor + 98 - 1]);
-				// r = std::to_string(compsCHART_CALIB[cursor + 98 + 1]);
-				// lv_chart_set_cursor_point(objects.chart_off, ch_off, ser_off_blue, cursor);
-				// lv_chart_refresh(cur_shart);
-				*/
-
-				for (const auto& chip : vChips) { // TODO numbers_chips ok
-					if (chip.typ == typeAction::off) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& comp : chip.comp) {
-							UART4_Receive_Settings();
-							buffer_calib[comp.address] = convert_8_16(a_, b_);
-						}
+				for (const auto& chip : vChips | std::views::drop(on_off_division) | std::views::take(allChipCount - on_off_division)) {  // TODO это не то, что я ожидаю...не "пропустить" в количестве "on_off_division"
+					// if ( off ) // TODO реализовать
+					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
+					for (const auto& comp : chip.comp) {
+						UART4_Receive_Settings();
+						buffer_calib[comp.address] = convert_8_16(a_, b_);
 					}
-					refresh_cursor(chip.number_chip); // TODO refresh_cursor переделать нормально
+					refresh_cursor(chip); // TODO refresh_cursor переделать нормально
 				}
 				chart_calib_online = std::to_string(buffer_calib[cursor]);
 				l = std::to_string(buffer_calib[cursor - 1]);
@@ -575,33 +504,12 @@ void h7() {
 } // h7
 
 void sync() { // включает прерывания, осторожно!
-
-	// action__echo_g4s(); // TODO echo?
-
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 	LL_USART_DisableDMAReq_RX(UART5);
 
-
-	/*
 	TIM3->CNT = 0; // сбросить номер контроллера
 	int fl_sync = 0; // for test
-	for (uint8_t i = start_adress_chip_on; i <= end_adress_chip_on; ++i) {
-		fl_sync += sync_sender(i);
-	}
-	for (uint8_t i = start_adress_chip_off; i <= end_adress_chip_off; ++i) {
-		fl_sync += sync_sender(i);
-	}
-	if (fl_sync == 0) {
-		debugg_fn("Sync DONE");
-	}
-	else {
-		debugg_fn(std::format("Sync {} bugs", fl_sync));
-	}
-	*/
-
-	TIM3->CNT = 0; // сбросить номер контроллера
-	int fl_sync = 0; // for test
-	for (const auto& chip : vChips) {  // TODO numbers_chips ok
+	for (const auto& chip : vChips) {
 		fl_sync += sync_sender(chip.number_chip);
 	}
 	if (fl_sync) {
@@ -633,7 +541,7 @@ int sync_sender(const uint8_t& i) {
 	return fs;
 }
 
-void check_max_min() { // TODO не требуется
+void check_max_min() { // TODO deprecated
 	on_off_s1_s2_min_max mm; //  для сброса состояния max_min
 	m_m = mm;
 	if (cur_disp == current_display::on) {
@@ -683,21 +591,9 @@ void check_max_min() { // TODO не требуется
 void all_H7_to_g4() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
-	/*
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
-		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
-		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
-	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
-		sender(command::set_comp_value, i / 7, i % 7, 0, compsCHART_0[i]);
-		sender(command::set_comp_value, i / 7, i % 7, 1, compsCHART_1[i]);
-		sender(command::set_comp_value, i / 7, i % 7, 2, compsCHART_0[i] - (compsCHART_0[i] / 10));
-	}
-	*/
-
 	for (const auto& chip : vChips) {
 		for (const auto& comp : chip.comp) {
-			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::green, buffer_green[comp.address]); // TODO numbers_chips ok
+			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::green, buffer_green[comp.address]);
 			sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::red, buffer_red[comp.address]);
 			if (chip.typ == typeAction::off) {
 				sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::grey, buffer_green[comp.address] - (buffer_green[comp.address] / 10));
@@ -709,25 +605,10 @@ void all_H7_to_g4() {
 void all_g4_to_H7() {
 	pause(10); // если вдруг кто-то захочет что-то отправить... ?
 
-	/*
-	for (uint8_t i = start_adress_chip_on * 7; i <= (end_adress_chip_on * 7) + 1; ++i) {
-		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
-		compsCHART_0[i] = convert_8_16(a_, b_);
-		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
-		compsCHART_1[i] = convert_8_16(a_, b_);
-	}
-	for (uint8_t i = start_adress_chip_off * 7; i <= (end_adress_chip_off * 7) + 6; ++i) {
-		sender(command::read_comp_value, i / 7, i % 7, 0, 0);
-		compsCHART_0[i] = convert_8_16(a_, b_);
-		sender(command::read_comp_value, i / 7, i % 7, 1, 0);
-		compsCHART_1[i] = convert_8_16(a_, b_);
-	}
-	*/
-
 	for (const auto& chip : vChips) {
 		for (const auto& comp : chip.comp) {
 			if (chip.typ == typeAction::on) {
-				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0); // TODO numbers_chips ok
+				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0);
 				buffer_green[comp.address] = convert_8_16(a_, b_);
 				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::red, 0);
 				buffer_red[comp.address] = convert_8_16(a_, b_);
@@ -736,35 +617,35 @@ void all_g4_to_H7() {
 	}
 }
 
-void refresh_cursor(const uint8_t& adress) { // TODO refresh cursor пересобрать  // TODO numbers_chips cursor
-	for (int i = 0; i < 7; ++i) {
-		const int c = (adress * 7) + i;
-		bool fl_c = false;
-		if (buffer_calib[c] < 4080 && buffer_calib[c] > 2) {
+void refresh_cursor(const Chip& chip) { // TODO refresh cursor пересобрать
+	bool fl_c = false;
+	for (const auto& comp : chip.comp) {
+		const auto& addr = comp.address;
+		if (buffer_calib[addr] < 4080 && buffer_calib[addr] > 2) {
 
-			if (buffer_calib_old[c] + 200 < buffer_calib[c]) {
-				buffer_calib_old[c] = buffer_calib[c];
+			if (buffer_calib_old[addr] + 200 < buffer_calib[addr]) {
+				buffer_calib_old[addr] = buffer_calib[addr];
 				fl_c = true;
 			}
-			else if (buffer_calib_old[c] - 200 > buffer_calib[c]) {
-				buffer_calib_old[c] = buffer_calib[c];
+			else if (buffer_calib_old[addr] - 200 > buffer_calib[addr]) {
+				buffer_calib_old[addr] = buffer_calib[addr];
 				fl_c = true;
 			}
 		}
+
 		if (fl_c) {
-			if (c > buffer_division) {
-				cursor = c - buffer_division;
+			cursor = comp.cursor;
+			if (addr > buffer_division) {
 				lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-				sensor_off_1_data_string = std::to_string(buffer_green[c]);
-				sensor_off_2_data_string = std::to_string(buffer_red[c]);
-				cursor_string = std::to_string(cursor + 1);
+				sensor_off_1_data_string = std::to_string(buffer_green[addr]);
+				sensor_off_2_data_string = std::to_string(buffer_red[addr]);
+				cursor_string = std::to_string(cursor);
 			}
 			else {
-				cursor = c;
 				lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
-				sensor_on_1_data_string = std::to_string(buffer_green[c]);
-				sensor_on_2_data_string = std::to_string(buffer_red[c]);
-				cursor_string = std::to_string(cursor - 6);
+				sensor_on_1_data_string = std::to_string(buffer_green[addr]);
+				sensor_on_2_data_string = std::to_string(buffer_red[addr]);
+				cursor_string = std::to_string(cursor);
 			}
 			fl_c = false;
 		}
@@ -1185,15 +1066,15 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
 	uint32_t Addr = FLASH_ADDRESS;
-	for (uint32_t i = 0; i < sizeCHART_BUFFER; i += 8) {
-		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&compsCHART_green[i]) != HAL_OK) {
+	for (uint32_t i = 0; i < size_BUFFER; i += 8) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&buffer_green[i]) != HAL_OK) {
 			HAL_FLASH_Lock();
 			return;
 		}
 		Addr += 0x20;
 	}
-	for (uint32_t i = 0; i < sizeCHART_BUFFER; i += 8) {
-		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&compsCHART_red[i]) != HAL_OK) {
+	for (uint32_t i = 0; i < size_BUFFER; i += 8) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&buffer_red[i]) != HAL_OK) {
 			HAL_FLASH_Lock();
 			return;
 		}
@@ -1201,10 +1082,10 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 	}
 
 	// // замок на запись (по адресу Flash_Address + 0x640)
-	if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory) != HAL_OK) {
-		HAL_FLASH_Lock();
-		return;
-	}
+	// if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&key_to_change_memory) != HAL_OK) {
+	// 	HAL_FLASH_Lock();
+	// 	return;
+	// }
 
 	HAL_FLASH_Lock();
 	SCB_EnableICache();
@@ -1216,9 +1097,9 @@ void ReadOnMemory() { // TODO переделать под vector
 	// 	SaveToMemory();
 	// }
 	// else {
-	for (int i = 0; i < sizeCHART_BUFFER; ++i) {
-		compsCHART_green[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)));
-		compsCHART_red[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)) + 0x320);
+	for (int i = 0; i < size_BUFFER; ++i) {
+		buffer_green[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)));
+		buffer_red[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)) + 0x320); // 0x33C
 	}
 // }
 }
@@ -1539,57 +1420,45 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
-void G4_echo() {
-	std::string str = "ships .. ";
-	std::string stat;
-	for (int i = 0; i < 5; ++i) {
-		rx_settings[i] = 0;
-	}
-	int x = 0;
-	for (auto& n : numbers_chips) {
-		for (int ii = 0; ii < 3; ++ii) {
-			UART4_SendAddress(x);
-			Set_tx_s((uint8_t)command_for_flash_g4::echo_bootloader, 0, 0, 0, 0);
-			UART4_Send_Settings_bootloader();
-			rx_settings[0] = 0;
-			if (UART4_Receive_timeout_10us() && rx_settings[0]) { // TODO странно, ну ладно
-				str += " UART timeout " + std::to_string(n);
-			}
-			if (rx_settings[4] == 1) {
-				ship_is = state::bootloader;
-				stat = " bootloaders";
-			}
-			else {
-				ship_is = state::piano;
-				stat = " pianos";
-			}
-		}
-		if (rx_settings[0]) {
-			n = rx_settings[0];
-			str += std::format(" {}", n);
-		}
-		else {
-			n = 0;
-		}
-		if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
-			str += "\n  * * NOISE!!! * *  ";
-		}
-		++x;
-	}
-	str += stat;
-	debugg_fn(str);
-}
-
-void reset_bootloaders() {
-	for (auto n : numbers_chips) {
-		if (n) {
-			UART4_SendAddress(n);
-			Set_tx_s((uint8_t)command_for_flash_g4::reset_bootloader, 0x04, 0x03, 0x02, 0x01); // 200ms delay
-			UART4_Send_Settings_bootloader();
-			UART4_Receive_Settings_bootloader();
-		}
-	}
-	pause(500000);
+void G4_echo() { // TODO derpecated
+	// std::string str = "ships .. ";
+	// std::string stat;
+	// for (int i = 0; i < 5; ++i) {
+	// 	rx_settings[i] = 0;
+	// }
+	// int x = 0;
+	// for (auto n : numbers_chips) {  // TODO numbers_chips -> vChips
+	// 	for (int ii = 0; ii < 3; ++ii) {
+	// 		UART4_SendAddress(x);
+	// 		Set_tx_s((uint8_t)bootloader_command::echo, 0, 0, 0, 0);
+	// 		UART4_Send_Settings_bootloader();
+	// 		rx_settings[0] = 0;
+	// 		if (UART4_Receive_timeout_10us() && rx_settings[0]) { // TODO странно, ну ладно
+	// 			str += " UART timeout " + std::to_string(n);
+	// 		}
+	// 		if (rx_settings[4] == 1) {
+	// 			ship_is = state::bootloader;
+	// 			stat = " bootloaders";
+	// 		}
+	// 		else {
+	// 			ship_is = state::piano;
+	// 			stat = " pianos";
+	// 		}
+	// 	}
+	// 	if (rx_settings[0]) {
+	// 		n = rx_settings[0];
+	// 		str += std::format(" {}", n);
+	// 	}
+	// 	else {
+	// 		n = 0;
+	// 	}
+	// 	if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
+	// 		str += "\n  * * NOISE!!! * *  ";
+	// 	}
+	// 	++x;
+	// }
+	// str += stat;
+	// debugg_fn(str);
 }
 
 void data_from_H7_to_g4() {
@@ -1599,63 +1468,62 @@ void data_from_H7_to_g4() {
 	int bug = 0;
 
 	// g4 echo .... // TODO зачем, если уже собрал номера чипов?
-	G4_echo();
+	// G4_echo();
 	// g4 echo .... // TODO зачем, если уже собрал номера чипов?
+	init_chips(); // ?
 
-	for (auto n : numbers_chips) {
+
+	for (const auto& chip : vChips) { // TODO numbers_chips -> vChips ok
 		start_adress_memory_read = ADRESS_H7_MAIN_FIRMWARE_FOR_G4;
 		mem = ADRESS_G4_MAIN_FIRMWARE_ALT;
 
-		if (n) {
+		for (uint32_t ii = 0; ii < COUNT_PAGE_FOR_FIRMWARE_G4; ++ii) {
+			UART4_SendAddress(chip.number_chip);
+			Set_tx_s((uint8_t)bootloader_command::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
+			UART4_Send_Settings_bootloader();
 
-			for (int ii = 0; ii < 7; ++ii) { // количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
-				UART4_SendAddress(n);
-				Set_tx_s((uint8_t)command_for_flash_g4::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
-				UART4_Send_Settings_bootloader();
+			// теперь внутри    From_H7_to_array_g4(); 
+			// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
+			UART4_Receive_Settings_bootloader(); // >> 0x11, 0x12, 0x13, 0x14
+			// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
 
-				// теперь внутри    From_H7_to_array_g4(); 
-				// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-				UART4_Receive_Settings_bootloader(); // >> 0x11, 0x12, 0x13, 0x14
-				// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
-
-				uint32_t primask = __get_PRIMASK();
-				volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
+			uint32_t primask = __get_PRIMASK();
+			volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
+			pause(1);
+			for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
+				uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
+				tx_settings[4] = (uint8_t)i;
 				pause(1);
-				for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
-					uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
-					tx_settings[4] = (uint8_t)i;
-					pause(1);
-					UART4_Send_Settings_bootloader();
-					UART4_Receive_Settings_bootloader();
-					if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
-						++bug;
-					}
+				UART4_Send_Settings_bootloader();
+				UART4_Receive_Settings_bootloader();
+				if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
+					++bug;
 				}
-
-				__set_PRIMASK(primask);
-				UART4_Receive_Settings_bootloader(); // response::ok
-				pause(2);
-
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-
-				flash_g4(mem, n);
-
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-				// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
-
-				start_adress_memory_read += 0x800;
-				mem += 0x800;
-				pause(2);
 			}
+
+			__set_PRIMASK(primask);
+			UART4_Receive_Settings_bootloader(); // response::ok
+			pause(2);
+
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+
+			flash_g4(mem, chip.number_chip);
+
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
+
+			start_adress_memory_read += 0x800;
+			mem += 0x800;
+			pause(2);
 		}
-		// debugg_fn(ships_ok);
+	// debugg_fn(ships_ok);
 	}
 	// прыгаем по предустановленному в G4 адресу (0x08008000)
-	// if (!bug) {
-	// 	debugg_fn("\n \n    JUMPING ");
+	if (!bug) {
+		debugg_fn("\n \n    JUMPING ");
 	// 	for (auto n : numbers_chips) {
 	// 		if (n) {
 	// 			UART4_SendAddress(n);
@@ -1670,18 +1538,18 @@ void data_from_H7_to_g4() {
 	// 			pause(200);
 	// 		}
 	// 	}
-	// }
-	// else {
-	// 	debugg_fn(std::format("{} -- copy bugs", bug));
-	// }
-	jump_g4s_to_adress();
+		jump_g4s_to_adress();
+	}
+	else {
+		debugg_fn(std::format("{} -- copy bugs", bug));
+	}
 }
 
-void flash_g4(const uint32_t addr, const int chip_number) {
+void flash_g4(const uint32_t& addr, const int& chip_number) {
 
 
 	UART4_SendAddress(chip_number);
-	Set_tx_s((uint8_t)command_for_flash_g4::copy_array_to_flash_g4, 0x61, 0x62, 0x63, 0x64);
+	Set_tx_s((uint8_t)bootloader_command::copy_array_to_flash_g4, 0x61, 0x62, 0x63, 0x64);
 	UART4_Send_Settings_bootloader();
 
 	// теперь внутри From_array_g4_to_H7();
@@ -1730,44 +1598,43 @@ void flash_g4(const uint32_t addr, const int chip_number) {
 
 void jump_g4s_to_adress() {
 	int bug = 0;
-	G4_echo();
-	for (auto n : numbers_chips) {
+	// G4_echo();
+	init_chips();
+	for (const auto& chip : vChips) { // TODO numbers_chips -> vChips ok
 
-		if (n) {
-			UART4_SendAddress(n);
-			Set_tx_s((uint8_t)command_for_flash_g4::jump_g4_to_adress, 0x88, 0x88, 0x88, 0x88);
-			UART4_Send_Settings_bootloader();
-			UART4_Receive_Settings_bootloader();
-			UART4_Receive_Settings_bootloader(); // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
+		UART4_SendAddress(chip.number_chip);
+		Set_tx_s((uint8_t)bootloader_command::jump_g4_to_adress, 0x88, 0x88, 0x88, 0x88);
+		UART4_Send_Settings_bootloader();
+		UART4_Receive_Settings_bootloader();
+		UART4_Receive_Settings_bootloader(); // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
 
-			if (bytes_to_uint32_pointer(&rx_settings[1]) != bytes_to_uint32_pointer(&tx_settings[1])) {
-				++bug;
-			}
-			pause(4);
-
-			// отправка адреса
-			uint32_to_bytes_pointer(ADRESS_G4_MAIN_FIRMWARE_ALT, tx_settings);
-			tx_settings[4] = n;
-			UART4_Send_Settings_bootloader();
-			UART4_Receive_Settings_bootloader(); // принять (полученный g4 адрес)
-			uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
-			pause(1);
-
-			// если ок, то прыгаем
-			if (addr_back == ADRESS_G4_MAIN_FIRMWARE_ALT) {
-				Set_tx_s((uint8_t)response::ok, 0x03, 0x02, 0x01, 0x00);
-				UART4_Send_Settings_bootloader();
-			}
-			else {
-				debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, ADRESS_G4_MAIN_FIRMWARE_ALT));
-			}
-			UART4_Receive_Settings_bootloader();
-			UART4_Receive_Settings_bootloader();
-			if (rx_settings[0] != n) {
-				debugg_fn(std::format(" start {} fail \n", n)); // DEBUG
-			}
-			pause(200);
+		if (bytes_to_uint32_pointer(&rx_settings[1]) != bytes_to_uint32_pointer(&tx_settings[1])) {
+			++bug;
 		}
+		pause(4);
+
+		// отправка адреса
+		uint32_to_bytes_pointer(ADRESS_G4_MAIN_FIRMWARE_ALT, tx_settings);
+		tx_settings[4] = chip.number_chip;
+		UART4_Send_Settings_bootloader();
+		UART4_Receive_Settings_bootloader(); // принять (полученный g4 адрес)
+		uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
+		pause(1);
+
+		// если ок, то прыгаем
+		if (addr_back == ADRESS_G4_MAIN_FIRMWARE_ALT) {
+			Set_tx_s((uint8_t)response::ok, 0x03, 0x02, 0x01, 0x00);
+			UART4_Send_Settings_bootloader();
+		}
+		else {
+			debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, ADRESS_G4_MAIN_FIRMWARE_ALT));
+		}
+		UART4_Receive_Settings_bootloader();
+		UART4_Receive_Settings_bootloader();
+		if (rx_settings[0] != chip.number_chip) {
+			debugg_fn(std::format(" start {} fail \n", chip.number_chip)); // DEBUG
+		}
+		pause(200);
 	}
 
 	if (bug) {
@@ -1777,18 +1644,51 @@ void jump_g4s_to_adress() {
 	// pause(50000); // 50ms
 }
 
-void reset_main_to_bootloader() {
-	G4_echo();
-	if (ship_is == state::piano) {
-		for (auto n : numbers_chips) {
-			if (n) {
-				UART4_SendAddress(n);
-				UART4_Send_Settings(command::reset_to_bootloader, 3, 2, 1);
-			}
+void reset_bootloaders() { // TODO numbers_chips -> vChips ok
+	if (chip_state == chip_states::boot) {
+		for (const auto& chip : vChips) {
+			UART4_SendAddress(chip.number_chip);
+			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
+			UART4_Send_Settings_bootloader();
+			UART4_Receive_Settings_bootloader();
 		}
 	}
 	else {
-		debugg_fn(" state NOT MAIN ");
+		debugg_fn(" state   NOT BOOTLOADER ");
+	}
+	pause(500000);
+}
+
+void reset_main_to_bootloader() {
+	G4_echo();
+	if (chip_state == chip_states::main) {
+		for (const auto& chip : vChips) { // TODO numbers_chips -> vChips ok
+			UART4_SendAddress(chip.number_chip);
+			UART4_Send_Settings(command::reset_to_bootloader, 3, 2, 1);
+		}
+	}
+	else {
+		debugg_fn(" state   NOT MAIN ");
+	}
+}
+
+const comparator& searcher_addr_in_cursor(const uint32_t& c) {
+	std::map<uint8_t, comparator>* mComparatorCursor_temp;
+
+	if (cur_disp == current_display::on) {
+		mComparatorCursor_temp = &mComparatorCursor_on;
+	}
+	else {
+		mComparatorCursor_temp = &mComparatorCursor_off;
+	}
+
+	auto it = mComparatorCursor_temp->find(c);
+
+	if (it != mComparatorCursor_temp->end()) {
+		return it->second;
+	}
+	else {
+		return default_comparator; // initial value of reference to non-const must be an lvalueC/C++(461)
 	}
 }
 
@@ -1798,45 +1698,32 @@ extern "C" {
 
 	// to dispays
 	void action_to_main_disp(lv_event_t* e) {
-
 		LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть здесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
-
 		pause(2);
+
 		if (cur_disp == current_display::on) {
-
-			/*
-			for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-				sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::stop_calibration);
-			}
-			*/
-
-			for (const auto& n : vChips) {
-				if (n.typ == typeAction::on) {
-					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration); // TODO numbers_chips ok
+			for (const auto& chip : vChips) {
+				if (chip.typ == typeAction::on) {
+					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
 				}
 				else {
-					sender(command::unmute, n.number_chip, 0, dot::green, 0); // TODO chips OFF - unmute
+					sender(command::unmute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
 				}
 			}
 		}
+
 		if (cur_disp == current_display::off) {
-
-			/*
-			for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-				sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::stop_calibration);
-			}
-			*/
-
-			for (const auto& n : vChips) {
-				if (n.typ == typeAction::off) {
-					sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration); // TODO numbers_chips ok
+			for (const auto& chip : vChips) {
+				if (chip.typ == typeAction::off) {
+					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
 				}
 				else {
-					sender(command::unmute, n.number_chip, 0, dot::green, 0);  // TODO chips ON - unmute
+					sender(command::unmute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
 				}
 			}
 
 		}
+
 		cur_disp = current_display::dis_main;
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
@@ -1857,18 +1744,12 @@ extern "C" {
 		debugg_clear();
 		all_g4_to_H7();
 
-		/*
-		for (uint8_t adress = start_adress_chip_on; adress <= end_adress_chip_on; ++adress) {
-			sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::start_calibration);
-		}
-		*/
-
-		for (const auto& n : vChips) {
-			if (n.typ == typeAction::on) {
-				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);// TODO numbers_chips ok
+		for (const auto& chip : vChips) {
+			if (chip.typ == typeAction::on) {
+				sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
 			}
 			else {
-				sender(command::mute, n.number_chip, 0, dot::green, 0);  // TODO chips OFF - mute
+				sender(command::mute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
 			}
 		}
 	}
@@ -1882,18 +1763,12 @@ extern "C" {
 		debugg_clear();
 		all_g4_to_H7();
 
-		/*
-		for (uint8_t adress = start_adress_chip_off; adress <= end_adress_chip_off; ++adress) {
-			sender(command::all_calib, adress, 0, 0, (uint32_t)subcommand::start_calibration);
-		}
-		*/
-
-		for (const auto& n : vChips) {
-			if (n.typ == typeAction::off) {
-				sender(command::all_calib, n.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration); // TODO numbers_chips ok
+		for (const auto& chip : vChips) {
+			if (chip.typ == typeAction::off) {
+				sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
 			}
 			else {
-				sender(command::mute, n.number_chip, 0, dot::green, 0);  // TODO chips ON - mute
+				sender(command::mute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
 			}
 		}
 	}
@@ -1907,7 +1782,8 @@ extern "C" {
 
 	// buttons
 	void action__echo_g4s(lv_event_t* e) {
-		G4_echo();
+		// G4_echo(); // TODO deprecated
+		init_chips();
 	}
 
 	void action_h7_g4(lv_event_t* e) { // копирует и шъёт одной кнопкой все чипы
@@ -1982,136 +1858,83 @@ extern "C" {
 		}
 	}
 
-	void action_calib_sensor_on_green(lv_event_t* e) { // TODO numbers_chips
-		// const uint8_t adr = cursor / 7;
-		// const uint8_t c = cursor % 7;
-		auto it = mComparatorCursor_on.find(cursor);
-		if (it != mComparatorCursor_on.end()) {
-			sender(command::set_comp_value, it->second.number_chip, it->second.number_comparator, dot::green, buffer_calib[cursor]);
-			// sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
-			buffer_green[cursor] = convert_8_16(a_, b_);
-			sensor_on_1_data_string = std::to_string(buffer_green[cursor]);
-			lv_chart_refresh(cur_shart);
-		}
-	}
-
-	void action_calib_sensor_on_red(lv_event_t* e) { // TODO numbers_chips
-		const uint8_t adr = cursor / 7;
-		const uint8_t c = cursor % 7;
-		const dot d = dot::red;
-		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cursor]);
-		compsCHART_red[cursor] = convert_8_16(a_, b_);
-		sensor_on_2_data_string = std::to_string(compsCHART_red[cursor]);
+	void action_calib_sensor_on_green(lv_event_t* e) {
+		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_calib[comp.address]);
+		buffer_green[comp.address] = convert_8_16(a_, b_);
+		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 		lv_chart_refresh(cur_shart);
 	}
 
-	void action_calib_sensor_off_green(lv_event_t* e) { // TODO numbers_chips
-		// cursor += buffer_division;
-		const uint8_t cu = cursor + 98;
-		const uint8_t adr = cu / 7;
-		const uint8_t c = cu % 7;
-		const dot d = dot::green;
-		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
-		compsCHART_green[cu] = convert_8_16(a_, b_);
-		sensor_off_1_data_string = std::to_string(compsCHART_green[cu]);
+	void action_calib_sensor_on_red(lv_event_t* e) {
+		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_calib[comp.address]);
+		buffer_red[comp.address] = convert_8_16(a_, b_);
+		sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
 		lv_chart_refresh(cur_shart);
 	}
 
-	void action_calib_sensor_off_red(lv_event_t* e) { // TODO numbers_chips
-		// cursor += buffer_division;
-		const uint8_t cu = cursor + 98;
-		const uint8_t adr = cu / 7;
-		const uint8_t c = cu % 7;
-		const dot d = dot::red;
-		sender(command::set_comp_value, adr, c, d, compsCHART_CALIB[cu]);
-		compsCHART_red[cu] = convert_8_16(a_, b_);
-		sensor_off_2_data_string = std::to_string(compsCHART_red[cu]);
+	void action_calib_sensor_off_green(lv_event_t* e) {
+		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_calib[comp.address]);
+		buffer_green[comp.address] = convert_8_16(a_, b_);
+		sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
 		lv_chart_refresh(cur_shart);
 	}
 
-	void set_cursor_piont_on() {
-		cursor_string = std::to_string(cursor - 6);
-		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor - 7);
-		sensor_on_1_data_string = std::to_string(compsCHART_green[cursor]);
-		sensor_on_2_data_string = std::to_string(compsCHART_red[cursor]);
+	void action_calib_sensor_off_red(lv_event_t* e) {
+		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_calib[comp.address]);
+		buffer_red[comp.address] = convert_8_16(a_, b_);
+		sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
+		lv_chart_refresh(cur_shart);
 	}
 
-	void set_cursor_piont_off() {
-		cursor_string = std::to_string(cursor + 1);
+	void set_cursor_piont_on(const comparator& comp) {
+		cursor_string = std::to_string(cursor);
+		lv_chart_set_cursor_point(objects.chart_on, c_on, ser_on_green, cursor);
+		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
+		sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
+
+	}
+
+	void set_cursor_piont_off(const comparator& comp) {
+		cursor_string = std::to_string(cursor);
 		lv_chart_set_cursor_point(objects.chart_off, c_off, ser_off_green, cursor);
-		sensor_off_1_data_string = std::to_string(compsCHART_green[cursor + 98]);
-		sensor_off_2_data_string = std::to_string(compsCHART_red[cursor + 98]);
+		sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
+		sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
+
 	}
 
 	void action_cursor_minus(lv_event_t* e) {
-		// if (cur_disp == current_display::on) { // TODO удалить это
-		// 	if (cursor > 7) {
-		// 		cursor = cursor - 1;
-		// 	}
-		// 	set_cursor_piont_on();
-		// }
-		// else {
-		// 	if (cursor > 0) {
-		// 		cursor = cursor - 1;
-		// 	}
-		// 	set_cursor_piont_off();
-		// }
-		if (mComparatorCursor_on.contains(cursor - 1)) {
+		const auto& comp = searcher_addr_in_cursor(cursor - 1);
+		if (comp.is_active) {
 			cursor -= 1;
+			set_cursor_piont_on(comp);
 		}
 	}
 
 	void action_cursor_plus(lv_event_t* e) {
-		// if (cur_disp == current_display::on) { // TODO удалить это
-		// 	if (cursor < 95) {
-		// 		cursor = cursor + 1;
-		// 	}
-		// 	set_cursor_piont_on();
-		// }
-		// else {
-		// 	if (cursor < 69) {
-		// 		cursor = cursor + 1;
-		// 	}
-		// 	set_cursor_piont_off();
-		// }
-		if (mComparatorCursor_on.contains(cursor + 1)) {
+		const auto& comp = searcher_addr_in_cursor(cursor + 1);
+		if (comp.is_active) {
 			cursor += 1;
+			set_cursor_piont_on(comp);
 		}
 	}
 
 	void action_cursor_minus_7(lv_event_t* e) {
-		// if (cur_disp == current_display::on) { // TODO удалить это
-		// 	if (cursor > 13) {
-		// 		cursor = cursor - 7;
-		// 	}
-		// 	set_cursor_piont_on();
-		// }
-		// else {
-		// 	if (cursor > 6) {
-		// 		cursor = cursor - 7;
-		// 	}
-		// 	set_cursor_piont_off();
-		// }
-		if (mComparatorCursor_on.contains(cursor - 7)) {
+		const auto& comp = searcher_addr_in_cursor(cursor - 7);
+		if (comp.is_active) {
 			cursor -= 7;
+			set_cursor_piont_on(comp);
 		}
 	}
 
 	void action_cursor_plus_7(lv_event_t* e) {
-		// if (cur_disp == current_display::on) { // TODO удалить это
-		// 	if (cursor < 89) {
-		// 		cursor = cursor + 7;
-		// 	}
-		// 	set_cursor_piont_on();
-		// }
-		// else {
-		// 	if (cursor < 63) {
-		// 		cursor = cursor + 7;
-		// 	}
-		// 	set_cursor_piont_off();
-		// }
-		if (mComparatorCursor_on.contains(cursor + 7)) {
+		const auto& comp = searcher_addr_in_cursor(cursor + 7);
+		if (comp.is_active) {
 			cursor += 7;
+			set_cursor_piont_on(comp);
 		}
 	}
 

@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/2",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
     "selectedActionObject": "[display_piano.eez-project]:/actions/12",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/0",
     "subnavigationSelectedItems": {
@@ -198,15 +198,16 @@
                 {
                   "type": "tab",
                   "id": "#e35000eb-889a-4109-81c7-81575dc3cf70",
-                  "name": "d_chart_calib_on",
+                  "name": "d_chart_calib_off",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/2",
+                    "objectPath": "[display_piano.eez-project]:/userPages/3",
                     "permanent": false
                   },
                   "icon": "svg:page"
                 }
-              ]
+              ],
+              "active": true
             },
             {
               "type": "row",
@@ -226,8 +227,7 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ],
-                  "active": true
+                  ]
                 },
                 {
                   "type": "tabset",
@@ -1050,7 +1050,9 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {},
+          "1": {
+            "$selected": true
+          },
           "2": {},
           "3": {},
           "4": {},
@@ -1098,10 +1100,10 @@
     "[display_piano.eez-project]:/userPages/3[flow-state]": {
       "selection": {
         "0": {
-          "0": {
+          "0": {},
+          "1": {
             "$selected": true
           },
-          "1": {},
           "2": {},
           "3": {},
           "4": {},
