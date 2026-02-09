@@ -265,21 +265,31 @@ void init_chips() {
 
 	debugg_fn(strOut);
 
-	// c_mi_ma.cursor_on_min = vChips.front().comp.front().address; // TODO установить края отображаемого графика
-	// c_mi_ma.cursor_on_max = 0;
-	// c_mi_ma.cursor_off_min = 0;
-	// c_mi_ma.cursor_off_max = vChips.back().comp.back().address;
+
+
+
+	c_mi_ma.cursor_on_min = vChips.front().comparators.front().address; // TODO установить края отображаемого графика
+	for (auto&& [prev, current] : vChips | std::views::adjacent<2>) {
+		if (current.typ == typeAction::off) {
+			c_mi_ma.cursor_on_max = prev.comparators.back().address;
+			c_mi_ma.cursor_off_min = current.comparators.front().address;
+		}
+	}
+	c_mi_ma.cursor_off_max = vChips.back().comparators.back().address;
+
+	debugg_fn(std::format("{} , {} , {} , {}", c_mi_ma.cursor_on_min, c_mi_ma.cursor_on_max, c_mi_ma.cursor_off_min, c_mi_ma.cursor_off_max));
+
 
 	// lv_obj_t* ob = objects.chart_on;
-	// lv_chart_set_point_count(ob, buffer_division);
-	// lv_chart_set_series_ext_y_array(ob, ser_on_green, buffer_green);
-	// lv_chart_set_series_ext_y_array(ob, ser_on_red, buffer_red);
-	// lv_chart_set_series_ext_y_array(ob, ser_on_blue, buffer_calib);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_green, &buffer_green[c_mi_ma.cursor_on_min]);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_red, &buffer_red[c_mi_ma.cursor_on_min]);
+	// lv_chart_set_series_ext_y_array(ob, ser_on_blue, &buffer_calib[c_mi_ma.cursor_on_min]);
+	// lv_chart_set_point_count(ob, c_mi_ma.cursor_on_max - c_mi_ma.cursor_on_min);
 	// ob = objects.chart_off;
-	// lv_chart_set_point_count(ob, buffer_division);
-	// lv_chart_set_series_ext_y_array(ob, ser_off_green, &buffer_green[buffer_division]);
-	// lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[buffer_division]);
-	// lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_calib[buffer_division]);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_green, &buffer_green[c_mi_ma.cursor_off_min]);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[c_mi_ma.cursor_off_min]);
+	// lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_calib[c_mi_ma.cursor_off_min]);
+	// lv_chart_set_point_count(ob, c_mi_ma.cursor_off_max - c_mi_ma.cursor_off_min);
 
 }
 
@@ -850,20 +860,14 @@ void initBuffers() {
 	// }
 
 	for (uint32_t i = 0; i < buffer_division; ++i) {
-		// buffer_green[i] = green_on_default;
-		// buffer_red[i] = red_on_default;
-		// buffer_calib[i] = 0;
-		buffer_green[i] = i;
-		buffer_red[i] = i + 100;
-		buffer_calib[i] = i + 200;
+		buffer_green[i] = green_on_default;
+		buffer_red[i] = red_on_default;
+		buffer_calib[i] = 0;
 	}
 	for (uint32_t i = buffer_division; i < size_BUFFER; ++i) {
-		// buffer_green[i] = green_off_default;
-		// buffer_red[i] = red_off_default;
-		// buffer_calib[i] = 0;
-		buffer_green[i] = i + 200;
-		buffer_red[i] = i + 300;
-		buffer_calib[i] = i + 400;
+		buffer_green[i] = green_off_default;
+		buffer_red[i] = red_off_default;
+		buffer_calib[i] = 0;
 	}
 
 	for (uint i = 0; i < size_BUFFER; ++i) { // TODO note shift // TODO проверить здесь что происходит...
