@@ -956,8 +956,8 @@ void chart_correction(const uint32_t& x, const plus_minus& pm) {
 	lv_chart_refresh(cur_shart);
 }
 
-void SaveToMemory() { // TODO посмотреть новые функции записи-считывания в память от ИИ, может их использовать?
- // TODO переделать под vector
+void SaveToMemory() {
+
 	SCB_DisableICache();
 	SCB_DisableDCache();
 	HAL_FLASH_Unlock();
@@ -968,6 +968,9 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 	for (uint32_t i = 0; i < size_BUFFER; i += 8) {
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&buffer_green[i]) != HAL_OK) {
 			HAL_FLASH_Lock();
+			SCB_EnableICache();
+			SCB_EnableDCache();
+			debugg_fn(" FLASH err 1 ");
 			return;
 		}
 		Addr += 0x20;
@@ -975,6 +978,9 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 	for (uint32_t i = 0; i < size_BUFFER; i += 8) {
 		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, Addr, (uint32_t)&buffer_red[i]) != HAL_OK) {
 			HAL_FLASH_Lock();
+			SCB_EnableICache();
+			SCB_EnableDCache();
+			debugg_fn(" FLASH err 2 ");
 			return;
 		}
 		Addr += 0x20;
@@ -989,18 +995,26 @@ void SaveToMemory() { // TODO посмотреть новые функции з�
 	HAL_FLASH_Lock();
 	SCB_EnableICache();
 	SCB_EnableDCache();
+
 }
 
-void ReadOnMemory() { // TODO переделать под vector
+void ReadOnMemory() {
+	// SCB_InvalidateDCache();
 	// if ((*(volatile uint32_t*)(Flash_Address + 0x640)) != key_to_change_memory) {
 	// 	SaveToMemory();
 	// }
 	// else {
-	for (int i = 0; i < size_BUFFER; ++i) {
+
+	// Вычисляем смещение для buffer_red
+	// buffer_green занимает: 200 элементов * 4 байта = 800 байт = 0x320
+	// НО! При записи используется FLASHWORD (32 байта на 8 элементов)
+	// 200 элементов / 8 = 25 блоков * 32 байта = 800 байт = 0x320
+	const uint32_t offset_buffer_red = (size_BUFFER / 8) * 0x20; // = 25 * 32 = 800 = 0x320
+	for (uint32_t i = 0; i < size_BUFFER; ++i) {
 		buffer_green[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)));
-		buffer_red[i] = *(volatile uint32_t*)(FLASH_ADDRESS + (i * sizeof(uint32_t)) + 0x320); // 0x33C
+		buffer_red[i] = *(volatile uint32_t*)(FLASH_ADDRESS + offset_buffer_red + (i * sizeof(uint32_t)));
 	}
-// }
+	// }
 }
 
 // (1uS)
@@ -1848,6 +1862,11 @@ extern "C" {
 
 	void action_restore_calibration(lv_event_t* e) {
 		ReadOnMemory();
+		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
+		all_H7_to_g4();
+		LL_USART_EnableDMAReq_RX(UART5);
+		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
 		debugg_fn(" calib restored "); // DEBUG
 	}
 
