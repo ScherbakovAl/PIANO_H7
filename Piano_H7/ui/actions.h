@@ -7,57 +7,26 @@
 extern "C" {
 #endif
 
-extern void action_to_main_disp(lv_event_t * e);
+extern void action_save_calibration(lv_event_t * e);
+extern void action_restore_calibration(lv_event_t * e);
 extern void action_piano_off(lv_event_t * e);
-extern void action_pre_pressure_switching(lv_event_t * e);
+extern void action_to_disp_flash(lv_event_t * e);
 extern void action_to_disp_calibration_on(lv_event_t * e);
 extern void action_to_disp_calibration_off(lv_event_t * e);
-extern void action_to_disp_manual_edit_on(lv_event_t * e);
-extern void action_to_disp_manual_edit_off(lv_event_t * e);
-extern void action_to_disp_graph_resize_on(lv_event_t * e);
-extern void action_to_disp_back(lv_event_t * e);
+extern void action_to_main_disp(lv_event_t * e);
+extern void action__echo_g4s(lv_event_t * e);
+extern void action_reset_bootloader_g4(lv_event_t * e);
+extern void action_reset_main_to_bootloader(lv_event_t * e);
+extern void action_h7_g4(lv_event_t * e);
+extern void action_jump(lv_event_t * e);
 extern void action_calib_sensor_on_green(lv_event_t * e);
 extern void action_calib_sensor_on_red(lv_event_t * e);
 extern void action_calib_sensor_off_green(lv_event_t * e);
 extern void action_calib_sensor_off_red(lv_event_t * e);
-extern void action_to_disp_divisible_edit(lv_event_t * e);
 extern void action_cursor_minus(lv_event_t * e);
 extern void action_cursor_plus(lv_event_t * e);
 extern void action_cursor_minus_7(lv_event_t * e);
 extern void action_cursor_plus_7(lv_event_t * e);
-extern void action_add_1(lv_event_t * e);
-extern void action_add_10(lv_event_t * e);
-extern void action_add_100(lv_event_t * e);
-extern void action_add_1000(lv_event_t * e);
-extern void action_sub_1(lv_event_t * e);
-extern void action_sub_10(lv_event_t * e);
-extern void action_sub_100(lv_event_t * e);
-extern void action_sub_1000(lv_event_t * e);
-extern void action_save_calibration(lv_event_t * e);
-extern void action_s1__s2_upd(lv_event_t * e);
-extern void action_top_bot(lv_event_t * e);
-extern void action_div_add_100(lv_event_t * e);
-extern void action_div_add_1000(lv_event_t * e);
-extern void action_div_add_10000(lv_event_t * e);
-extern void action_div_add_100000(lv_event_t * e);
-extern void action_div_sub_100(lv_event_t * e);
-extern void action_div_sub_1000(lv_event_t * e);
-extern void action_div_sub_10000(lv_event_t * e);
-extern void action_div_sub_100000(lv_event_t * e);
-extern void action_to_disp_graph_resize_off(lv_event_t * e);
-extern void action_set(lv_event_t * e);
-extern void action_auto_size(lv_event_t * e);
-extern void action_restore_calibration(lv_event_t * e);
-extern void action_max_size_chart(lv_event_t * e);
-extern void action_set_all(lv_event_t * e);
-extern void action_calib_all(lv_event_t * e);
-extern void action_read_all(lv_event_t * e);
-extern void action_to_disp_flash(lv_event_t * e);
-extern void action__echo_g4s(lv_event_t * e);
-extern void action_h7_g4(lv_event_t * e);
-extern void action_jump(lv_event_t * e);
-extern void action_reset_bootloader_g4(lv_event_t * e);
-extern void action_reset_main_to_bootloader(lv_event_t * e);
 
 
 #ifdef __cplusplus

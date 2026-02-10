@@ -18,103 +18,23 @@
 #ifdef __cplusplus
 extern "C" {
 
-	std::string ch_o;
-	std::string ch_f;
-	std::string s1_on_min;
-	std::string s1_on_max;
-	std::string s2_on_min;
-	std::string s2_on_max;
-	std::string s1_off_min;
-	std::string s1_off_max;
-	std::string s2_off_min;
-	std::string s2_off_max;
-	std::string sensor_on_1_data_string;
-	std::string sensor_on_2_data_string;
-	std::string sensor_off_1_data_string;
-	std::string sensor_off_2_data_string;
-	std::string divisible_eez_string;
-	std::string cursor_string;
-	std::string disp_on_off_button;
-	std::string disp_on_off_button_3;
-	std::string top_bot_str;
-	std::string top_bot_str_2;
-	std::string debugg;  // DEBUG
-	std::string chart_calib_online;
-	std::string l;
-	std::string r;
-
-
-
-
-	using uint = unsigned int;
-	using cuint = const uint;
-
-	struct conv_16_8 {
-		uint8_t a = 0;
-		uint8_t b = 0;
-	};
-
-	struct min_max {
-		int32_t max = 0;
-		int32_t min = 4095;
-	};
-
-	struct s1s2 {
-		min_max s_green;
-		min_max s_red;
-	};
-
-	struct on_off_s1_s2_min_max {
-		s1s2 on;
-		s1s2 off;
-	};
-
 	enum class dot {
 		green = 0,
 		red = 1,
 		grey
 	};
 
-	enum class plus_minus {
-		plus,
-		minus,
-		none
-	};
-
 	enum class current_display {
 		on,
 		off,
-		d_none,
-		dis_main,
-		d_flash
-	};
-
-	enum class color_but {
-		green,
-		red,
-		c_none
-	};
-
-	enum class but_top_bot {
-		top,
-		bot,
-		t_none
-	};
-
-	enum class calib_all_on_off {
-		calib_on,
-		calib_off,
-		calib_none
+		none,
+		main,
+		bootloader
 	};
 
 	enum class response {
 		ok = 0x0C,
 		fail = 0xDD
-	};
-
-	enum class state { // TODO deprecated
-		bootloader = 1,
-		piano
 	};
 
 	enum class command { // TODO G4 обновить код
@@ -149,19 +69,19 @@ extern "C" {
 
 	enum class chip_states {
 		boot = 1,
-		main
+		main,
+		none
 	};
 
 	enum class typeAction {
 		on = 1,
-		off
+		off,
+		none
 	};
 
-	struct cursor_min_max {
-		uint8_t cursor_on_min = 0;
-		uint8_t cursor_on_max = 0;
-		uint8_t cursor_off_min = 0;
-		uint8_t cursor_off_max = 0;
+	struct conv_16_8 {
+		uint8_t a = 0;
+		uint8_t b = 0;
 	};
 
 	struct comparator {
@@ -173,67 +93,45 @@ extern "C" {
 	};
 
 	struct Chip {
-		uint8_t number_chip = 0; // переделать в просто "number"
-		std::vector<comparator> comparators; // переделать в "comps"
-		typeAction typ = typeAction::on;
-		chip_states st = chip_states::boot;
+		uint8_t number_chip = 0;
+		std::vector<comparator> comparators;
+		typeAction typ = typeAction::none;
+		chip_states st = chip_states::none;
 	};
 
-		// номер 95 у последней верхней клавиши
-		// ***** 390(263)-14000(22723)us пролёт молоточка
 
-	const uint32_t allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер // TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! И надо ставить на один больше, чем фактически? 
-
-	const uint8_t start_adress_chip_on = 5; // включительно (1)
-	const uint8_t end_adress_chip_on = 7; // включительно (13) (если < start_adress_chip_on, то выключено) // TODO проверить этот момент..
-	const uint8_t start_adress_chip_off = 14; // включительно (14)
-	const uint8_t end_adress_chip_off = 10; // включительно всего (23)
-
-	const uint32_t start_cursor = 35;
-	volatile uint32_t cursor = start_cursor; // TODO volatile?
-
+	// ***** 390(263)-14000(22723)us пролёт молоточка
 	uint8_t rx_data[4] = { };
 	const uint32_t dataLengthRX = sizeof(rx_data);
 	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
-	const uint8_t tx_settings_length = sizeof(tx_settings);
+	const uint32_t tx_settings_length = sizeof(tx_settings);
 	__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
-	const uint8_t rx_settings_length = sizeof(rx_settings);
+	const uint32_t rx_settings_length = sizeof(rx_settings);
 	uint8_t compN_ = 0;
 	uint8_t dot_ = 0;
 	uint8_t a_ = 0;
 	uint8_t b_ = 0;
-	state ship_is = state::bootloader;
 
-	int32_t def_on[2] = { 2600, 1000 }; // [0]-green, [1]-red
-	int32_t def_off[2] = { 2100, 2400 }; // [0]-green, [1]-red
-
-	const int32_t sizeCHART_BUFFER = 196;
-	int32_t compsCHART_green[sizeCHART_BUFFER] = {}; // green // TODO vector переделать это в vector
-	int32_t compsCHART_red[sizeCHART_BUFFER] = {}; // red
-	int32_t compsCHART_CALIB[sizeCHART_BUFFER] = {};
-	int32_t compsCHART_CALIB_old[sizeCHART_BUFFER] = {};
-
-	std::vector<int> numbers_chips; // TODO deprecated
-
-
-
-	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 	// new variants
+	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
-	static const uint32_t ADRESS_H7_BOOTLOADER = 0x08000000;
-	static const uint32_t ADRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
-	static const uint32_t ADRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
-	// надо 6 копирований делать в G4                    ^^^^^^^^^^^^^
-	static const uint32_t FLASH_ADDRESS = 0x080E0000; // -здесь лежит калибровка
+	static const uint32_t ADDRESS_H7_BOOTLOADER = 0x08000000;
+	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
+	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
+	static const uint32_t ADDRESS_H7_CALIB = 0x080E0000; // -здесь лежит калибровка
 
-	static const uint32_t ADRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
-	static const uint32_t ADRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
-	static const uint32_t ADRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
+	static const uint32_t ADDRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
+	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
+	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
 	static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 7;// количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
+
+
+	const uint32_t allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер 
+	const uint32_t on_off_division = 14; // точка разделения on-off
 
 	const uint32_t size_BUFFER = 200; // чётное
 	const uint32_t buffer_division = size_BUFFER / 2;
-	const uint32_t on_off_division = 14; // точка разделения on-off
+	const uint32_t count_comparators = 7;
 
 	int32_t buffer_green[size_BUFFER] = {};
 	int32_t buffer_red[size_BUFFER] = {};
@@ -250,51 +148,37 @@ extern "C" {
 	std::map<uint8_t, comparator> mComparatorCursor_off;
 	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
 
-	const uint8_t count_comparators = 7;
 	chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
-	cursor_min_max c_mi_ma; // TODO реализовать мин-макс
-
-	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
-
-	int fl = 0; // for test fl
-
-	float timerLenght_F = 0; // for test
-	float speed_F = 0; // for test
-	float energy_F = 0; // for test
-	float midi_hi_F = 0; // for test
-	float midi_lo_F = 0; // for test
-	uint32_t debug_counter = 0;
-	int tt1 = 0;
-	int tt2 = 0;
-	int tt3 = 0;
-	float timer_data_in = 0;
+	current_display cur_disp = current_display::none;
+	volatile uint32_t cursor = 0; // TODO volatile?
 
 	int8_t noteAdder[size_BUFFER] = {};
 	float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
 
+	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
-	 // TODO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TODO int->uint32_t ?? в 449й строке сохранение в память потому-что! 
+	int fl = 0; // for test fl
+	float speed_F = 0; // for test
+	float energy_F = 0; // for test
+	float midi_hi_F = 0; // for test
+	float midi_lo_F = 0; // for test
+	float timer_data_in = 0;
+	uint32_t debug_counter = 0;
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
-	on_off_s1_s2_min_max m_m;
-	int32_t on_green_max = 4095;
-	int32_t on_green_min = 0;
-	int32_t on_red_max = 4095;
-	int32_t on_red_min = 0;
-	int32_t off_green_max = 4095;
-	int32_t off_green_min = 0;
-	int32_t off_red_max = 4095;
-	int32_t off_red_min = 0;
-	int divis = 100'000'000;
 
-	volatile int touchpad_pressed = 0; // TODO deprecated?
-	int touchpad_x = 0; // TODO deprecated?
-	int touchpad_y = 0; // TODO deprecated?
+	const float key_mass = 0.008f; // 8 гр -->> переехал в массив
+	const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+	const float div_on = 0.000000000092f; // меньше - громче
+	const float div_off = 0.00000000004f; // меньше - громче 
+	const float deriv_F = 2.0f; // делить на 2 в формуле
+	const float maxMidi_F = 127.99f;
 
-	current_display cur_disp = current_display::d_none;
-	color_but col_but = color_but::c_none;
-	but_top_bot top_bot = but_top_bot::t_none;
-	calib_all_on_off calib_all_OnOff = calib_all_on_off::calib_none;
+	const float key_mass_2 = 819.79f;
+	const float distance_2 = 17000.0f;
+	const float aX = 24568.0f;
+	const float aY = -1.2f;
+
 
 	void pwr();
 	void to_sleep();
@@ -304,60 +188,63 @@ extern "C" {
 	void disp_start();
 	void touch_start();
 	void init_chips();
+	void init_buffers();
+	void config_charts();
 	void h7();
 	void sync();
 	int sync_sender(const uint8_t& i);
-	void initBuffers();
-	void check_max_min();
 	void all_H7_to_g4();
 	void all_g4_to_H7();
+	void refresh_cursor(const Chip& comp);
 	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
-	void UART4_SendAddress(const uint8_t& slave_address);
-	void UART4_Send_Settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
-	void UART4_Receive_Settings();
-	void UART4_Send_Settings_bootloader();
-	void UART4_Receive_Settings_bootloader();
+	void UART4_send_address(const uint8_t& slave_address);
+	void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
+	void UART4_receive_settings();
+	void UART4_send_settings_bootloader();
+	void UART4_receive_settings_bootloader();
+	int UART4_receive_timeout_10us();
 	void DMA1_RX();
-	void USART_Noise_Error_detected();
+	void USART_noise_error_detected();
 	void DMA_UART_ERRORS_HANDLER();
 	int32_t convert_8_16(const uint8_t& a, const uint8_t& b);
 	conv_16_8 convert_16_8(const uint32_t& a);
-	void chart_correction(const uint32_t& x, const plus_minus& pm);
-	void SaveToMemory();
-	void ReadOnMemory();
+	void save_to_memory();
+	void read_on_memory();
 	void pause(const uint32_t& p);
 	void debugg_fn(const std::string& str);  // DEBUG
 	void debugg_clear();
 	void resetPin();
 	void send_test_midi();
-	void G4_echo();
-	void reset_bootloaders();
-	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
-	int UART4_Receive_timeout_10us();
-
-	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
-
-	void DMA2_Stream1_TransferComplete();
 	void DMA2_Stream3_i2c();
-
-	void configCharts();
-
+	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
+	void DMA2_Stream1_TransferComplete();
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
-	// void Flash_uint32(uint32_t Address, volatile uint32_t* Data, uint32_t size);
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
+	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
 	void data_from_H7_to_g4();
 	void flash_g4(const uint32_t& addr, const int& chip_number);
 	void jump_g4s_to_adress();
+	void reset_bootloaders();
 	void reset_main_to_bootloader();
-	void refresh_cursor(const Chip& comp);
 	const comparator& searcher_addr_in_cursor(const uint32_t& chip);
+	void set_cursor_piont_on(const comparator& comp);
+	void set_cursor_piont_off(const comparator& comp);
 
+
+	std::string debugg;
+	std::string cursor_string;
+	std::string chart_calib_online;
+	std::string l;
+	std::string r;
+	std::string sensor_on_1_data_string;
+	std::string sensor_on_2_data_string;
+	std::string sensor_off_1_data_string;
+	std::string sensor_off_2_data_string;
 
 	lv_display_t* disp;
 	lv_indev_t* indev;
-
 	lv_obj_t* cur_shart;
 	lv_chart_series_t* ser_on_green;
 	lv_chart_series_t* ser_on_red;
@@ -371,118 +258,20 @@ extern "C" {
 	lv_chart_cursor_t* cursor_off_vert;
 	lv_chart_cursor_t* cursor_off_hor;
 
-	std::string test_t_out_fl; // for test
-	std::string test_speed_fl; // for test
-	std::string test_energy_fl; // for test
-	std::string test_midi_hi_fl; // for test
-	std::string test_midi_lo_fl; // for test
-	std::string note; // for test
-	std::string mass_str;
-	std::string tim_str_in; // for test
-	std::string t1; // for test
-	std::string t2; // for test
-	std::string t3; // for test
-	std::string timer_data; // for test
-
-
-	std::string test_timer2; // for test
-	std::string calib_all_str;
-	volatile uint32_t test_int_timer2 = 0; // for test
-	volatile uint32_t oldCursor = start_cursor;
-	float mass_to_disp = 0; // for test
-
 	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // TODO 565 or 888? (было 565)
 	const uint32_t BUFF_SIZE = (480 * 20 * BYTES_PER_PIXEL);
 	static lv_color16_t buf_1[BUFF_SIZE]; // TODO 16 or 8
 	static lv_color16_t buf_2[BUFF_SIZE];
 
-
-
+	int32_t on_green_max = 4095;
+	int32_t on_green_min = 0;
+	int32_t on_red_max = 4095;
+	int32_t on_red_min = 0;
+	int32_t off_green_max = 4095;
+	int32_t off_green_min = 0;
+	int32_t off_red_max = 4095;
+	int32_t off_red_min = 0;
 
 }
 #endif // extern "C"
-
-/*
-
-действия:
-
-d_main
-d_flash
-d_chart_calib_on
-d_chart_calib_off
-
-save_calibration
-restore_calibration
-piano_off (jump to dfu)
-
-to_main_disp
-to_disp_flash
-to_disp_calibration_on
-to_disp_calibration_off
-
-_echo_g4s
-reset_bootloader_g4
-reset_main_to_bootloader
-h7-g4
-jump
-
-calib_sensor_on_green
-calib_sensor_on_red
-calib_sensor_off_green
-calib_sensor_off_red
-
-
-
-
-
-переменные:
-
-debugg
-cursor_string
-L
-R
-CHART_CALIB_online
-sensor_on_1_data_string
-sensor_on_2_data_string
-sensor_off_1_data_string
-sensor_off_2_data_string
-
-*/
-
-
-
-
-
-
-
-//		GPIOC->BSRR = 0x200; // pC9
-//		GPIOC->BSRR = 0x2000000; // pC9
-//		GPIOC->BSRR = 0x80; // pC7
-//		GPIOC->BSRR = 0x800000; // pC7
-//		GPIOD->BSRR = 0x8000; // pD15
-//		GPIOD->BSRR = 0x80000000; // pD15
-//		GPIOD->BSRR = 0x2000; // pD13
-//		GPIOD->BSRR = 0x20000000; // pD13
-//		GPIOD->BSRR = 0x800; // pD11
-//		GPIOD->BSRR = 0x8000000; // pD11
-//		GPIOD->BSRR = 0x200; // pD9
-//		GPIOD->BSRR = 0x2000000; // pD9
-//		GPIOB->BSRR = 0x8000; // pB15
-//		GPIOB->BSRR = 0x80000000; // pB15
-//		GPIOB->BSRR = 0x2000; // pB13
-//		GPIOB->BSRR = 0x20000000; // pB13
-//		GPIOE->BSRR = 0x8; // pE3 LED
-//		GPIOE->BSRR = 0x80000; // pE3 LED
-
-/*TX*/
-/* Clean D-cache */
-/* Make sure the address is 32-byte aligned and add 32-bytes to length, in case it overlaps cacheline */
-/*SCB_CleanDCache_by_Addr((uint32_t*)(((uint32_t)tx_buffer) & ~(uint32_t)0x1F), TX_LENGTH+32);*/
-//			SCB_CleanDCache_by_Addr((uint32_t*)(((uint32_t)tx_data) & ~(uint32_t)0x1F), 3); // когда включениы ICache & DCache это необходимо использовать
-//			LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_1);
-/*RX*/
-/* Invalidate D-cache before reception */
-/* Make sure the address is 32-byte aligned and add 32-bytes to length, in case it overlaps cacheline */
-/*SCB_InvalidateDCache_by_Addr((uint32_t*)(((uint32_t)rx_buffer) & ~(uint32_t)0x1F), RX_LENGTH+32);*/
-/* No access to rx_buffer should be made before DMA transfer is completed */

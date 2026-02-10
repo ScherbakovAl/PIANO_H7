@@ -1,8 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/12",
-    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/0",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/19",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -125,7 +124,7 @@
                 {
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
-                  "weight": 0.8422236429751572,
+                  "weight": 1.0058306557742027,
                   "enableClose": false,
                   "children": [
                     {
@@ -152,12 +151,13 @@
                       "enableClose": false,
                       "icon": "svg:user_widgets"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
                   "id": "#8d747c40-1bd4-47d9-a802-7d15c197cc04",
-                  "weight": 0.9503991567517829,
+                  "weight": 0.8440231154974832,
                   "enableClose": false,
                   "children": [
                     {
@@ -173,7 +173,7 @@
                 {
                   "type": "tabset",
                   "id": "#a9aa8c3c-5981-4c4d-8907-c4f6a03cd743",
-                  "weight": 1.2073772002730587,
+                  "weight": 1.1501462287283073,
                   "enableClose": false,
                   "children": [
                     {
@@ -191,28 +191,27 @@
             {
               "type": "tabset",
               "id": "EDITORS",
-              "weight": 4.053207646676633,
+              "weight": 2.8505002286789995,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
                 {
                   "type": "tab",
-                  "id": "#e35000eb-889a-4109-81c7-81575dc3cf70",
-                  "name": "d_chart_calib_off",
+                  "id": "#8078f948-f19a-4376-86fa-68a125f77086",
+                  "name": "d_flash",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/3",
+                    "objectPath": "[display_piano.eez-project]:/userPages/1",
                     "permanent": false
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
               "id": "#ee31d3b0-ddca-445c-930a-88f83c7e5d4c",
-              "weight": 2.622436916974415,
+              "weight": 3.8251443349720535,
               "children": [
                 {
                   "type": "tabset",
@@ -1006,10 +1005,10 @@
       },
       "transform": {
         "translate": {
-          "x": -280,
-          "y": -420
+          "x": -167.08571428571426,
+          "y": -310.7071428571429
         },
-        "scale": 2
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1023,9 +1022,7 @@
         "0": {
           "0": {},
           "1": {},
-          "2": {
-            "$selected": true
-          },
+          "2": {},
           "3": {},
           "4": {},
           "5": {},
@@ -1034,10 +1031,10 @@
       },
       "transform": {
         "translate": {
-          "x": -280,
-          "y": -540
+          "x": -176,
+          "y": -264
         },
-        "scale": 2
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1050,25 +1047,19 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {
-            "$selected": true
-          },
-          "2": {},
-          "3": {},
           "4": {},
           "5": {},
           "6": {},
           "7": {},
-          "8": {},
-          "9": {}
+          "8": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -280,
-          "y": -420
+          "x": -176,
+          "y": -264
         },
-        "scale": 2
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1101,28 +1092,19 @@
       "selection": {
         "0": {
           "0": {},
-          "1": {
-            "$selected": true
-          },
-          "2": {},
-          "3": {},
           "4": {},
           "5": {},
           "6": {},
           "7": {},
-          "8": {},
-          "9": {},
-          "10": {},
-          "11": {},
-          "12": {}
+          "8": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -280,
-          "y": -420
+          "x": -176,
+          "y": -264
         },
-        "scale": 2
+        "scale": 1.1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1140,30 +1122,7 @@
         "scale": 2
       },
       "selection": {
-        "0": {
-          "0": {
-            "$selected": true
-          },
-          "1": {},
-          "2": {},
-          "3": {},
-          "4": {},
-          "5": {},
-          "6": {},
-          "7": {},
-          "8": {},
-          "9": {},
-          "10": {},
-          "11": {},
-          "12": {},
-          "13": {},
-          "14": {},
-          "15": {},
-          "16": {},
-          "17": {},
-          "18": {},
-          "19": {}
-        }
+        "0": {}
       },
       "timeline": {
         "isEditorActive": false,
@@ -1174,25 +1133,14 @@
     },
     "[display_piano.eez-project]:/userPages/5[flow-state]": {
       "selection": {
-        "0": {
-          "14": {},
-          "15": {},
-          "16": {},
-          "17": {},
-          "18": {},
-          "19": {},
-          "20": {},
-          "21": {},
-          "22": {},
-          "24": {}
-        }
+        "0": {}
       },
       "transform": {
         "translate": {
           "x": -280,
           "y": -420
         },
-        "scale": 1.1
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1203,11 +1151,7 @@
     },
     "[display_piano.eez-project]:/userPages/8[flow-state]": {
       "selection": {
-        "0": {
-          "0": {
-            "$selected": true
-          }
-        }
+        "0": {}
       },
       "transform": {
         "translate": {
@@ -1225,70 +1169,14 @@
     },
     "[display_piano.eez-project]:/userPages/6[flow-state]": {
       "selection": {
-        "0": {
-          "1": {
-            "$selected": true
-          },
-          "2": {
-            "$selected": true
-          },
-          "3": {
-            "$selected": true
-          },
-          "4": {
-            "$selected": true
-          },
-          "5": {},
-          "6": {
-            "$selected": true
-          },
-          "7": {
-            "$selected": true
-          },
-          "8": {
-            "$selected": true
-          },
-          "9": {
-            "$selected": true
-          },
-          "10": {},
-          "12": {
-            "$selected": true
-          },
-          "13": {
-            "$selected": true
-          },
-          "14": {
-            "$selected": true
-          },
-          "15": {
-            "$selected": true
-          },
-          "16": {
-            "$selected": true
-          },
-          "17": {
-            "$selected": true
-          },
-          "18": {
-            "$selected": true
-          },
-          "19": {
-            "$selected": true
-          },
-          "21": {
-            "0": {}
-          },
-          "22": {},
-          "23": {}
-        }
+        "0": {}
       },
       "transform": {
         "translate": {
           "x": -280,
           "y": -420
         },
-        "scale": 1.1
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1299,27 +1187,14 @@
     },
     "[display_piano.eez-project]:/userPages/7[flow-state]": {
       "selection": {
-        "0": {
-          "0": {},
-          "1": {},
-          "2": {
-            "0": {}
-          },
-          "3": {},
-          "4": {},
-          "5": {},
-          "6": {},
-          "7": {},
-          "8": {},
-          "9": {}
-        }
+        "0": {}
       },
       "transform": {
         "translate": {
           "x": -280,
           "y": -420
         },
-        "scale": 1.1
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1351,6 +1226,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 2,
+  "flowZoom": 1.1,
   "implementationLanguage": "C++"
 }
