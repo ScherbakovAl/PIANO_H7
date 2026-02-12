@@ -37,17 +37,17 @@ extern "C" {
 		fail = 0xDD
 	};
 
-	enum class command { // TODO G4 обновить код
+	enum class command {
 		sync_timer = 1,
 		cal,
-		read_comp_value, // TODO добавить проверки (принять ответ)
-		set_comp_value, // TODO добавить проверки (принять ответ)
+		read_comp_value,
+		set_comp_value,
 		read_comp_setting, // TODO реализовать
 		all_calib,
 		reset_to_bootloader,
-		mute, // TODO реализовать (chips ON - mute)
-		unmute, // TODO реализовать
-		echo = 11 // TODO реализовать для основной прошивки
+		mute,
+		unmute,
+		echo = 11
 	};
 
 	enum class subcommand {
@@ -55,7 +55,7 @@ extern "C" {
 		read_calibration,
 		stop_calibration,
 		working,
-		nothing
+		nothing,
 	};
 
 	enum class bootloader_command {
@@ -137,6 +137,7 @@ extern "C" {
 	int32_t buffer_red[size_BUFFER] = {};
 	int32_t buffer_calib[size_BUFFER] = {};
 	int32_t buffer_calib_old[size_BUFFER] = {};
+	int32_t buffer_dac[size_BUFFER] = {};
 
 	int32_t green_on_default = 2601;
 	int32_t red_on_default = 1001;
@@ -186,18 +187,18 @@ extern "C" {
 	void to_sleep();
 	void init();
 	void init_LL();
-	void init_LCD_touch();
-	void disp_start();
-	void touch_start();
+	void init_LCD_and_touch();
+	void disp_create_and_touch_start();
 	void init_chips();
 	void init_buffers();
 	void config_charts();
+	void reconfig_charts();
 	void h7();
 	void sync();
 	int sync_sender(const uint8_t& i);
 	void all_H7_to_g4();
 	void all_g4_to_H7();
-	void refresh_cursor(const Chip& comp);
+	void update_cursor(const Chip& comp);
 	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
 	void UART4_send_address(const uint8_t& slave_address);
 	void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
@@ -251,9 +252,11 @@ extern "C" {
 	lv_chart_series_t* ser_on_green;
 	lv_chart_series_t* ser_on_red;
 	lv_chart_series_t* ser_on_blue;
+	lv_chart_series_t* ser_on_dac;
 	lv_chart_series_t* ser_off_green;
 	lv_chart_series_t* ser_off_red;
 	lv_chart_series_t* ser_off_blue;
+	lv_chart_series_t* ser_off_dac;
 	lv_style_t cursor_style;
 	lv_chart_cursor_t* cursor_on_vert;
 	lv_chart_cursor_t* cursor_on_hor;

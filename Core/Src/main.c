@@ -33,7 +33,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+extern void h7();
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/

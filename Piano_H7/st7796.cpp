@@ -165,6 +165,7 @@ void LCD_Init() {
 
 	LCD_RESET();
 
+	LCD_WR_REG(0x10); // Sleep In
 	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима
 
 	LL_mDelay(120);       //Delay 120ms

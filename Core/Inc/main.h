@@ -86,8 +86,6 @@ void Error_Handler(void);
 #define CTP_I2C5_SCL_GPIO_Port GPIOC
 #define CTP_RST_Pin LL_GPIO_PIN_0
 #define CTP_RST_GPIO_Port GPIOD
-#define LCD_LED_Pin LL_GPIO_PIN_6
-#define LCD_LED_GPIO_Port GPIOD
 #define LCD_SCK_Pin LL_GPIO_PIN_3
 #define LCD_SCK_GPIO_Port GPIOB
 #define LCD_SDI_Pin LL_GPIO_PIN_5

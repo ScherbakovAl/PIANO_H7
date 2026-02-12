@@ -6,7 +6,9 @@ set(CMAKE_CXX_COMPILER_ID GNU)
 
 # Some default GCC settings
 # arm-none-eabi- must be part of path environment
-set(TOOLCHAIN_PREFIX arm-none-eabi-)
+# set(TOOLCHAIN_PREFIX arm-none-eabi-)
+# Используем системный компилятор GCC 15.2.0 вместо STM32CubeCLT
+set(TOOLCHAIN_PREFIX /usr/bin/arm-none-eabi-)
 
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}gcc)
 set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})

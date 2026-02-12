@@ -49,7 +49,7 @@ static void refr_obj_and_children(lv_layer_t * layer, lv_obj_t * top_obj);
 static void refr_obj(lv_layer_t * layer, lv_obj_t * obj);
 static uint32_t get_max_row(lv_display_t * disp, int32_t area_w, int32_t area_h);
 static void draw_buf_flush(lv_display_t * disp);
-static void call_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
+static void call_flush_cb(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map);
 static void wait_for_flushing(lv_display_t * disp);
 
 /**********************
@@ -1318,7 +1318,7 @@ static void draw_buf_flush(lv_display_t * disp)
     bool flushing_last = disp->flushing_last;
 
     if(disp->flush_cb) {
-        call_flush_cb(disp, &disp->refreshed_area, layer->draw_buf->data);
+        call_flush_cb(disp, &disp->refreshed_area, (uint16_t*)layer->draw_buf->data);
     }
     /*If there are 2 buffers swap them. With direct mode swap only on the last area*/
     if(lv_display_is_double_buffered(disp) && (disp->render_mode != LV_DISPLAY_RENDER_MODE_DIRECT || flushing_last)) {
@@ -1331,7 +1331,7 @@ static void draw_buf_flush(lv_display_t * disp)
     }
 }
 
-static void call_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map)
+static void call_flush_cb(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map)
 {
     LV_PROFILER_REFR_BEGIN;
     LV_TRACE_REFR("Calling flush_cb on (%d;%d)(%d;%d) area with %p image pointer",

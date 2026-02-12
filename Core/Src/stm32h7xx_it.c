@@ -48,6 +48,8 @@ extern volatile int touchpad_pressed;
 extern lv_display_t* disp;
 extern void DMA2_Stream1_TransferComplete(); // ??
 extern void DMA2_Stream3_i2c();
+extern void DMA1_RX();
+extern void resetPin();
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
