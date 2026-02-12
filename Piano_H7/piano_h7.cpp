@@ -115,19 +115,15 @@ void init() {
 
 
 	init_chips();
-	init_buffers();
-	config_charts();
 
 	if (chip_state == chip_states::boot) {
 		jump_g4s_to_adress();
 		pause(50000);
+		init_chips();
 	}
 
-	lv_obj_t* obj = objects.chart_on; // TODO задать размеры графика
-	lv_chart_set_x_start_point(obj, ser_on_green, cursor);
-	lv_chart_set_x_start_point(obj, ser_on_red, cursor);
-	lv_chart_set_x_start_point(obj, ser_on_blue, cursor);
-	// lv_chart_set_point_count(obj, vChips.front().comparators.front().address);
+	init_buffers();
+	config_charts();
 
 	all_H7_to_g4();
 	sync(); // включает прерывания и таймер, осторожно!
@@ -202,6 +198,8 @@ void touch_start() {
 
 }
 
+
+#include <algorithm>
 void init_chips() {
 	vChips.clear();
 	vChips.reserve(allChipCount);
@@ -275,6 +273,8 @@ void init_chips() {
 	debugg_fn(strOut);
 
 	cursor = vChips.front().comparators.front().address;
+	cursor_offset_on = cursor;
+	for (const auto& [prev, current] : vChips | std::views::slide(2)) {}
 
 }
 
@@ -351,6 +351,14 @@ void config_charts() {
 	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
 	lv_chart_set_div_line_count(ob, 0, 0);
 	lv_obj_set_style_radius(ob, 0, 0);
+
+
+
+	lv_obj_t* obj = objects.chart_on; // TODO задать размеры графика
+	lv_chart_set_x_start_point(obj, ser_on_green, cursor);
+	lv_chart_set_x_start_point(obj, ser_on_red, cursor);
+	lv_chart_set_x_start_point(obj, ser_on_blue, cursor);
+	// lv_chart_set_point_count(obj, vChips.front().comparators.front().address);
 }
 
 // добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
@@ -552,13 +560,13 @@ void refresh_cursor(const Chip& chip) {
 		if (fl_c) {
 			cursor = comp.cursor;
 			if (addr > buffer_division) {
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor - cursor_offset_off);
 				sensor_off_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_off_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
 			}
 			else {
-				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor);
+				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor - cursor_offset_on);
 				sensor_on_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_on_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
@@ -1302,7 +1310,7 @@ const comparator& searcher_addr_in_cursor(const uint32_t& c) {
 
 void set_cursor_piont_on(const comparator& comp) {
 	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_green, cursor - cursor_offset_on);
 	sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 	sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
 
@@ -1310,7 +1318,7 @@ void set_cursor_piont_on(const comparator& comp) {
 
 void set_cursor_piont_off(const comparator& comp) {
 	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor);
+	lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_green, cursor - cursor_offset_off);
 	sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
 	sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
 

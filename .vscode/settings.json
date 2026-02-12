@@ -93,5 +93,8 @@
         "variant": "cpp"
     },
     "cortex-debug.variableUseNaturalFormat": false,
-    "todo-tree.tree.scanMode": "open files"
+    "todo-tree.tree.scanMode": "workspace",
+    "todo-tree.tree.showBadges": true,
+    "todo-tree.tree.disableCompactFolders": true,
+    "todo-tree.tree.showCountsInTree": false
 }

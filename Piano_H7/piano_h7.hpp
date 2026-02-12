@@ -60,11 +60,11 @@ extern "C" {
 
 	enum class bootloader_command {
 		echo = 11,
-		reset, // 200ms delay // TODO надо реализовать
+		reset, // 200ms delay
 		data_from_H7_to_array_g4,
 		copy_array_to_flash_g4,
 		jump_to_piano_g4, // прыжок по зашитому в g4 адресу
-		jump_g4_to_adress // TODO сделать // прыжок по указанному адресу
+		jump_g4_to_adress // прыжок по указанному адресу
 	};
 
 	enum class chip_states {
@@ -148,9 +148,11 @@ extern "C" {
 	std::map<uint8_t, comparator> mComparatorCursor_off;
 	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
 
-	chip_states chip_state = chip_states::boot; // TODO переименовать, когда удалю class state
+	chip_states chip_state = chip_states::none; // TODO переименовать, когда удалю class state
 	current_display cur_disp = current_display::none;
 	volatile uint32_t cursor = 0; // TODO volatile?
+	uint32_t cursor_offset_on = 0;
+	uint32_t cursor_offset_off = 0;
 
 	int8_t noteAdder[size_BUFFER] = {};
 	float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
@@ -249,19 +251,19 @@ extern "C" {
 	lv_chart_series_t* ser_on_green;
 	lv_chart_series_t* ser_on_red;
 	lv_chart_series_t* ser_on_blue;
-	lv_chart_cursor_t* cursor_on_vert;
-	lv_chart_cursor_t* cursor_on_hor;
-	lv_style_t cursor_style;
 	lv_chart_series_t* ser_off_green;
 	lv_chart_series_t* ser_off_red;
 	lv_chart_series_t* ser_off_blue;
+	lv_style_t cursor_style;
+	lv_chart_cursor_t* cursor_on_vert;
+	lv_chart_cursor_t* cursor_on_hor;
 	lv_chart_cursor_t* cursor_off_vert;
 	lv_chart_cursor_t* cursor_off_hor;
 
 	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
-	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // TODO 565 or 888? (было 565)
+	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
 	const uint32_t BUFF_SIZE = (480 * 20 * BYTES_PER_PIXEL);
-	static lv_color16_t buf_1[BUFF_SIZE]; // TODO 16 or 8
+	static lv_color16_t buf_1[BUFF_SIZE];
 	static lv_color16_t buf_2[BUFF_SIZE];
 
 	int32_t on_green_max = 4095;
