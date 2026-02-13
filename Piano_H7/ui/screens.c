@@ -188,6 +188,17 @@ void create_screen_d_main() {
                 }
             }
         }
+        {
+            // roller
+            lv_obj_t *obj = lv_roller_create(parent_obj);
+            objects.roller = obj;
+            lv_obj_set_pos(obj, 229, 79);
+            lv_obj_set_size(obj, 80, 71);
+            lv_roller_set_options(obj, "curve 1\ncurve 2\ncurve 3", LV_ROLLER_MODE_NORMAL);
+            lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xff127873), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(obj, lv_color_hex(0xff4e6475), LV_PART_SELECTED | LV_STATE_DEFAULT);
+        }
     }
     
     tick_screen_d_main();
@@ -627,6 +638,22 @@ void create_screen_d_chart_calib_on() {
                 }
             }
         }
+        {
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.obj11 = obj;
+            lv_obj_set_pos(obj, 154, 420);
+            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xff0aaa37), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(obj, "v");
+        }
+        {
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.obj12 = obj;
+            lv_obj_set_pos(obj, 266, 420);
+            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xffdb591e), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(obj, "^");
+        }
     }
     
     tick_screen_d_chart_calib_on();
@@ -726,7 +753,7 @@ void create_screen_d_chart_calib_off() {
                 lv_obj_t *parent_obj = obj;
                 {
                     lv_obj_t *obj = lv_label_create(parent_obj);
-                    objects.obj11 = obj;
+                    objects.obj13 = obj;
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
@@ -751,7 +778,7 @@ void create_screen_d_chart_calib_off() {
                 lv_obj_t *parent_obj = obj;
                 {
                     lv_obj_t *obj = lv_label_create(parent_obj);
-                    objects.obj12 = obj;
+                    objects.obj14 = obj;
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
@@ -778,7 +805,7 @@ void create_screen_d_chart_calib_off() {
                 lv_obj_t *parent_obj = obj;
                 {
                     lv_obj_t *obj = lv_label_create(parent_obj);
-                    objects.obj13 = obj;
+                    objects.obj15 = obj;
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     lv_obj_add_flag(obj, LV_OBJ_FLAG_IGNORE_LAYOUT);
@@ -944,6 +971,22 @@ void create_screen_d_chart_calib_off() {
                 }
             }
         }
+        {
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.obj16 = obj;
+            lv_obj_set_pos(obj, 154, 420);
+            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xff0aaa37), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(obj, "^");
+        }
+        {
+            lv_obj_t *obj = lv_label_create(parent_obj);
+            objects.obj17 = obj;
+            lv_obj_set_pos(obj, 266, 420);
+            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xffdb591e), LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_label_set_text(obj, "v");
+        }
     }
     
     tick_screen_d_chart_calib_off();
@@ -952,19 +995,19 @@ void create_screen_d_chart_calib_off() {
 void tick_screen_d_chart_calib_off() {
     {
         const char *new_val = get_var_sensor_off_1_data_string();
-        const char *cur_val = lv_label_get_text(objects.obj12);
+        const char *cur_val = lv_label_get_text(objects.obj14);
         if (strcmp(new_val, cur_val) != 0) {
-            tick_value_change_obj = objects.obj12;
-            lv_label_set_text(objects.obj12, new_val);
+            tick_value_change_obj = objects.obj14;
+            lv_label_set_text(objects.obj14, new_val);
             tick_value_change_obj = NULL;
         }
     }
     {
         const char *new_val = get_var_sensor_off_2_data_string();
-        const char *cur_val = lv_label_get_text(objects.obj13);
+        const char *cur_val = lv_label_get_text(objects.obj15);
         if (strcmp(new_val, cur_val) != 0) {
-            tick_value_change_obj = objects.obj13;
-            lv_label_set_text(objects.obj13, new_val);
+            tick_value_change_obj = objects.obj15;
+            lv_label_set_text(objects.obj15, new_val);
             tick_value_change_obj = NULL;
         }
     }

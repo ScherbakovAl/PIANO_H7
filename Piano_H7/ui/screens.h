@@ -25,6 +25,7 @@ typedef struct _objects_t {
     lv_obj_t *deb;
     lv_obj_t *obj0;
     lv_obj_t *obj1;
+    lv_obj_t *roller;
     lv_obj_t *button_to_main_6;
     lv_obj_t *obj2;
     lv_obj_t *obj3;
@@ -49,13 +50,15 @@ typedef struct _objects_t {
     lv_obj_t *sub_1;
     lv_obj_t *add_10;
     lv_obj_t *sub_10;
+    lv_obj_t *obj11;
+    lv_obj_t *obj12;
     lv_obj_t *chart_off;
     lv_obj_t *button_to_main_1;
-    lv_obj_t *obj11;
-    lv_obj_t *button_calibration_sensor_on_3;
-    lv_obj_t *obj12;
-    lv_obj_t *button_calibration_sensor_on_4;
     lv_obj_t *obj13;
+    lv_obj_t *button_calibration_sensor_on_3;
+    lv_obj_t *obj14;
+    lv_obj_t *button_calibration_sensor_on_4;
+    lv_obj_t *obj15;
     lv_obj_t *label_on_1;
     lv_obj_t *label_string_cursor_1;
     lv_obj_t *label_string_sensor_10;
@@ -65,6 +68,8 @@ typedef struct _objects_t {
     lv_obj_t *sub_11;
     lv_obj_t *add_2;
     lv_obj_t *sub_2;
+    lv_obj_t *obj16;
+    lv_obj_t *obj17;
 } objects_t;
 
 extern objects_t objects;

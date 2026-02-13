@@ -99,6 +99,13 @@ extern "C" {
 		chip_states st = chip_states::none;
 	};
 
+	struct speed_for_midi {
+		const float key_mass = 0.0f; // 80000 == 80 gr
+		const float distance = 0.0f; // 1700 == 1.7 mm
+		const float offset_x = 0.0f; // offset x
+		const float offset_y = 0.0f; // offcet y
+	};
+
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	uint8_t rx_data[4] = { };
@@ -160,28 +167,26 @@ extern "C" {
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
-	int fl = 0; // for test fl
-	float speed_F = 0; // for test
-	float energy_F = 0; // for test
-	float midi_hi_F = 0; // for test
-	float midi_lo_F = 0; // for test
-	float timer_data_in = 0;
-	uint32_t debug_counter = 0;
+	int fl = 0.0f; // for test fl
+	float speed_F = 0.0f; // for test
+	float energy_F = 0.0f; // for test
+	float midi_hi_F = 0.0f; // for test
+	float midi_lo_F = 0.0f; // for test
+	float timer_data_in = 0.0f;
+	uint32_t debug_counter = 0.0f;
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
+
+	float min = 3800.0f; // 3261 (3834)
+	float max = 170000.0f; // 170106
 
 
 	const float key_mass = 0.008f; // 8 гр -->> переехал в массив
-	const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-	const float div_on = 0.000000000092f; // меньше - громче
-	const float div_off = 0.00000000004f; // меньше - громче 
+	// const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+	// const float div_on = 0.000000000092f; // меньше - громче
+	// const float div_off = 0.00000000004f; // меньше - громче 
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
-
-	const float key_mass_2 = 819.79f;
-	const float distance_2 = 17000.0f;
-	const float aX = 24568.0f;
-	const float aY = -1.2f;
-
+	std::vector<speed_for_midi> speeds;
 
 	void pwr();
 	void to_sleep();

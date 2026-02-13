@@ -77,7 +77,7 @@ void init() {
 	}
 
 	// SaveToMemory();
-	// ReadOnMemory(); // восстановление графика при включении
+	read_on_memory(); // восстановление графика при включении
 
 	all_H7_to_g4();
 	sync(); // включает прерывания и таймер, осторожно!
@@ -251,11 +251,16 @@ void init_buffers() {
 		mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
 	}
 
+	speeds.push_back(speed_for_midi(8000.0f, 1700.0f, 45000.0f, -0.44f));
+	speeds.push_back(speed_for_midi(80000.0f, 1700.0f, 25000.0f, -2.5f));
+	speeds.push_back(speed_for_midi(800000.0f, 1700.0f, 85000.0f, -17.8f));
+
 }
 
 void config_charts() {
 	lv_obj_t* ob = objects.chart_on;
-	lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
+	// lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
+	lv_chart_set_point_count(ob, 89); // TODO подобрать значение
 	ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_Y); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
 	ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_Y);
 	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_Y);
@@ -277,7 +282,8 @@ void config_charts() {
 	lv_obj_set_style_radius(ob, 0, 0);
 
 	ob = objects.chart_off;
-	lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
+	// lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
+	lv_chart_set_point_count(ob, 70); // TODO подобрать значение
 	ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x314ded), LV_CHART_AXIS_PRIMARY_Y);
 	ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x0aaa37), LV_CHART_AXIS_PRIMARY_Y);
 	ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xdb591e), LV_CHART_AXIS_PRIMARY_Y);
@@ -357,9 +363,11 @@ void h7() {
 						update_cursor(chip);
 					}
 				}
-				chart_calib_online = std::to_string(buffer_calib[cursor]);
-				l = std::to_string(buffer_calib[cursor - 1]);
-				r = std::to_string(buffer_calib[cursor + 1]);
+				uint8_t addr = mComparatorCursor_on[cursor].address; // TODO ?
+				chart_calib_online = std::to_string(buffer_calib[addr]); // TODO ?
+				// chart_calib_online = std::to_string(buffer_calib[cursor]);
+				l = std::to_string(buffer_calib[addr - 1]);
+				r = std::to_string(buffer_calib[addr + 1]);
 				lv_chart_set_cursor_point(objects.chart_on, cursor_on_hor, ser_on_blue, cursor - cursor_offset_on);
 				lv_chart_refresh(cur_shart);
 			}
@@ -378,10 +386,11 @@ void h7() {
 						update_cursor(chip);
 					}
 				}
-				chart_calib_online = std::to_string(buffer_calib[cursor]);
-				l = std::to_string(buffer_calib[cursor - 1]);
-				r = std::to_string(buffer_calib[cursor + 1]);
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor - cursor_offset_off);
+				uint8_t addr = mComparatorCursor_off[cursor].address;
+				chart_calib_online = std::to_string(buffer_calib[addr]);
+				l = std::to_string(buffer_calib[addr - 1]);
+				r = std::to_string(buffer_calib[addr + 1]);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor - cursor_offset_off); // получение значения для cursor_offset_off не реализовано (== 0)
 				lv_chart_refresh(cur_shart);
 			}
 
@@ -393,11 +402,10 @@ void h7() {
 
 			// tud_disconnect();
 			// debugg_fn("usb disconnect!")
-
-			debugg_fn(std::format("  .   .    .   . . "));
-			debugg_fn(std::format("tx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
-			debugg_fn(std::format("rx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
-
+			debugg_fn(std::format("min {},    max {}", min, max));
+			// debugg_fn(std::format("  .   .    .   . . "));
+			// debugg_fn(std::format("tx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
+			// debugg_fn(std::format("rx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
 			// debugg_fn(std::format("tOut = { :.5f }", rx_settings[1]));
 			// debugg_fn(std::format("rx_settings = {:}", rx_settings[1]));
 			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
@@ -654,15 +662,14 @@ void DMA1_RX(void) {
 
 		const uint32_t rxB = rx_data[0];
 
-		const uint32_t tim_compare = TIM3->CNT;
-		if (tim_compare != rxB / count_comparators) { // TODO сделать проверку номера чипа!
-			debugg_fn(std::format(" chip number err {} != {}", rxB, tim_compare));
-		}
+		// const uint32_t tim_compare = TIM3->CNT;
+		// if (tim_compare != rxB / count_comparators) { // TODO сделать проверку номера чипа!
+		// 	debugg_fn(std::format(" chip number err {} != {}", rxB, tim_compare));
+		// }
 
-
-		midi_hi_F = 0; // DEBUG
-		midi_lo_F = 0; // DEBUG
-		timer_data_in = 0; // DEBUG
+		midi_hi_F = 0;
+		midi_lo_F = 0;
+		// timer_data_in = 0;
 
 
 		if (rxB > 168) { // DEBUG
@@ -678,23 +685,11 @@ void DMA1_RX(void) {
 #define speee
 #ifdef speee
 
-		// if (rxB < 98) {
-		// 	timerLenght_F = (float)tOut * div_on;
-		// }
-		// else {
-		// 	timerLenght_F = (float)tOut * div_off;
-		// }
+		const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
+		const speed_for_midi& st = speeds[curve_num]; // TODO скорость: 0 - глухая ... 2 - яркая ?
 
-		// //var 1
-		// speed_F = distance_F / timerLenght_F;
-		// energy_F = (mass_F[rxB] * speed_F * speed_F) / deriv_F;
-		// midi_hi_F = energy_F / maxMidi_F;
-		// midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-
-
-		// VAR 2
-		speed_F = distance_2 / (tOut + aX);
-		energy_F = (key_mass_2 * speed_F * speed_F) / 2.0f;
+		speed_F = st.distance / (tOut + st.offset_x);
+		energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
 		midi_hi_F = energy_F;
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 
@@ -720,10 +715,30 @@ void DMA1_RX(void) {
 
 		tud_midi_stream_write(0, note_buf, 6);
 
+		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
+			uint8_t note_buff[] = {
+				0xB0,
+				0x58,
+				(uint8_t)midi_lo_F,
+				0x80,
+				note_,
+				(uint8_t)midi_hi_F
+			};
+			tud_midi_stream_write(0, note_buff, 6);
+		}
 
+		if (rxB < 98) { // DEBUG
+			if (tOut > max) {
+				max = tOut;
+				fl = 1;
+			}
+			if (tOut < min) {
+				min = tOut;
+				fl = 1;
+			}
+		}
 
 #endif
-
 #ifndef speee
 
 		if (tOut < 5664) tOut = 5664;
@@ -759,6 +774,7 @@ void DMA1_RX(void) {
 		// speed_F = midi_hi_F; // DEBUG
 #endif
 	}
+
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
 
@@ -896,7 +912,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {
-	if (debug_counter % 27 == 0)debugg_clear();
+	if (debug_counter % 13 == 0)debugg_clear();
 	if (debug_counter) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
@@ -1314,7 +1330,7 @@ extern "C" {
 					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
 				}
 				else if (chip.typ == typeAction::off) {
-					sender(command::unmute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
+					sender(command::unmute, chip.number_chip, 0, dot::green, 0);
 				}
 			}
 		}
@@ -1325,7 +1341,7 @@ extern "C" {
 					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
 				}
 				else if (chip.typ == typeAction::on) {
-					sender(command::unmute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
+					sender(command::unmute, chip.number_chip, 0, dot::green, 0);
 				}
 			}
 
@@ -1358,7 +1374,7 @@ extern "C" {
 				sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
 			}
 			else if (chip.typ == typeAction::off) {
-				sender(command::mute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
+				sender(command::mute, chip.number_chip, 0, dot::green, 0);
 			}
 		}
 	}
@@ -1379,7 +1395,7 @@ extern "C" {
 				sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
 			}
 			else if (chip.typ == typeAction::on) {
-				sender(command::mute, chip.number_chip, 0, dot::green, 0);  // TODO chips mute_unmute
+				sender(command::mute, chip.number_chip, 0, dot::green, 0);
 			}
 		}
 	}
@@ -1446,6 +1462,7 @@ extern "C" {
 		if (comp.is_active) {
 			cursor -= 1;
 			set_cursor_piont_on(comp);
+			set_cursor_piont_off(comp);
 		}
 	}
 
@@ -1454,6 +1471,7 @@ extern "C" {
 		if (comp.is_active) {
 			cursor += 1;
 			set_cursor_piont_on(comp);
+			set_cursor_piont_off(comp);
 		}
 	}
 
@@ -1462,6 +1480,7 @@ extern "C" {
 		if (comp.is_active) {
 			cursor -= 7;
 			set_cursor_piont_on(comp);
+			set_cursor_piont_off(comp);
 		}
 	}
 
@@ -1470,6 +1489,7 @@ extern "C" {
 		if (comp.is_active) {
 			cursor += 7;
 			set_cursor_piont_on(comp);
+			set_cursor_piont_off(comp);
 		}
 	}
 
