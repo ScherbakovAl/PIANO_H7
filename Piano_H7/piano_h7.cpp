@@ -39,7 +39,7 @@ void pwr() {
 
 void to_sleep() {
 
-	LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
+	LCD_WR_REG(0x10); // Sleep In
 	LL_mDelay(120);
 	tud_disconnect();
 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
