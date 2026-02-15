@@ -130,7 +130,7 @@ extern "C" {
 	static const uint32_t ADDRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
 	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
 	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
-	static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 7;// количество страниц (7) в g4, которые занимает прошивка g4 (16-22)
+	static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 8;// количество страниц (8) в g4, которые занимает прошивка g4 (16-23)
 
 
 	const uint32_t allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер 
