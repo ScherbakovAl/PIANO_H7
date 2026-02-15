@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
     "selectedActionObject": "[display_piano.eez-project]:/actions/19",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -197,16 +197,15 @@
                 {
                   "type": "tab",
                   "id": "#8078f948-f19a-4376-86fa-68a125f77086",
-                  "name": "d_chart_calib_off",
+                  "name": "d_main",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/3",
+                    "objectPath": "[display_piano.eez-project]:/userPages/0",
                     "permanent": false
                   },
                   "icon": "svg:page"
                 }
-              ],
-              "active": true
+              ]
             },
             {
               "type": "row",
@@ -226,7 +225,8 @@
                       "enableClose": false,
                       "icon": "svg:properties"
                     }
-                  ]
+                  ],
+                  "active": true
                 },
                 {
                   "type": "tabset",
@@ -997,11 +997,11 @@
             "0": {}
           },
           "4": {},
-          "5": {},
-          "6": {},
-          "7": {
+          "5": {
             "$selected": true
-          }
+          },
+          "6": {},
+          "7": {}
         }
       },
       "transform": {
@@ -1009,7 +1009,7 @@
           "x": -167.08571428571426,
           "y": -310.7071428571429
         },
-        "scale": 1.1
+        "scale": 1.5
       },
       "timeline": {
         "isEditorActive": false,

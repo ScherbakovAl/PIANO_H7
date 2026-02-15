@@ -172,12 +172,13 @@ extern "C" {
 	float energy_F = 0.0f; // for test
 	float midi_hi_F = 0.0f; // for test
 	float midi_lo_F = 0.0f; // for test
+	uint32_t out_debug_ = 0; // for test
 	float timer_data_in = 0.0f;
 	uint32_t debug_counter = 0.0f;
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
-	float min = 3800.0f; // 3261 (3834)
-	float max = 170000.0f; // 170106
+	float min = 3800.0f; // 3261 (3834) (~3600)
+	float max = 181987.0f; // 170106 (170000) 181000
 
 
 	const float key_mass = 0.008f; // 8 гр -->> переехал в массив
@@ -187,6 +188,11 @@ extern "C" {
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
 	std::vector<speed_for_midi> speeds;
+	std::vector<speed_for_midi> speeds_ON;
+	float m_F = 0.0f; // for test
+	float sd_F = 0.0f; // for test
+	float sx_F = 0.0f; // for test
+	float sy_F = 0.0f; // for test
 
 	void pwr();
 	void to_sleep();
