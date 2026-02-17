@@ -997,11 +997,12 @@
             "0": {}
           },
           "4": {},
-          "5": {
-            "$selected": true
-          },
+          "5": {},
           "6": {},
-          "7": {}
+          "7": {},
+          "8": {
+            "$selected": true
+          }
         }
       },
       "transform": {
@@ -1225,7 +1226,6 @@
   "lvglExpandedPropertiesGroup": [
     "TEXT",
     "MISCELLANEOUS",
-    "BACKGROUND",
     "IMAGE",
     "MARGIN"
   ],

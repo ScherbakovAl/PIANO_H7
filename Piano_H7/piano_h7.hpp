@@ -42,7 +42,7 @@ extern "C" {
 		cal,
 		read_comp_value,
 		set_comp_value,
-		read_comp_setting, // TODO реализовать
+		read_comp_setting,
 		all_calib,
 		reset_to_bootloader,
 		mute,
@@ -68,9 +68,9 @@ extern "C" {
 	};
 
 	enum class chip_states {
+		none = 0,
 		boot = 1,
 		main,
-		none
 	};
 
 	enum class typeAction {
@@ -146,19 +146,22 @@ extern "C" {
 	int32_t buffer_calib_old[size_BUFFER] = {};
 	int32_t buffer_dac[size_BUFFER] = {};
 
-	int32_t green_on_default = 2601;
-	int32_t red_on_default = 1001;
-	int32_t green_off_default = 2102;
-	int32_t red_off_default = 2402;
+	struct default_comp {
+		int32_t green_on_default = 2601;
+		int32_t red_on_default = 1001;
+		int32_t green_off_default = 2102;
+		int32_t red_off_default = 2402;
+	};
+	struct default_comp def_comp;
 
 	std::vector<Chip> vChips;
 	std::map<uint8_t, comparator> mComparatorCursor_on;
 	std::map<uint8_t, comparator> mComparatorCursor_off;
 	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
 
-	chip_states chip_state = chip_states::none; // TODO переименовать, когда удалю class state
+	chip_states chip_state = chip_states::none;
 	current_display cur_disp = current_display::none;
-	volatile uint32_t cursor = 0; // TODO volatile?
+	uint32_t cursor = 0;
 	uint32_t cursor_offset_on = 0;
 	uint32_t cursor_offset_off = 0;
 
