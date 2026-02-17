@@ -181,7 +181,7 @@ extern "C" {
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
 	float min = 3800.0f; // 3261 (3834) (~3600)
-	float max = 181987.0f; // 170106 (170000) 181000
+	float max = 186582.0f; // 170106 (170000) 181000
 
 
 	const float key_mass = 0.008f; // 8 гр -->> переехал в массив

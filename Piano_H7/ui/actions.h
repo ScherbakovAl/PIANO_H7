@@ -9,7 +9,7 @@ extern "C" {
 
 extern void action_save_calibration(lv_event_t * e);
 extern void action_restore_calibration(lv_event_t * e);
-extern void action_piano_off(lv_event_t * e);
+extern void action_jump_to_dfu(lv_event_t * e);
 extern void action_to_disp_flash(lv_event_t * e);
 extern void action_to_disp_calibration_on(lv_event_t * e);
 extern void action_to_disp_calibration_off(lv_event_t * e);
@@ -27,6 +27,7 @@ extern void action_cursor_minus(lv_event_t * e);
 extern void action_cursor_plus(lv_event_t * e);
 extern void action_cursor_minus_7(lv_event_t * e);
 extern void action_cursor_plus_7(lv_event_t * e);
+extern void action_piano_off(lv_event_t * e);
 
 
 #ifdef __cplusplus

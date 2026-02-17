@@ -261,22 +261,24 @@ void init_buffers() {
 	speeds.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
 
 
-	const float key = 89;
+	const float key = 89.0f;
+	const float rasst = 1710.0f;
 
-	const float mass_start = 120000;
-	const float mass_fin = 50000;
+	const float mass_start = 120000.0f;
+	const float mass_fin = 50000.0f;
 	const float mass_step = (mass_start - mass_fin) / key;
 
-	const float x_start = 31425; // v1
-	const float x_fin = 18625; // v1
-	// const float x_start = 28000; // v2
-	// const float x_fin = 28000; // v2
-	const float x_step = (x_start - x_fin) / key;
+	const float x_start = 31775.0f; // v1
+	const float x_fin = 19250.0f; // v1
+	const float y_start = -1.18f; // v1
+	const float y_fin = -0.53f; // v1
 
-	const float y_start = -4.2; // v1
-	const float y_fin = -2.1; // v1
-	// const float y_start = -4.5; // v2
-	// const float y_fin = -2.1; // v2
+	// const float x_start = 28000.0f; // v2
+	// const float x_fin = 28000.0f; // v2
+	// const float y_start = -4.5f; // v2
+	// const float y_fin = -2.1f; // v2
+
+	const float x_step = (x_start - x_fin) / key;
 	const float y_step = (y_start - y_fin) / key;
 
 	float m_s = mass_start;
@@ -284,7 +286,7 @@ void init_buffers() {
 	float y_s = y_start;
 
 	for (int i = 0; i < 98; ++i) {
-		speeds_ON.push_back(speed_for_midi(m_s, 1710.0f, x_s, y_s));
+		speeds_ON.push_back(speed_for_midi(m_s, rasst, x_s, y_s));
 		m_s -= mass_step;
 		x_s -= x_step;
 		y_s -= y_step;
@@ -1581,7 +1583,7 @@ extern "C" {
 		debugg_fn(" calib restored "); // DEBUG
 	}
 
-	void action_piano_off(lv_event_t* e) {
+	void action_jump_to_dfu(lv_event_t* e) {
 		SCB_DisableDCache();
 		SCB_DisableICache();
 		SCB_CleanInvalidateDCache();
@@ -1593,6 +1595,10 @@ extern "C" {
 
 		pause(200);
 		NVIC_SystemReset();
+	}
+
+	void action_piano_off(lv_event_t* e) {
+		to_sleep();
 	}
 
 	// LVGL VARS
