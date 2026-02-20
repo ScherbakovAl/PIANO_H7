@@ -72,7 +72,50 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+//  // Включаем тактирование GPIOE и GPIOB для настройки пинов
+//  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOE);
+//  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB);
 
+//  // Переводим пины E11, E7, B12, B13 в режим аналогового вывода для обесточивания перед standby
+//  // GPIOE/B_MODER: 00=input, 01=output, 10=alternate, 11=analog
+//  // Сдвиг пина * 2, так как каждый пин занимает 2 бита
+//  // ВАЖНО: сначала очищаем биты, потом устанавливаем нужное значение
+ 
+//  // PE11 -> analog
+//  GPIOE->MODER &= ~(0x03 << (11 * 2));  // Очищаем биты
+//  GPIOE->MODER |= (0x03 << (11 * 2));   // Устанавливаем analog (11)
+ 
+//  // PE7 -> analog
+//  GPIOE->MODER &= ~(0x03 << (7 * 2));   // Очищаем биты
+//  GPIOE->MODER |= (0x03 << (7 * 2));    // Устанавливаем analog (11)
+ 
+//  // PB12 -> analog
+//  GPIOB->MODER &= ~(0x03 << (12 * 2));  // Очищаем биты
+//  GPIOB->MODER |= (0x03 << (12 * 2));   // Устанавливаем analog (11)
+ 
+//  // PB13 -> analog
+//  GPIOB->MODER &= ~(0x03 << (13 * 2));  // Очищаем биты
+//  GPIOB->MODER |= (0x03 << (13 * 2));   // Устанавливаем analog (11)
+
+//  // Отключаем подтяжку для этих пинов (сбрасываем в 0)
+//  GPIOE->PUPDR &= ~(0x03 << (11 * 2));  // PE11 - no pull
+//  GPIOE->PUPDR &= ~(0x03 << (7 * 2));   // PE7 - no pull
+//  GPIOB->PUPDR &= ~(0x03 << (12 * 2));  // PB12 - no pull
+//  GPIOB->PUPDR &= ~(0x03 << (13 * 2));  // PB13 - no pull
+ 
+//  // Сбрасываем выходные регистры в 0 (на всякий случай)
+//  GPIOE->ODR &= ~((1 << 11) | (1 << 7));
+//  GPIOB->ODR &= ~((1 << 12) | (1 << 13));
+
+	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+		HAL_PWR_EnterSTANDBYMode();
+	}
+	else {
+		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	}
   /* USER CODE END 1 */
 
   /* Enable the CPU Cache */

@@ -54,7 +54,7 @@ void init() {
 	init_LL();
 	init_LCD_and_touch();
 	lv_init();
-	pwr();
+	// pwr();
 	disp_create_and_touch_start();
 	ui_init();
 	tusb_init();
