@@ -223,7 +223,7 @@ void init_chips() {
 void init_buffers() {
 
 	for (uint32_t i = 0; i < buffer_division; ++i) {
-		buffer_green[i] = def_comp.green_on_default; // TODO собрать в структуру
+		buffer_green[i] = def_comp.green_on_default;
 		buffer_red[i] = def_comp.red_on_default;
 		buffer_calib[i] = 0;
 		buffer_calib_old[i] = 0;
@@ -264,25 +264,30 @@ void init_buffers() {
 	const float key = 89.0f;
 	const float rasst = 1710.0f;
 
-	const float mass_start = 120000.0f;
-	const float mass_fin = 50000.0f;
-	const float mass_step = (mass_start - mass_fin) / key;
+	const float mass_bass = 120000.0f;
+	const float mass_discant = 50000.0f;
+	const float mass_step = (mass_bass - mass_discant) / key;
 
-	const float x_start = 31775.0f; // v1
-	const float x_fin = 19250.0f; // v1
-	const float y_start = -1.18f; // v1
-	const float y_fin = -0.53f; // v1
+	// const float x_bass = 31775.0f; // v1
+	// const float x_discant = 19250.0f; // v1
+	// const float y_start = -1.18f; // v1
+	// const float y_fin = -0.53f; // v1
 
-	// const float x_start = 28000.0f; // v2
-	// const float x_fin = 28000.0f; // v2
+	// const float x_bass = 28000.0f; // v2
+	// const float x_discant = 28000.0f; // v2
 	// const float y_start = -4.5f; // v2
 	// const float y_fin = -2.1f; // v2
 
-	const float x_step = (x_start - x_fin) / key;
+	const float x_bass = 31425.0f; // v3
+	const float x_discant = 18625.0f; // v3
+	const float y_start = -3.78f; // v3
+	const float y_fin = -1.88f; // v3
+
+	const float x_step = (x_bass - x_discant) / key;
 	const float y_step = (y_start - y_fin) / key;
 
-	float m_s = mass_start;
-	float x_s = x_start;
+	float m_s = mass_bass;
+	float x_s = x_bass;
 	float y_s = y_start;
 
 	for (int i = 0; i < 98; ++i) {
