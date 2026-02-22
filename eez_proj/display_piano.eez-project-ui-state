@@ -1,7 +1,8 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/0",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/20",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/21",
+    "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/10",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -197,10 +198,10 @@
                 {
                   "type": "tab",
                   "id": "#8078f948-f19a-4376-86fa-68a125f77086",
-                  "name": "d_main",
+                  "name": "d_chart_calib_off",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/0",
+                    "objectPath": "[display_piano.eez-project]:/userPages/3",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -987,9 +988,12 @@
       "selection": {
         "0": {
           "0": {
-            "0": {}
+            "0": {},
+            "$selected": true
           },
-          "1": {},
+          "1": {
+            "$selected": true
+          },
           "2": {
             "0": {}
           },
@@ -1000,15 +1004,18 @@
           "5": {},
           "6": {},
           "7": {},
-          "8": {}
+          "8": {},
+          "9": {
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
-          "x": -167.08571428571426,
-          "y": -310.7071428571429
+          "x": -320,
+          "y": -480
         },
-        "scale": 1.5
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1026,15 +1033,16 @@
           "3": {},
           "4": {},
           "5": {},
-          "6": {}
+          "6": {},
+          "7": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -176,
-          "y": -264
+          "x": -240,
+          "y": -360
         },
-        "scale": 1.5
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1053,15 +1061,17 @@
           "5": {},
           "6": {},
           "7": {},
-          "8": {}
+          "8": {},
+          "15": {},
+          "16": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -113.23257575757577,
-          "y": -667.6768939393937
+          "x": -240,
+          "y": -360
         },
-        "scale": 1.75
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1098,15 +1108,17 @@
           "5": {},
           "6": {},
           "7": {},
-          "8": {}
+          "8": {},
+          "15": {},
+          "16": {}
         }
       },
       "transform": {
         "translate": {
-          "x": -81.07142857142861,
-          "y": -270.80357142857133
+          "x": -240,
+          "y": -360
         },
-        "scale": 1.5
+        "scale": 2
       },
       "timeline": {
         "isEditorActive": false,
@@ -1222,13 +1234,13 @@
   "lvglPart": "SELECTED",
   "lvglState": "DEFAULT",
   "lvglExpandedPropertiesGroup": [
-    "TEXT",
     "MISCELLANEOUS",
     "IMAGE",
-    "MARGIN"
+    "MARGIN",
+    "TEXT"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 1.5,
+  "flowZoom": 2,
   "implementationLanguage": "C++"
 }

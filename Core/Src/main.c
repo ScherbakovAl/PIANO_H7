@@ -107,15 +107,15 @@ int main(void)
 //  GPIOE->ODR &= ~((1 << 11) | (1 << 7));
 //  GPIOB->ODR &= ~((1 << 12) | (1 << 13));
 
-	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
-		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-		HAL_PWR_EnterSTANDBYMode();
-	}
-	else {
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-	}
+	// if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+	// 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
+	// 	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	// 	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	// 	HAL_PWR_EnterSTANDBYMode();
+	// }
+	// else {
+	// 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	// }
   /* USER CODE END 1 */
 
   /* Enable the CPU Cache */

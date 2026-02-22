@@ -23,7 +23,9 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_SENSOR_ON_1_DATA_STRING = 5,
     FLOW_GLOBAL_VARIABLE_SENSOR_ON_2_DATA_STRING = 6,
     FLOW_GLOBAL_VARIABLE_SENSOR_OFF_1_DATA_STRING = 7,
-    FLOW_GLOBAL_VARIABLE_SENSOR_OFF_2_DATA_STRING = 8
+    FLOW_GLOBAL_VARIABLE_SENSOR_OFF_2_DATA_STRING = 8,
+    FLOW_GLOBAL_VARIABLE_N_CHIP = 9,
+    FLOW_GLOBAL_VARIABLE_N_COMP = 10
 };
 
 // Native global variables
@@ -46,6 +48,10 @@ extern const char *get_var_sensor_off_1_data_string();
 extern void set_var_sensor_off_1_data_string(const char *value);
 extern const char *get_var_sensor_off_2_data_string();
 extern void set_var_sensor_off_2_data_string(const char *value);
+extern const char *get_var_n_chip();
+extern void set_var_n_chip(const char *value);
+extern const char *get_var_n_comp();
+extern void set_var_n_comp(const char *value);
 
 
 #ifdef __cplusplus

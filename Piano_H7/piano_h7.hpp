@@ -101,7 +101,7 @@ extern "C" {
 
 	struct speed_for_midi {
 		const float key_mass = 0.0f; // 80000 == 80 gr
-		const float distance = 0.0f; // 1700 == 1.7 mm
+		const float distance = 0.0f; // 1710 == 1.71 mm
 		const float offset_x = 0.0f; // offset x
 		const float offset_y = 0.0f; // offcet y
 	};
@@ -142,8 +142,8 @@ extern "C" {
 
 	int32_t buffer_green[size_BUFFER] = {};
 	int32_t buffer_red[size_BUFFER] = {};
-	int32_t buffer_calib[size_BUFFER] = {};
-	int32_t buffer_calib_old[size_BUFFER] = {};
+	int32_t buffer_blue_calib[size_BUFFER] = {};
+	int32_t buffer_blue_calib_old[size_BUFFER] = {};
 	int32_t buffer_dac[size_BUFFER] = {};
 
 	struct default_comp {
@@ -155,18 +155,19 @@ extern "C" {
 	struct default_comp def_comp;
 
 	std::vector<Chip> vChips;
-	std::map<uint8_t, comparator> mComparatorCursor_on;
-	std::map<uint8_t, comparator> mComparatorCursor_off;
+	std::map<uint8_t, comparator> mCursor_to_comparator_on;
+	std::map<uint8_t, comparator> mCursor_to_comparator_off;
 	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
 
 	chip_states chip_state = chip_states::none;
 	current_display cur_disp = current_display::none;
 	uint32_t cursor = 0;
-	uint32_t cursor_offset_on = 0;
-	uint32_t cursor_offset_off = 0;
 
 	int8_t noteAdder[size_BUFFER] = {};
 	float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
+
+	static int counter_on = 0;
+	static int counter_off = 0;
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
@@ -190,7 +191,7 @@ extern "C" {
 	// const float div_off = 0.00000000004f; // меньше - громче 
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
-	std::vector<speed_for_midi> speeds;
+	std::vector<speed_for_midi> speeds_OFF;
 	std::vector<speed_for_midi> speeds_ON;
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
@@ -231,7 +232,6 @@ extern "C" {
 	void debugg_fn(const std::string& str);  // DEBUG
 	void debugg_clear();
 	void resetPin();
-	void send_test_midi();
 	void DMA2_Stream3_i2c();
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
@@ -259,10 +259,12 @@ extern "C" {
 	std::string sensor_on_2_data_string;
 	std::string sensor_off_1_data_string;
 	std::string sensor_off_2_data_string;
+	std::string n_chip;
+	std::string n_comp;
 
 	lv_display_t* disp;
 	lv_indev_t* indev;
-	lv_obj_t* cur_shart;
+	lv_obj_t* cur_chart;
 	lv_chart_series_t* ser_on_green;
 	lv_chart_series_t* ser_on_red;
 	lv_chart_series_t* ser_on_blue;

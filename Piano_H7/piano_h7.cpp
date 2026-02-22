@@ -74,7 +74,7 @@ void init() {
 		debugg_fn("\n   *+*+*+*   NO CHIPS   *+*+*+*   \n");
 	}
 	else if (chip_state == chip_states::main) {
-		// SaveToMemory();
+		// reconfig_charts();
 		read_on_memory(); // восстановление графика при включении
 		all_H7_to_g4();
 		sync(); // включает прерывания и таймер, осторожно!
@@ -83,7 +83,7 @@ void init() {
 		jump_g4s_to_adress();
 		pause(50000);
 		init_chips();
-		// SaveToMemory();
+		// reconfig_charts();
 		read_on_memory(); // восстановление графика при включении
 		all_H7_to_g4();
 		sync(); // включает прерывания и таймер, осторожно!
@@ -150,8 +150,10 @@ void disp_create_and_touch_start() {
 void init_chips() {
 	vChips.clear();
 	vChips.reserve(allChipCount);
-	mComparatorCursor_on.clear();
-	mComparatorCursor_off.clear();
+	mCursor_to_comparator_on.clear();
+	mCursor_to_comparator_off.clear();
+	counter_on = 0;
+	counter_off = 0;
 
 	for (uint32_t i = 0; i < rx_settings_length; ++i) {
 		rx_settings[i] = 0;
@@ -159,6 +161,7 @@ void init_chips() {
 
 	std::string strOut = "ships .. \n";
 	std::string stat;
+
 
 	for (uint8_t chip_N = 0; chip_N < allChipCount; ++chip_N) {
 		rx_settings[0] = 0;
@@ -178,7 +181,6 @@ void init_chips() {
 		chip_state = (chip_states)rx_settings[4];
 
 		if (rx_settings[0]) {
-			uint8_t cursor_temp = 0;
 			uint8_t addr_in_buffer = 0;
 			std::vector<comparator> vComparators;
 			vComparators.reserve(count_comparators);
@@ -186,16 +188,17 @@ void init_chips() {
 			for (uint8_t comp_N = 0; comp_N < count_comparators; ++comp_N) {
 
 				if (chip_N < on_off_division) {
-					cursor_temp = ((chip_N)*count_comparators) + comp_N; // TODO задать смещение графика
-					addr_in_buffer = cursor_temp;
-					mComparatorCursor_on.emplace(cursor_temp, comparator(cursor_temp, addr_in_buffer, chip_N, comp_N, true));
+					addr_in_buffer = (chip_N * count_comparators) + comp_N;
+					mCursor_to_comparator_on.emplace(counter_on, comparator(counter_on, addr_in_buffer, chip_N, comp_N, true));
+					vComparators.push_back(comparator(counter_on, addr_in_buffer, chip_N, comp_N, true));
+					++counter_on;
 				}
 				else {
-					cursor_temp = ((chip_N - on_off_division) * count_comparators) + comp_N; // TODO задать смещение графика
-					addr_in_buffer = cursor_temp + buffer_division;
-					mComparatorCursor_off.emplace(cursor_temp, comparator(cursor_temp, addr_in_buffer, chip_N, comp_N, true));
+					addr_in_buffer = ((chip_N - on_off_division) * count_comparators) + comp_N + buffer_division;
+					mCursor_to_comparator_off.emplace(counter_off, comparator(counter_off, addr_in_buffer, chip_N, comp_N, true));
+					vComparators.push_back(comparator(counter_off, addr_in_buffer, chip_N, comp_N, true));
+					++counter_off;
 				}
-				vComparators.push_back(comparator(cursor_temp, addr_in_buffer, chip_N, comp_N, true));
 			}
 			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
 			strOut += std::format(" {}", chip_N);
@@ -214,10 +217,7 @@ void init_chips() {
 	}
 
 	strOut += stat;
-
 	debugg_fn(strOut);
-
-	reconfig_charts();
 }
 
 void init_buffers() {
@@ -225,15 +225,15 @@ void init_buffers() {
 	for (uint32_t i = 0; i < buffer_division; ++i) {
 		buffer_green[i] = def_comp.green_on_default;
 		buffer_red[i] = def_comp.red_on_default;
-		buffer_calib[i] = 0;
-		buffer_calib_old[i] = 0;
+		buffer_blue_calib[i] = 0;
+		buffer_blue_calib_old[i] = 0;
 		buffer_dac[i] = 0;
 	}
 	for (uint32_t i = buffer_division; i < size_BUFFER; ++i) {
 		buffer_green[i] = def_comp.green_off_default;
 		buffer_red[i] = def_comp.red_off_default;
-		buffer_calib[i] = 0;
-		buffer_calib_old[i] = 0;
+		buffer_blue_calib[i] = 0;
+		buffer_blue_calib_old[i] = 0;
 		buffer_dac[i] = 0;
 	}
 
@@ -256,16 +256,18 @@ void init_buffers() {
 		mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
 	}
 
-	speeds.push_back(speed_for_midi(8000.0f, 1710.0f, 45000.0f, -0.44f)); // расстояние 1710 
-	speeds.push_back(speed_for_midi(80000.0f, 1710.0f, 25000.0f, -3.0f)); // << это используется в noteOFF
-	speeds.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
+	speeds_OFF.push_back(speed_for_midi(8000.0f, 1710.0f, 45000.0f, -0.44f)); // расстояние 1710 
+	speeds_OFF.push_back(speed_for_midi(80000.0f, 1710.0f, 25000.0f, -3.0f)); // << это используется в noteOFF
+	speeds_OFF.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
 
 
 	const float key = 89.0f;
 	const float rasst = 1710.0f;
 
-	const float mass_bass = 120000.0f;
-	const float mass_discant = 50000.0f;
+	// const float mass_bass = 120000.0f;
+	// const float mass_discant = 50000.0f;
+	const float mass_bass = 58005.0f;
+	const float mass_discant = 58000.0f;
 	const float mass_step = (mass_bass - mass_discant) / key;
 
 	// const float x_bass = 31775.0f; // v1
@@ -278,10 +280,15 @@ void init_buffers() {
 	// const float y_start = -4.5f; // v2
 	// const float y_fin = -2.1f; // v2
 
-	const float x_bass = 31425.0f; // v3
-	const float x_discant = 18625.0f; // v3
-	const float y_start = -3.78f; // v3
-	const float y_fin = -1.88f; // v3
+	// const float x_bass = 31425.0f; // v3
+	// const float x_discant = 18625.0f; // v3
+	// const float y_start = -3.78f; // v3
+	// const float y_fin = -1.88f; // v3
+
+	const float x_bass = 18251.0f; // v4
+	const float x_discant = 18250.0f; // v4
+	const float y_start = -1.18f; // v4
+	const float y_fin = -1.17f; // v4
 
 	const float x_step = (x_bass - x_discant) / key;
 	const float y_step = (y_start - y_fin) / key;
@@ -300,22 +307,20 @@ void init_buffers() {
 
 void config_charts() {
 	lv_obj_t* ob = objects.chart_on;
-	// lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
-	lv_chart_set_point_count(ob, 89); // TODO подобрать значение
-	ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_Y); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
-	ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_Y);
-	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_Y);
-	ser_on_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_Y);
-	lv_chart_set_series_ext_y_array(ob, ser_on_green, buffer_green);
-	lv_chart_set_series_ext_y_array(ob, ser_on_red, buffer_red);
-	lv_chart_set_series_ext_y_array(ob, ser_on_blue, buffer_calib);
-	lv_chart_set_series_ext_y_array(ob, ser_on_dac, buffer_dac);
+	// lv_chart_set_point_count(ob, buffer_division);
+	lv_chart_set_point_count(ob, 91);
+	ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_X);
+	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_X);
+	ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_X); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
+	ser_on_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_X);
+	lv_chart_set_series_ext_y_array(ob, ser_on_green, &buffer_green[7]);
+	lv_chart_set_series_ext_y_array(ob, ser_on_red, &buffer_red[7]);
+	lv_chart_set_series_ext_y_array(ob, ser_on_blue, &buffer_blue_calib[7]);
+	lv_chart_set_series_ext_y_array(ob, ser_on_dac, &buffer_dac[7]);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
 	cursor_on_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
 	cursor_on_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_chart_set_cursor_point(ob, cursor_on_vert, ser_on_blue, cursor);
-	lv_chart_set_cursor_point(ob, cursor_on_hor, ser_on_blue, cursor);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -323,22 +328,19 @@ void config_charts() {
 	lv_obj_set_style_radius(ob, 0, 0);
 
 	ob = objects.chart_off;
-	// lv_chart_set_point_count(ob, buffer_division); // TODO подобрать значение
-	lv_chart_set_point_count(ob, 70); // TODO подобрать значение
-	ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_Y);
-	ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_Y);
-	ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_Y);
-	ser_off_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_Y);
+	lv_chart_set_point_count(ob, 70);
+	ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_X);
+	ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_X);
+	ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_X);
+	ser_off_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_X);
 	lv_chart_set_series_ext_y_array(ob, ser_off_green, &buffer_green[buffer_division]);
 	lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[buffer_division]);
-	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_calib[buffer_division]);
+	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_blue_calib[buffer_division]);
 	lv_chart_set_series_ext_y_array(ob, ser_off_dac, &buffer_dac[buffer_division]);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
 	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
 	cursor_off_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
 	cursor_off_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_chart_set_cursor_point(ob, cursor_off_vert, ser_off_blue, cursor);
-	lv_chart_set_cursor_point(ob, cursor_off_hor, ser_off_blue, cursor);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
 	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
 	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
@@ -347,34 +349,58 @@ void config_charts() {
 }
 
 void reconfig_charts() { // должен быть только после config_charts();
+
+	uint8_t start_on = 0;
+	uint8_t end_on = 0;
+	uint8_t start_off = 0;
+	uint8_t end_off = 0;
+
 	if (!vChips.empty()) {
-		cursor = vChips.front().comparators.front().address;
-		cursor_offset_on = cursor;
-		lv_obj_t* obj = objects.chart_on; // TODO задать размеры графика
-		lv_chart_set_x_start_point(obj, ser_on_green, cursor);
-		lv_chart_set_x_start_point(obj, ser_on_red, cursor);
-		lv_chart_set_x_start_point(obj, ser_on_blue, cursor);
-		lv_chart_set_x_start_point(obj, ser_on_dac, cursor);
-		// lv_chart_set_point_count(obj, vChips.front().comparators.front().address);
+
+		const auto& front = vChips.front();
+		const auto& back = vChips.back();
+
+		if (front.typ == typeAction::on) {
+			start_on = front.comparators.front().address;
+		}
+		else {
+			start_off = front.comparators.front().address;
+		}
+
+		if (back.typ == typeAction::off) {
+			end_off = back.comparators.back().address;
+		}
+		else {
+			end_on = back.comparators.back().address;
+		}
+
+		if (front.typ == typeAction::on && back.typ == typeAction::off) {
+			for (const auto& [prev, curr] : vChips | std::views::adjacent<2>) {
+				if (curr.typ == typeAction::off) {
+					end_on = prev.comparators.back().address;
+					start_off = curr.comparators.front().address;
+					return;
+				}
+			}
+		}
+
+		if (counter_on) {
+			lv_chart_set_point_count(objects.chart_on, end_on - start_on);
+			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_green, &buffer_green[start_on]);
+			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_red, &buffer_red[start_on]);
+			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_blue, &buffer_blue_calib[start_on]);
+			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_dac, &buffer_dac[start_on]);
+		}
+		if (counter_off) {
+			lv_chart_set_point_count(objects.chart_off, end_off - start_off);
+			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_green, &buffer_green[start_off]);
+			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_red, &buffer_red[start_off]);
+			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_blue, &buffer_blue_calib[start_off]);
+			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_dac, &buffer_dac[start_off]);
+		}
+
+		debugg_fn(std::format("cur {}", start_on)); // DEBUG
 	}
-
-
-	// for (size_t i = 0; i + 1 < vChips.size(); ++i) {
-	// 	const auto& prev = vChips[i];
-	// 	const auto& current = vChips[i + 1];
-	// 	if (current.typ == typeAction::off) {
-	// 		cursor_offset_off = current.comparators.front().address;
-
-	// 	}
-	// }
-
-	// for (const auto& [prev, curr] : vChips | std::views::adjacent<2>) {
-	// 	debugg_fn(std::format("prev {}   cur {}", prev.number_chip, curr.number_chip));
-	// 	if (curr.typ == typeAction::off) {
-
-	// 	}
-	// }
-
 }
 
 // добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
@@ -382,7 +408,7 @@ void h7() {
 
 	init();
 
-	while (1) { // основной циклs
+	while (1) { // основной цикл
 
 		tud_task();
 		lv_timer_handler_run_in_period(5);
@@ -399,17 +425,17 @@ void h7() {
 						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
 						for (const auto& comp : chip.comparators) {
 							UART4_receive_settings();
-							buffer_calib[comp.address] = convert_8_16(a_, b_);
+							buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
 						}
 						update_cursor(chip);
 					}
 				}
-				uint8_t addr = mComparatorCursor_on[cursor].address;
-				chart_calib_online = std::to_string(buffer_calib[addr]);
-				l = std::to_string(buffer_calib[addr - 1]);
-				r = std::to_string(buffer_calib[addr + 1]);
-				lv_chart_set_cursor_point(objects.chart_on, cursor_on_hor, ser_on_blue, cursor - cursor_offset_on); // TODO не работает вертикальный курсор до конца графика
-				lv_chart_refresh(cur_shart);
+				uint8_t addr = mCursor_to_comparator_on[cursor].address;
+				chart_calib_online = std::to_string(buffer_blue_calib[addr]);
+				l = std::to_string(buffer_blue_calib[addr - 1]);
+				r = std::to_string(buffer_blue_calib[addr + 1]);
+				lv_chart_set_cursor_point(objects.chart_on, cursor_on_hor, ser_on_blue, cursor);
+				lv_chart_refresh(cur_chart);
 			}
 
 			if (cur_disp == current_display::off) {
@@ -419,21 +445,19 @@ void h7() {
 						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
 						for (const auto& comp : chip.comparators) {
 							UART4_receive_settings();
-							buffer_calib[comp.address] = convert_8_16(a_, b_);
+							buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
 						}
 						update_cursor(chip);
 					}
 				}
-				uint8_t addr = mComparatorCursor_off[cursor].address;
-				chart_calib_online = std::to_string(buffer_calib[addr]);
-				l = std::to_string(buffer_calib[addr - 1]);
-				r = std::to_string(buffer_calib[addr + 1]);
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor - cursor_offset_off); // получение значения для cursor_offset_off не реализовано (== 0)
-				lv_chart_refresh(cur_shart);
+				uint8_t addr = mCursor_to_comparator_off[cursor].address;
+				chart_calib_online = std::to_string(buffer_blue_calib[addr]);
+				l = std::to_string(buffer_blue_calib[addr - 1]);
+				r = std::to_string(buffer_blue_calib[addr + 1]);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor);
+				lv_chart_refresh(cur_chart);
 			}
-
 			TIM5->CNT = 0;
-
 		}
 
 		if (fl == 1) { // DEBUG
@@ -446,7 +470,7 @@ void h7() {
 			// debugg_fn(std::format("rx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
 			// debugg_fn(std::format("tOut = { :.5f }", rx_settings[1]));
 			// debugg_fn(std::format("rx_settings = {:}", rx_settings[1]));
-			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // for test
+			// test_t_out_fl = std::format("{:.10f}", timerLenght_F); // DEBUG
 			// 	// test_speed_fl = std::format("{:.3f}", speed_F);
 			// debugg_fn(std::format("log = {:.3f}", speed_F));
 			// 	// test_energy_fl = std::format("{:.3f}", energy_F);
@@ -486,7 +510,7 @@ void h7() {
 			// debugg_fn(std::format("3 = {}", rx_data[3]));
 		// 	// timer_data = std::format("{:.4f}", timer_data_in);
 			// debugg_fn(std::format("timer_data = {:.4f}", timer_data_in));
-			fl = 0; // for test fl
+			fl = 0; // DEBUG
 		}
 
 		if (fl == 2) {
@@ -584,14 +608,14 @@ void update_cursor(const Chip& chip) {
 	bool fl_c = false;
 	for (const auto& comp : chip.comparators) {
 		const auto& addr = comp.address;
-		if (buffer_calib[addr] < 4080 && buffer_calib[addr] > 2) {
+		if (buffer_blue_calib[addr] < 4080 && buffer_blue_calib[addr] > 2) {
 
-			if (buffer_calib_old[addr] + 200 < buffer_calib[addr]) {
-				buffer_calib_old[addr] = buffer_calib[addr];
+			if (buffer_blue_calib_old[addr] + 200 < buffer_blue_calib[addr]) {
+				buffer_blue_calib_old[addr] = buffer_blue_calib[addr];
 				fl_c = true;
 			}
-			else if (buffer_calib_old[addr] - 200 > buffer_calib[addr]) {
-				buffer_calib_old[addr] = buffer_calib[addr];
+			else if (buffer_blue_calib_old[addr] - 200 > buffer_blue_calib[addr]) {
+				buffer_blue_calib_old[addr] = buffer_blue_calib[addr];
 				fl_c = true;
 			}
 		}
@@ -599,17 +623,19 @@ void update_cursor(const Chip& chip) {
 		if (fl_c) {
 			cursor = comp.cursor;
 			if (addr > buffer_division) {
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor - cursor_offset_off);
+				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
 				sensor_off_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_off_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
 			}
 			else {
-				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor - cursor_offset_on);
+				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
 				sensor_on_1_data_string = std::to_string(buffer_green[addr]);
 				sensor_on_2_data_string = std::to_string(buffer_red[addr]);
 				cursor_string = std::to_string(cursor);
 			}
+			n_chip = std::to_string(comp.number_chip);
+			n_comp = std::to_string(comp.number_comparator);
 			fl_c = false;
 		}
 	}
@@ -742,38 +768,54 @@ void DMA1_RX(void) {
 		float integerPart_F;
 		uint8_t note_ = rxB + noteAdder[rxB];
 
-#define speee
-#ifdef speee
 
-		if (rxB > 98) {
-			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
-			const speed_for_midi& st = speeds[curve_num]; // TODO скорость: 0 - глухая ... 2 - яркая ?
+		if (rxB > 98) { // for OFF
+			const speed_for_midi& st = speeds_OFF[1]; // TODO скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
 			speed_F = st.distance / ((float)tOut + st.offset_x);
 			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
 			midi_hi_F = energy_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		}
-		else {
-			const speed_for_midi& st = speeds_ON[rxB - 7];
-			speed_F = st.distance / (((float)tOut) + st.offset_x);
-			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
-			midi_hi_F = energy_F;
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+		else { // for ON
+			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
+			if (curve_num == 0) {
+				const float key_mass = 0.008f; // 8 гр -->> переехал в массив
+				const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+				const float div_on = 0.000000000092f; // меньше - громче
+				const float deriv_F = 2.0f; // делить на 2 в формуле
+				const float maxMidi_F = 127.99f;
+				float timerLenght_F = (float)tOut * div_on;
 
-			if (midi_hi_F < 1.0f) {
-				midi_hi_F = 1.0f;
-				midi_lo_F = 1.0f;
+				speed_F = distance_F / timerLenght_F;
+				energy_F = (key_mass * speed_F * speed_F) / deriv_F;
+				midi_hi_F = energy_F / maxMidi_F;
+				float integerPart_F;
+				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+				int note_ = rxB + noteAdder[rxB];
+
 			}
-			if (midi_hi_F > 127.0f) {
-				midi_hi_F = 127.0f;
-				midi_lo_F = 127.0f;
-				out_debug_ = tOut;
-				m_F = st.key_mass;
-				sd_F = st.distance;
-				sx_F = st.offset_x;
-				sy_F = st.offset_y;
-				fl = 2;
+			if (curve_num == 1) {
+				const speed_for_midi& st = speeds_ON[rxB - 7];
+				speed_F = st.distance / (((float)tOut) + st.offset_x);
+				energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
+				midi_hi_F = energy_F;
+				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 			}
+		}
+
+		if (midi_hi_F < 1.0f) {
+			midi_hi_F = 1.0f;
+			midi_lo_F = 1.0f;
+		}
+		if (midi_hi_F > 127.0f) {
+			midi_hi_F = 127.0f;
+			midi_lo_F = 127.0f;
+			out_debug_ = tOut;
+			m_F = 58005; // DEBUG
+			sd_F = 1710;
+			sx_F = 18250;
+			sy_F = -1.18;
+			fl = 2;
 		}
 
 		uint8_t note_buf[] = {
@@ -810,51 +852,41 @@ void DMA1_RX(void) {
 			}
 		}
 
-#endif
-#ifndef speee
-
-		if (tOut < 5664) tOut = 5664;
-
-		//47.9 + 51.23(17000)-2474.3
-		midi_hi_F = 66.2f + (63.88f * log10f(17000.0f / ((float)tOut - 3764.0f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
-		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-		note_ = rxB + noteAdder[rxB];
-
-		if (midi_hi_F < 1) {
-			midi_hi_F = 1;
-			midi_lo_F = 1;
-		}
-
-		// if (midi_hi_F > 127) {
-		// 	midi_hi_F = 127;
-		// 	midi_lo_F = 127;
+		// if (tOut < 5664) tOut = 5664;
+		// //47.9 + 51.23(17000)-2474.3
+		// midi_hi_F = 66.2f + (63.88f * log10f(17000.0f / ((float)tOut - 3764.0f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
+		// midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+		// note_ = rxB + noteAdder[rxB];
+		// if (midi_hi_F < 1) {
+		// 	midi_hi_F = 1;
+		// 	midi_lo_F = 1;
 		// }
-
-		uint8_t note_buf2[] = {
-			0xB0,
-			0x58,
-			(uint8_t)midi_lo_F,
-			rxB < 98 ? 0x90 : 0x80, // 0x90 note on
-			note_,
-			(uint8_t)midi_hi_F
-		};
-
-		tud_midi_stream_write(0, note_buf2, 6);
-
-		// fl = rxB < 98 ? 1 : 0; // for test // разрешить обновлять цифры на дисплее
-		timerLenght_F = midi_hi_F; // DEBUG
-		// speed_F = midi_hi_F; // DEBUG
-#endif
+		// // if (midi_hi_F > 127) {
+		// // 	midi_hi_F = 127;
+		// // 	midi_lo_F = 127;
+		// // }
+		// uint8_t note_buf2[] = {
+		// 	0xB0,
+		// 	0x58,
+		// 	(uint8_t)midi_lo_F,
+		// 	rxB < 98 ? 0x90 : 0x80, // 0x90 note on
+		// 	note_,
+		// 	(uint8_t)midi_hi_F
+		// };
+		// tud_midi_stream_write(0, note_buf2, 6);
+		// // fl = rxB < 98 ? 1 : 0; // DEBUG // разрешить обновлять цифры на дисплее
+		// timerLenght_F = midi_hi_F; // DEBUG
+		// // speed_F = midi_hi_F; // DEBUG
 	}
 
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	LL_TIM_EnableCounter(TIM1); // PWM - tim clk // for test // TODO правильно ли здесь это использовать?
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
 
 }
 
 void USART_noise_error_detected() {
 	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
-	LL_USART_RequestRxDataFlush(UART5); // TODO // for test // ????
+	LL_USART_RequestRxDataFlush(UART5);
 	SCB_CleanInvalidateDCache();
 }
 
@@ -998,15 +1030,6 @@ void debugg_clear() {
 
 void resetPin() {
 	NVIC_SystemReset();
-}
-
-void send_test_midi() { // for test   // TODO можно удалить
-	uint8_t const cable_num = 0;
-	uint8_t note_buf[] = { 0xB0, 0x58, 16, 0x90, 64, 0x36, 0xB0, 0x58, 125, 0x80, 64, 0x36 };
-	const int bufsize = sizeof(note_buf);
-	tud_midi_stream_write(cable_num, note_buf, bufsize);
-	pause(100);
-	tud_midi_stream_write(cable_num, note_buf, bufsize);
 }
 
 // LVGL UTILITES
@@ -1203,6 +1226,7 @@ void data_from_H7_to_g4() {
 	}
 	// прыгаем по предустановленному в G4 адресу (0x08008000)
 	if (!bug) {
+		debugg_clear();
 		debugg_fn("\n \n    JUMPING ");
 		jump_g4s_to_adress();
 
@@ -1355,10 +1379,10 @@ const comparator& searcher_addr_in_cursor(const uint32_t& c) {
 	std::map<uint8_t, comparator>* mComparatorCursor_temp;
 
 	if (cur_disp == current_display::on) {
-		mComparatorCursor_temp = &mComparatorCursor_on;
+		mComparatorCursor_temp = &mCursor_to_comparator_on;
 	}
 	else {
-		mComparatorCursor_temp = &mComparatorCursor_off;
+		mComparatorCursor_temp = &mCursor_to_comparator_off;
 	}
 
 	auto it = mComparatorCursor_temp->find(c);
@@ -1373,18 +1397,20 @@ const comparator& searcher_addr_in_cursor(const uint32_t& c) {
 
 void set_cursor_piont_on(const comparator& comp) {
 	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor - cursor_offset_on);
+	lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
 	sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 	sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
-
+	n_chip = std::to_string(comp.number_chip);
+	n_comp = std::to_string(comp.number_comparator);
 }
 
 void set_cursor_piont_off(const comparator& comp) {
 	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor - cursor_offset_off);
+	lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
 	sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
 	sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
-
+	n_chip = std::to_string(comp.number_chip);
+	n_comp = std::to_string(comp.number_comparator);
 }
 
 // LVGL ACTIONS
@@ -1436,7 +1462,7 @@ extern "C" {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 		LL_USART_DisableDMAReq_RX(UART5);
 		cur_disp = current_display::on;
-		cur_shart = objects.chart_on;
+		cur_chart = objects.chart_on;
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
 		debugg_clear();
 		all_g4_to_H7();
@@ -1460,7 +1486,7 @@ extern "C" {
 		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 		LL_USART_DisableDMAReq_RX(UART5);
 		cur_disp = current_display::off;
-		cur_shart = objects.chart_off;
+		cur_chart = objects.chart_off;
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
 		debugg_clear();
 		if (!vChips.empty()) {
@@ -1511,28 +1537,28 @@ extern "C" {
 	// other
 	void action_calib_sensor_on_green(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_calib[comp.address]);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
 		buffer_green[comp.address] = convert_8_16(a_, b_);
 		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 	}
 
 	void action_calib_sensor_on_red(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_calib[comp.address]);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_blue_calib[comp.address]);
 		buffer_red[comp.address] = convert_8_16(a_, b_);
 		sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
 	}
 
 	void action_calib_sensor_off_green(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_calib[comp.address]);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
 		buffer_green[comp.address] = convert_8_16(a_, b_);
 		sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
 	}
 
 	void action_calib_sensor_off_red(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_calib[comp.address]);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_blue_calib[comp.address]);
 		buffer_red[comp.address] = convert_8_16(a_, b_);
 		sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
 	}
@@ -1606,7 +1632,11 @@ extern "C" {
 		to_sleep();
 	}
 
-	// LVGL VARS
+	void action_clear_disp(lv_event_t* e) {
+		debugg_clear();
+	}
+
+		// LVGL VARS
 	const char* get_var_debugg() {
 		return debugg.c_str();
 	}
@@ -1669,6 +1699,22 @@ extern "C" {
 	}
 	void set_var_sensor_off_2_data_string(const char* value) {
 		sensor_off_2_data_string = value;
+	}
+
+	const char* get_var_n_chip() {
+		return n_chip.c_str();
+	}
+
+	void set_var_n_chip(const char* value) {
+		n_chip = value;
+	}
+
+	const char* get_var_n_comp() {
+		return n_comp.c_str();
+	}
+
+	void set_var_n_comp(const char* value) {
+		n_comp = value;
 	}
 
 }

@@ -28,6 +28,7 @@ extern void action_cursor_plus(lv_event_t * e);
 extern void action_cursor_minus_7(lv_event_t * e);
 extern void action_cursor_plus_7(lv_event_t * e);
 extern void action_piano_off(lv_event_t * e);
+extern void action_clear_disp(lv_event_t * e);
 
 
 #ifdef __cplusplus

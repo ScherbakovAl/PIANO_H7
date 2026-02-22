@@ -228,10 +228,10 @@ Piano_H7/piano_h7.cpp:1609:32: style: Parameter 'e' can be declared as pointer t
  void action_h7_g4(lv_event_t* e) { // копирует и шъёт одной кнопкой все чипы
                                ^
 Piano_H7/piano_h7.cpp:1613:31: style: Parameter 'e' can be declared as pointer to const [constParameterPointer]
- void action_jump(lv_event_t* e) { // >> jump_to_piano_g4 по адресу // TODO ?
+ void action_jump(lv_event_t* e) { // >> jump_to_piano_g4 по адресу
                               ^
 Piano_H7/piano_h7.cpp:1617:46: style: Parameter 'e' can be declared as pointer to const [constParameterPointer]
- void action_reset_bootloader_g4(lv_event_t* e) { // TODO реализовать
+ void action_reset_bootloader_g4(lv_event_t* e) {
                                              ^
 Piano_H7/piano_h7.cpp:1621:51: style: Parameter 'e' can be declared as pointer to const [constParameterPointer]
  void action_reset_main_to_bootloader(lv_event_t* e) {
