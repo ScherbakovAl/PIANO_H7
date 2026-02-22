@@ -7,7 +7,7 @@
 
 #include "vector"
 #include "map"
-#include <ranges>
+// #include <ranges>
 #include <format>
 #include "piano_h7.hpp"
 
@@ -348,59 +348,59 @@ void config_charts() {
 	lv_obj_set_style_radius(ob, 0, 0);
 }
 
-void reconfig_charts() { // должен быть только после config_charts();
+void reconfig_charts() { // должен быть только после config_charts();s
 
-	uint8_t start_on = 0;
-	uint8_t end_on = 0;
-	uint8_t start_off = 0;
-	uint8_t end_off = 0;
+	// uint8_t start_on = 0;
+	// uint8_t end_on = 0;
+	// uint8_t start_off = 0;
+	// uint8_t end_off = 0;
 
-	if (!vChips.empty()) {
+	// if (!vChips.empty()) {
 
-		const auto& front = vChips.front();
-		const auto& back = vChips.back();
+	// 	const auto& front = vChips.front();
+	// 	const auto& back = vChips.back();
 
-		if (front.typ == typeAction::on) {
-			start_on = front.comparators.front().address;
-		}
-		else {
-			start_off = front.comparators.front().address;
-		}
+	// 	if (front.typ == typeAction::on) {
+	// 		start_on = front.comparators.front().address;
+	// 	}
+	// 	else {
+	// 		start_off = front.comparators.front().address;
+	// 	}
 
-		if (back.typ == typeAction::off) {
-			end_off = back.comparators.back().address;
-		}
-		else {
-			end_on = back.comparators.back().address;
-		}
+	// 	if (back.typ == typeAction::off) {
+	// 		end_off = back.comparators.back().address;
+	// 	}
+	// 	else {
+	// 		end_on = back.comparators.back().address;
+	// 	}
 
-		if (front.typ == typeAction::on && back.typ == typeAction::off) {
-			for (const auto& [prev, curr] : vChips | std::views::adjacent<2>) {
-				if (curr.typ == typeAction::off) {
-					end_on = prev.comparators.back().address;
-					start_off = curr.comparators.front().address;
-					return;
-				}
-			}
-		}
+	// 	if (front.typ == typeAction::on && back.typ == typeAction::off) {
+	// 		for (const auto& [prev, curr] : vChips | std::views::adjacent<2>) {
+	// 			if (curr.typ == typeAction::off) {
+	// 				end_on = prev.comparators.back().address;
+	// 				start_off = curr.comparators.front().address;
+	// 				return;
+	// 			}
+	// 		}
+	// 	}
 
-		if (counter_on) {
-			lv_chart_set_point_count(objects.chart_on, end_on - start_on);
-			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_green, &buffer_green[start_on]);
-			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_red, &buffer_red[start_on]);
-			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_blue, &buffer_blue_calib[start_on]);
-			lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_dac, &buffer_dac[start_on]);
-		}
-		if (counter_off) {
-			lv_chart_set_point_count(objects.chart_off, end_off - start_off);
-			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_green, &buffer_green[start_off]);
-			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_red, &buffer_red[start_off]);
-			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_blue, &buffer_blue_calib[start_off]);
-			lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_dac, &buffer_dac[start_off]);
-		}
+	// 	if (counter_on) {
+	// 		lv_chart_set_point_count(objects.chart_on, end_on - start_on);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_green, &buffer_green[start_on]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_red, &buffer_red[start_on]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_blue, &buffer_blue_calib[start_on]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_on, ser_on_dac, &buffer_dac[start_on]);
+	// 	}
+	// 	if (counter_off) {
+	// 		lv_chart_set_point_count(objects.chart_off, end_off - start_off);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_green, &buffer_green[start_off]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_red, &buffer_red[start_off]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_blue, &buffer_blue_calib[start_off]);
+	// 		lv_chart_set_series_ext_y_array(objects.chart_off, ser_off_dac, &buffer_dac[start_off]);
+	// 	}
 
-		debugg_fn(std::format("cur {}", start_on)); // DEBUG
-	}
+	// 	debugg_fn(std::format("cur {}", start_on)); // DEBUG
+	// }
 }
 
 // добавить анимацию: https://duino.ru/blog/onlayn-konverter-gif-animatsii-v-iskhodnyy-kod-dlya-arduino/
@@ -770,7 +770,7 @@ void DMA1_RX(void) {
 
 
 		if (rxB > 98) { // for OFF
-			const speed_for_midi& st = speeds_OFF[1]; // TODO скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
+			const speed_for_midi& st = speeds_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
 			speed_F = st.distance / ((float)tOut + st.offset_x);
 			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
 			midi_hi_F = energy_F;
@@ -778,7 +778,8 @@ void DMA1_RX(void) {
 		}
 		else { // for ON
 			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
-			if (curve_num == 0) {
+
+			if (curve_num == 0) { // v1
 				const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 				const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
 				const float div_on = 0.000000000092f; // меньше - громче
@@ -792,9 +793,9 @@ void DMA1_RX(void) {
 				float integerPart_F;
 				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 				int note_ = rxB + noteAdder[rxB];
-
 			}
-			if (curve_num == 1) {
+
+			if (curve_num == 1) { // v2
 				const speed_for_midi& st = speeds_ON[rxB - 7];
 				speed_F = st.distance / (((float)tOut) + st.offset_x);
 				energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
@@ -851,29 +852,7 @@ void DMA1_RX(void) {
 				fl = 1;
 			}
 		}
-
-		// if (tOut < 5664) tOut = 5664;
-		// //47.9 + 51.23(17000)-2474.3
-		// midi_hi_F = 66.2f + (63.88f * log10f(17000.0f / ((float)tOut - 3764.0f))); // 74 + 78? // 57.96 + 100? // 57.96 + 71.3? // 70 + 74(17000)?
-		// midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-		// note_ = rxB + noteAdder[rxB];
-		// if (midi_hi_F < 1) {
-		// 	midi_hi_F = 1;
-		// 	midi_lo_F = 1;
-		// }
-		// // if (midi_hi_F > 127) {
-		// // 	midi_hi_F = 127;
-		// // 	midi_lo_F = 127;
-		// // }
-		// uint8_t note_buf2[] = {
-		// 	0xB0,
-		// 	0x58,
-		// 	(uint8_t)midi_lo_F,
-		// 	rxB < 98 ? 0x90 : 0x80, // 0x90 note on
-		// 	note_,
-		// 	(uint8_t)midi_hi_F
-		// };
-		// tud_midi_stream_write(0, note_buf2, 6);
+		
 		// // fl = rxB < 98 ? 1 : 0; // DEBUG // разрешить обновлять цифры на дисплее
 		// timerLenght_F = midi_hi_F; // DEBUG
 		// // speed_F = midi_hi_F; // DEBUG
