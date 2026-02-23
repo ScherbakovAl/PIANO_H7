@@ -1638,7 +1638,8 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#cbc237"
                         }
                       }
                     }
@@ -1797,7 +1798,8 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#cc75b7"
                         }
                       }
                     }
@@ -1869,7 +1871,7 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 60,
+                  "width": 63,
                   "height": 48,
                   "customInputs": [],
                   "customOutputs": [],
@@ -1901,14 +1903,15 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#37cb9c"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "  boot 1 \n  jump\nto piano",
+                  "text": "    boot 1 \n     jump\nto piano",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -1973,8 +1976,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 82,
-                  "height": 32,
+                  "width": 62,
+                  "height": 48,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -2005,14 +2008,15 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#6acb37"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "boots reset\n   to boot 1",
+                  "text": "     boots\n     reset\nto boot 1",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2077,8 +2081,8 @@
                   "type": "LVGLLabelWidget",
                   "left": 0,
                   "top": 0,
-                  "width": 82,
-                  "height": 32,
+                  "width": 62,
+                  "height": 48,
                   "customInputs": [],
                   "customOutputs": [],
                   "style": {
@@ -2109,14 +2113,15 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#6acb37"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "piano reset\n  to boot 1",
+                  "text": "     piano\n     reset\nto boot 1",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2317,7 +2322,8 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#6acb37"
                         }
                       }
                     }
@@ -2421,14 +2427,15 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#cc75b7"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "boot 2\nflash\nboot 1",
+                  "text": "boot 2\n flash\nboot 1",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false
@@ -2525,14 +2532,15 @@
                     "definition": {
                       "MAIN": {
                         "DEFAULT": {
-                          "align": "CENTER"
+                          "align": "CENTER",
+                          "text_color": "#cc75b7"
                         }
                       }
                     }
                   },
                   "group": "",
                   "groupIndex": 0,
-                  "text": "boot 1\nflash\nboot 2",
+                  "text": "boot 1\n flash\nboot 2",
                   "textType": "literal",
                   "longMode": "WRAP",
                   "recolor": false

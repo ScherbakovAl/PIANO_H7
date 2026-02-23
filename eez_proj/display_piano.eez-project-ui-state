@@ -1,7 +1,7 @@
 {
   "navigation": {
-    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/3",
-    "selectedActionObject": "[display_piano.eez-project]:/actions/21",
+    "selectedUserPageObject": "[display_piano.eez-project]:/userPages/1",
+    "selectedActionObject": "[display_piano.eez-project]:/actions/24",
     "selectedGlobalVariableObject": "[display_piano.eez-project]:/variables/globalVariables/10",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
@@ -125,7 +125,8 @@
                 {
                   "type": "tabset",
                   "id": "#b6d926fc-85dd-4d43-b438-1dfef1965f57",
-                  "weight": 1.0932941910589162,
+                  "weight": 1.4037897413196483,
+                  "selected": 1,
                   "enableClose": false,
                   "children": [
                     {
@@ -157,7 +158,7 @@
                 {
                   "type": "tabset",
                   "id": "#8d747c40-1bd4-47d9-a802-7d15c197cc04",
-                  "weight": 0.7565595802127699,
+                  "weight": 0.8440235066446755,
                   "enableClose": false,
                   "children": [
                     {
@@ -173,7 +174,7 @@
                 {
                   "type": "tabset",
                   "id": "#a9aa8c3c-5981-4c4d-8907-c4f6a03cd743",
-                  "weight": 1.1501462287283073,
+                  "weight": 0.7521867520356694,
                   "enableClose": false,
                   "children": [
                     {
@@ -198,10 +199,10 @@
                 {
                   "type": "tab",
                   "id": "#8078f948-f19a-4376-86fa-68a125f77086",
-                  "name": "d_chart_calib_off",
+                  "name": "d_flash",
                   "component": "editor",
                   "config": {
-                    "objectPath": "[display_piano.eez-project]:/userPages/3",
+                    "objectPath": "[display_piano.eez-project]:/userPages/1",
                     "permanent": false
                   },
                   "icon": "svg:page"
@@ -988,12 +989,9 @@
       "selection": {
         "0": {
           "0": {
-            "0": {},
-            "$selected": true
+            "0": {}
           },
-          "1": {
-            "$selected": true
-          },
+          "1": {},
           "2": {
             "0": {}
           },
@@ -1005,9 +1003,7 @@
           "6": {},
           "7": {},
           "8": {},
-          "9": {
-            "$selected": true
-          }
+          "9": {}
         }
       },
       "transform": {
@@ -1034,7 +1030,10 @@
           "4": {},
           "5": {},
           "6": {},
-          "7": {}
+          "7": {},
+          "8": {},
+          "9": {},
+          "10": {}
         }
       },
       "transform": {
@@ -1237,7 +1236,8 @@
     "MISCELLANEOUS",
     "IMAGE",
     "MARGIN",
-    "TEXT"
+    "TEXT",
+    "ARC"
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
