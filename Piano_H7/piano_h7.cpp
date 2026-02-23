@@ -39,13 +39,15 @@ void pwr() {
 
 void to_sleep() {
 
-	LCD_WR_REG(0x10); // Sleep In
-	LL_mDelay(120);
-	tud_disconnect();
-	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-	HAL_PWR_EnterSTANDBYMode();
+	// LCD_WR_REG(0x10); // Sleep In
+	// LL_mDelay(120);
+	// tud_disconnect();
+	// HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
+	// __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	// HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
+	// HAL_PWR_EnterSTANDBYMode();
+	LL_mDelay(200);
+	NVIC_SystemReset();
 
 }
 
@@ -71,22 +73,25 @@ void init() {
 	init_chips();
 
 	if (chip_state == chip_states::none) {
-		debugg_fn("\n   *+*+*+*   NO CHIPS   *+*+*+*   \n");
+		debugg_fn("   *+*+*+*   NO CHIPS   *+*+*+*\n");
 	}
-	else if (chip_state == chip_states::main) {
-		// reconfig_charts();
+	else if (chip_state == chip_states::piano) {
+		debugg_fn("   *+*+*+*   piano   *+*+*+*\n");
 		read_on_memory(); // восстановление графика при включении
 		all_H7_to_g4();
 		sync(); // включает прерывания и таймер, осторожно!
 	}
-	else if (chip_state == chip_states::boot) {
-		jump_g4s_to_adress();
+	else if (chip_state == chip_states::boot1) {
+		debugg_fn("   *+*+*+*   bootloader   *+*+*+*\n");
+		jump_g4s_to_adress(ADDRESS_G4_MAIN_FIRMWARE, chip_states::piano);
 		pause(50000);
 		init_chips();
-		// reconfig_charts();
 		read_on_memory(); // восстановление графика при включении
 		all_H7_to_g4();
 		sync(); // включает прерывания и таймер, осторожно!
+	}
+	else if (chip_state == chip_states::boot2) {
+		debugg_fn("   *+*+*+*   bootloader v2   *+*+*+*\n");
 	}
 }
 
@@ -148,12 +153,18 @@ void disp_create_and_touch_start() {
 }
 
 void init_chips() {
+
+	LL_USART_RequestRxDataFlush(UART5);
+
 	vChips.clear();
 	vChips.reserve(allChipCount);
 	mCursor_to_comparator_on.clear();
 	mCursor_to_comparator_off.clear();
 	counter_on = 0;
 	counter_off = 0;
+	chip_state = chip_states::none;
+	chip_state_prev = chip_states::none;
+	int flag1 = 1;
 
 	for (uint32_t i = 0; i < rx_settings_length; ++i) {
 		rx_settings[i] = 0;
@@ -163,13 +174,14 @@ void init_chips() {
 	std::string stat;
 
 
-	for (uint8_t chip_N = 0; chip_N < allChipCount; ++chip_N) {
+	for (uint8_t chip_N = 1; chip_N < allChipCount; ++chip_N) {
 		rx_settings[0] = 0;
 		UART4_send_address(chip_N);
 		Set_tx_s((uint8_t)bootloader_command::echo, 0, 0, 0, 0);
 		UART4_send_settings_bootloader();
 		UART4_receive_timeout_10us();
 
+		pause(4);
 		UART4_send_address(chip_N); // с первого раза не раздупляются почему-то
 		UART4_send_settings_bootloader();
 		UART4_receive_timeout_10us();
@@ -177,8 +189,6 @@ void init_chips() {
 		if (rx_settings[1] != 0 || rx_settings[2] != 0 || rx_settings[3] != 0) { // проверка, что приняты " aadr 0 0 0 state"
 			strOut += "\n  * * NOISE!!! * *  ";
 		}
-
-		chip_state = (chip_states)rx_settings[4];
 
 		if (rx_settings[0]) {
 			uint8_t addr_in_buffer = 0;
@@ -201,21 +211,38 @@ void init_chips() {
 				}
 			}
 			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
+
+			chip_state = (chip_states)rx_settings[4];
+
+			if (flag1) {
+				chip_state_prev = chip_state;
+				flag1 = 0;
+			}
+
+			if (chip_state != chip_state_prev) {
+				chip_state_prev = chip_state;
+				strOut += std::format("  chip_state fail {} ", chip_N);
+			}
+
 			strOut += std::format(" {}", chip_N);
 		}
 	}
 
-	if (chip_state == chip_states::boot) {
+	if (chip_state == chip_states::boot1) {
 		stat = "\n bootloaders";
 	}
-	else if (chip_state == chip_states::main) {
+	else if (chip_state == chip_states::piano) {
 		stat = "\n pianos";
 	}
 	else if (chip_state == chip_states::none) {
 		stat.clear();
 		strOut.clear();
 	}
+	else if (chip_state == chip_states::boot2) {
+		stat = "\n bootloaders v2";
+	}
 
+	strOut += std::format(" = {}", (counter_on + counter_off) / count_comparators);
 	strOut += stat;
 	debugg_fn(strOut);
 }
@@ -533,7 +560,7 @@ void sync() { // включает прерывания, осторожно!
 		debugg_fn(std::format("Sync {} bugs", fl_sync));
 	}
 	else {
-		debugg_fn("Sync OK");
+		debugg_fn("   sync OK");
 	}
 
 	LL_USART_EnableDMAReq_RX(UART5);
@@ -572,6 +599,7 @@ void all_H7_to_g4() {
 			}
 		}
 	}
+	debugg_fn("   calib H7 >> G4 \n");
 }
 
 void all_g4_to_H7() {
@@ -587,6 +615,7 @@ void all_g4_to_H7() {
 			}
 		}
 	}
+	debugg_fn("   calib G4 >> H7 \n");
 }
 
 void read_comp_setting(const typeAction& t) {
@@ -656,7 +685,7 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 		}
 	}
 	if (com == command::mute || com == command::unmute) {
-		if (convert_8_16(a_, b_) != (int32_t)chip_states::main) {
+		if (convert_8_16(a_, b_) != (int32_t)chip_states::piano) {
 			debugg_fn(std::format(" mute - unmute  fail {}", adress));
 		}
 	}
@@ -852,7 +881,7 @@ void DMA1_RX(void) {
 				fl = 1;
 			}
 		}
-		
+
 		// // fl = rxB < 98 ? 1 : 0; // DEBUG // разрешить обновлять цифры на дисплее
 		// timerLenght_F = midi_hi_F; // DEBUG
 		// // speed_F = midi_hi_F; // DEBUG
@@ -1147,19 +1176,20 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
-void data_from_H7_to_g4() {
-	uint32_t start_adress_memory_read = ADDRESS_H7_MAIN_FIRMWARE_FOR_G4; //  ++0x800 с каждым шагом
-	uint32_t mem = ADDRESS_G4_MAIN_FIRMWARE_ALT;
+void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump) {
+
+	uint32_t start_adress_memory_read = adress_g4_firmware_in_H7; //  ++0x800 с каждым шагом
+	uint32_t mem = addr_jump;
 	std::string ships_ok = "ships flash ok .. ";
 	int bug = 0;
 
 	init_chips();
 
 	for (const auto& chip : vChips) {
-		start_adress_memory_read = ADDRESS_H7_MAIN_FIRMWARE_FOR_G4;
-		mem = ADDRESS_G4_MAIN_FIRMWARE_ALT;
+		start_adress_memory_read = adress_g4_firmware_in_H7;
+		mem = addr_jump;
 
-		for (uint32_t ii = 0; ii < COUNT_PAGE_FOR_FIRMWARE_G4; ++ii) {
+		for (uint32_t ii = 0; ii < count_page; ++ii) {
 			UART4_send_address(chip.number_chip);
 			Set_tx_s((uint8_t)bootloader_command::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
 			UART4_send_settings_bootloader();
@@ -1204,10 +1234,13 @@ void data_from_H7_to_g4() {
 	// debugg_fn(ships_ok);
 	}
 	// прыгаем по предустановленному в G4 адресу (0x08008000)
-	if (!bug) {
-		debugg_clear();
-		debugg_fn("\n \n    JUMPING ");
-		jump_g4s_to_adress();
+	if (bug) {
+		debugg_fn(std::format("{} -- copy bugs", bug));
+	}
+	else {
+		// debugg_clear();
+		// debugg_fn("\n \n    JUMPING ");
+		// jump_g4s_to_adress(addr_jump);
 
 		/*
 		for (auto n : numbers_chips) {
@@ -1225,9 +1258,6 @@ void data_from_H7_to_g4() {
 			}
 		}
 		*/
-	}
-	else {
-		debugg_fn(std::format("{} -- copy bugs", bug));
 	}
 }
 
@@ -1280,9 +1310,11 @@ void flash_g4(const uint32_t& addr, const int& chip_number) {
 	}
 }
 
-void jump_g4s_to_adress() {
+void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) {
+
 	init_chips();
 	int bug = 0;
+
 	for (const auto& chip : vChips) {
 
 		UART4_send_address(chip.number_chip);
@@ -1297,7 +1329,7 @@ void jump_g4s_to_adress() {
 		pause(4);
 
 		// отправка адреса
-		uint32_to_bytes_pointer(ADDRESS_G4_MAIN_FIRMWARE_ALT, tx_settings);
+		uint32_to_bytes_pointer(addr_jump, tx_settings);
 		tx_settings[4] = chip.number_chip;
 		UART4_send_settings_bootloader();
 		UART4_receive_settings_bootloader(); // принять (полученный g4 адрес)
@@ -1305,18 +1337,41 @@ void jump_g4s_to_adress() {
 		pause(1);
 
 		// если ок, то прыгаем
-		if (addr_back == ADDRESS_G4_MAIN_FIRMWARE_ALT) {
+		if (addr_back == addr_jump) {
 			Set_tx_s((uint8_t)response::ok, 0x03, 0x02, 0x01, 0x00);
 			UART4_send_settings_bootloader();
 		}
 		else {
-			debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, ADDRESS_G4_MAIN_FIRMWARE_ALT));
+			debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, addr_jump));
 		}
 		UART4_receive_settings_bootloader();
-		UART4_receive_settings_bootloader();
+
+		if (jump_to_ == chip_states::boot2) {
+			rx_settings[1] = 1;
+			while (rx_settings[1] != 0) {
+				UART4_send_address(chip.number_chip);
+				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+				UART4_send_settings_bootloader();
+				UART4_receive_timeout_10us();
+			}
+		}
+		else if (jump_to_ == chip_states::boot1) {
+			rx_settings[1] = 1;
+			while (rx_settings[1] != 0) {
+				UART4_send_address(chip.number_chip);
+				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+				UART4_send_settings_bootloader();
+				UART4_receive_timeout_10us();
+			}
+		}
+		else if (jump_to_ == chip_states::piano) {
+			UART4_receive_settings_bootloader();
+		}
+
 		if (rx_settings[0] != chip.number_chip) {
 			debugg_fn(std::format(" start {} fail \n", chip.number_chip));
 		}
+
 		pause(2);
 	}
 
@@ -1327,12 +1382,35 @@ void jump_g4s_to_adress() {
 }
 
 void reset_bootloaders() {
-	if (chip_state == chip_states::boot) {
+
+	if (chip_state == chip_states::boot1) {
 		for (const auto& chip : vChips) {
 			UART4_send_address(chip.number_chip);
 			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
 			UART4_send_settings_bootloader();
 			UART4_receive_settings_bootloader();
+			rx_settings[4] = 0;
+			while (rx_settings[4] != 1) {
+				UART4_send_address(chip.number_chip);
+				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+				UART4_send_settings_bootloader();
+				UART4_receive_timeout_10us();
+			}
+		}
+	}
+	else if (chip_state == chip_states::boot2) {
+		for (const auto& chip : vChips) {
+			UART4_send_address(chip.number_chip);
+			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
+			UART4_send_settings_bootloader();
+			UART4_receive_settings_bootloader();
+			rx_settings[4] = 0;
+			while (rx_settings[4] != 1) {
+				UART4_send_address(chip.number_chip);
+				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+				UART4_send_settings_bootloader();
+				UART4_receive_timeout_10us();
+			}
 		}
 	}
 	else {
@@ -1342,11 +1420,19 @@ void reset_bootloaders() {
 }
 
 void reset_main_to_bootloader() {
+
 	init_chips();
-	if (chip_state == chip_states::main) {
+	if (chip_state == chip_states::piano) {
 		for (const auto& chip : vChips) {
 			UART4_send_address(chip.number_chip);
 			UART4_send_settings(command::reset_to_bootloader, 3, 2, 1);
+			rx_settings[4] = 0;
+			while (rx_settings[4] != 1) {
+				UART4_send_address(chip.number_chip);
+				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+				UART4_send_settings_bootloader();
+				UART4_receive_timeout_10us();
+			}
 		}
 	}
 	else {
@@ -1430,11 +1516,10 @@ extern "C" {
 		loadScreen(SCREEN_ID_D_MAIN);
 		debugg_clear();
 
-		all_H7_to_g4();
-		sync();
-
-		// LL_USART_EnableDMAReq_RX(UART5); // это уже есть внутри sync();
-		// LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
+		if (chip_state == chip_states::piano) {
+			all_H7_to_g4();
+			sync();
+		}
 	}
 
 	void action_to_disp_calibration_on(lv_event_t* e) {
@@ -1498,11 +1583,23 @@ extern "C" {
 	}
 
 	void action_h7_g4(lv_event_t* e) {
-		data_from_H7_to_g4();
+		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_FOR_FIRMWARE_G4, ADDRESS_G4_MAIN_FIRMWARE);
 	}
 
 	void action_jump(lv_event_t* e) {
-		jump_g4s_to_adress();
+		jump_g4s_to_adress(ADDRESS_G4_MAIN_FIRMWARE, chip_states::piano);
+	}
+
+	void action_boot_1_flash_boot_2(lv_event_t* e) {
+		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_G4_FOR_BOOTLOADER_v2, ADDRESS_G4_BOOTLOADER_v2);
+	}
+
+	void action_in_boot_jump_to_boot_2(lv_event_t* e) {
+		jump_g4s_to_adress(ADDRESS_G4_BOOTLOADER_v2, chip_states::boot2);
+	}
+
+	void action_boot_2_flash_boot_1(lv_event_t* e) {
+		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_G4_FOR_BOOTLOADER, ADDRESS_G4_BOOTLOADER);
 	}
 
 	void action_reset_bootloader_g4(lv_event_t* e) {
@@ -1513,7 +1610,6 @@ extern "C" {
 		reset_main_to_bootloader();
 	}
 
-	// other
 	void action_calib_sensor_on_green(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
 		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
@@ -1683,7 +1779,6 @@ extern "C" {
 	const char* get_var_n_chip() {
 		return n_chip.c_str();
 	}
-
 	void set_var_n_chip(const char* value) {
 		n_chip = value;
 	}
@@ -1691,7 +1786,6 @@ extern "C" {
 	const char* get_var_n_comp() {
 		return n_comp.c_str();
 	}
-
 	void set_var_n_comp(const char* value) {
 		n_comp = value;
 	}

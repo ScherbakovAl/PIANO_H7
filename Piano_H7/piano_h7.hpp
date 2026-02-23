@@ -69,8 +69,9 @@ extern "C" {
 
 	enum class chip_states {
 		none = 0,
-		boot = 1,
-		main,
+		boot1 = 1,
+		piano,
+		boot2
 	};
 
 	enum class typeAction {
@@ -127,8 +128,12 @@ extern "C" {
 	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
 	static const uint32_t ADDRESS_H7_CALIB = 0x080E0000; // -здесь лежит калибровка
 
-	static const uint32_t ADDRESS_G4_CHIP_NUMBER = 0x08003800; // здесь храним номер чипа (в памяти g4) 7я банка
-	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 7 банок.
+	static const uint32_t ADDRESS_G4_BOOTLOADER = 0x08000000; // 8k (4 банки)
+	static const uint32_t COUNT_PAGE_G4_FOR_BOOTLOADER = 4;
+	static const uint32_t ADDRESS_G4_BOOTLOADER_v2 = 0x08002000; // 8k (4 банки)
+	static const uint32_t COUNT_PAGE_G4_FOR_BOOTLOADER_v2 = 4;
+	static const uint32_t ADDRESS_G4_CHIP_NUMBER = 0x08004800; // здесь храним номер чипа (в памяти g4) 9я банка // TODO изменено!
+	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE = 0x08008000; // этот адрес зашит в памяти g4 (16я банка) - сейчас размер на 8 банок.
 	static const uint32_t ADDRESS_G4_MAIN_FIRMWARE_ALT = 0x08008000; // здесь меняем куда шить и куда прыгать
 	static const uint32_t COUNT_PAGE_FOR_FIRMWARE_G4 = 8;// количество страниц (8) в g4, которые занимает прошивка g4 (16-23)
 
@@ -160,6 +165,7 @@ extern "C" {
 	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
 
 	chip_states chip_state = chip_states::none;
+	chip_states chip_state_prev = chip_states::none;
 	current_display cur_disp = current_display::none;
 	uint32_t cursor = 0;
 
@@ -240,9 +246,9 @@ extern "C" {
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
-	void data_from_H7_to_g4();
+	void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump);
 	void flash_g4(const uint32_t& addr, const int& chip_number);
-	void jump_g4s_to_adress();
+	void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_);
 	void reset_bootloaders();
 	void reset_main_to_bootloader();
 	const comparator& searcher_addr_in_cursor(const uint32_t& chip);

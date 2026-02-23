@@ -29,6 +29,9 @@ extern void action_cursor_minus_7(lv_event_t * e);
 extern void action_cursor_plus_7(lv_event_t * e);
 extern void action_piano_off(lv_event_t * e);
 extern void action_clear_disp(lv_event_t * e);
+extern void action_boot_1_flash_boot_2(lv_event_t * e);
+extern void action_in_boot_jump_to_boot_2(lv_event_t * e);
+extern void action_boot_2_flash_boot_1(lv_event_t * e);
 
 
 #ifdef __cplusplus
