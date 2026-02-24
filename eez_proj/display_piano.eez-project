@@ -1197,7 +1197,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "options": "curve 1\ncurve 2\ncurve 3",
+              "options": "older curve\nnormal\ncurve 1\ncurve 2",
               "optionsType": "literal",
               "selected": 1,
               "selectedType": "literal",

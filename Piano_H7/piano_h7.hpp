@@ -100,7 +100,7 @@ extern "C" {
 		chip_states st = chip_states::none;
 	};
 
-	struct speed_for_midi {
+	struct speed_for_midi { // mass, distance, offset_X, offset_Y
 		const float key_mass = 0.0f; // 80000 == 80 gr
 		const float distance = 0.0f; // 1710 == 1.71 mm
 		const float offset_x = 0.0f; // offset x
@@ -170,7 +170,7 @@ extern "C" {
 	uint32_t cursor = 0;
 
 	int8_t noteAdder[size_BUFFER] = {};
-	float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
+	// float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
 
 	static int counter_on = 0;
 	static int counter_off = 0;
@@ -191,14 +191,14 @@ extern "C" {
 	float max = 186582.0f; // 170106 (170000) 181000
 
 
-	const float key_mass = 0.008f; // 8 гр -->> переехал в массив
+	// const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 	// const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
 	// const float div_on = 0.000000000092f; // меньше - громче
 	// const float div_off = 0.00000000004f; // меньше - громче 
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
-	std::vector<speed_for_midi> speeds_OFF;
-	std::vector<speed_for_midi> speeds_ON;
+	std::vector<speed_for_midi> curve_OFF;
+	std::vector<speed_for_midi> curve_ON;
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
 	float sx_F = 0.0f; // for test
@@ -212,6 +212,7 @@ extern "C" {
 	void disp_create_and_touch_start();
 	void init_chips();
 	void init_buffers();
+	void init_midi_speeds();
 	void config_charts();
 	void reconfig_charts();
 	void h7();

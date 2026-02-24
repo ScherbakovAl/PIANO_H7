@@ -194,7 +194,7 @@ void create_screen_d_main() {
             objects.roller = obj;
             lv_obj_set_pos(obj, 229, 79);
             lv_obj_set_size(obj, 80, 71);
-            lv_roller_set_options(obj, "curve 1\ncurve 2\ncurve 3", LV_ROLLER_MODE_NORMAL);
+            lv_roller_set_options(obj, "older curve\ncurve 1\ncurve 2\ncurve 3", LV_ROLLER_MODE_NORMAL);
             lv_roller_set_selected(obj, 1, LV_ANIM_OFF);
             lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(obj, lv_color_hex(0xff127873), LV_PART_MAIN | LV_STATE_DEFAULT);

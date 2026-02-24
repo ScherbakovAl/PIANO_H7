@@ -69,6 +69,7 @@ void init() {
 	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
 
 	init_buffers();
+	init_midi_speeds();
 	config_charts();
 	init_chips();
 
@@ -264,6 +265,10 @@ void init_buffers() {
 		buffer_dac[i] = 0;
 	}
 
+}
+
+void init_midi_speeds() {
+
 	for (uint i = 0; i < size_BUFFER; ++i) {
 		if (i < 55) {
 			noteAdder[i] = 14;
@@ -279,57 +284,62 @@ void init_buffers() {
 		}
 	}
 
-	for (uint32_t i = 0; i < size_BUFFER; ++i) {
-		mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
-	}
+	// for (uint32_t i = 0; i < size_BUFFER; ++i) {
+	// 	mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
+	// }
 
-	speeds_OFF.push_back(speed_for_midi(8000.0f, 1710.0f, 45000.0f, -0.44f)); // расстояние 1710 
-	speeds_OFF.push_back(speed_for_midi(80000.0f, 1710.0f, 25000.0f, -3.0f)); // << это используется в noteOFF
-	speeds_OFF.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
+	curve_OFF.push_back(speed_for_midi(8000.0f, 1710.0f, 45000.0f, -0.44f)); // расстояние 1710 
+	curve_OFF.push_back(speed_for_midi(80000.0f, 1710.0f, 25000.0f, -3.0f)); // << это используется в noteOFF
+	curve_OFF.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
 
 
-	const float key = 89.0f;
-	const float rasst = 1710.0f;
+	curve_ON.push_back(speed_for_midi(0.0f, 0.0f, 0.0f, 0.0f)); // ---
+	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 18250.0f, -1.14f)); // normal
+	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 77000.0f, 13.0f)); // curve 1
+	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, -1.0f)); // curve 2
 
-	// const float mass_bass = 120000.0f;
-	// const float mass_discant = 50000.0f;
-	const float mass_bass = 58005.0f;
-	const float mass_discant = 58000.0f;
-	const float mass_step = (mass_bass - mass_discant) / key;
+	// const float key_mass = 89.0f;
+	// const float interval = 1710.0f;
 
-	// const float x_bass = 31775.0f; // v1
-	// const float x_discant = 19250.0f; // v1
-	// const float y_start = -1.18f; // v1
-	// const float y_fin = -0.53f; // v1
+	// // const float mass_bass = 120000.0f;
+	// // const float mass_discant = 50000.0f;
+	// const float mass_bass = 58005.0f;
+	// const float mass_discant = 58000.0f;
+	// const float mass_step = (mass_bass - mass_discant) / key_mass;
 
-	// const float x_bass = 28000.0f; // v2
-	// const float x_discant = 28000.0f; // v2
-	// const float y_start = -4.5f; // v2
-	// const float y_fin = -2.1f; // v2
+	// // const float x_bass = 31775.0f; // v1
+	// // const float x_discant = 19250.0f; // v1
+	// // const float y_start = -1.18f; // v1
+	// // const float y_fin = -0.53f; // v1
 
-	// const float x_bass = 31425.0f; // v3
-	// const float x_discant = 18625.0f; // v3
-	// const float y_start = -3.78f; // v3
-	// const float y_fin = -1.88f; // v3
+	// // const float x_bass = 28000.0f; // v2
+	// // const float x_discant = 28000.0f; // v2
+	// // const float y_start = -4.5f; // v2
+	// // const float y_fin = -2.1f; // v2
 
-	const float x_bass = 18251.0f; // v4
-	const float x_discant = 18250.0f; // v4
-	const float y_start = -1.18f; // v4
-	const float y_fin = -1.17f; // v4
+	// // const float x_bass = 31425.0f; // v3
+	// // const float x_discant = 18625.0f; // v3
+	// // const float y_start = -3.78f; // v3
+	// // const float y_fin = -1.88f; // v3
 
-	const float x_step = (x_bass - x_discant) / key;
-	const float y_step = (y_start - y_fin) / key;
+	// const float x_bass = 18251.0f; // v4
+	// const float x_discant = 18250.0f; // v4
+	// const float y_start = -1.18f; // v4
+	// const float y_fin = -1.17f; // v4
 
-	float m_s = mass_bass;
-	float x_s = x_bass;
-	float y_s = y_start;
+	// const float x_step = (x_bass - x_discant) / key_mass;
+	// const float y_step = (y_start - y_fin) / key_mass;
 
-	for (int i = 0; i < 98; ++i) {
-		speeds_ON.push_back(speed_for_midi(m_s, rasst, x_s, y_s));
-		m_s -= mass_step;
-		x_s -= x_step;
-		y_s -= y_step;
-	}
+	// float m_s = mass_bass;
+	// float x_s = x_bass;
+	// float y_s = y_start;
+
+	// for (int i = 0; i < 98; ++i) {
+	// 	speeds_ON.push_back(speed_for_midi(m_s, interval, x_s, y_s));
+	// 	m_s -= mass_step;
+	// 	x_s -= x_step;
+	// 	y_s -= y_step;
+	// }
 }
 
 void config_charts() {
@@ -799,16 +809,28 @@ void DMA1_RX(void) {
 
 
 		if (rxB > 98) { // for OFF
-			const speed_for_midi& st = speeds_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
+			const speed_for_midi& st = curve_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
 			speed_F = st.distance / ((float)tOut + st.offset_x);
 			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
 			midi_hi_F = energy_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		}
 		else { // for ON
+
 			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
 
-			if (curve_num == 0) { // v1
+			if (curve_num) {
+
+				const speed_for_midi& curve = curve_ON[curve_num];
+
+				speed_F = curve.distance / (((float)tOut) + curve.offset_x);
+				energy_F = ((curve.key_mass * speed_F * speed_F) / 2.0f) + curve.offset_y;
+				midi_hi_F = energy_F;
+				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
+			}
+			else { // curve_num > 0, v1 старые значения, для использования вместе с программной-rust кривой на компе
+
 				const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 				const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
 				const float div_on = 0.000000000092f; // меньше - громче
@@ -822,15 +844,9 @@ void DMA1_RX(void) {
 				float integerPart_F;
 				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 				int note_ = rxB + noteAdder[rxB];
+
 			}
 
-			if (curve_num == 1) { // v2
-				const speed_for_midi& st = speeds_ON[rxB - 7];
-				speed_F = st.distance / (((float)tOut) + st.offset_x);
-				energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
-				midi_hi_F = energy_F;
-				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-			}
 		}
 
 		if (midi_hi_F < 1.0f) {
@@ -840,12 +856,12 @@ void DMA1_RX(void) {
 		if (midi_hi_F > 127.0f) {
 			midi_hi_F = 127.0f;
 			midi_lo_F = 127.0f;
-			out_debug_ = tOut;
-			m_F = 58005; // DEBUG
-			sd_F = 1710;
-			sx_F = 18250;
-			sy_F = -1.18;
-			fl = 2;
+			// out_debug_ = tOut;
+			// m_F = 58005; // DEBUG
+			// sd_F = 1710;
+			// sx_F = 18250;
+			// sy_F = -1.18;
+			// fl = 2;
 		}
 
 		uint8_t note_buf[] = {
