@@ -294,9 +294,10 @@ void init_midi_speeds() {
 
 
 	curve_ON.push_back(speed_for_midi(0.0f, 0.0f, 0.0f, 0.0f)); // ---
-	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 18250.0f, -1.14f)); // normal
-	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 77000.0f, 13.0f)); // curve 1
-	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, -1.0f)); // curve 2
+	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 18250.0f, -1.14f));	// -normal
+	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75000.0f, 12.5f)); 	// -яркая (bright)
+	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, -1.0f)); 		// -глухая (muffled)
+	curve_ON.push_back(speed_for_midi(100000.0f, 1710.0f, 28000.0f, 2.3f)); 	// -experiment
 
 	// const float key_mass = 89.0f;
 	// const float interval = 1710.0f;
@@ -798,7 +799,7 @@ void DMA1_RX(void) {
 
 
 		if (rxB > 168) { // DEBUG
-			USART_noise_error_detected(); // DEBUG
+			USART_noise_error_detected();
 			debugg_fn("... rxB > 168");
 		}
 
