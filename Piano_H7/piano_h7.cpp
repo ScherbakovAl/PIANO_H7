@@ -295,9 +295,9 @@ void init_midi_speeds() {
 
 	curve_ON.push_back(speed_for_midi(0.0f, 0.0f, 0.0f, 0.0f)); // ---
 	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 18250.0f, -1.14f));	// -normal
-	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75000.0f, 12.5f)); 	// -яркая (bright)
-	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, -1.0f)); 		// -глухая (muffled)
-	curve_ON.push_back(speed_for_midi(100000.0f, 1710.0f, 28000.0f, 2.3f)); 	// -experiment
+	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75300.0f, -12.5f)); 	// -bright
+	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, 1.0f)); 		// -muffled
+	curve_ON.push_back(speed_for_midi(98005.0f, 1710.0f, 28250.0f, -2.3f)); 	// -experiment
 
 	// const float key_mass = 89.0f;
 	// const float interval = 1710.0f;
@@ -553,6 +553,11 @@ void h7() {
 
 		if (fl == 2) {
 			debugg_fn(std::format(" OVER {}  m{:.2f}  d{}  x{}  y{:.2f} ", out_debug_, m_F, sd_F, sx_F, sy_F));
+			fl = 0;
+		}
+
+		if (fl == 3) {
+			debugg_fn(std::format("  {}", speed_F));
 			fl = 0;
 		}
 	}
@@ -899,9 +904,10 @@ void DMA1_RX(void) {
 			}
 		}
 
-		// // fl = rxB < 98 ? 1 : 0; // DEBUG // разрешить обновлять цифры на дисплее
+		// speed_F = tOut; // DEBUG
 		// timerLenght_F = midi_hi_F; // DEBUG
-		// // speed_F = midi_hi_F; // DEBUG
+		// speed_F = midi_hi_F; // DEBUG
+		// fl = rxB < 98 ? 3 : 0; // DEBUG // разрешить обновлять цифры на дисплее
 	}
 
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);

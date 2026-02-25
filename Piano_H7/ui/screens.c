@@ -195,7 +195,7 @@ void create_screen_d_main() {
             lv_obj_set_pos(obj, 229, 79);
             lv_obj_set_size(obj, 80, 71);
             lv_roller_set_options(obj, "older curve\nnormal\nbright\nmuffled\nexperiment", LV_ROLLER_MODE_NORMAL);
-            lv_roller_set_selected(obj, 1, LV_ANIM_OFF);
+            lv_roller_set_selected(obj, 4, LV_ANIM_OFF);
             lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_text_color(obj, lv_color_hex(0xff127873), LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff4e6475), LV_PART_SELECTED | LV_STATE_DEFAULT);
