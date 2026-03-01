@@ -1197,7 +1197,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "options": "older curve\nnormal\nbright\nmuffled\nexperiment",
+              "options": "older curve\nnormal\nbright\nmuffled\nexperiment\nnew\nnew 2\nnew 3",
               "optionsType": "literal",
               "selected": 4,
               "selectedType": "literal",

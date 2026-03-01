@@ -298,6 +298,9 @@ void init_midi_speeds() {
 	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75300.0f, -12.5f)); 	// -bright
 	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, 1.0f)); 		// -muffled
 	curve_ON.push_back(speed_for_midi(98005.0f, 1710.0f, 28250.0f, -2.3f)); 	// -experiment
+	curve_ON.push_back(speed_for_midi(120000.0f, 1710.0f, 33000.0f, -3.0f)); 	// -new
+	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75500.0f, -13.0f)); 	// -new 2
+	curve_ON.push_back(speed_for_midi(200000.0f, 1710.0f, 43000.0f, -6.0f)); 	// -new 3
 
 	// const float key_mass = 89.0f;
 	// const float interval = 1710.0f;
