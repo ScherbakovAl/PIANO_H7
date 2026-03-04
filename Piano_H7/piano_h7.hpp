@@ -80,6 +80,12 @@ extern "C" {
 		none
 	};
 
+	enum class event {
+		None,
+		On,
+		Off
+	};
+
 	struct conv_16_8 {
 		uint8_t a = 0;
 		uint8_t b = 0;
@@ -109,7 +115,7 @@ extern "C" {
 
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
-	uint8_t rx_data[4] = { };
+	uint8_t rx_data[5] = { };
 	const uint32_t dataLengthRX = sizeof(rx_data);
 	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
 	const uint32_t tx_settings_length = sizeof(tx_settings);

@@ -873,28 +873,37 @@ void DMA1_RX(void) {
 			// fl = 2;
 		}
 
+		// uint8_t note_buf[] = {
+		// 	0xB0,
+		// 	0x58,
+		// 	(uint8_t)midi_lo_F,
+		// 	(uint8_t)rxB < 98U ? 0x90U : 0x80U, // 0x90 note on
+		// 	note_,
+		// 	(uint8_t)midi_hi_F
+		// };
+
 		uint8_t note_buf[] = {
 			0xB0,
 			0x58,
 			(uint8_t)midi_lo_F,
-			(uint8_t)rxB < 98U ? 0x90U : 0x80U, // 0x90 note on
+			(uint8_t)rx_data[4] == (uint8_t)event::On ? 0x90U : 0x80U, // 0x90 note on
 			note_,
 			(uint8_t)midi_hi_F
 		};
 
 		tud_midi_stream_write(0, note_buf, 6);
 
-		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
-			uint8_t note_buff[] = {
-				0xB0,
-				0x58,
-				(uint8_t)midi_lo_F,
-				0x80,
-				note_,
-				(uint8_t)midi_hi_F
-			};
-			tud_midi_stream_write(0, note_buff, 6);
-		}
+		// if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
+		// 	uint8_t note_buff[] = {
+		// 		0xB0,
+		// 		0x58,
+		// 		(uint8_t)midi_lo_F,
+		// 		0x80,
+		// 		note_,
+		// 		(uint8_t)midi_hi_F
+		// 	};
+		// 	tud_midi_stream_write(0, note_buff, 6);
+		// }
 
 		if (rxB < 98) { // DEBUG
 			if (tOut > max) {
@@ -1639,6 +1648,7 @@ extern "C" {
 	void action_calib_sensor_on_green(lv_event_t* e) {
 		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
 		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
+		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::grey, (buffer_blue_calib[comp.address] + (buffer_blue_calib[comp.address] / 100)) & 0xFFF);
 		buffer_green[comp.address] = convert_8_16(a_, b_);
 		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
 	}

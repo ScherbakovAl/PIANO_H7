@@ -1009,10 +1009,10 @@
       },
       "transform": {
         "translate": {
-          "x": -320,
-          "y": -480
+          "x": -160,
+          "y": -240
         },
-        "scale": 2
+        "scale": 1
       },
       "timeline": {
         "isEditorActive": false,
@@ -1242,6 +1242,6 @@
   ],
   "showInactiveFlowsInDebugger": true,
   "globalFlowZoom": true,
-  "flowZoom": 2,
+  "flowZoom": 1,
   "implementationLanguage": "C++"
 }
