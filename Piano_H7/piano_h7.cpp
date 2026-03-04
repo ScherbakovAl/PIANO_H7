@@ -893,6 +893,9 @@ void DMA1_RX(void) {
 
 		tud_midi_stream_write(0, note_buf, 6);
 
+		// uint8_t note_on[3] = { 144, note_, (uint8_t)midi_hi_F };
+		// tud_midi_stream_write(0, note_on, 3);
+
 		// if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
 		// 	uint8_t note_buff[] = {
 		// 		0xB0,
