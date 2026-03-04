@@ -170,7 +170,8 @@
                 "--connect",
                 "port=usb1",
                 "--download",
-                "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
+                // "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
+                "/home/sche/programming/midi_piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
                 "0x080C0000"
             ],
             "options": {
@@ -191,7 +192,8 @@
                 "--connect",
                 "port=usb1",
                 "--download",
-                "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/G4_bootloader/build/Release/G4_bootloader.bin", // TODO
+                // "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
+                "/home/sche/programming/midi_piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
                 "0x080C0000"
             ],
             "options": {
@@ -212,7 +214,8 @@
                 "--connect",
                 "port=usb1",
                 "--download",
-                "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/G4_bootloader_v2/build/Release/G4_bootloader.bin", // TODO
+                // "/home/sche/Documents/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
+                "/home/sche/programming/Piano/PIANO_G4_cbt6/build/Release/PIANO_G4_cbt6.bin",
                 "0x080C0000"
             ],
             "options": {
