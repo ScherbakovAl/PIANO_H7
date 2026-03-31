@@ -301,6 +301,7 @@ void init_midi_speeds() {
 	curve_ON.push_back(speed_for_midi(120000.0f, 1710.0f, 33000.0f, -3.0f)); 	// -new
 	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75500.0f, -13.0f)); 	// -new 2
 	curve_ON.push_back(speed_for_midi(200000.0f, 1710.0f, 43000.0f, -6.0f)); 	// -new 3
+	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 21250.0f, -1.14f)); 	// -normal upd -10db D38db
 
 	// const float key_mass = 89.0f;
 	// const float interval = 1710.0f;
@@ -358,8 +359,8 @@ void config_charts() {
 	lv_chart_set_series_ext_y_array(ob, ser_on_red, &buffer_red[7]);
 	lv_chart_set_series_ext_y_array(ob, ser_on_blue, &buffer_blue_calib[7]);
 	lv_chart_set_series_ext_y_array(ob, ser_on_dac, &buffer_dac[7]);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, on_green_max, on_green_min);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, on_red_max, on_red_min);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, graph_min_max.on_min, graph_min_max.on_max);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, graph_min_max.on_min, graph_min_max.on_max);
 	cursor_on_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
 	cursor_on_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
@@ -378,8 +379,8 @@ void config_charts() {
 	lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[buffer_division]);
 	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_blue_calib[buffer_division]);
 	lv_chart_set_series_ext_y_array(ob, ser_off_dac, &buffer_dac[buffer_division]);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, off_green_max, off_green_min);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, off_red_max, off_red_min);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, graph_min_max.off_max, graph_min_max.off_min);
+	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, graph_min_max.off_max, graph_min_max.off_min);
 	cursor_off_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
 	cursor_off_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
 	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
@@ -613,7 +614,7 @@ void all_H7_to_g4() {
 				sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::green, buffer_green[comp.address]);
 				sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::red, buffer_red[comp.address]);
 				if (chip.typ == typeAction::off) {
-					sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::grey, buffer_green[comp.address] - (buffer_green[comp.address] / 10));
+					sender(command::set_comp_value, chip.number_chip, comp.number_comparator, dot::grey, buffer_green[comp.address] - (buffer_green[comp.address] / 40));
 				}
 			}
 		}

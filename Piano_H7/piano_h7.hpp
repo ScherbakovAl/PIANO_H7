@@ -159,6 +159,14 @@ extern "C" {
 	};
 	struct default_comp def_comp;
 
+	struct default_graph_min_max {
+		int32_t on_min = 3600;
+		int32_t on_max = 300;
+		int32_t off_min = 2400;
+		int32_t off_max = 3700;
+	};
+	default_graph_min_max graph_min_max;
+
 	std::vector<Chip> vChips;
 	std::map<uint8_t, comparator> mCursor_to_comparator_on;
 	std::map<uint8_t, comparator> mCursor_to_comparator_off;
@@ -292,14 +300,14 @@ extern "C" {
 	static lv_color16_t buf_1[BUFF_SIZE];
 	static lv_color16_t buf_2[BUFF_SIZE];
 
-	int32_t on_green_max = 4095;
-	int32_t on_green_min = 0;
-	int32_t on_red_max = 4095;
-	int32_t on_red_min = 0;
-	int32_t off_green_max = 4095;
-	int32_t off_green_min = 0;
-	int32_t off_red_max = 4095;
-	int32_t off_red_min = 0;
+	// int32_t on_green_max = 4095;
+	// int32_t on_green_min = 0;
+	// int32_t on_red_max = 4095;
+	// int32_t on_red_min = 0;
+	// int32_t off_green_max = 4095;
+	// int32_t off_green_min = 0;
+	// int32_t off_red_max = 4095;
+	// int32_t off_red_min = 0;
 
 }
 #endif // extern "C"
