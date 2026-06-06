@@ -15,7 +15,13 @@
       "Bash(git -C /home/sche/Documents/programming/Piano/PIANO_H7 show origin/refact_to_vector_and_map --stat --format=\"%h %an <%ae>%n%s\")",
       "Bash(git -C /home/sche/Documents/programming/Piano/PIANO_H7 grep -h \"zenodo\" origin/refact_to_vector_and_map -- README.MD CITATION.cff)",
       "Bash(git -C /home/sche/Documents/programming/Piano/PIANO_G4_cbt6 show origin/main --stat --format=\"%h %an <%ae>%n%s\")",
-      "Bash(git -C /home/sche/Documents/programming/Piano/PIANO_G4_cbt6 grep -h \"zenodo\" origin/main -- README.MD CITATION.cff)"
+      "Bash(git -C /home/sche/Documents/programming/Piano/PIANO_G4_cbt6 grep -h \"zenodo\" origin/main -- README.MD CITATION.cff)",
+      "Bash(ots --version)",
+      "Bash(git archive *)",
+      "Bash(pip install *)",
+      "Bash(~/.local/bin/ots --version)",
+      "Bash(python3 -m opentimestamps)",
+      "Bash(awk -F/ '{print $1}')"
     ]
   }
 }

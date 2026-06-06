@@ -1,1 +1,4 @@
 build
+
+# OpenTimestamps upgrade backups
+*.ots.bak
