@@ -6,7 +6,8 @@ abstract: >-
   digital MIDI piano with optical key sensing. Provides an LVGL touch UI,
   a class-compliant USB-MIDI interface, a multidrop UART master bus to the
   PIANO_G4_cbt6 sensor boards, hammer-flight-time-to-velocity modelling,
-  calibration storage and a custom bootloader.
+  calibration storage and a custom USB DFU bootloader (the H7 can be
+  re-flashed over USB, and it can update the G4 boards over the UART bus).
 type: software
 authors:
   - family-names: Scherbakov

@@ -49,9 +49,10 @@ used to play on a real instrument.
   ON/OFF curves.
 - **Calibration storage:** comparator thresholds and calibration data are
   persisted in internal flash.
-- **Bootloader / field update:** carries a custom bootloader and can flash the
-  firmware of the G4 boards over the UART bus, including jumping between
-  bootloader and main-application regions.
+- **Bootloader / field update:** carries a custom bootloader. The H7 itself can
+  be re-flashed over USB (USB DFU) using its own bootloader, and it can in turn
+  flash the firmware of the G4 boards over the UART bus, including jumping
+  between bootloader and main-application regions.
 
 ### Hardware
 
@@ -135,7 +136,8 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
   кривыми ON/OFF.
 - **Хранение калибровки:** пороги компараторов и данные калибровки сохраняются
   во внутренней flash-памяти.
-- **Бутлоадер / обновление «в поле»:** собственный бутлоадер; умеет прошивать
+- **Бутлоадер / обновление «в поле»:** собственный бутлоадер. Сам H7 может быть
+  перепрошит по USB (USB DFU) через свой бутлоадер, а также умеет прошивать
   платы G4 по шине UART, включая переключение между областями бутлоадера и
   основного приложения.
 
