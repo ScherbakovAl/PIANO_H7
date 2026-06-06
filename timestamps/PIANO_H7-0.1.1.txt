@@ -1,0 +1,22 @@
+PIANO_H7 — OpenTimestamps proof of existence
+============================================
+
+Version (git tag): 0.1.1
+Commit:  f73ed0e0c8c964807ac38912464e7286ec3952e0
+Tree:    8c1ffad9b264f4a0f06fd5b982c4e753eb5bd3c5
+
+Repository: https://github.com/ScherbakovAl/PIANO_H7
+Zenodo DOI: 10.5281/zenodo.20569239
+
+SHA-256 of `git archive --format=tar.gz 0.1.1`
+(note: gzip output depends on the git/gzip version, so this is an
+auxiliary anchor — the authoritative fingerprint is the git commit above):
+  8a30e4a0ffb0a30868156656b6d6e87f50c6c513434d2a5a88019033fc99f4b0
+
+The git commit hash above cryptographically commits to the entire
+source tree of version 0.1.1. This text file is anchored to the
+Bitcoin blockchain via OpenTimestamps; the accompanying .ots file is
+the proof.
+
+Verify:
+  ots verify timestamps/PIANO_H7-0.1.1.txt.ots
