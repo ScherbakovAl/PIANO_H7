@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "PIANO_H7 — Controller board firmware for an optical digital MIDI piano"
+abstract: >-
+  Firmware for the master controller board (STM32H723) of a self-built
+  digital MIDI piano with optical key sensing. Provides an LVGL touch UI,
+  a class-compliant USB-MIDI interface, a multidrop UART master bus to the
+  PIANO_G4_cbt6 sensor boards, hammer-flight-time-to-velocity modelling,
+  calibration storage and a custom bootloader.
+type: software
+authors:
+  - family-names: Scherbakov
+    given-names: Aleksey
+    email: scherbakov.al@gmail.com
+    alias: ScherbakovAl
+repository-code: "https://github.com/ScherbakovAl/PIANO_H7"
+url: "https://github.com/ScherbakovAl/PIANO_H7"
+keywords:
+  - MIDI
+  - digital piano
+  - STM32
+  - STM32H7
+  - embedded firmware
+  - optical sensor
+  - USB-MIDI
+  - LVGL
+license: MIT
+version: "0.1.0"
+date-released: "2026-06-06"
+doi: 10.5281/zenodo.20569239
