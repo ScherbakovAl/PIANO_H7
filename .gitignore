@@ -1,4 +1,7 @@
 build
 
+# Local Claude Code config
+.claude/
+
 # OpenTimestamps upgrade backups
 *.ots.bak
