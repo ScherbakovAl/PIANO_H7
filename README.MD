@@ -65,10 +65,11 @@ used to play on a real instrument.
 3D render of the assembled boards, with the PCB layout and the controller-board
 schematic:
 
-![3D view of the assembled boards](pcb/3D_all_2026-06-18.png)
+![3D view of the assembled boards](pcb/PNG_H7/3D_H7.png)
 
-- [PCB layout (all boards)](pcb/PCB_all_2026-06-18.png)
-- [Schematic — controller / base board](pcb/SCH_reuse_base_1-rb_2026-06-18.png)
+- [EasyEDA Pro project (`.epro2`)](pcb/ProPrj_piano_base_v1.0_H7.epro2)
+- [PCB layout ](pcb/PNG_H7/PCB_H7.png)
+- [Schematic — controller / base board](pcb/PNG_H7/SCH_H7.png)
 
 ### Repository layout
 
@@ -159,10 +160,11 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
 
 3D-вид собранных плат, трассировка платы и схема платы-контроллера:
 
-![3D-вид собранных плат](pcb/3D_all_2026-06-18.png)
+![3D-вид собранных плат](pcb/PNG_H7/3D_H7.png)
 
-- [Трассировка платы (все платы)](pcb/PCB_all_2026-06-18.png)
-- [Схема — плата-контроллер](pcb/SCH_reuse_base_1-rb_2026-06-18.png)
+- [Проект EasyEDA Pro (`.epro2`)](pcb/ProPrj_piano_base_v1.0_H7.epro2)
+- [Трассировка платы](pcb/PNG_H7/PCB_H7.png)
+- [Схема — плата-контроллер](pcb/PNG_H7/SCH_H7.png)
 
 ### Структура репозитория
 
