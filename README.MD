@@ -62,6 +62,14 @@ used to play on a real instrument.
 - PCB design, schematics and BOM are in [`pcb/`](pcb/) (EasyEDA Pro project,
   exported SCH/PCB PDFs and BOM).
 
+3D render of the assembled boards, with the PCB layout and the controller-board
+schematic:
+
+![3D view of the assembled boards](pcb/3D_all_2026-06-18.png)
+
+- [PCB layout (all boards)](pcb/PCB_all_2026-06-18.png)
+- [Schematic — controller / base board](pcb/SCH_reuse_base_1-rb_2026-06-18.png)
+
 ### Repository layout
 
 ```
@@ -148,6 +156,13 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
 - Связь с датчиками: многоточечный UART к платам G4
 - Файлы платы, схемы и BOM — в [`pcb/`](pcb/) (проект EasyEDA Pro,
   экспортированные PDF схемы/платы и BOM).
+
+3D-вид собранных плат, трассировка платы и схема платы-контроллера:
+
+![3D-вид собранных плат](pcb/3D_all_2026-06-18.png)
+
+- [Трассировка платы (все платы)](pcb/PCB_all_2026-06-18.png)
+- [Схема — плата-контроллер](pcb/SCH_reuse_base_1-rb_2026-06-18.png)
 
 ### Структура репозитория
 
