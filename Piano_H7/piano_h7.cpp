@@ -818,7 +818,7 @@ void DMA1_RX(void) {
 		uint8_t note_ = rxB + noteAdder[rxB];
 
 
-		if (rxB > 98) { // for OFF
+		if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
 			const speed_for_midi& st = curve_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
 			speed_F = st.distance / ((float)tOut + st.offset_x);
 			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
