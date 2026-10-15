@@ -183,6 +183,8 @@ extern "C" {
 	static int counter_on = 0;
 	static int counter_off = 0;
 
+	bool send_damper_lift = false; // подъём демпфера (бит 23 от G4) → Poly Key Pressure 0xA0; включать только вместе с SEND_LIFT 1 в G4
+
 	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
 	uint32_t noise_shown = 0;
 	volatile uint8_t noise_bytes[4] = { };

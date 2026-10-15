@@ -825,6 +825,22 @@ void DMA1_RX(void) {
 		float integerPart_F;
 		uint8_t note_ = rxB + noteAdder[rxB];
 
+		// G4 OFF: бит 23 — подъём демпфера, младшие 23 — интервал R↓→G↓ (0 = не замерен).
+		// Только вместе с SEND_LIFT 1 в G4: старый G4 шлёт обрезанное время, и бит 23 у него случаен.
+		if (rxB >= 98 && send_damper_lift && (tOut & 0x800000)) {
+			uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
+			if (tOut & 0x7FFFFF) {
+				const speed_for_midi& st = curve_OFF[1];
+				const float s = st.distance / ((float)(tOut & 0x7FFFFF) + st.offset_x);
+				const float e = ((st.key_mass * s * s) / 2.0f) + st.offset_y;
+				v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
+			}
+			uint8_t lift_buf[] = { 0xA0, note_, v }; // Poly Key Pressure: подъём демпфера, data2 — скорость подъёма
+			midi_write(lift_buf, 3);
+			LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+			LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+			return;
+		}
 
 		if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
 			const speed_for_midi& st = curve_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
