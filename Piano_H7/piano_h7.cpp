@@ -502,6 +502,11 @@ void h7() {
 			TIM5->CNT = 0;
 		}
 
+		if (noise_count != noise_shown) {
+			noise_shown = noise_count;
+			debugg_fn(std::format("USART noise {} : {}-{}-{}-{}", noise_shown, (unsigned)noise_bytes[0], (unsigned)noise_bytes[1], (unsigned)noise_bytes[2], (unsigned)noise_bytes[3]));
+		}
+
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();
@@ -789,7 +794,6 @@ void DMA1_RX(void) {
 	if (LL_USART_IsActiveFlag_NE(UART5)) {
 		LL_USART_ClearFlag_NE(UART5);
 		USART_noise_error_detected();
-		debugg_fn("...noise");
 	}
 	else {
 
@@ -809,7 +813,6 @@ void DMA1_RX(void) {
 
 		if (rxB > 168) { // DEBUG
 			USART_noise_error_detected();
-			debugg_fn("... rxB > 168");
 		}
 
 		uint32_t tOut = 0;
@@ -919,8 +922,11 @@ void DMA1_RX(void) {
 
 }
 
-void USART_noise_error_detected() {
-	debugg_fn(std::format("USART Noise Error detected {}-{}-{}-{}", rx_data[0], rx_data[1], rx_data[2], rx_data[3]));
+void USART_noise_error_detected() { // из DMA1_RX: без std::format/кучи — печатает основной цикл
+	for (uint32_t i = 0; i < dataLengthRX; ++i) {
+		noise_bytes[i] = rx_data[i];
+	}
+	noise_count = noise_count + 1;
 	LL_USART_RequestRxDataFlush(UART5);
 	SCB_CleanInvalidateDCache();
 }

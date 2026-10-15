@@ -183,6 +183,10 @@ extern "C" {
 	static int counter_on = 0;
 	static int counter_off = 0;
 
+	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
+	uint32_t noise_shown = 0;
+	volatile uint8_t noise_bytes[4] = { };
+
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
 	int fl = 0.0f; // for test fl
