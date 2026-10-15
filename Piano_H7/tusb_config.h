@@ -63,7 +63,7 @@ extern "C" {
 
 // MIDI FIFO size of TX and RX
 #define CFG_TUD_MIDI_RX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
-#define CFG_TUD_MIDI_TX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
+#define CFG_TUD_MIDI_TX_BUFSIZE   512 // FS тоже: 64 Б = 8 нот (CC88+нота), аккорд с подъёмами демпферов не влезал
 
 
 

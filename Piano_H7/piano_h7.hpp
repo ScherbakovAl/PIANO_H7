@@ -186,6 +186,8 @@ extern "C" {
 	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
 	uint32_t noise_shown = 0;
 	volatile uint8_t noise_bytes[4] = { };
+	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет DMA1_RX)
+	uint32_t midi_lost_shown = 0;
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
@@ -242,6 +244,7 @@ extern "C" {
 	int UART4_receive_timeout_10us();
 	void DMA1_RX();
 	void USART_noise_error_detected();
+	void midi_write(const uint8_t* b, const uint32_t n);
 	void DMA_UART_ERRORS_HANDLER();
 	int32_t convert_8_16(const uint8_t& a, const uint8_t& b);
 	conv_16_8 convert_16_8(const uint32_t& a);

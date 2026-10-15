@@ -507,6 +507,11 @@ void h7() {
 			debugg_fn(std::format("USART noise {} : {}-{}-{}-{}", noise_shown, (unsigned)noise_bytes[0], (unsigned)noise_bytes[1], (unsigned)noise_bytes[2], (unsigned)noise_bytes[3]));
 		}
 
+		if (midi_lost != midi_lost_shown) {
+			midi_lost_shown = midi_lost;
+			debugg_fn(std::format("MIDI lost {}", midi_lost_shown));
+		}
+
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();
@@ -886,7 +891,7 @@ void DMA1_RX(void) {
 			(uint8_t)midi_hi_F
 		};
 
-		tud_midi_stream_write(0, note_buf, 6);
+		midi_write(note_buf, 6);
 
 		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
 			uint8_t note_buff[] = {
@@ -897,7 +902,7 @@ void DMA1_RX(void) {
 				note_,
 				(uint8_t)midi_hi_F
 			};
-			tud_midi_stream_write(0, note_buff, 6);
+			midi_write(note_buff, 6);
 		}
 
 		if (rxB < 98) { // DEBUG
@@ -929,6 +934,12 @@ void USART_noise_error_detected() { // из DMA1_RX: без std::format/кучи
 	noise_count = noise_count + 1;
 	LL_USART_RequestRxDataFlush(UART5);
 	SCB_CleanInvalidateDCache();
+}
+
+void midi_write(const uint8_t* b, const uint32_t n) {
+	if (tud_midi_stream_write(0, b, n) != n) {
+		midi_lost = midi_lost + 1; // FIFO TinyUSB полон: событие (или его часть) потеряно
+	}
 }
 
 void DMA_UART_ERRORS_HANDLER() {
