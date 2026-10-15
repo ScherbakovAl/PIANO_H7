@@ -97,6 +97,16 @@ cmake --build --preset <preset>
 
 Flash the resulting binary with your usual ST tool (ST-Link / DFU).
 
+### Branches
+
+| Branch | Status |
+|--------|--------|
+| `master` | Main branch. Matches the firmware currently running on the instrument. |
+| `refact_to_vector_and_map` | Former development branch, merged into `master`. |
+| `к-концерту-Кандинского` | Experiment: 5-byte H7↔G4 packet with explicit note-on/off events. Needs the branch of the same name in PIANO_G4_cbt6; incompatible with `master` of both repos. |
+| `pwr` | Unfinished: standby / power control. |
+| `for-concerts`, `для-сравнения-с-живым`, `для-тестирования-дома-редактора-миди-кривых` | Old experiments (autumn–winter 2025), kept for history. |
+
 ### License
 
 Released under the [MIT License](LICENSE).
@@ -191,6 +201,16 @@ cmake --build --preset <preset>
 ```
 
 Прошивка — обычным инструментом ST (ST-Link / DFU).
+
+### Ветки
+
+| Ветка | Состояние |
+|-------|-----------|
+| `master` | Основная ветка. Соответствует прошивке, которая сейчас работает в инструменте. |
+| `refact_to_vector_and_map` | Бывшая ветка разработки, влита в `master`. |
+| `к-концерту-Кандинского` | Эксперимент: 5-байтный пакет H7↔G4 с явными событиями note-on/off. Требует одноимённую ветку в PIANO_G4_cbt6; несовместима с `master` обоих репозиториев. |
+| `pwr` | Не доделано: standby / управление питанием. |
+| `for-concerts`, `для-сравнения-с-живым`, `для-тестирования-дома-редактора-миди-кривых` | Старые эксперименты (осень–зима 2025), сохранены для истории. |
 
 ### Лицензия
 
