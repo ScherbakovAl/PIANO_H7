@@ -163,6 +163,37 @@
             "problemMatcher": []
         },
         {
+            // калибровка H7: ADDRESS_H7_CALIB, buffer_green + buffer_red = 2 * 200 * 4 = 0x640 байт
+            // восстановление: STM32_Programmer_CLI -c port=swd -d calib_backup/<файл>.hex -v
+            "type": "shell",
+            "label": "Save H7 calibration (SWD)",
+            "command": "mkdir -p calib_backup && STM32_Programmer_CLI -c port=swd mode=HOTPLUG -u 0x080E0000 0x640 calib_backup/calib_$(date +%Y-%m-%d_%H-%M-%S).hex",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#4caf50",
+                    "label": "$(save) CALIB",
+                    "detail": "Save H7 calibration from flash to calib_backup/"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
+            // то же через DFU (H7 в загрузчике); восстановление: STM32_Programmer_CLI -c port=usb1 -d calib_backup/<файл>.hex
+            "type": "shell",
+            "label": "Save H7 calibration (DFU)",
+            "command": "mkdir -p calib_backup && STM32_Programmer_CLI -c port=usb1 -u 0x080E0000 0x640 calib_backup/calib_$(date +%Y-%m-%d_%H-%M-%S).hex",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "color": "#17c4b6",
+                    "label": "$(save) CALIB DFU",
+                    "detail": "Save H7 calibration from flash to calib_backup/ (DFU USB)"
+                }
+            },
+            "problemMatcher": []
+        },
+        {
             "type": "shell",
             "label": "Flash G4 bootloader (DFU)",
             "command": "STM32_Programmer_CLI",
