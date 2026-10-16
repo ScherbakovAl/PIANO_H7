@@ -156,9 +156,11 @@ void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
 
 void LCD_RESET() {
 	LCD_RES_L();
-	LL_mDelay(100);
+	LL_mDelay(10); // импульс сброса: по даташиту хватает 10 мкс
 	LCD_RES_H();
-	LL_mDelay(50);
+	// Сброс при работающем дисплее (перезагрузка в DFU из основной прошивки) заканчивается до 120 мс;
+	// раньше этого Sleep Out слать нельзя. При включении питания хватило бы 5 мс.
+	LL_mDelay(120);
 }
 
 void LCD_Init() {
