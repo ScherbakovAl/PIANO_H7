@@ -196,6 +196,8 @@ extern "C" {
 	uint32_t midi_lost_shown = 0;
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
+	uint32_t touch_errors_shown = 0; // ft6336_errors на момент последней печати
+	uint32_t touch_errors_tick = 0;  // HAL_GetTick() последней печати
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
@@ -262,8 +264,8 @@ extern "C" {
 	void debugg_fn(const std::string& str);  // DEBUG
 	void debugg_clear();
 	void resetPin();
-	void DMA2_Stream3_i2c();
-	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
+	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
+	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);

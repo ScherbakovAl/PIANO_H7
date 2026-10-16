@@ -44,10 +44,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern volatile int touchpad_pressed;
+// extern volatile int touchpad_pressed; // не используется и нигде не определена
 extern lv_display_t* disp;
 extern void DMA2_Stream1_TransferComplete(); // ??
-extern void DMA2_Stream3_i2c();
+// extern void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 extern void DMA1_RX();
 extern void resetPin();
 /* USER CODE END PV */
@@ -299,7 +299,7 @@ void DMA2_Stream3_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream3_IRQn 0 */
   		// GPIOA->BSRR |= 0x10; // for test // DEBUG      
-      DMA2_Stream3_i2c(); // touch панель
+      // DMA2_Stream3_i2c(); // touch панель — не используется: прерывание потока не включается (DMA I2C5 RX остался только в CubeMX)
       // GPIOA->BSRR |= 0x100000; // for test // DEBUG
   /* USER CODE END DMA2_Stream3_IRQn 0 */
   /* USER CODE BEGIN DMA2_Stream3_IRQn 1 */

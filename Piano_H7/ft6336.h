@@ -1,5 +1,5 @@
 /*
- * st6336.h
+ * ft6336.h
  *
  *  Created on: Apr 9, 2025
  *      Author: sche
@@ -11,15 +11,17 @@
 #include "gpio.h"
 #include "stm32h7xx_ll_gpio.h"
 
-#define FT6X36_ADDR 0x38 << 1 
-const int SCREEN_WIDTH = 480;
-const int SCREEN_HEIGHT = 320;
+#define FT6X36_ADDR (0x38 << 1)
+// не используются (только в закомментированной AdjustTouchCoordinates); к тому же дисплей 320x480, а не 480x320
+// const int SCREEN_WIDTH = 480;
+// const int SCREEN_HEIGHT = 320;
 
 typedef struct {
 	uint16_t point1_x;
 	uint16_t point1_y;
 	uint16_t point2_x;
 	uint16_t point2_y;
+	uint8_t count; // точек касания: 0..2 (0 — нет касания или ошибка I2C)
 } TouchPoints_HandleTypeDef;
 
 #define FT6336_DEV_MODE 0x00
@@ -59,6 +61,17 @@ typedef struct {
 #define FT6336_RELEASE_CODE_ID 0xAF
 #define FT6336_STATE 0xBC
 
+// Коды возврата FT6336_WriteRegister / FT6336_ReadRegister
+#define FT6336_OK 0
+#define FT6336_ERR_BUSY 1    // шина занята: SDA/SCL держит низким кто-то из устройств
+#define FT6336_ERR_NACK 2    // тач не ответил (нет питания, сброс, помеха)
+#define FT6336_ERR_BUS 3     // ошибка шины или потеря арбитража (BERR / ARLO)
+#define FT6336_ERR_TIMEOUT 4 // флаг ISR не дождались
+
+// Ошибки обмена с тачем (после каждой I2C5 сбрасывается программно); печать — в основном цикле
+extern uint32_t ft6336_errors;
+extern uint8_t ft6336_last_error;
+
 void FT6336_RST_L();
 void FT6336_RST_H();
 
@@ -66,9 +79,9 @@ void FT6336_Init();
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint();
 uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
 uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
-uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t *pData, uint16_t Size);
+// uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t *pData, uint16_t Size); // неверная, закомментирована (см. ft6336.cpp)
 
-// Внешние переменные для DMA
-extern volatile uint8_t ft6336_dma_rx_complete;
-extern volatile uint8_t ft6336_dma_error;
+// Внешние переменные для DMA — не используются вместе с FT6336_ReadRegister_DMA
+// extern volatile uint8_t ft6336_dma_rx_complete;
+// extern volatile uint8_t ft6336_dma_error;
 

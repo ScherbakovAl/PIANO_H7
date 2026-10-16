@@ -148,7 +148,7 @@ void disp_create_and_touch_start() {
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
+	// LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH — не используется: TIM6 не инициализирован и не тактируется, обработчика нет (тач опрашивает LVGL)
 	indev = lv_indev_create();
 	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
 	lv_indev_set_read_cb(indev, my_input_read);
@@ -519,6 +519,14 @@ void h7() {
 			lcd_dma_errors_shown = lcd_dma_errors;
 			debugg_fn(std::format("LCD DMA error {}", lcd_dma_errors_shown));
 			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
+		}
+
+		// не чаще раза в секунду: отвалившийся тач ошибается на каждом опросе LVGL
+		if (ft6336_errors != touch_errors_shown && HAL_GetTick() - touch_errors_tick >= 1000) {
+			static const char* const names[] = { "OK", "BUSY", "NACK", "BERR/ARLO", "TIMEOUT" };
+			touch_errors_shown = ft6336_errors;
+			touch_errors_tick = HAL_GetTick();
+			debugg_fn(std::format("Touch I2C error {}: {}", touch_errors_shown, names[ft6336_last_error]));
 		}
 
 		if (fl == 1) { // DEBUG
@@ -1132,6 +1140,8 @@ void resetPin() {
 }
 
 // LVGL UTILITES
+// не используется: шёл в паре с неверной FT6336_ReadRegister_DMA, тач читается опросом
+/*
 void DMA2_Stream3_i2c(void) { // DMA touch - панели
 
 	// Обработка Transfer Complete
@@ -1156,13 +1166,11 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 	// 	LL_DMA_ClearFlag_DME3(DMA2);
 	// }
 }
+*/
 
-void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
-	uint8_t touchStatus = 0;
-	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
-	uint8_t touchCount = touchStatus & 0x0F;
-	if (touchCount > 0) {
-		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя параметра перекрывало глобальный indev
+	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint(); // TD_STATUS и первая точка — одним чтением
+	if (TP.count > 0) {
 		data->point.x = TP.point1_x;
 		data->point.y = TP.point1_y;
 		data->state = LV_INDEV_STATE_PRESSED;

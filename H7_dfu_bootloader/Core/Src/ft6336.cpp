@@ -7,11 +7,11 @@
 
 #include "ft6336.h"
 #include "stm32h7xx_ll_i2c.h"
-#include "stm32h7xx_ll_dma.h"
+// #include "stm32h7xx_ll_dma.h" // не используется: DMA для тача отключён
 
-// Глобальный флаг для синхронизации DMA
-volatile uint8_t ft6336_dma_rx_complete = 0;
-volatile uint8_t ft6336_dma_error = 0;
+// Глобальный флаг для синхронизации DMA — не используется вместе с FT6336_ReadRegister_DMA
+// volatile uint8_t ft6336_dma_rx_complete = 0;
+// volatile uint8_t ft6336_dma_error = 0;
 
 void FT6336_RST_L() {
 	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0);
@@ -21,62 +21,109 @@ void FT6336_RST_H() {
 	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0);
 }
 
-TouchPoints_HandleTypeDef TouchPoints;
+// TouchPoints_HandleTypeDef TouchPoints; // не используется: точки возвращает FT6336_GetTouchPoint
+
+uint32_t ft6336_errors = 0;
+uint8_t ft6336_last_error = FT6336_OK;
+
+// Транзакция на 400 кГц занимает ~0.2 мс; HAL_GetTick шагает по 1 мс, поэтому реальный таймаут 2..3 мс
+#define FT6336_TIMEOUT_MS 2
+
+static uint8_t i2c_wait_idle() {
+	uint32_t start = HAL_GetTick();
+	while (LL_I2C_IsActiveFlag_BUSY(I2C5)) {
+		if (HAL_GetTick() - start > FT6336_TIMEOUT_MS) return FT6336_ERR_BUSY;
+	}
+	return FT6336_OK;
+}
+
+// Ожидание флага ISR. NACK (тач не ответил — STOP при этом уходит сам) и ошибки шины — выход сразу
+static uint8_t i2c_wait(uint32_t flag) {
+	uint32_t start = HAL_GetTick();
+	while (!(I2C5->ISR & flag)) {
+		if (I2C5->ISR & I2C_ISR_NACKF) return FT6336_ERR_NACK;
+		if (I2C5->ISR & (I2C_ISR_BERR | I2C_ISR_ARLO)) return FT6336_ERR_BUS;
+		if (HAL_GetTick() - start > FT6336_TIMEOUT_MS) return FT6336_ERR_TIMEOUT;
+	}
+	return FT6336_OK;
+}
+
+// Программный сброс I2C5 (RM0468: PE=0, проверить PE=0, PE=1) — сбрасывает флаги ISR и автомат передачи
+static uint8_t i2c_fail(uint8_t err) {
+	LL_I2C_Disable(I2C5);
+	while (LL_I2C_IsEnabled(I2C5));
+	LL_I2C_Enable(I2C5);
+	++ft6336_errors;
+	ft6336_last_error = err;
+	return err;
+}
 
 uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	uint8_t err;
 	// Ожидание готовности шины I2C
-	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	if ((err = i2c_wait_idle())) return i2c_fail(err);
 
 	// Настройка передачи
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		Size + 1, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
 
 	// Ожидание готовности TX буфера и отправка адреса регистра
-	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 	LL_I2C_TransmitData8(I2C5, RegAddress);
 
 	// Отправка данных
 	for (uint16_t i = 0; i < Size; i++) {
-		while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+		if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 		LL_I2C_TransmitData8(I2C5, pData[i]);
 	}
 
 	// Ожидание завершения передачи
-	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	if ((err = i2c_wait(I2C_ISR_STOPF))) return i2c_fail(err);
 	LL_I2C_ClearFlag_STOP(I2C5);
 
 	return 0; // Успех
 }
 
 uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	uint8_t err;
 	// Ожидание готовности шины I2C
-	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	if ((err = i2c_wait_idle())) return i2c_fail(err);
 
 	// Отправка адреса регистра (запись)
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		1, LL_I2C_MODE_SOFTEND, LL_I2C_GENERATE_START_WRITE);
 
-	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 	LL_I2C_TransmitData8(I2C5, RegAddress);
 
-	while (!LL_I2C_IsActiveFlag_TC(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TC))) return i2c_fail(err);
 
 	// Чтение данных
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		Size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
 
 	for (uint16_t i = 0; i < Size; i++) {
-		while (!LL_I2C_IsActiveFlag_RXNE(I2C5));
+		if ((err = i2c_wait(I2C_ISR_RXNE))) return i2c_fail(err);
 		pData[i] = LL_I2C_ReceiveData8(I2C5);
 	}
 
 	// Ожидание завершения приема
-	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	if ((err = i2c_wait(I2C_ISR_STOPF))) return i2c_fail(err);
 	LL_I2C_ClearFlag_STOP(I2C5);
 
 	return 0; // Успех
 }
 
+// НЕВЕРНО, не используется — не включать как есть:
+// - повторный START выставляется без ожидания TC (ожидание закомментировано): RM не разрешает
+//   переписывать CR2, пока идёт передача;
+// - флаги потока (TC/TE/HT/DME) перед EnableStream не сбрасываются, EN=0 не дожидается;
+// - TE не обрабатывается, а ожидание без таймаута: при ошибке DMA — вечный цикл;
+// - кеш: SCB_CleanInvalidateDCache() по всему кешу и только до передачи; после DMA нужен
+//   invalidate по адресу буфера (буфер на стеке в RAM_D1, его строки CPU подтянет снова);
+// - ожидания I2C без таймаутов и без NACK;
+// - выигрыша нет: 5 байт на 400 кГц, а завершения всё равно ждём в цикле.
+/*
 uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
 	// Сброс флагов
 	ft6336_dma_rx_complete = 0;
@@ -135,53 +182,59 @@ uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Siz
 
 	return 0; // Успех
 }
+*/
 
 void FT6336_Init(void) {
 	FT6336_RST_L();
 	LL_mDelay(10);
 	FT6336_RST_H();
-	LL_mDelay(50);
+	LL_mDelay(300); // с запасом: контроллеры FocalTech начинают работать спустя ~200–300 мс после reset
 
-	//    // 设置 DEVICE_MODE 为 0x00（正常模式）
-	FT6336_WriteRegister(0x00, 0x00, 1);
-	//
-	//    // 设置 ID_G_MODE 为 0x00（启用中断输出）
-	FT6336_WriteRegister(0xA4, 0x00, 1);
+	uint8_t mode = 0x00;
+	FT6336_WriteRegister(FT6336_DEV_MODE, &mode, 1); // 0x00 — рабочий режим (не factory)
+	FT6336_WriteRegister(FT6336_G_MODE, &mode, 1);   // 0x00 — polling: INT низкий, пока есть касание (INT не используется)
 
 	uint8_t id = 0;
 	FT6336_ReadRegister(FT6336_FOCALTECH_ID, &id, 1);
 	LL_mDelay(1);
 
 
-	LL_I2C_EnableDMAReq_RX(I2C5);
-	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_3);
+	// не используется: чтение идёт опросом RXNE, DMA-запрос I2C5 RX никто не обслуживает
+	// (к тому же в бутлоадере I2C5_RX назначен на DMA1_Stream0, а не на DMA2_Stream3)
+	// LL_I2C_EnableDMAReq_RX(I2C5);
+	// LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_3);
 }
 
+// не используется: дисплей 320x480 без поворота, координаты тача совпадают с экранными
+/*
 static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
 	uint16_t rawX = *x;
 	uint16_t rawY = *y;
 	*x = SCREEN_WIDTH - rawY;
 	*y = rawX;
 }
+*/
 
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 	TouchPoints_HandleTypeDef touchPoints = { 0 };
-	uint8_t touchStatus = 0;
-	uint8_t touchData[8];
+	uint8_t touchData[9]; // TD_STATUS, P1_XH..P1_YL, P2_XH..P2_YL
 
-	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);
-	uint8_t touchCount = touchStatus & 0x0F; // получить количество точек
+	// TD_STATUS и первая точка — одним чтением (0x02..0x06): если палец поднимут между двумя
+	// отдельными чтениями, статус скажет «касание», а координаты придут нулевыми — нажатие в (0,0)
+	if (FT6336_ReadRegister(FT6336_TD_STATUS, touchData, 5)) return touchPoints; // ошибка I2C — касания нет
+	uint8_t touchCount = touchData[0] & 0x0F; // получить количество точек
+	if (touchCount > 2) return touchPoints; // FT6336 ведёт не больше 2 точек — остальное мусор
 
 	if (touchCount > 0) {
-		FT6336_ReadRegister(FT6336_P1_XH, touchData, 4); // первая точка
-		touchPoints.point1_x = ((touchData[0] & 0x0F) << 8) | touchData[1];
-		touchPoints.point1_y = ((touchData[2] & 0x0F) << 8) | touchData[3];
+		touchPoints.count = 1;
+		touchPoints.point1_x = ((touchData[1] & 0x0F) << 8) | touchData[2];
+		touchPoints.point1_y = ((touchData[3] & 0x0F) << 8) | touchData[4];
 		// AdjustTouchCoordinates(&touchPoints.point1_x, &touchPoints.point1_y);
 
-		if (touchCount > 1) {
-			FT6336_ReadRegister(FT6336_P2_XH, &touchData[4], 4);
-			touchPoints.point2_x = ((touchData[4] & 0x0F) << 8) | touchData[5];
-			touchPoints.point2_y = ((touchData[6] & 0x0F) << 8) | touchData[7];
+		if (touchCount > 1 && !FT6336_ReadRegister(FT6336_P2_XH, &touchData[5], 4)) {
+			touchPoints.count = 2;
+			touchPoints.point2_x = ((touchData[5] & 0x0F) << 8) | touchData[6];
+			touchPoints.point2_y = ((touchData[7] & 0x0F) << 8) | touchData[8];
 			// AdjustTouchCoordinates(&touchPoints.point2_x, &touchPoints.point2_y);
 		}
 	}
