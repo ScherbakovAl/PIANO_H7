@@ -1182,6 +1182,11 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 		LL_DMA_ClearFlag_HT1(DMA2);
 	}
 
+	// TC = последний байт попал в FIFO SPI, а не ушёл в линию. Без ожидания следующий
+	// flush_cb опустит DC, и хвост FIFO (до 16 байт, ~1.4 мкс) дисплей примет как команды.
+	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
+	};
+
 	lv_display_flush_ready(disp);
 }
 
