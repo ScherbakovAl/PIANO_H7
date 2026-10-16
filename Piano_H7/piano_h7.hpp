@@ -196,6 +196,9 @@ extern "C" {
 	uint32_t midi_lost_shown = 0;
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
+	// Кусок кадра идёт по DMA (ставит my_flush_cb, снимает DMA2_Stream1). LVGL ждёт его только перед
+	// следующим flush, поэтому после lv_timer_handler он ещё может лететь: перед прямыми LCD_* — ждать
+	volatile bool lcd_dma_busy = false;
 	uint32_t touch_errors_shown = 0; // ft6336_errors на момент последней печати
 	uint32_t touch_errors_tick = 0;  // HAL_GetTick() последней печати
 
