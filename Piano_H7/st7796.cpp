@@ -9,8 +9,8 @@
 
 const int LCD_W = 320;
 const int LCD_H = 480;
-const int WHITE = 0xFFFF;
-uint16_t POINT_COLOR = 0x0000;
+// const int WHITE = 0xFFFF; // не используется
+// uint16_t POINT_COLOR = 0x0000; // не используется
 
 lcd_dev lcddev;
 
@@ -35,6 +35,8 @@ void LCD_Send_Data_8(uint8_t data) {
 	};
 }
 
+// не используются (остались от RGB565 без DMA)
+/*
 void LCD_Send_Data_16(uint16_t* Data) {
 	LCD_DC_D();
 	while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
@@ -56,6 +58,7 @@ void LCD_Send_Data_16_(uint16_t Data) {
 	//	LCD_Send_Data_8(Data >> 8);
 	//	LCD_Send_Data_8(Data);
 }
+*/
 
 void LCD_WR_REG(uint8_t data) {
 	LCD_DC_C();
@@ -80,7 +83,7 @@ void LCD_direction(uint8_t direction) {
 	lcddev.setxcmd = 0x2A; // CASET (2Ah): Column Address Set (42)
 	lcddev.setycmd = 0x2B; // RASET (2Bh): Row Address Set (43)
 	lcddev.wramcmd = 0x2C; // RAMWR (2Ch): Memory Write (44)
-	lcddev.rramcmd = 0x2E; // RAMRD (2Eh): Memory Read
+	// lcddev.rramcmd = 0x2E; // RAMRD (2Eh): Memory Read — не используется: SPI3 только на передачу
 	lcddev.dir = direction % 4;
 	switch (lcddev.dir) {
 	case 0:
@@ -135,9 +138,10 @@ void LCD_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint32_t Color
 	};
 }
 
-void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
-	LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
-}
+// не используется
+// void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
+// 	LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
+// }
 
 void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
 	uint16_t yEnd) {
@@ -291,21 +295,23 @@ void LCD_DC_C() {
 	LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_7);
 }
 
-// LCD_CS_SET;
-void LCD_CS_H() {
-	LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_1);
-}
+// не используются: CS (PE1) прижат к 0 в MX_GPIO_Init — дисплей один на шине
+// // LCD_CS_SET;
+// void LCD_CS_H() {
+// 	LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_1);
+// }
+//
+// // LCD_CS_CLR;
+// void LCD_CS_L() {
+// 	LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_1);
+// }
 
-// LCD_CS_CLR;
-void LCD_CS_L() {
-	LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_1);
-}
-
-void LCD_BL_H() {
-	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_6);
-}
-
-void LCD_BL_L() {
-	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_6);
-}
+// не используются: подсветка светится всегда, PD6 настроен как аналоговый
+// void LCD_BL_H() {
+// 	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_6);
+// }
+//
+// void LCD_BL_L() {
+// 	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_6);
+// }
 
