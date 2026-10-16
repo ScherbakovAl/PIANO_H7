@@ -257,7 +257,7 @@ extern "C" {
 	void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
 	int UART4_receive_settings();
 	void UART4_send_settings_bootloader();
-	void UART4_receive_settings_bootloader();
+	int UART4_receive_settings_bootloader();
 	int UART4_receive_timeout_10us();
 	void DMA1_RX();
 	void USART_noise_error_detected();
@@ -280,8 +280,9 @@ extern "C" {
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
+	int echo_until(const uint8_t& chip_N, const uint32_t& i, const uint8_t& value);
 	void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump);
-	void flash_g4(const uint32_t& addr, const int& chip_number);
+	int flash_g4(const uint32_t& addr, const int& chip_number);
 	void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_);
 	void reset_bootloaders();
 	void reset_main_to_bootloader();
