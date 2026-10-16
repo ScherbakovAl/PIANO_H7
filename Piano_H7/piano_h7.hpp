@@ -197,6 +197,13 @@ extern "C" {
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
 
+	bool lcd_speed_debug = true; // замер скорости DMA→SPI дисплея: печать раз в 2 с, пока экран обновляется (выключить после замера)
+	volatile uint32_t lcd_flush_t0 = 0;    // DWT->CYCCNT при запуске DMA (my_flush_cb)
+	volatile uint32_t lcd_flush_bytes = 0; // размер текущего куска
+	volatile uint32_t lcd_max_bytes = 0;   // самый большой кусок за период и его худшее время (пишет DMA2_Stream1)
+	volatile uint32_t lcd_max_cycles = 0;
+	uint32_t lcd_speed_shown_ms = 0;
+
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
 	int fl = 0.0f; // for test fl
