@@ -464,12 +464,13 @@ void h7() {
 				// for (auto n : v | std::views::drop(3) | std::views::take(4)) {}
 				for (const auto& chip : vChips) {
 					if (chip.typ == typeAction::on) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& comp : chip.comparators) {
-							UART4_receive_settings();
-							buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
+						if (sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration)) {
+							for (const auto& comp : chip.comparators) {
+								if (UART4_receive_settings()) break;
+								buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
+							}
+							update_cursor(chip);
 						}
-						update_cursor(chip);
 					}
 				}
 				uint8_t addr = mCursor_to_comparator_on[cursor].address;
@@ -484,12 +485,13 @@ void h7() {
 
 				for (const auto& chip : vChips) {
 					if (chip.typ == typeAction::off) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration);
-						for (const auto& comp : chip.comparators) {
-							UART4_receive_settings();
-							buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
+						if (sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration)) {
+							for (const auto& comp : chip.comparators) {
+								if (UART4_receive_settings()) break;
+								buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
+							}
+							update_cursor(chip);
 						}
-						update_cursor(chip);
 					}
 				}
 				uint8_t addr = mCursor_to_comparator_off[cursor].address;
@@ -638,10 +640,12 @@ void all_g4_to_H7() {
 	if (!vChips.empty()) {
 		for (const auto& chip : vChips) {
 			for (const auto& comp : chip.comparators) {
-				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0);
-				buffer_green[comp.address] = convert_8_16(a_, b_);
-				sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::red, 0);
-				buffer_red[comp.address] = convert_8_16(a_, b_);
+				if (sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::green, 0)) {
+					buffer_green[comp.address] = convert_8_16(a_, b_);
+				}
+				if (sender(command::read_comp_value, chip.number_chip, comp.number_comparator, dot::red, 0)) {
+					buffer_red[comp.address] = convert_8_16(a_, b_);
+				}
 			}
 		}
 	}
@@ -655,8 +659,9 @@ void read_comp_setting(const typeAction& t) {
 		for (const auto& chip : vChips) {
 			if (chip.typ == t) {
 				for (const auto& comp : chip.comparators) {
-					sender(command::read_comp_setting, chip.number_chip, comp.number_comparator, dot::green, 0);
-					buffer_dac[comp.address] = convert_8_16(a_, b_);
+					if (sender(command::read_comp_setting, chip.number_chip, comp.number_comparator, dot::green, 0)) {
+						buffer_dac[comp.address] = convert_8_16(a_, b_);
+					}
 				}
 			}
 		}
@@ -700,11 +705,21 @@ void update_cursor(const Chip& chip) {
 	}
 }
 
-void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value) {
+bool sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value) { // false — G4 не ответил
 	UART4_send_address(adress);
 	pause(3); // 4 for release, 10-debug g4
 	UART4_send_settings(com, compN, (uint8_t)dot, value);
-	UART4_receive_settings();
+	if (UART4_receive_settings()) {
+		if (!chip_silent[adress]) { // печатаем один раз, а не на каждом опросе калибровки
+			chip_silent[adress] = true;
+			debugg_fn(std::format("G4 #{} NO ANSWER (com {})", adress, (int)com));
+		}
+		return false;
+	}
+	if (chip_silent[adress]) {
+		chip_silent[adress] = false;
+		debugg_fn(std::format("G4 #{} answers again", adress));
+	}
 	pause(1); // 1 for release, 4-debug g4
 	if (adress != rx_settings[0]) {
 		debugg_fn(std::format("BAD ADRESS {}   rx_settings {}", adress, rx_settings[0]));
@@ -719,6 +734,7 @@ void sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 			debugg_fn(std::format(" mute - unmute  fail {}", adress));
 		}
 	}
+	return true;
 }
 
 // UART Send-Recive
@@ -746,15 +762,23 @@ void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
-void UART4_receive_settings() {
+int UART4_receive_settings() { // 1 — тайм-аут: G4 не ответил, не висим на шине
+	const uint32_t timeout = 50000 * 275; // 50 мс (TIM2 275 МГц): ответ на stop_calibration ждёт конца прохода калибровки G4
+	const uint32_t start = TIM2->CNT;
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
+			if (TIM2->CNT - start > timeout) {
+				LL_USART_RequestRxDataFlush(UART5); // недопринятое — не в следующий ответ
+				return 1;
+			}
+		}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
 	compN_ = rx_settings[1];
 	dot_ = rx_settings[2];
 	a_ = rx_settings[3];
 	b_ = rx_settings[4];
+	return 0;
 }
 
 void UART4_send_settings_bootloader() { // tx_settings[0] - [4]

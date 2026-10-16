@@ -183,6 +183,8 @@ extern "C" {
 	static int counter_on = 0;
 	static int counter_off = 0;
 
+	bool chip_silent[allChipCount] = { }; // G4 не ответил на последнюю команду (печать «NO ANSWER» один раз)
+
 	bool send_damper_lift = true; // подъём демпфера (бит 23 от G4) → Poly Key Pressure 0xA0; включать только вместе с SEND_LIFT 1 в G4
 
 	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
@@ -237,10 +239,10 @@ extern "C" {
 	void all_H7_to_g4();
 	void all_g4_to_H7();
 	void update_cursor(const Chip& comp);
-	void sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
+	bool sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
 	void UART4_send_address(const uint8_t& slave_address);
 	void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
-	void UART4_receive_settings();
+	int UART4_receive_settings();
 	void UART4_send_settings_bootloader();
 	void UART4_receive_settings_bootloader();
 	int UART4_receive_timeout_10us();
