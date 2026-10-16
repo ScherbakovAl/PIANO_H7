@@ -142,11 +142,9 @@ void FT6336_Init(void) {
 	FT6336_RST_H();
 	LL_mDelay(50);
 
-	//    // 设置 DEVICE_MODE 为 0x00（正常模式）
-	FT6336_WriteRegister(0x00, 0x00, 1);
-	//
-	//    // 设置 ID_G_MODE 为 0x00（启用中断输出）
-	FT6336_WriteRegister(0xA4, 0x00, 1);
+	uint8_t mode = 0x00;
+	FT6336_WriteRegister(FT6336_DEV_MODE, &mode, 1); // 0x00 — рабочий режим (не factory)
+	FT6336_WriteRegister(FT6336_G_MODE, &mode, 1);   // 0x00 — polling: INT низкий, пока есть касание (INT не используется)
 
 	uint8_t id = 0;
 	FT6336_ReadRegister(FT6336_FOCALTECH_ID, &id, 1);
