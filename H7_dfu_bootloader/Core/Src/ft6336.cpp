@@ -7,11 +7,11 @@
 
 #include "ft6336.h"
 #include "stm32h7xx_ll_i2c.h"
-#include "stm32h7xx_ll_dma.h"
+// #include "stm32h7xx_ll_dma.h" // не используется: DMA для тача отключён
 
-// Глобальный флаг для синхронизации DMA
-volatile uint8_t ft6336_dma_rx_complete = 0;
-volatile uint8_t ft6336_dma_error = 0;
+// Глобальный флаг для синхронизации DMA — не используется вместе с FT6336_ReadRegister_DMA
+// volatile uint8_t ft6336_dma_rx_complete = 0;
+// volatile uint8_t ft6336_dma_error = 0;
 
 void FT6336_RST_L() {
 	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_0);
@@ -114,6 +114,16 @@ uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
 	return 0; // Успех
 }
 
+// НЕВЕРНО, не используется — не включать как есть:
+// - повторный START выставляется без ожидания TC (ожидание закомментировано): RM не разрешает
+//   переписывать CR2, пока идёт передача;
+// - флаги потока (TC/TE/HT/DME) перед EnableStream не сбрасываются, EN=0 не дожидается;
+// - TE не обрабатывается, а ожидание без таймаута: при ошибке DMA — вечный цикл;
+// - кеш: SCB_CleanInvalidateDCache() по всему кешу и только до передачи; после DMA нужен
+//   invalidate по адресу буфера (буфер на стеке в RAM_D1, его строки CPU подтянет снова);
+// - ожидания I2C без таймаутов и без NACK;
+// - выигрыша нет: 5 байт на 400 кГц, а завершения всё равно ждём в цикле.
+/*
 uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
 	// Сброс флагов
 	ft6336_dma_rx_complete = 0;
@@ -172,6 +182,7 @@ uint8_t FT6336_ReadRegister_DMA(uint8_t RegAddress, uint8_t* pData, uint16_t Siz
 
 	return 0; // Успех
 }
+*/
 
 void FT6336_Init(void) {
 	FT6336_RST_L();
@@ -188,8 +199,10 @@ void FT6336_Init(void) {
 	LL_mDelay(1);
 
 
-	LL_I2C_EnableDMAReq_RX(I2C5);
-	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_3);
+	// не используется: чтение идёт опросом RXNE, DMA-запрос I2C5 RX никто не обслуживает
+	// (к тому же в бутлоадере I2C5_RX назначен на DMA1_Stream0, а не на DMA2_Stream3)
+	// LL_I2C_EnableDMAReq_RX(I2C5);
+	// LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_3);
 }
 
 static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {

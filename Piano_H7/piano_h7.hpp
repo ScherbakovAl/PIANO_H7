@@ -264,7 +264,7 @@ extern "C" {
 	void debugg_fn(const std::string& str);  // DEBUG
 	void debugg_clear();
 	void resetPin();
-	void DMA2_Stream3_i2c();
+	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);

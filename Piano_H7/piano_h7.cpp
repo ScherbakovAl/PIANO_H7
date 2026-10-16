@@ -1140,6 +1140,8 @@ void resetPin() {
 }
 
 // LVGL UTILITES
+// не используется: шёл в паре с неверной FT6336_ReadRegister_DMA, тач читается опросом
+/*
 void DMA2_Stream3_i2c(void) { // DMA touch - панели
 
 	// Обработка Transfer Complete
@@ -1164,6 +1166,7 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 	// 	LL_DMA_ClearFlag_DME3(DMA2);
 	// }
 }
+*/
 
 void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint(); // TD_STATUS и первая точка — одним чтением
