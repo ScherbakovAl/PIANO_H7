@@ -76,6 +76,7 @@ int main(void) {
 // bootloader
 #define DFU_BOOT_FLAG 0xDEADBEEF
 #define MAIN_FIRMWARE 0x08020000 // здесь основная прошивка
+#define MAIN_FIRMWARE_END 0x080C0000 // сектор 6 — уже образ для G4
 // #define BOOTLOADER_ADDRESS 0x08000000 // здесь начало всех программ по умолчанию для старта
 // #define BOOTLOADER_ADDRESS 0x1FF09800 // << здесь usbDFU вшитый в контроллер
 // #define FLASH_DESC_STR      "@Internal Flash   /0x08000000/03*016Ka,01*016Kg,01*064Kg,07*128Kg,04*016Kg,01*064Kg,07*128Kg"
@@ -85,7 +86,12 @@ int main(void) {
   extern int _bflag;
   uint32_t* dfu_boot_flag;
   dfu_boot_flag = (uint32_t*)(&_bflag);
-  if (*dfu_boot_flag != DFU_BOOT_FLAG) {
+  // стёртая прошивка (0xFFFFFFFF, DFU оборвался после стирания) — остаёмся в DFU, а не в HardFault
+  const uint32_t app_sp = *(__IO uint32_t*)MAIN_FIRMWARE;
+  const uint32_t app_reset = *(__IO uint32_t*)(MAIN_FIRMWARE + 4);
+  const int app_valid = app_sp > D1_AXISRAM_BASE && app_sp <= (uint32_t)&_bflag
+                     && app_reset > MAIN_FIRMWARE && app_reset < MAIN_FIRMWARE_END;
+  if (*dfu_boot_flag != DFU_BOOT_FLAG && app_valid) {
     *dfu_boot_flag = 0;
 
     // Установка нового вектора прерываний

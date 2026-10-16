@@ -217,9 +217,9 @@ void init_chips() {
 					++counter_off;
 				}
 			}
-			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
+			chip_state = (chip_states)rx_settings[4]; // до push_back: st — состояние этого чипа, а не предыдущего
 
-			chip_state = (chip_states)rx_settings[4];
+			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
 
 			if (flag1) {
 				chip_state_prev = chip_state;
@@ -810,11 +810,19 @@ void UART4_send_settings_bootloader() { // tx_settings[0] - [4]
 	while (!LL_USART_IsActiveFlag_TC(UART5)) {}
 }
 
-void UART4_receive_settings_bootloader() { // rx_settings[0] - [4]
+int UART4_receive_settings_bootloader() { // rx_settings[0] - [4]; 1 — тайм-аут: G4 не ответил, не висим на шине
+	const uint32_t timeout = 200000 * 275; // 200 мс (TIM2 275 МГц): с запасом на стирание и запись страницы G4
+	const uint32_t start = TIM2->CNT;
 	for (uint8_t i = 0; i < rx_settings_length; i++) {
-		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {}
+		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
+			if (TIM2->CNT - start > timeout) {
+				LL_USART_RequestRxDataFlush(UART5); // недопринятое — не в следующий ответ
+				return 1;
+			}
+		}
 		rx_settings[i] = (uint8_t)LL_USART_ReceiveData9(UART5);
 	}
+	return 0;
 }
 
 int UART4_receive_timeout_10us() {
@@ -1290,6 +1298,46 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
+// Можно ли шить: все чипы в одном загрузчике, он не сотрёт сам себя, а образ в слоте H7
+// собран под target. Иначе после сброса или прыжка G4 исполняет чужой код — только SWD.
+bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, const uint32_t& target) {
+	uint32_t running = 0; // начало работающего загрузчика G4
+	uint32_t running_pages = 0;
+	if (chip_state == chip_states::boot1) {
+		running = ADDRESS_G4_BOOTLOADER;
+		running_pages = COUNT_PAGE_G4_FOR_BOOTLOADER;
+	}
+	else if (chip_state == chip_states::boot2) {
+		running = ADDRESS_G4_BOOTLOADER_v2;
+		running_pages = COUNT_PAGE_G4_FOR_BOOTLOADER_v2;
+	}
+	else {
+		debugg_fn(" flash: chips NOT BOOTLOADER ");
+		return false;
+	}
+	for (const auto& chip : vChips) {
+		if (chip.st != chip_state) {
+			debugg_fn(std::format(" flash: chip {} in other state", chip.number_chip));
+			return false;
+		}
+	}
+
+	const uint32_t size = count_page * 0x800;
+	if (target < running + running_pages * 0x800 && running < target + size) {
+		debugg_fn(std::format(" flash: {:x} = running bootloader", target));
+		return false;
+	}
+
+	// вектор образа: SP в RAM G4 (128K), Reset_Handler внутри target
+	const uint32_t sp = ((volatile uint32_t*)image_in_H7)[0];
+	const uint32_t reset = ((volatile uint32_t*)image_in_H7)[1];
+	if (sp <= 0x20000000 || sp > 0x20020000 || reset < target || reset >= target + size) {
+		debugg_fn(std::format(" flash: image not for {:x}\n SP {:x} reset {:x}", target, sp, reset));
+		return false;
+	}
+	return true;
+}
+
 void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump) {
 
 	uint32_t start_adress_memory_read = adress_g4_firmware_in_H7; //  ++0x800 с каждым шагом
@@ -1298,6 +1346,9 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 	int bug = 0;
 
 	init_chips();
+	if (!g4_flash_allowed(adress_g4_firmware_in_H7, count_page, addr_jump)) {
+		return;
+	}
 
 	for (const auto& chip : vChips) {
 		start_adress_memory_read = adress_g4_firmware_in_H7;
@@ -1308,34 +1359,40 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 			Set_tx_s((uint8_t)bootloader_command::data_from_H7_to_array_g4, 0x11, 0x12, 0x13, 0x14);
 			UART4_send_settings_bootloader();
 
-			// теперь внутри    From_H7_to_array_g4(); 
+			// теперь внутри    From_H7_to_array_g4();
 			// *  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  **  *
-			UART4_receive_settings_bootloader(); // >> 0x11, 0x12, 0x13, 0x14
-			// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   
+			int timeout = UART4_receive_settings_bootloader(); // >> 0x11, 0x12, 0x13, 0x14
+			// -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -   - -   - - -
 
 			uint32_t primask = __get_PRIMASK();
 			volatile uint32_t* pFlashAddr = (volatile uint32_t*)start_adress_memory_read;
 			pause(1);
-			for (uint32_t i = 0; i < 512; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
+			for (uint32_t i = 0; i < 512 && !timeout; ++i) { // 2kB (4*512) размер пакета с прошивкой для отправки в g4
 				uint32_to_bytes_pointer(pFlashAddr[i], tx_settings);
 				tx_settings[4] = (uint8_t)i;
 				pause(1);
 				UART4_send_settings_bootloader();
-				UART4_receive_settings_bootloader();
+				timeout = UART4_receive_settings_bootloader();
 				if (bytes_to_uint32_pointer(rx_settings) != bytes_to_uint32_pointer(tx_settings)) {
 					++bug;
 				}
 			}
 
 			__set_PRIMASK(primask);
-			UART4_receive_settings_bootloader(); // response::ok
+			if (timeout || UART4_receive_settings_bootloader()) { // response::ok
+				debugg_fn(std::format(" flash: chip {} timeout at {:x}", chip.number_chip, mem));
+				return;
+			}
 			pause(2);
 
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 
-			flash_g4(mem, chip.number_chip);
+			if (flash_g4(mem, chip.number_chip)) {
+				debugg_fn(std::format(" flash: chip {} stop at {:x}", chip.number_chip, mem));
+				return;
+			}
 
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
@@ -1375,7 +1432,7 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 	}
 }
 
-void flash_g4(const uint32_t& addr, const int& chip_number) {
+int flash_g4(const uint32_t& addr, const int& chip_number) { // 1 — страница не записана: тайм-аут или отказ G4
 
 
 	UART4_send_address(chip_number);
@@ -1383,7 +1440,9 @@ void flash_g4(const uint32_t& addr, const int& chip_number) {
 	UART4_send_settings_bootloader();
 
 	// теперь внутри From_array_g4_to_H7();
-	UART4_receive_settings_bootloader(); // принимает ответ 0x15 0x61 0x62 0x63 0x64
+	if (UART4_receive_settings_bootloader()) { // принимает ответ 0x15 0x61 0x62 0x63 0x64
+		return 1;
+	}
 
 	// **  ****  ****  ****  ****  ****  ****  ****  ****  **
 	pause(2);
@@ -1394,34 +1453,51 @@ void flash_g4(const uint32_t& addr, const int& chip_number) {
 	UART4_send_settings_bootloader();
 
 	// 2 принять адрес для проверки
-	UART4_receive_settings_bootloader();
+	if (UART4_receive_settings_bootloader()) {
+		return 1;
+	}
 	pause(1);
 	uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
-	if (addr_back == addr) {
-		Set_tx_s((uint8_t)response::ok, 0x45, 0x46, 0x47, 0x48);
-	}
-	else {
+	if (addr_back != addr) {
 		debugg_fn(std::format("  addr  fail  {:x}", addr_back));
 		Set_tx_s((uint8_t)response::fail, 0x55, 0x56, 0x57, 0x58);
+		UART4_send_settings_bootloader();
+		UART4_receive_settings_bootloader(); // без записи G4 сразу шлёт итог (4), без 32 и 35
+		return 1;
 	}
 
 	// 3 если ок - то разрешаем запись
+	Set_tx_s((uint8_t)response::ok, 0x45, 0x46, 0x47, 0x48);
 	UART4_send_settings_bootloader();
 
-	//3.2
-	UART4_receive_settings_bootloader(); // 32
-
-	//3.5
-	UART4_receive_settings_bootloader(); // 35
-
-	// 4
-	UART4_receive_settings_bootloader(); // fail or ok
-
-	if (rx_settings[1] == (uint8_t)response::ok) {
+	//3.2 32, 3.5 35, 4 fail or ok
+	if (UART4_receive_settings_bootloader() || UART4_receive_settings_bootloader() || UART4_receive_settings_bootloader()) {
+		return 1;
 	}
-	else {
+
+	if (rx_settings[1] != (uint8_t)response::ok) {
 		debugg_fn(std::format("  FLASH G4 fail  ((  {}", chip_number));
+		return 1;
 	}
+	return 0;
+}
+
+// Эхо чипу, пока в ответе rx_settings[i] != value: ждёт, когда G4 перезапустится или
+// перейдёт в другую прошивку. 1 — не ответил за ~1.3 с (не висим на сломанном чипе)
+int echo_until(const uint8_t& chip_N, const uint32_t& i, const uint8_t& value) {
+	rx_settings[i] = (uint8_t)~value;
+	for (uint32_t n = 0; n < 10000; ++n) {
+		UART4_send_address(chip_N);
+		Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
+		UART4_send_settings_bootloader();
+		UART4_receive_timeout_10us();
+		if (rx_settings[i] == value) {
+			return 0;
+		}
+		pause(100);
+	}
+	debugg_fn(std::format(" chip {} no echo", chip_N));
+	return 1;
 }
 
 void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) {
@@ -1434,8 +1510,11 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		UART4_send_address(chip.number_chip);
 		Set_tx_s((uint8_t)bootloader_command::jump_g4_to_adress, 0x88, 0x88, 0x88, 0x88);
 		UART4_send_settings_bootloader();
-		UART4_receive_settings_bootloader();
-		UART4_receive_settings_bootloader(); // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
+		if (UART4_receive_settings_bootloader() || UART4_receive_settings_bootloader()) { // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
+			debugg_fn(std::format(" jump: chip {} timeout", chip.number_chip));
+			++bug;
+			continue; // сломанный чип не держит остальные (и старт H7)
+		}
 
 		if (bytes_to_uint32_pointer(&rx_settings[1]) != bytes_to_uint32_pointer(&tx_settings[1])) {
 			++bug;
@@ -1446,7 +1525,11 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		uint32_to_bytes_pointer(addr_jump, tx_settings);
 		tx_settings[4] = chip.number_chip;
 		UART4_send_settings_bootloader();
-		UART4_receive_settings_bootloader(); // принять (полученный g4 адрес)
+		if (UART4_receive_settings_bootloader()) { // принять (полученный g4 адрес)
+			debugg_fn(std::format(" jump: chip {} timeout", chip.number_chip));
+			++bug;
+			continue;
+		}
 		uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
 		pause(1);
 
@@ -1458,31 +1541,19 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		else {
 			debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, addr_jump));
 		}
-		UART4_receive_settings_bootloader();
+		int timeout = UART4_receive_settings_bootloader();
 
 		if (jump_to_ == chip_states::boot2) {
-			rx_settings[1] = 1;
-			while (rx_settings[1] != 0) {
-				UART4_send_address(chip.number_chip);
-				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
-				UART4_send_settings_bootloader();
-				UART4_receive_timeout_10us();
-			}
+			timeout = echo_until(chip.number_chip, 1, 0);
 		}
 		else if (jump_to_ == chip_states::boot1) {
-			rx_settings[1] = 1;
-			while (rx_settings[1] != 0) {
-				UART4_send_address(chip.number_chip);
-				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
-				UART4_send_settings_bootloader();
-				UART4_receive_timeout_10us();
-			}
+			timeout = echo_until(chip.number_chip, 1, 0);
 		}
-		else if (jump_to_ == chip_states::piano) {
-			UART4_receive_settings_bootloader();
+		else if (jump_to_ == chip_states::piano && !timeout) {
+			timeout = UART4_receive_settings_bootloader();
 		}
 
-		if (rx_settings[0] != chip.number_chip) {
+		if (timeout || rx_settings[0] != chip.number_chip) {
 			debugg_fn(std::format(" start {} fail \n", chip.number_chip));
 		}
 
@@ -1502,14 +1573,11 @@ void reset_bootloaders() {
 			UART4_send_address(chip.number_chip);
 			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
 			UART4_send_settings_bootloader();
-			UART4_receive_settings_bootloader();
-			rx_settings[4] = 0;
-			while (rx_settings[4] != 1) {
-				UART4_send_address(chip.number_chip);
-				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
-				UART4_send_settings_bootloader();
-				UART4_receive_timeout_10us();
+			if (UART4_receive_settings_bootloader()) {
+				debugg_fn(std::format(" reset: chip {} timeout", chip.number_chip));
+				continue;
 			}
+			echo_until(chip.number_chip, 4, 1); // ждём v1 после сброса
 		}
 	}
 	else if (chip_state == chip_states::boot2) {
@@ -1517,14 +1585,11 @@ void reset_bootloaders() {
 			UART4_send_address(chip.number_chip);
 			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
 			UART4_send_settings_bootloader();
-			UART4_receive_settings_bootloader();
-			rx_settings[4] = 0;
-			while (rx_settings[4] != 1) {
-				UART4_send_address(chip.number_chip);
-				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
-				UART4_send_settings_bootloader();
-				UART4_receive_timeout_10us();
+			if (UART4_receive_settings_bootloader()) {
+				debugg_fn(std::format(" reset: chip {} timeout", chip.number_chip));
+				continue;
 			}
+			echo_until(chip.number_chip, 4, 1); // ждём v1 после сброса
 		}
 	}
 	else {
@@ -1540,13 +1605,7 @@ void reset_main_to_bootloader() {
 		for (const auto& chip : vChips) {
 			UART4_send_address(chip.number_chip);
 			UART4_send_settings(command::reset_to_bootloader, 3, 2, 1);
-			rx_settings[4] = 0;
-			while (rx_settings[4] != 1) {
-				UART4_send_address(chip.number_chip);
-				Set_tx_s((uint8_t)bootloader_command::echo, 0x88, 0x88, 0x88, 0x88);
-				UART4_send_settings_bootloader();
-				UART4_receive_timeout_10us();
-			}
+			echo_until(chip.number_chip, 4, 1); // ждём v1 после сброса
 		}
 	}
 	else {
