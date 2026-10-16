@@ -14,7 +14,7 @@ uint16_t POINT_COLOR = 0x0000;
 
 lcd_dev lcddev;
 
-void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
+void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize) {
 
 	// LCD_DC_C(); // ? надо?
 	// LCD_WR_REG(0x2c); // надо?

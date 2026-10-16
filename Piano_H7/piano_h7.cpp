@@ -1190,8 +1190,7 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	lv_display_flush_ready(disp);
 }
 
-// typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
-void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
+void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
