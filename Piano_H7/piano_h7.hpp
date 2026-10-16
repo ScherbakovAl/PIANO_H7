@@ -194,6 +194,8 @@ extern "C" {
 	volatile uint8_t noise_bytes[4] = { };
 	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет DMA1_RX)
 	uint32_t midi_lost_shown = 0;
+	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
+	uint32_t lcd_dma_errors_shown = 0;
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 

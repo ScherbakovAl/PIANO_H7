@@ -515,6 +515,12 @@ void h7() {
 			debugg_fn(std::format("MIDI lost {}", midi_lost_shown));
 		}
 
+		if (lcd_dma_errors != lcd_dma_errors_shown) {
+			lcd_dma_errors_shown = lcd_dma_errors;
+			debugg_fn(std::format("LCD DMA error {}", lcd_dma_errors_shown));
+			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
+		}
+
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();
@@ -1175,7 +1181,7 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	// Проверка флага Transfer Error
 	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
 		LL_DMA_ClearFlag_TE1(DMA2);
-		// Обработка ошибки
+		lcd_dma_errors = lcd_dma_errors + 1; // поток остановлен аппаратно; flush_ready ниже — LVGL не зависнет
 	}
 
 	// Проверка флага Half Transfer (если нужно)
