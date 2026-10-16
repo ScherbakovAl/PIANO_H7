@@ -223,6 +223,9 @@ extern "C" {
 	const float maxMidi_F = 127.99f;
 	std::vector<speed_for_midi> curve_OFF;
 	std::vector<speed_for_midi> curve_ON;
+	// Кривая ON из роллера. DMA1_RX читает её отсюда, а не lv_roller_get_selected: LVGL нельзя звать
+	// из прерывания, а до ui_init objects.roller == NULL. 8 — как lv_roller_set_selected в screens.c
+	volatile uint8_t curve_on_selected = 8;
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
 	float sx_F = 0.0f; // for test
@@ -266,6 +269,7 @@ extern "C" {
 	void resetPin();
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
+	void roller_curve_changed(lv_event_t* e);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);

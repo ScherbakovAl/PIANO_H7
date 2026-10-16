@@ -59,6 +59,9 @@ void init() {
 	// pwr();
 	disp_create_and_touch_start();
 	ui_init();
+	// не через EEZ: в проекте событие не видно, но и перегенерация screens.c его не сотрёт
+	lv_obj_add_event_cb(objects.roller, roller_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
+	curve_on_selected = lv_roller_get_selected(objects.roller);
 	tusb_init();
 
 	tud_task();
@@ -890,7 +893,7 @@ void DMA1_RX(void) {
 		}
 		else { // for ON
 
-			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
+			const uint32_t curve_num = curve_on_selected;
 
 			if (curve_num) {
 
@@ -1178,6 +1181,10 @@ void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя п�
 	else {
 		data->state = LV_INDEV_STATE_RELEASED;
 	}
+}
+
+void roller_curve_changed(lv_event_t* e) {
+	curve_on_selected = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
 }
 
 void DMA2_Stream1_TransferComplete() { // DMA дисплея
