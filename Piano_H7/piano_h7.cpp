@@ -129,12 +129,6 @@ void init_LL() {
 
 void init_LCD_and_touch() {
 
-	// счётчик тактов ядра для замера скорости дисплея (TIM2 обнуляется в опросе G4 — не годится)
-	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-	DWT->LAR = 0xC5ACCE55; // на Cortex-M7 DWT заперт до записи ключа
-	DWT->CYCCNT = 0;
-	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-
 	// LCD init
 	LL_SPI_EnableDMAReq_TX(SPI3); // TXDMAEN в CFG1 — до SPE (RM0468)
 	LL_SPI_Enable(SPI3);
@@ -525,18 +519,6 @@ void h7() {
 			lcd_dma_errors_shown = lcd_dma_errors;
 			debugg_fn(std::format("LCD DMA error {}", lcd_dma_errors_shown));
 			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
-		}
-
-		if (lcd_speed_debug && lcd_max_bytes && lv_tick_elaps(lcd_speed_shown_ms) >= 2000) {
-			lcd_speed_shown_ms = lv_tick_get();
-			__disable_irq();
-			const uint32_t bytes = lcd_max_bytes;
-			const uint32_t cycles = lcd_max_cycles;
-			lcd_max_bytes = 0;
-			lcd_max_cycles = 0;
-			__enable_irq();
-			const float mhz = SystemCoreClock / 1000000.0f;
-			debugg_fn(std::format("LCD {} B {} us {:.1f} Mbit/s (SPI 93.75)", bytes, (uint32_t)(cycles / mhz), bytes * 8 * mhz / cycles));
 		}
 
 		if (fl == 1) { // DEBUG
@@ -1191,8 +1173,6 @@ void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
 }
 
 void DMA2_Stream1_TransferComplete() { // DMA дисплея
-	bool error = false;
-
 	// Проверка флага Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
 		LL_DMA_ClearFlag_TC1(DMA2);
@@ -1202,7 +1182,6 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
 		LL_DMA_ClearFlag_TE1(DMA2);
 		lcd_dma_errors = lcd_dma_errors + 1; // поток остановлен аппаратно; flush_ready ниже — LVGL не зависнет
-		error = true;
 	}
 
 	// Проверка флага Half Transfer (если нужно)
@@ -1215,13 +1194,6 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
 	};
 
-	// замер: худшее время самого большого куска (от запуска DMA до ухода последнего байта)
-	const uint32_t cycles = DWT->CYCCNT - lcd_flush_t0;
-	if (!error && (lcd_flush_bytes > lcd_max_bytes || (lcd_flush_bytes == lcd_max_bytes && cycles > lcd_max_cycles))) {
-		lcd_max_bytes = lcd_flush_bytes;
-		lcd_max_cycles = cycles;
-	}
-
 	lv_display_flush_ready(disp);
 }
 
@@ -1231,8 +1203,6 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 3;
 	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
-	lcd_flush_bytes = wh_;
-	lcd_flush_t0 = DWT->CYCCNT;
 	Send_DMA_Data8(color_p, wh_);
 }
 
