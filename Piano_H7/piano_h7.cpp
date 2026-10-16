@@ -130,6 +130,7 @@ void init_LL() {
 void init_LCD_and_touch() {
 
 	// LCD init
+	LL_SPI_EnableDMAReq_TX(SPI3); // TXDMAEN в CFG1 — до SPE (RM0468)
 	LL_SPI_Enable(SPI3);
 	LL_SPI_StartMasterTransfer(SPI3);
 	LCD_Init();

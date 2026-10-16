@@ -265,8 +265,7 @@ void LCD_Init() {
 
 	LCD_Clear(0x0000);
 
-	// DMA
-	LL_SPI_EnableDMAReq_TX(SPI3);
+	// DMA (TXDMAEN включается до SPE в init_LCD_and_touch)
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 
 	for (int a = 0; a < 50; ++a) {
