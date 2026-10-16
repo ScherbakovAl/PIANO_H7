@@ -24,6 +24,8 @@
 void pwr() {
 
 	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
+		while (lcd_dma_busy) {
+		};
 		LCD_WR_REG(0x10); // Sleep In
 		LL_mDelay(120);
 		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
@@ -59,6 +61,9 @@ void init() {
 	// pwr();
 	disp_create_and_touch_start();
 	ui_init();
+	// не через EEZ: в проекте событие не видно, но и перегенерация screens.c его не сотрёт
+	lv_obj_add_event_cb(objects.roller, roller_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
+	curve_on_selected = lv_roller_get_selected(objects.roller);
 	tusb_init();
 
 	tud_task();
@@ -890,7 +895,7 @@ void DMA1_RX(void) {
 		}
 		else { // for ON
 
-			const uint32_t& curve_num = lv_roller_get_selected(objects.roller);
+			const uint32_t curve_num = curve_on_selected;
 
 			if (curve_num) {
 
@@ -1180,6 +1185,10 @@ void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя п�
 	}
 }
 
+void roller_curve_changed(lv_event_t* e) {
+	curve_on_selected = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
+}
+
 void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	// Проверка флага Transfer Complete
 	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
@@ -1202,6 +1211,7 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
 	};
 
+	lcd_dma_busy = false;
 	lv_display_flush_ready(disp);
 }
 
@@ -1209,8 +1219,9 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
-	const int32_t wh_ = width * height * 3;
+	const int32_t wh_ = width * height * BYTES_PER_PIXEL; // кусок сплошной: строки без выравнивания (static_assert в piano_h7.hpp)
 	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
+	lcd_dma_busy = true;
 	Send_DMA_Data8(color_p, wh_);
 }
 

@@ -196,6 +196,9 @@ extern "C" {
 	uint32_t midi_lost_shown = 0;
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
+	// Кусок кадра идёт по DMA (ставит my_flush_cb, снимает DMA2_Stream1). LVGL ждёт его только перед
+	// следующим flush, поэтому после lv_timer_handler он ещё может лететь: перед прямыми LCD_* — ждать
+	volatile bool lcd_dma_busy = false;
 	uint32_t touch_errors_shown = 0; // ft6336_errors на момент последней печати
 	uint32_t touch_errors_tick = 0;  // HAL_GetTick() последней печати
 
@@ -223,6 +226,9 @@ extern "C" {
 	const float maxMidi_F = 127.99f;
 	std::vector<speed_for_midi> curve_OFF;
 	std::vector<speed_for_midi> curve_ON;
+	// Кривая ON из роллера. DMA1_RX читает её отсюда, а не lv_roller_get_selected: LVGL нельзя звать
+	// из прерывания, а до ui_init objects.roller == NULL. 8 — как lv_roller_set_selected в screens.c
+	volatile uint8_t curve_on_selected = 8;
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
 	float sx_F = 0.0f; // for test
@@ -266,6 +272,7 @@ extern "C" {
 	void resetPin();
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
+	void roller_curve_changed(lv_event_t* e);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
@@ -315,6 +322,7 @@ extern "C" {
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
 	const uint32_t BUFF_SIZE = (320 * 60 * BYTES_PER_PIXEL); // 60 строк по 320 px = 57600 байт
 	static_assert(BUFF_SIZE <= 0xFFFF, "кусок уходит одним DMA: NDTR и Send_DMA_Data8 — 16 бит");
+	static_assert(LV_DRAW_BUF_STRIDE_ALIGN == 1, "my_flush_cb шлёт width * height * BYTES_PER_PIXEL подряд — строки не должны дополняться");
 	alignas(32) static uint8_t buf_1[BUFF_SIZE]; // выравнивание по строке D-cache — для SCB_CleanDCache_by_Addr
 	alignas(32) static uint8_t buf_2[BUFF_SIZE];
 
