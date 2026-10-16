@@ -1219,7 +1219,7 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
-	const int32_t wh_ = width * height * 3;
+	const int32_t wh_ = width * height * BYTES_PER_PIXEL; // кусок сплошной: строки без выравнивания (static_assert в piano_h7.hpp)
 	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
 	lcd_dma_busy = true;
 	Send_DMA_Data8(color_p, wh_);

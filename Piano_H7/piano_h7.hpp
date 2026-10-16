@@ -322,6 +322,7 @@ extern "C" {
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
 	const uint32_t BUFF_SIZE = (320 * 60 * BYTES_PER_PIXEL); // 60 строк по 320 px = 57600 байт
 	static_assert(BUFF_SIZE <= 0xFFFF, "кусок уходит одним DMA: NDTR и Send_DMA_Data8 — 16 бит");
+	static_assert(LV_DRAW_BUF_STRIDE_ALIGN == 1, "my_flush_cb шлёт width * height * BYTES_PER_PIXEL подряд — строки не должны дополняться");
 	alignas(32) static uint8_t buf_1[BUFF_SIZE]; // выравнивание по строке D-cache — для SCB_CleanDCache_by_Addr
 	alignas(32) static uint8_t buf_2[BUFF_SIZE];
 
