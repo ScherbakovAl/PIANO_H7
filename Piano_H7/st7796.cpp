@@ -164,9 +164,11 @@ void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
 
 void LCD_RESET() {
 	LCD_RES_L();
-	LL_mDelay(100);
+	LL_mDelay(10); // импульс сброса: по даташиту хватает 10 мкс
 	LCD_RES_H();
-	LL_mDelay(50);
+	// Сброс при работающем дисплее (NVIC_SystemReset, выход из DFU) заканчивается до 120 мс;
+	// раньше этого Sleep Out слать нельзя. При включении питания хватило бы 5 мс.
+	LL_mDelay(120);
 }
 
 void LCD_Init() {
@@ -257,15 +259,13 @@ void LCD_Init() {
 	LCD_WR_REG(0xF0); // CSCON (F0h): Command Set Control
 	LCD_WR_DATA(0x69); // 69h disable command 2 part II
 
-	LL_mDelay(120);
-
 	// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
 	LCD_WR_REG(0x21); // INVON (21h): Display Inversion On
 
+	LCD_Clear(0x000000); // до DISPON: иначе на ~40 мс виден мусор из памяти дисплея
+
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
-
-	LCD_Clear(0x000000);
 
 	// DMA (TXDMAEN включается до SPE в init_LCD_and_touch)
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
