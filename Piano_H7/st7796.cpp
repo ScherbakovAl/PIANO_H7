@@ -24,6 +24,8 @@ void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize) {
 	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
 	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff); // TODO (uint32_t*) а если + " * " ??
+	// RM0468: перед EN все флаги потока должны быть сброшены (TC/HT/TE сбрасывает прерывание, FE/DME — нет)
+	DMA2->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
 }
 
