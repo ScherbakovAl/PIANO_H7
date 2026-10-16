@@ -21,7 +21,7 @@ void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize) {
 	LCD_DC_D();
 
 	LL_DMA_DisableStream(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize / 4); // в словах; dataSize кратен 48 (lcd_rounder_cb)
+	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
 	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff); // TODO (uint32_t*) а если + " * " ??
 	// RM0468: перед EN все флаги потока должны быть сброшены (TC/HT/TE сбрасывает прерывание, FE/DME — нет)
@@ -267,14 +267,7 @@ void LCD_Init() {
 
 	LCD_Clear(0x000000);
 
-	// DMA (TXDMAEN и порог FIFO SPI — до SPE в init_LCD_and_touch).
-	// Словами с обеих сторон: SPI сам раскладывает 32-битную запись на 4 байта, младший первым;
-	// память читается пачками по 16 байт через FIFO потока — в 4 раза меньше обращений к шине.
-	LL_DMA_SetMemorySize(DMA2, LL_DMA_STREAM_1, LL_DMA_MDATAALIGN_WORD);
-	LL_DMA_SetPeriphSize(DMA2, LL_DMA_STREAM_1, LL_DMA_PDATAALIGN_WORD);
-	LL_DMA_EnableFifoMode(DMA2, LL_DMA_STREAM_1);
-	LL_DMA_SetFIFOThreshold(DMA2, LL_DMA_STREAM_1, LL_DMA_FIFOTHRESHOLD_FULL);
-	LL_DMA_SetMemoryBurstxfer(DMA2, LL_DMA_STREAM_1, LL_DMA_MBURST_INC4);
+	// DMA (TXDMAEN включается до SPE в init_LCD_and_touch)
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 	LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_1);
 
