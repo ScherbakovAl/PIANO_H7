@@ -280,6 +280,7 @@ extern "C" {
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
+	bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, const uint32_t& target);
 	int echo_until(const uint8_t& chip_N, const uint32_t& i, const uint8_t& value);
 	void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump);
 	int flash_g4(const uint32_t& addr, const int& chip_number);

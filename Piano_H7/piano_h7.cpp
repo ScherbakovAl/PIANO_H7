@@ -217,9 +217,9 @@ void init_chips() {
 					++counter_off;
 				}
 			}
-			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
+			chip_state = (chip_states)rx_settings[4]; // до push_back: st — состояние этого чипа, а не предыдущего
 
-			chip_state = (chip_states)rx_settings[4];
+			vChips.push_back({ chip_N, vComparators, (chip_N < on_off_division ? typeAction::on : typeAction::off), chip_state });
 
 			if (flag1) {
 				chip_state_prev = chip_state;
@@ -1298,6 +1298,46 @@ void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e) {
 	tx_settings[4] = e;
 }
 
+// Можно ли шить: все чипы в одном загрузчике, он не сотрёт сам себя, а образ в слоте H7
+// собран под target. Иначе после сброса или прыжка G4 исполняет чужой код — только SWD.
+bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, const uint32_t& target) {
+	uint32_t running = 0; // начало работающего загрузчика G4
+	uint32_t running_pages = 0;
+	if (chip_state == chip_states::boot1) {
+		running = ADDRESS_G4_BOOTLOADER;
+		running_pages = COUNT_PAGE_G4_FOR_BOOTLOADER;
+	}
+	else if (chip_state == chip_states::boot2) {
+		running = ADDRESS_G4_BOOTLOADER_v2;
+		running_pages = COUNT_PAGE_G4_FOR_BOOTLOADER_v2;
+	}
+	else {
+		debugg_fn(" flash: chips NOT BOOTLOADER ");
+		return false;
+	}
+	for (const auto& chip : vChips) {
+		if (chip.st != chip_state) {
+			debugg_fn(std::format(" flash: chip {} in other state", chip.number_chip));
+			return false;
+		}
+	}
+
+	const uint32_t size = count_page * 0x800;
+	if (target < running + running_pages * 0x800 && running < target + size) {
+		debugg_fn(std::format(" flash: {:x} = running bootloader", target));
+		return false;
+	}
+
+	// вектор образа: SP в RAM G4 (128K), Reset_Handler внутри target
+	const uint32_t sp = ((volatile uint32_t*)image_in_H7)[0];
+	const uint32_t reset = ((volatile uint32_t*)image_in_H7)[1];
+	if (sp <= 0x20000000 || sp > 0x20020000 || reset < target || reset >= target + size) {
+		debugg_fn(std::format(" flash: image not for {:x}\n SP {:x} reset {:x}", target, sp, reset));
+		return false;
+	}
+	return true;
+}
+
 void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t& count_page, const uint32_t& addr_jump) {
 
 	uint32_t start_adress_memory_read = adress_g4_firmware_in_H7; //  ++0x800 с каждым шагом
@@ -1306,6 +1346,9 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 	int bug = 0;
 
 	init_chips();
+	if (!g4_flash_allowed(adress_g4_firmware_in_H7, count_page, addr_jump)) {
+		return;
+	}
 
 	for (const auto& chip : vChips) {
 		start_adress_memory_read = adress_g4_firmware_in_H7;
