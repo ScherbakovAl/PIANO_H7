@@ -109,28 +109,30 @@ void LCD_direction(uint8_t direction) {
 	}
 }
 
-void LCD_Clear(uint16_t Color) {
-	LCD_SetWindows(0, 0, lcddev.width - 1, lcddev.height - 1);
-	LCD_DC_D();
-	for (int i = 0; i < lcddev.height; i++) {
-		for (int m = 0; m < lcddev.width; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
-	}
+void LCD_Clear(uint32_t Color) {
+	LCD_Fill(0, 0, lcddev.width - 1, lcddev.height - 1, Color);
 }
 
-void LCD_rect_test(int x1, int y1, int x2, int y2, uint16_t Color) {
+// Заливка окна (включительно) цветом 0xRRGGBB. Байты идут в порядке B, G, R — как в буфере
+// LVGL (RGB888) основной прошивки, с которым цвета на этом дисплее верные. DC не меняется,
+// поэтому ждём только места в FIFO, а TXC — один раз в конце.
+void LCD_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint32_t Color) {
 	LCD_SetWindows(x1, y1, x2, y2);
 	LCD_DC_D();
-	for (int i = 0; i < x2 - x1; i++) {
-		for (int m = 0; m < y2 - y1; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
+	const uint32_t pixels = (x2 - x1 + 1) * (y2 - y1 + 1);
+	for (uint32_t i = 0; i < pixels; i++) {
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color); // B
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 8); // G
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 16); // R
 	}
+	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
+	};
 }
 
 void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
@@ -167,14 +169,11 @@ void LCD_Init() {
 
 	LCD_RESET();
 
-	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима
+	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима (после аппаратного сброса дисплей уже в Sleep In)
 
 	LL_mDelay(120);       //Delay 120ms
 
-	// BIT6 - MX (Column Address Order)
-	// BIT3 - RGB (RGB-BGR Order)
-	LCD_WR_REG(0x36); // MADCTL (0x36) – Memory Access Control (Настройка направления сканирования и зеркалирования.)
-	LCD_WR_DATA(0x48); // 0x48
+	LCD_direction(0); // MADCTL (0x36) – ориентация, зеркалирование и порядок цветов
 
 	LCD_WR_REG(0x3A); // COLMOD (Interface Pixel Format, Формат цвета)
 	LCD_WR_DATA(0x77); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
@@ -197,7 +196,7 @@ void LCD_Init() {
 	LCD_WR_DATA(0xC0);
 	LCD_WR_DATA(0x00);
 
-	LCD_WR_REG(0xC1); // PWR1(C0h): Power Control 1
+	LCD_WR_REG(0xC1); // PWR2 (C1h): Power Control 2
 	LCD_WR_DATA(0x13); // 4.5+
 
 	LCD_WR_REG(0xC2); // PWR3 (C2h): Power Control 3
@@ -254,23 +253,18 @@ void LCD_Init() {
 	LCD_WR_REG(0xF0); // CSCON (F0h): Command Set Control
 	LCD_WR_DATA(0x69); // 69h disable command 2 part II
 
-	LL_mDelay(120);
-
 	// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
 	LCD_WR_REG(0x21); // INVON (21h): Display Inversion On
+
+	LCD_Clear(0x000000); // до DISPON: иначе на ~40 мс виден мусор из памяти дисплея
 
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
 
-	LCD_direction(0);
+	// DMA в загрузчике не используется: всё рисуется опросом
+	// (TXDMAEN к тому же нельзя менять при включённом SPI — RM0468)
 
-	LCD_Clear(0x0000);
-
-	// DMA
-	LL_SPI_EnableDMAReq_TX(SPI3);
-	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
-	
-	LCD_rect_test(50, 50, 100, 100, 0xFFFF);
+	LCD_Fill(50, 50, 100, 100, 0xFFFFFF); // кнопка выхода из DFU (касание в main.c)
 }
 
 void LCD_RES_H() {
