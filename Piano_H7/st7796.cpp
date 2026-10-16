@@ -109,28 +109,30 @@ void LCD_direction(uint8_t direction) {
 	}
 }
 
-void LCD_Clear(uint16_t Color) {
-	LCD_SetWindows(0, 0, lcddev.width - 1, lcddev.height - 1);
-	LCD_DC_D();
-	for (int i = 0; i < lcddev.height; i++) {
-		for (int m = 0; m < lcddev.width; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
-	}
+void LCD_Clear(uint32_t Color) {
+	LCD_Fill(0, 0, lcddev.width - 1, lcddev.height - 1, Color);
 }
 
-void LCD_rect_test(int x1, int y1, int x2, int y2, uint16_t Color) {
+// Заливка окна (включительно) цветом 0xRRGGBB. Байты идут в порядке B, G, R — как в буфере
+// LVGL (RGB888), с которым цвета на этом дисплее верные. DC не меняется, поэтому ждём только
+// места в FIFO, а TXC — один раз в конце.
+void LCD_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint32_t Color) {
 	LCD_SetWindows(x1, y1, x2, y2);
 	LCD_DC_D();
-	for (int i = 0; i < x2 - x1; i++) {
-		for (int m = 0; m < y2 - y1; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
+	const uint32_t pixels = (x2 - x1 + 1) * (y2 - y1 + 1);
+	for (uint32_t i = 0; i < pixels; i++) {
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color); // B
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 8); // G
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 16); // R
 	}
+	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
+	};
 }
 
 void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
@@ -257,16 +259,17 @@ void LCD_Init() {
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
 
-	LCD_Clear(0x0000);
+	LCD_Clear(0x000000);
 
 	// DMA (TXDMAEN включается до SPE в init_LCD_and_touch)
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
 	LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_1);
 
+	// тест при старте: драйвер и дисплей ожили, код дошёл до инициализации
 	for (int a = 0; a < 50; ++a) {
-		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, 0xFFFF);
-		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, 0xFFFF);
-		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, 0xFFFF);
+		LCD_Fill(50 + a, 50 + a, 100 + a, 100 + a, 0xFFFFFF);
+		LCD_Fill(100 + a, 100 + a, 150 + a, 150 + a, 0xFFFFFF);
+		LCD_Fill(150 + a, 150 + a, 200 + a, 200 + a, 0xFFFFFF);
 	}
 }
 
