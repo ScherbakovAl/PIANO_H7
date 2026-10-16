@@ -140,7 +140,7 @@ void FT6336_Init(void) {
 	FT6336_RST_L();
 	LL_mDelay(10);
 	FT6336_RST_H();
-	LL_mDelay(50);
+	LL_mDelay(300); // с запасом: контроллеры FocalTech начинают работать спустя ~200–300 мс после reset
 
 	uint8_t mode = 0x00;
 	FT6336_WriteRegister(FT6336_DEV_MODE, &mode, 1); // 0x00 — рабочий режим (не factory)
