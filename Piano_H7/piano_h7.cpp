@@ -521,6 +521,14 @@ void h7() {
 			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
 		}
 
+		// не чаще раза в секунду: отвалившийся тач ошибается на каждом опросе LVGL
+		if (ft6336_errors != touch_errors_shown && HAL_GetTick() - touch_errors_tick >= 1000) {
+			static const char* const names[] = { "OK", "BUSY", "NACK", "BERR/ARLO", "TIMEOUT" };
+			touch_errors_shown = ft6336_errors;
+			touch_errors_tick = HAL_GetTick();
+			debugg_fn(std::format("Touch I2C error {}: {}", touch_errors_shown, names[ft6336_last_error]));
+		}
+
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();

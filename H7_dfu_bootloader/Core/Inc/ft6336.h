@@ -63,6 +63,17 @@ extern "C" {
 #define FT6336_RELEASE_CODE_ID 0xAF
 #define FT6336_STATE 0xBC
 
+// Коды возврата FT6336_WriteRegister / FT6336_ReadRegister
+#define FT6336_OK 0
+#define FT6336_ERR_BUSY 1    // шина занята: SDA/SCL держит низким кто-то из устройств
+#define FT6336_ERR_NACK 2    // тач не ответил (нет питания, сброс, помеха)
+#define FT6336_ERR_BUS 3     // ошибка шины или потеря арбитража (BERR / ARLO)
+#define FT6336_ERR_TIMEOUT 4 // флаг ISR не дождались
+
+	// Ошибки обмена с тачем (после каждой I2C5 сбрасывается программно)
+	extern uint32_t ft6336_errors;
+	extern uint8_t ft6336_last_error;
+
 	void FT6336_RST_L();
 	void FT6336_RST_H();
 

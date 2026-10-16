@@ -23,55 +23,92 @@ void FT6336_RST_H() {
 
 TouchPoints_HandleTypeDef TouchPoints;
 
+uint32_t ft6336_errors = 0;
+uint8_t ft6336_last_error = FT6336_OK;
+
+// Транзакция на 400 кГц занимает ~0.2 мс; HAL_GetTick шагает по 1 мс, поэтому реальный таймаут 2..3 мс
+#define FT6336_TIMEOUT_MS 2
+
+static uint8_t i2c_wait_idle() {
+	uint32_t start = HAL_GetTick();
+	while (LL_I2C_IsActiveFlag_BUSY(I2C5)) {
+		if (HAL_GetTick() - start > FT6336_TIMEOUT_MS) return FT6336_ERR_BUSY;
+	}
+	return FT6336_OK;
+}
+
+// Ожидание флага ISR. NACK (тач не ответил — STOP при этом уходит сам) и ошибки шины — выход сразу
+static uint8_t i2c_wait(uint32_t flag) {
+	uint32_t start = HAL_GetTick();
+	while (!(I2C5->ISR & flag)) {
+		if (I2C5->ISR & I2C_ISR_NACKF) return FT6336_ERR_NACK;
+		if (I2C5->ISR & (I2C_ISR_BERR | I2C_ISR_ARLO)) return FT6336_ERR_BUS;
+		if (HAL_GetTick() - start > FT6336_TIMEOUT_MS) return FT6336_ERR_TIMEOUT;
+	}
+	return FT6336_OK;
+}
+
+// Программный сброс I2C5 (RM0468: PE=0, проверить PE=0, PE=1) — сбрасывает флаги ISR и автомат передачи
+static uint8_t i2c_fail(uint8_t err) {
+	LL_I2C_Disable(I2C5);
+	while (LL_I2C_IsEnabled(I2C5));
+	LL_I2C_Enable(I2C5);
+	++ft6336_errors;
+	ft6336_last_error = err;
+	return err;
+}
+
 uint8_t FT6336_WriteRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	uint8_t err;
 	// Ожидание готовности шины I2C
-	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	if ((err = i2c_wait_idle())) return i2c_fail(err);
 
 	// Настройка передачи
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		Size + 1, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_WRITE);
 
 	// Ожидание готовности TX буфера и отправка адреса регистра
-	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 	LL_I2C_TransmitData8(I2C5, RegAddress);
 
 	// Отправка данных
 	for (uint16_t i = 0; i < Size; i++) {
-		while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+		if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 		LL_I2C_TransmitData8(I2C5, pData[i]);
 	}
 
 	// Ожидание завершения передачи
-	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	if ((err = i2c_wait(I2C_ISR_STOPF))) return i2c_fail(err);
 	LL_I2C_ClearFlag_STOP(I2C5);
 
 	return 0; // Успех
 }
 
 uint8_t FT6336_ReadRegister(uint8_t RegAddress, uint8_t* pData, uint16_t Size) {
+	uint8_t err;
 	// Ожидание готовности шины I2C
-	while (LL_I2C_IsActiveFlag_BUSY(I2C5));
+	if ((err = i2c_wait_idle())) return i2c_fail(err);
 
 	// Отправка адреса регистра (запись)
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		1, LL_I2C_MODE_SOFTEND, LL_I2C_GENERATE_START_WRITE);
 
-	while (!LL_I2C_IsActiveFlag_TXIS(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TXIS))) return i2c_fail(err);
 	LL_I2C_TransmitData8(I2C5, RegAddress);
 
-	while (!LL_I2C_IsActiveFlag_TC(I2C5));
+	if ((err = i2c_wait(I2C_ISR_TC))) return i2c_fail(err);
 
 	// Чтение данных
 	LL_I2C_HandleTransfer(I2C5, FT6X36_ADDR, LL_I2C_ADDRSLAVE_7BIT,
 		Size, LL_I2C_MODE_AUTOEND, LL_I2C_GENERATE_START_READ);
 
 	for (uint16_t i = 0; i < Size; i++) {
-		while (!LL_I2C_IsActiveFlag_RXNE(I2C5));
+		if ((err = i2c_wait(I2C_ISR_RXNE))) return i2c_fail(err);
 		pData[i] = LL_I2C_ReceiveData8(I2C5);
 	}
 
 	// Ожидание завершения приема
-	while (!LL_I2C_IsActiveFlag_STOP(I2C5));
+	if ((err = i2c_wait(I2C_ISR_STOPF))) return i2c_fail(err);
 	LL_I2C_ClearFlag_STOP(I2C5);
 
 	return 0; // Успех

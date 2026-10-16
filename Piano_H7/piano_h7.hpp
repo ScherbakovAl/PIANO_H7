@@ -196,6 +196,8 @@ extern "C" {
 	uint32_t midi_lost_shown = 0;
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
+	uint32_t touch_errors_shown = 0; // ft6336_errors на момент последней печати
+	uint32_t touch_errors_tick = 0;  // HAL_GetTick() последней печати
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
