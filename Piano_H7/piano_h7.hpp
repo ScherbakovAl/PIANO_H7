@@ -109,8 +109,10 @@ extern "C" {
 
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
-	uint8_t rx_data[4] = { };
-	const uint32_t dataLengthRX = sizeof(rx_data);
+	// Приёмник DMA1 занимает целую строку D-cache (32 байта): CPU сюда не пишет, строка
+	// никогда не бывает «грязной», и очистка кэша не затрёт свежий пакет старой копией.
+	alignas(32) uint8_t rx_data[32] = { };
+	const uint32_t dataLengthRX = 4;
 	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
 	const uint32_t tx_settings_length = sizeof(tx_settings);
 	__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
@@ -308,8 +310,8 @@ extern "C" {
 	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
 	const uint32_t BUFF_SIZE = (480 * 20 * BYTES_PER_PIXEL);
-	static lv_color16_t buf_1[BUFF_SIZE];
-	static lv_color16_t buf_2[BUFF_SIZE];
+	alignas(32) static lv_color16_t buf_1[BUFF_SIZE]; // выравнивание по строке D-cache — для SCB_CleanDCache_by_Addr
+	alignas(32) static lv_color16_t buf_2[BUFF_SIZE];
 
 	// int32_t on_green_max = 4095;
 	// int32_t on_green_min = 0;

@@ -826,7 +826,7 @@ void DMA1_RX(void) {
 	}
 	else {
 
-		SCB_CleanInvalidateDCache();
+		SCB_InvalidateDCache_by_Addr(rx_data, sizeof(rx_data)); // только своя строка: DMA записал RAM мимо кэша
 
 		const uint32_t rxB = rx_data[0];
 
@@ -1196,7 +1196,7 @@ void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 3;
-	SCB_CleanInvalidateDCache();
+	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
 	Send_DMA_Data8(color_p, wh_);
 }
 
