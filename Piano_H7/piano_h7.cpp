@@ -130,6 +130,7 @@ void init_LL() {
 void init_LCD_and_touch() {
 
 	// LCD init
+	LL_SPI_EnableDMAReq_TX(SPI3); // TXDMAEN в CFG1 — до SPE (RM0468)
 	LL_SPI_Enable(SPI3);
 	LL_SPI_StartMasterTransfer(SPI3);
 	LCD_Init();
@@ -514,6 +515,12 @@ void h7() {
 			debugg_fn(std::format("MIDI lost {}", midi_lost_shown));
 		}
 
+		if (lcd_dma_errors != lcd_dma_errors_shown) {
+			lcd_dma_errors_shown = lcd_dma_errors;
+			debugg_fn(std::format("LCD DMA error {}", lcd_dma_errors_shown));
+			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
+		}
+
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();
@@ -826,7 +833,7 @@ void DMA1_RX(void) {
 	}
 	else {
 
-		SCB_CleanInvalidateDCache();
+		SCB_InvalidateDCache_by_Addr(rx_data, sizeof(rx_data)); // только своя строка: DMA записал RAM мимо кэша
 
 		const uint32_t rxB = rx_data[0];
 
@@ -1174,7 +1181,7 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	// Проверка флага Transfer Error
 	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
 		LL_DMA_ClearFlag_TE1(DMA2);
-		// Обработка ошибки
+		lcd_dma_errors = lcd_dma_errors + 1; // поток остановлен аппаратно; flush_ready ниже — LVGL не зависнет
 	}
 
 	// Проверка флага Half Transfer (если нужно)
@@ -1182,16 +1189,20 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 		LL_DMA_ClearFlag_HT1(DMA2);
 	}
 
+	// TC = последний байт попал в FIFO SPI, а не ушёл в линию. Без ожидания следующий
+	// flush_cb опустит DC, и хвост FIFO (до 16 байт, ~1.4 мкс) дисплей примет как команды.
+	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
+	};
+
 	lv_display_flush_ready(disp);
 }
 
-// typedef void (*lv_display_flush_cb_t)(lv_display_t * disp, const lv_area_t * area, uint16_t * px_map); >>>  lv_display.h ( uint16_t !!! ) !!
-void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p) {
+void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
 	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
 	const int32_t height = area->y2 - area->y1 + 1;
 	const int32_t width = area->x2 - area->x1 + 1;
 	const int32_t wh_ = width * height * 3;
-	SCB_CleanInvalidateDCache();
+	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
 	Send_DMA_Data8(color_p, wh_);
 }
 

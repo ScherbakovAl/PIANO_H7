@@ -109,8 +109,10 @@ extern "C" {
 
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
-	uint8_t rx_data[4] = { };
-	const uint32_t dataLengthRX = sizeof(rx_data);
+	// Приёмник DMA1 занимает целую строку D-cache (32 байта): CPU сюда не пишет, строка
+	// никогда не бывает «грязной», и очистка кэша не затрёт свежий пакет старой копией.
+	alignas(32) uint8_t rx_data[32] = { };
+	const uint32_t dataLengthRX = 4;
 	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
 	const uint32_t tx_settings_length = sizeof(tx_settings);
 	__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
@@ -192,6 +194,8 @@ extern "C" {
 	volatile uint8_t noise_bytes[4] = { };
 	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет DMA1_RX)
 	uint32_t midi_lost_shown = 0;
+	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
+	uint32_t lcd_dma_errors_shown = 0;
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
@@ -261,7 +265,7 @@ extern "C" {
 	void DMA2_Stream3_i2c();
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint16_t* color_p);
+	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
 	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
@@ -307,9 +311,10 @@ extern "C" {
 
 	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
-	const uint32_t BUFF_SIZE = (480 * 20 * BYTES_PER_PIXEL);
-	static lv_color16_t buf_1[BUFF_SIZE];
-	static lv_color16_t buf_2[BUFF_SIZE];
+	const uint32_t BUFF_SIZE = (320 * 60 * BYTES_PER_PIXEL); // 60 строк по 320 px = 57600 байт
+	static_assert(BUFF_SIZE <= 0xFFFF, "кусок уходит одним DMA: NDTR и Send_DMA_Data8 — 16 бит");
+	alignas(32) static uint8_t buf_1[BUFF_SIZE]; // выравнивание по строке D-cache — для SCB_CleanDCache_by_Addr
+	alignas(32) static uint8_t buf_2[BUFF_SIZE];
 
 	// int32_t on_green_max = 4095;
 	// int32_t on_green_min = 0;

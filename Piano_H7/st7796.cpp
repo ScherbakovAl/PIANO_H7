@@ -9,12 +9,12 @@
 
 const int LCD_W = 320;
 const int LCD_H = 480;
-const int WHITE = 0xFFFF;
-uint16_t POINT_COLOR = 0x0000;
+// const int WHITE = 0xFFFF; // не используется
+// uint16_t POINT_COLOR = 0x0000; // не используется
 
 lcd_dev lcddev;
 
-void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
+void Send_DMA_Data8(uint8_t* buff, uint16_t dataSize) {
 
 	// LCD_DC_C(); // ? надо?
 	// LCD_WR_REG(0x2c); // надо?
@@ -24,6 +24,8 @@ void Send_DMA_Data8(uint16_t* buff, uint16_t dataSize) {
 	LL_DMA_SetDataLength(DMA2, LL_DMA_STREAM_1, dataSize);
 	LL_DMA_SetPeriphAddress(DMA2, LL_DMA_STREAM_1, LL_SPI_DMA_GetTxRegAddr(SPI3));
 	LL_DMA_SetMemoryAddress(DMA2, LL_DMA_STREAM_1, (uint32_t)buff); // TODO (uint32_t*) а если + " * " ??
+	// RM0468: перед EN все флаги потока должны быть сброшены (TC/HT/TE сбрасывает прерывание, FE/DME — нет)
+	DMA2->LIFCR = DMA_LIFCR_CTCIF1 | DMA_LIFCR_CHTIF1 | DMA_LIFCR_CTEIF1 | DMA_LIFCR_CDMEIF1 | DMA_LIFCR_CFEIF1;
 	LL_DMA_EnableStream(DMA2, LL_DMA_STREAM_1);
 }
 
@@ -35,6 +37,8 @@ void LCD_Send_Data_8(uint8_t data) {
 	};
 }
 
+// не используются (остались от RGB565 без DMA)
+/*
 void LCD_Send_Data_16(uint16_t* Data) {
 	LCD_DC_D();
 	while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
@@ -56,6 +60,7 @@ void LCD_Send_Data_16_(uint16_t Data) {
 	//	LCD_Send_Data_8(Data >> 8);
 	//	LCD_Send_Data_8(Data);
 }
+*/
 
 void LCD_WR_REG(uint8_t data) {
 	LCD_DC_C();
@@ -80,7 +85,7 @@ void LCD_direction(uint8_t direction) {
 	lcddev.setxcmd = 0x2A; // CASET (2Ah): Column Address Set (42)
 	lcddev.setycmd = 0x2B; // RASET (2Bh): Row Address Set (43)
 	lcddev.wramcmd = 0x2C; // RAMWR (2Ch): Memory Write (44)
-	lcddev.rramcmd = 0x2E; // RAMRD (2Eh): Memory Read
+	// lcddev.rramcmd = 0x2E; // RAMRD (2Eh): Memory Read — не используется: SPI3 только на передачу
 	lcddev.dir = direction % 4;
 	switch (lcddev.dir) {
 	case 0:
@@ -109,33 +114,36 @@ void LCD_direction(uint8_t direction) {
 	}
 }
 
-void LCD_Clear(uint16_t Color) {
-	LCD_SetWindows(0, 0, lcddev.width - 1, lcddev.height - 1);
-	LCD_DC_D();
-	for (int i = 0; i < lcddev.height; i++) {
-		for (int m = 0; m < lcddev.width; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
-	}
+void LCD_Clear(uint32_t Color) {
+	LCD_Fill(0, 0, lcddev.width - 1, lcddev.height - 1, Color);
 }
 
-void LCD_rect_test(int x1, int y1, int x2, int y2, uint16_t Color) {
+// Заливка окна (включительно) цветом 0xRRGGBB. Байты идут в порядке B, G, R — как в буфере
+// LVGL (RGB888), с которым цвета на этом дисплее верные. DC не меняется, поэтому ждём только
+// места в FIFO, а TXC — один раз в конце.
+void LCD_Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint32_t Color) {
 	LCD_SetWindows(x1, y1, x2, y2);
 	LCD_DC_D();
-	for (int i = 0; i < x2 - x1; i++) {
-		for (int m = 0; m < y2 - y1; m++) {
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-			LCD_Send_Data_8(Color);
-		}
+	const uint32_t pixels = (x2 - x1 + 1) * (y2 - y1 + 1);
+	for (uint32_t i = 0; i < pixels; i++) {
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color); // B
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 8); // G
+		while (!LL_SPI_IsActiveFlag_TXP(SPI3)) {
+		};
+		LL_SPI_TransmitData8(SPI3, Color >> 16); // R
 	}
+	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
+	};
 }
 
-void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
-	LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
-}
+// не используется
+// void LCD_SetCursor(uint16_t Xpos, uint16_t Ypos) {
+// 	LCD_SetWindows(Xpos, Ypos, Xpos, Ypos);
+// }
 
 void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
 	uint16_t yEnd) {
@@ -156,24 +164,22 @@ void LCD_SetWindows(uint16_t xStar, uint16_t yStar, uint16_t xEnd,
 
 void LCD_RESET() {
 	LCD_RES_L();
-	LL_mDelay(100);
+	LL_mDelay(10); // импульс сброса: по даташиту хватает 10 мкс
 	LCD_RES_H();
-	LL_mDelay(50);
+	// Сброс при работающем дисплее (NVIC_SystemReset, выход из DFU) заканчивается до 120 мс;
+	// раньше этого Sleep Out слать нельзя. При включении питания хватило бы 5 мс.
+	LL_mDelay(120);
 }
 
 void LCD_Init() {
 
 	LCD_RESET();
 
-	LCD_WR_REG(0x10); // Sleep In
-	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима
+	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима (после аппаратного сброса дисплей уже в Sleep In)
 
 	LL_mDelay(120);       //Delay 120ms
 
-	// BIT6 - MX (Column Address Order)
-	// BIT3 - RGB (RGB-BGR Order)
-	LCD_WR_REG(0x36); // MADCTL (0x36) – Memory Access Control (Настройка направления сканирования и зеркалирования.)
-	LCD_WR_DATA(0x48); // 0x48
+	LCD_direction(0); // MADCTL (0x36) – ориентация, зеркалирование и порядок цветов
 
 	LCD_WR_REG(0x3A); // COLMOD (Interface Pixel Format, Формат цвета)
 	LCD_WR_DATA(0x77); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
@@ -196,7 +202,7 @@ void LCD_Init() {
 	LCD_WR_DATA(0xC0);
 	LCD_WR_DATA(0x00);
 
-	LCD_WR_REG(0xC1); // PWR1(C0h): Power Control 1
+	LCD_WR_REG(0xC1); // PWR2 (C1h): Power Control 2
 	LCD_WR_DATA(0x13); // 4.5+
 
 	LCD_WR_REG(0xC2); // PWR3 (C2h): Power Control 3
@@ -253,26 +259,23 @@ void LCD_Init() {
 	LCD_WR_REG(0xF0); // CSCON (F0h): Command Set Control
 	LCD_WR_DATA(0x69); // 69h disable command 2 part II
 
-	LL_mDelay(120);
-
 	// LCD_WR_REG(0x20); // INVOFF (20h): Display Inversion Off
 	LCD_WR_REG(0x21); // INVON (21h): Display Inversion On
+
+	LCD_Clear(0x000000); // до DISPON: иначе на ~40 мс виден мусор из памяти дисплея
 
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
 
-	LCD_direction(0);
-
-	LCD_Clear(0x0000);
-
-	// DMA
-	LL_SPI_EnableDMAReq_TX(SPI3);
+	// DMA (TXDMAEN включается до SPE в init_LCD_and_touch)
 	LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_1);
+	LL_DMA_EnableIT_TE(DMA2, LL_DMA_STREAM_1);
 
+	// тест при старте: драйвер и дисплей ожили, код дошёл до инициализации
 	for (int a = 0; a < 50; ++a) {
-		LCD_rect_test(50 + a, 50 + a, 100 + a, 100 + a, 0xFFFF);
-		LCD_rect_test(100 + a, 100 + a, 150 + a, 150 + a, 0xFFFF);
-		LCD_rect_test(150 + a, 150 + a, 200 + a, 200 + a, 0xFFFF);
+		LCD_Fill(50 + a, 50 + a, 100 + a, 100 + a, 0xFFFFFF);
+		LCD_Fill(100 + a, 100 + a, 150 + a, 150 + a, 0xFFFFFF);
+		LCD_Fill(150 + a, 150 + a, 200 + a, 200 + a, 0xFFFFFF);
 	}
 }
 
@@ -294,21 +297,23 @@ void LCD_DC_C() {
 	LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_7);
 }
 
-// LCD_CS_SET;
-void LCD_CS_H() {
-	LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_1);
-}
+// не используются: CS (PE1) прижат к 0 в MX_GPIO_Init — дисплей один на шине
+// // LCD_CS_SET;
+// void LCD_CS_H() {
+// 	LL_GPIO_SetOutputPin(GPIOE, LL_GPIO_PIN_1);
+// }
+//
+// // LCD_CS_CLR;
+// void LCD_CS_L() {
+// 	LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_1);
+// }
 
-// LCD_CS_CLR;
-void LCD_CS_L() {
-	LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_1);
-}
-
-void LCD_BL_H() {
-	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_6);
-}
-
-void LCD_BL_L() {
-	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_6);
-}
+// не используются: подсветка светится всегда, PD6 настроен как аналоговый
+// void LCD_BL_H() {
+// 	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_6);
+// }
+//
+// void LCD_BL_L() {
+// 	LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_6);
+// }
 
