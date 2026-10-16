@@ -265,7 +265,7 @@ extern "C" {
 	void debugg_clear();
 	void resetPin();
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
-	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
+	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);

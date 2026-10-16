@@ -148,7 +148,7 @@ void disp_create_and_touch_start() {
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
+	// LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH — не используется: TIM6 не инициализирован и не тактируется, обработчика нет (тач опрашивает LVGL)
 	indev = lv_indev_create();
 	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
 	lv_indev_set_read_cb(indev, my_input_read);
@@ -1168,7 +1168,7 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 }
 */
 
-void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
+void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя параметра перекрывало глобальный indev
 	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint(); // TD_STATUS и первая точка — одним чтением
 	if (TP.count > 0) {
 		data->point.x = TP.point1_x;

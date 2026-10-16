@@ -21,7 +21,7 @@ void FT6336_RST_H() {
 	LL_GPIO_SetOutputPin(GPIOD, LL_GPIO_PIN_0);
 }
 
-TouchPoints_HandleTypeDef TouchPoints;
+// TouchPoints_HandleTypeDef TouchPoints; // не используется: точки возвращает FT6336_GetTouchPoint
 
 uint32_t ft6336_errors = 0;
 uint8_t ft6336_last_error = FT6336_OK;
@@ -204,12 +204,15 @@ void FT6336_Init(void) {
 	// LL_DMA_EnableIT_TC(DMA2, LL_DMA_STREAM_3);
 }
 
+// не используется: дисплей 320x480 без поворота, координаты тача совпадают с экранными
+/*
 static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
 	uint16_t rawX = *x;
 	uint16_t rawY = *y;
 	*x = SCREEN_WIDTH - rawY;
 	*y = rawX;
 }
+*/
 
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 	TouchPoints_HandleTypeDef touchPoints = {0};

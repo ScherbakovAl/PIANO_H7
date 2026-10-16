@@ -44,7 +44,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern volatile int touchpad_pressed;
+// extern volatile int touchpad_pressed; // не используется и нигде не определена
 extern lv_display_t* disp;
 extern void DMA2_Stream1_TransferComplete(); // ??
 // extern void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён

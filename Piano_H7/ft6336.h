@@ -1,5 +1,5 @@
 /*
- * st6336.h
+ * ft6336.h
  *
  *  Created on: Apr 9, 2025
  *      Author: sche
@@ -11,9 +11,10 @@
 #include "gpio.h"
 #include "stm32h7xx_ll_gpio.h"
 
-#define FT6X36_ADDR 0x38 << 1 
-const int SCREEN_WIDTH = 480;
-const int SCREEN_HEIGHT = 320;
+#define FT6X36_ADDR (0x38 << 1)
+// не используются (только в закомментированной AdjustTouchCoordinates); к тому же дисплей 320x480, а не 480x320
+// const int SCREEN_WIDTH = 480;
+// const int SCREEN_HEIGHT = 320;
 
 typedef struct {
 	uint16_t point1_x;
