@@ -165,15 +165,11 @@ void LCD_Init() {
 
 	LCD_RESET();
 
-	LCD_WR_REG(0x10); // Sleep In
-	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима
+	LCD_WR_REG(0x11); // Sleep Out - выход из спящего режима (после аппаратного сброса дисплей уже в Sleep In)
 
 	LL_mDelay(120);       //Delay 120ms
 
-	// BIT6 - MX (Column Address Order)
-	// BIT3 - RGB (RGB-BGR Order)
-	LCD_WR_REG(0x36); // MADCTL (0x36) – Memory Access Control (Настройка направления сканирования и зеркалирования.)
-	LCD_WR_DATA(0x48); // 0x48
+	LCD_direction(0); // MADCTL (0x36) – ориентация, зеркалирование и порядок цветов
 
 	LCD_WR_REG(0x3A); // COLMOD (Interface Pixel Format, Формат цвета)
 	LCD_WR_DATA(0x77); // было 0x55 //0x55 = 16 бит (RGB565) - 0x66 = 18 бит (RGB666) - 0x77 = 24 бит (RGB888)
@@ -196,7 +192,7 @@ void LCD_Init() {
 	LCD_WR_DATA(0xC0);
 	LCD_WR_DATA(0x00);
 
-	LCD_WR_REG(0xC1); // PWR1(C0h): Power Control 1
+	LCD_WR_REG(0xC1); // PWR2 (C1h): Power Control 2
 	LCD_WR_DATA(0x13); // 4.5+
 
 	LCD_WR_REG(0xC2); // PWR3 (C2h): Power Control 3
@@ -260,8 +256,6 @@ void LCD_Init() {
 
 	// LCD_WR_REG(0x28); // DISPOFF (28h): Display Off
 	LCD_WR_REG(0x29); // DISPON (29h): Display On
-
-	LCD_direction(0);
 
 	LCD_Clear(0x0000);
 
