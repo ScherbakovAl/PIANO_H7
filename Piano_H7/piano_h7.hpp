@@ -272,6 +272,7 @@ extern "C" {
 	void DMA2_Stream3_i2c();
 	void my_input_read(lv_indev_t* indev, lv_indev_data_t* data);
 	void DMA2_Stream1_TransferComplete();
+	void lcd_rounder_cb(lv_event_t* e);
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
 	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);

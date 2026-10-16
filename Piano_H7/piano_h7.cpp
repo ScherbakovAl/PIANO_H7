@@ -137,6 +137,7 @@ void init_LCD_and_touch() {
 
 	// LCD init
 	LL_SPI_EnableDMAReq_TX(SPI3); // TXDMAEN в CFG1 — до SPE (RM0468)
+	LL_SPI_SetFIFOThreshold(SPI3, LL_SPI_FIFO_TH_04DATA); // запрос DMA — когда в FIFO место под слово (4 байта); CFG1 — до SPE
 	LL_SPI_Enable(SPI3);
 	LL_SPI_StartMasterTransfer(SPI3);
 	LCD_Init();
@@ -153,6 +154,7 @@ void disp_create_and_touch_start() {
 	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888);
 	lv_display_set_flush_cb(disp, my_flush_cb);
 	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
+	lv_display_add_event_cb(disp, lcd_rounder_cb, LV_EVENT_INVALIDATE_AREA, NULL);
 
 	LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH
 	indev = lv_indev_create();
@@ -1223,6 +1225,14 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 	}
 
 	lv_display_flush_ready(disp);
+}
+
+// Ширина области — кратна 16 px (320 тоже): кусок = ширина × строки × 3 байта кратен 48 байтам,
+// то есть целым пачкам DMA по 16 байт (MBURST INC4 словами). Лишние пиксели по краям — не больше 15.
+void lcd_rounder_cb(lv_event_t* e) {
+	lv_area_t* area = (lv_area_t*)lv_event_get_param(e);
+	area->x1 &= ~15;
+	area->x2 |= 15;
 }
 
 void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
