@@ -101,6 +101,14 @@ When blocked, diagnose the cause — don't reach for a destructive shortcut to m
 
 The confusion starts on **read**, not on write — this rule disciplines reading too.
 
+## 8. Merges — Always `--no-ff`
+
+**Every merge of a branch creates a merge commit, so the branch stays visible in history.**
+
+- Merge with `git merge --no-ff <branch>` — never fast-forward, even when it is possible. A fast-forward drops the branch: its commits look as if they were made on the target directly, and `git log --graph` shows no fork.
+- Message: `Merge branch '<branch>'`, the body sums up what the branch brought.
+- This is about merging a branch into another one. Updating a branch from its own remote (`git pull`) is not that — use `--ff-only` there, without extra merge commits.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
