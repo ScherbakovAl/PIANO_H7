@@ -1166,11 +1166,8 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 }
 
 void my_input_read(lv_indev_t* indev, lv_indev_data_t* data) {
-	uint8_t touchStatus = 0;
-	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
-	uint8_t touchCount = touchStatus & 0x0F;
-	if (touchCount > 0) {
-		TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint(); // TD_STATUS и первая точка — одним чтением
+	if (TP.count > 0) {
 		data->point.x = TP.point1_x;
 		data->point.y = TP.point1_y;
 		data->state = LV_INDEV_STATE_PRESSED;

@@ -150,15 +150,11 @@ int main(void) {
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t touchStatus = 0;
-
   while (1) {
 
     LL_mDelay(100);
-    FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);  // читаем 0x02
-    uint8_t touchCount = touchStatus & 0x0F;
-    if (touchCount > 0) {
-      TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+    TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint();
+    if (TP.count > 0) {
       if (TP.point1_x > 50 && TP.point1_x < 100) {
         if (TP.point1_y > 50 && TP.point1_y < 100) {
           SCB_DisableDCache();

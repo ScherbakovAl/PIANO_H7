@@ -201,22 +201,24 @@ static void AdjustTouchCoordinates(uint16_t* x, uint16_t* y) {
 
 TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 	TouchPoints_HandleTypeDef touchPoints = { 0 };
-	uint8_t touchStatus = 0;
-	uint8_t touchData[8];
+	uint8_t touchData[9]; // TD_STATUS, P1_XH..P1_YL, P2_XH..P2_YL
 
-	FT6336_ReadRegister(FT6336_TD_STATUS, &touchStatus, 1);
-	uint8_t touchCount = touchStatus & 0x0F; // получить количество точек
+	// TD_STATUS и первая точка — одним чтением (0x02..0x06): если палец поднимут между двумя
+	// отдельными чтениями, статус скажет «касание», а координаты придут нулевыми — нажатие в (0,0)
+	if (FT6336_ReadRegister(FT6336_TD_STATUS, touchData, 5)) return touchPoints; // ошибка I2C — касания нет
+	uint8_t touchCount = touchData[0] & 0x0F; // получить количество точек
+	if (touchCount > 2) return touchPoints; // FT6336 ведёт не больше 2 точек — остальное мусор
 
 	if (touchCount > 0) {
-		FT6336_ReadRegister(FT6336_P1_XH, touchData, 4); // первая точка
-		touchPoints.point1_x = ((touchData[0] & 0x0F) << 8) | touchData[1];
-		touchPoints.point1_y = ((touchData[2] & 0x0F) << 8) | touchData[3];
+		touchPoints.count = 1;
+		touchPoints.point1_x = ((touchData[1] & 0x0F) << 8) | touchData[2];
+		touchPoints.point1_y = ((touchData[3] & 0x0F) << 8) | touchData[4];
 		// AdjustTouchCoordinates(&touchPoints.point1_x, &touchPoints.point1_y);
 
-		if (touchCount > 1) {
-			FT6336_ReadRegister(FT6336_P2_XH, &touchData[4], 4);
-			touchPoints.point2_x = ((touchData[4] & 0x0F) << 8) | touchData[5];
-			touchPoints.point2_y = ((touchData[6] & 0x0F) << 8) | touchData[7];
+		if (touchCount > 1 && !FT6336_ReadRegister(FT6336_P2_XH, &touchData[5], 4)) {
+			touchPoints.count = 2;
+			touchPoints.point2_x = ((touchData[5] & 0x0F) << 8) | touchData[6];
+			touchPoints.point2_y = ((touchData[7] & 0x0F) << 8) | touchData[8];
 			// AdjustTouchCoordinates(&touchPoints.point2_x, &touchPoints.point2_y);
 		}
 	}
