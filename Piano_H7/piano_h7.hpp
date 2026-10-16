@@ -143,7 +143,8 @@ extern "C" {
 	const uint32_t allChipCount = 27; // 1-13-on, 14-23(26)-off // до этого значения считает таймер 
 	const uint32_t on_off_division = 14; // точка разделения on-off
 
-	const uint32_t size_BUFFER = 200; // чётное
+	const uint32_t size_BUFFER = 200; // кратно 8
+	static_assert(size_BUFFER % 8 == 0, "save_to_memory пишет FLASHWORD по 8 элементов, read_on_memory так же считает смещение buffer_red");
 	const uint32_t buffer_division = size_BUFFER / 2;
 	const uint32_t count_comparators = 7;
 
