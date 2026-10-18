@@ -119,6 +119,14 @@ extern "C" {
 	const float vel_t_fast = 3300.0f;   // ≈ 340 мкс — по min из замеров
 	const float vel_t_slow = 180000.0f; // ≈ 18.5 мс — по max из замеров
 
+	// OFF (G↑→R↑, демпфер ложится) и LIFT (R↓→G↓, клавиша поднимает демпфер) — свои карты скорости,
+	// роллер ON на них не влияет. Роллеры roller_off / roller_lift: 0 — lin (∝ скорости, t_slow → 1), 1 — log (как log speed).
+	// Границы — по замеру min/max (off 20087..599186, lift 9304..147064).
+	const float off_t_fast = 20000.0f;   // ≈ 2.1 мс
+	const float off_t_slow = 599186.0f;  // ≈ 61.7 мс — насыщение G4 (LEN_MAX / 14): медленнее не замерить
+	const float lift_t_fast = 9300.0f;   // ≈ 0.96 мс
+	const float lift_t_slow = 147000.0f; // ≈ 15.1 мс — OFF_LIFT_WAIT в G4: дольше подъём идёт без замера
+
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	// Приёмник DMA1 занимает целую строку D-cache (32 байта): CPU сюда не пишет, строка
@@ -237,11 +245,12 @@ extern "C" {
 	// const float div_off = 0.00000000004f; // меньше - громче 
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
-	std::vector<speed_for_midi> curve_OFF;
 	std::vector<speed_for_midi> curve_ON;
 	// Кривая ON из роллера. DMA1_RX читает её отсюда, а не lv_roller_get_selected: LVGL нельзя звать
-	// из прерывания, а до ui_init objects.roller == NULL. 8 — как lv_roller_set_selected в screens.c
-	volatile uint8_t curve_on_selected = 8;
+	// из прерывания, а до ui_init objects.roller == NULL. 9 (lin speed) — как lv_roller_set_selected в screens.c
+	volatile uint8_t curve_on_selected = 9;
+	volatile uint8_t curve_off_selected = 0;  // роллер OFF: 0 — lin, 1 — log
+	volatile uint8_t curve_lift_selected = 0; // роллер LIFT: 0 — lin, 1 — log
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
 	float sx_F = 0.0f; // for test
@@ -286,6 +295,8 @@ extern "C" {
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
 	void roller_curve_changed(lv_event_t* e);
+	void roller_mode_changed(lv_event_t* e);
+	float speed_vel(const float t, const float t_fast, const float t_slow, const bool log);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
