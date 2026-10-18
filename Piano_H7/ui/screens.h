@@ -29,6 +29,8 @@ typedef struct _objects_t {
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *obj4;
+    lv_obj_t *roller_off;
+    lv_obj_t *roller_lift;
     lv_obj_t *button_to_main_6;
     lv_obj_t *obj5;
     lv_obj_t *obj6;

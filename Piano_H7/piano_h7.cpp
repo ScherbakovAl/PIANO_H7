@@ -64,6 +64,10 @@ void init() {
 	// не через EEZ: в проекте событие не видно, но и перегенерация screens.c его не сотрёт
 	lv_obj_add_event_cb(objects.roller, roller_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
 	curve_on_selected = lv_roller_get_selected(objects.roller);
+	lv_obj_add_event_cb(objects.roller_off, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_off_selected);
+	curve_off_selected = lv_roller_get_selected(objects.roller_off);
+	lv_obj_add_event_cb(objects.roller_lift, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_lift_selected);
+	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
 	tusb_init();
 
 	tud_task();
@@ -293,10 +297,6 @@ void init_midi_speeds() {
 	// for (uint32_t i = 0; i < size_BUFFER; ++i) {
 	// 	mass_F[i] = key_mass; //  + (float)i / 10000000; // 8 гр
 	// }
-
-	curve_OFF.push_back(speed_for_midi(8000.0f, 1710.0f, 45000.0f, -0.44f)); // расстояние 1710 
-	curve_OFF.push_back(speed_for_midi(80000.0f, 1710.0f, 25000.0f, -3.0f)); // << это используется в noteOFF
-	curve_OFF.push_back(speed_for_midi(800000.0f, 1100.0f, 85000.0f, -17.8f));
 
 
 	curve_ON.push_back(speed_for_midi(0.0f, 0.0f, 0.0f, 0.0f)); // ---
@@ -883,9 +883,7 @@ void DMA1_RX(void) {
 		if (rxB >= 98 && send_damper_lift && (tOut & 0x800000)) {
 			uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
 			if (tOut & 0x7FFFFF) {
-				const speed_for_midi& st = curve_OFF[1];
-				const float s = st.distance / ((float)(tOut & 0x7FFFFF) / g4_tick_div + st.offset_x);
-				const float e = ((st.key_mass * s * s) / 2.0f) + st.offset_y;
+				const float e = speed_vel((float)(tOut & 0x7FFFFF) / g4_tick_div, lift_t_fast, lift_t_slow, curve_lift_selected);
 				v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
 			}
 			uint8_t lift_buf[] = { 0xA0, note_, v }; // Poly Key Pressure: подъём демпфера, data2 — скорость подъёма
@@ -896,10 +894,7 @@ void DMA1_RX(void) {
 		}
 
 		if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
-			const speed_for_midi& st = curve_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
-			speed_F = st.distance / (t_F + st.offset_x);
-			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
-			midi_hi_F = energy_F;
+			midi_hi_F = speed_vel(t_F, off_t_fast, off_t_slow, curve_off_selected); // LEN_NONE (без замера) → 1
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 		}
 		else { // for ON
@@ -974,16 +969,9 @@ void DMA1_RX(void) {
 
 		midi_write(note_buf, 6);
 
-		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов
-			uint8_t note_buff[] = {
-				0xB0,
-				0x58,
-				(uint8_t)midi_lo_F,
-				0x80,
-				note_,
-				(uint8_t)midi_hi_F
-			};
-			midi_write(note_buff, 6);
+		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов: release velocity не замеряется — 64 по стандарту MIDI
+			uint8_t note_buff[] = { 0x80, note_, 64 };
+			midi_write(note_buff, 3);
 		}
 
 		if (rxB < 98) { // DEBUG
@@ -1208,6 +1196,18 @@ void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя п�
 
 void roller_curve_changed(lv_event_t* e) {
 	curve_on_selected = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
+}
+
+// Роллеры OFF и LIFT: user_data — их curve_*_selected
+void roller_mode_changed(lv_event_t* e) {
+	*(volatile uint8_t*)lv_event_get_user_data(e) = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
+}
+
+// velocity OFF и LIFT по скорости d/t, без массы: t_fast → 127, t_slow → 1. Скорости у демпфера лишь 16:1 (LIFT),
+// и у ON-шного 127 · t_fast / t медленный конец не опускался бы ниже 8 — поэтому lin здесь от v_min, а не от нуля.
+float speed_vel(const float t, const float t_fast, const float t_slow, const bool log) {
+	if (log) return 1.0f + 126.0f * logf(t_slow / t) / logf(t_slow / t_fast); // ln(v / v_min) / ln(v_max / v_min)
+	return 1.0f + 126.0f * (t_fast / t - t_fast / t_slow) / (1.0f - t_fast / t_slow); // (v − v_min) / (v_max − v_min)
 }
 
 void DMA2_Stream1_TransferComplete() { // DMA дисплея
