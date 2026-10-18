@@ -874,6 +874,7 @@ void DMA1_RX(void) {
 
 		uint32_t tOut = 0;
 		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
+		const float t_F = (float)tOut / g4_tick_div; // в прежних тиках 102.9 нс, как кривые
 		float integerPart_F;
 		uint8_t note_ = rxB + noteAdder[rxB];
 
@@ -883,7 +884,7 @@ void DMA1_RX(void) {
 			uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
 			if (tOut & 0x7FFFFF) {
 				const speed_for_midi& st = curve_OFF[1];
-				const float s = st.distance / ((float)(tOut & 0x7FFFFF) + st.offset_x);
+				const float s = st.distance / ((float)(tOut & 0x7FFFFF) / g4_tick_div + st.offset_x);
 				const float e = ((st.key_mass * s * s) / 2.0f) + st.offset_y;
 				v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
 			}
@@ -896,7 +897,7 @@ void DMA1_RX(void) {
 
 		if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
 			const speed_for_midi& st = curve_OFF[1]; // скорость: 0 - глухая ... 2 - яркая ? (выше я сделал три варианта скорости off на выбор)
-			speed_F = st.distance / ((float)tOut + st.offset_x);
+			speed_F = st.distance / (t_F + st.offset_x);
 			energy_F = ((st.key_mass * speed_F * speed_F) / 2.0f) + st.offset_y;
 			midi_hi_F = energy_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
@@ -909,7 +910,7 @@ void DMA1_RX(void) {
 
 				const speed_for_midi& curve = curve_ON[curve_num];
 
-				speed_F = curve.distance / (((float)tOut) + curve.offset_x);
+				speed_F = curve.distance / (t_F + curve.offset_x);
 				energy_F = ((curve.key_mass * speed_F * speed_F) / 2.0f) + curve.offset_y;
 				midi_hi_F = energy_F;
 				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
@@ -922,7 +923,7 @@ void DMA1_RX(void) {
 				const float div_on = 0.000000000092f; // меньше - громче
 				const float deriv_F = 2.0f; // делить на 2 в формуле
 				const float maxMidi_F = 127.99f;
-				float timerLenght_F = (float)tOut * div_on;
+				float timerLenght_F = t_F * div_on;
 
 				speed_F = distance_F / timerLenght_F;
 				energy_F = (key_mass * speed_F * speed_F) / deriv_F;
@@ -974,12 +975,12 @@ void DMA1_RX(void) {
 		}
 
 		if (rxB < 98) { // DEBUG
-			if (tOut > max) {
-				max = tOut;
+			if (t_F > max) {
+				max = t_F;
 				fl = 1;
 			}
-			if (tOut < min) {
-				min = tOut;
+			if (t_F < min) {
+				min = t_F;
 				fl = 1;
 			}
 		}
