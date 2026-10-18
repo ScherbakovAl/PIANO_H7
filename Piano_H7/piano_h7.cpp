@@ -906,7 +906,19 @@ void DMA1_RX(void) {
 
 			const uint32_t curve_num = curve_on_selected;
 
-			if (curve_num) {
+			if (curve_num == curve_lin_speed) { // v / v_max = t_fast / t
+
+				midi_hi_F = 127.0f * vel_t_fast / t_F;
+				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
+			}
+			else if (curve_num == curve_log_speed) { // ln(v / v_min) / ln(v_max / v_min)
+
+				midi_hi_F = 1.0f + 126.0f * logf(vel_t_slow / t_F) / logf(vel_t_slow / vel_t_fast);
+				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
+			}
+			else if (curve_num) {
 
 				const speed_for_midi& curve = curve_ON[curve_num];
 

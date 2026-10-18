@@ -111,6 +111,14 @@ extern "C" {
 	// PSC 13 — 102.9 нс, которых в 14 раз меньше. Делим во float: дробная часть — та точность, что нужна hi-res velocity.
 	const float g4_tick_div = 14.0f;
 
+	// Кривые ON «по скорости» (роллер 9, 10): velocity — функция скорости d/t, без массы и сдвигов.
+	// Границы — в тех же тиках 102.9 нс, что t_F: vel_t_fast → 127 в обеих; vel_t_slow → 1 в log
+	// (в lin медленный конец не задаётся: 127 · t_fast / t, при vel_t_slow ≈ 2.3).
+	const uint8_t curve_lin_speed = 9; // velocity ∝ скорость: для piano_sim (v0 ∝ velocity, нужен 14 бит)
+	const uint8_t curve_log_speed = 10; // velocity ∝ ln скорости: для синтезаторов без hi-res velocity
+	const float vel_t_fast = 3300.0f;   // ≈ 340 мкс — по min из замеров
+	const float vel_t_slow = 180000.0f; // ≈ 18.5 мс — по max из замеров
+
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	// Приёмник DMA1 занимает целую строку D-cache (32 байта): CPU сюда не пишет, строка
