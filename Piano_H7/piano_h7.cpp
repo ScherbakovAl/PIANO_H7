@@ -902,9 +902,14 @@ void usb_task() {
 	uint8_t packet[4];
 	while (tud_midi_packet_read(packet)) {
 	}
+	// Не подключено или хост спит: событие некому слушать — выбрасываем, в midi_lost не считаем. Иначе FIFO передачи
+	// копит старые ноты и отдаёт их пачкой после пробуждения. «Подключено, но порт никто не открыл» отсюда не видно
+	const bool host_listens = tud_mounted() && !tud_suspended();
 	while (g4_ring_r != g4_ring_w) {
 		const uint32_t r = g4_ring_r;
-		g4_to_midi(g4_ring[r % g4_ring_size]);
+		if (host_listens) {
+			g4_to_midi(g4_ring[r % g4_ring_size]);
+		}
 		g4_ring_r = r + 1;
 	}
 }
