@@ -78,6 +78,15 @@ bool     tud_midi_n_packet_write (uint8_t itf, uint8_t const packet[4]);
 // PIANO_H7: свободно в FIFO передачи, байт (0 — не подключено). Нужна, чтобы писать событие из нескольких сообщений целиком
 uint32_t tud_midi_n_tx_available (uint8_t itf);
 
+// PIANO_H7: сколько IN-передач хост забрал (по модулю 2^32)
+uint32_t tud_midi_n_tx_done      (uint8_t itf);
+
+// PIANO_H7: выбросить неотправленное из FIFO передачи (передачу, уже отданную контроллеру, не трогает)
+void     tud_midi_n_tx_clear     (uint8_t itf);
+
+// PIANO_H7: если IN свободен — поставить пустой пакет (ZLP) как пробу, читает ли хост. false — IN занят или не подключено
+bool     tud_midi_n_tx_probe     (uint8_t itf);
+
 //--------------------------------------------------------------------+
 // Application API (Single Interface)
 //--------------------------------------------------------------------+

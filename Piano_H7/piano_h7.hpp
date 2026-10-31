@@ -225,6 +225,12 @@ extern "C" {
 	volatile uint32_t g4_ring_r = 0;
 	volatile uint32_t g4_ring_lost = 0; // кольцо полно — usb_task не успевает (пишет DMA1_RX)
 	uint32_t g4_ring_lost_shown = 0;
+	// Читает ли хост IN (только usb_task). Открытый порт опрашивается каждые 30–90 мкс: передача, висящая 50 мс, —
+	// хост не читает; IN, свободный 50 мс, — проба пустым пакетом. Проба висит ≤ 1 опроса, ноту задержит редко
+	const uint32_t host_read_timeout_ms = 50;
+	bool host_reads = false;
+	uint32_t host_tx_done_seen = 0;
+	uint32_t host_tx_edge_ms = 0; // HAL_GetTick() последней забранной передачи или поставленной пробы
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
 	// Кусок кадра идёт по DMA (ставит my_flush_cb, снимает DMA2_Stream1). LVGL ждёт его только перед

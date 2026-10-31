@@ -236,6 +236,7 @@ void TIM4_IRQHandler(void)
   		// GPIOA->BSRR |= 0x20; // for test // DEBUG      
       LL_TIM_ClearFlag_UPDATE(TIM4);
       lv_tick_inc(1);
+      SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; // usb_task раз в 1 мс: тайм-аут и проба IN (читает ли хост)
       // GPIOA->BSRR |= 0x200000; // for test // DEBUG
   /* USER CODE END TIM4_IRQn 0 */
   /* USER CODE BEGIN TIM4_IRQn 1 */

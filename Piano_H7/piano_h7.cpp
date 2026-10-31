@@ -70,8 +70,8 @@ void init() {
 	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
 	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
 	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
-	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available в class/midi/midi_device.c/.h.
-	// При обновлении библиотеки — перенести, иначе g4_to_midi не соберётся
+	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available, _tx_done, _tx_clear, _tx_probe
+	// и счётчик в midid_xfer_cb — class/midi/midi_device.c/.h. При обновлении библиотеки — перенести, иначе не соберётся
 	tusb_init();
 
 	lv_timer_handler();
@@ -902,12 +902,33 @@ void usb_task() {
 	uint8_t packet[4];
 	while (tud_midi_packet_read(packet)) {
 	}
-	// Не подключено или хост спит: событие некому слушать — выбрасываем, в midi_lost не считаем. Иначе FIFO передачи
-	// копит старые ноты и отдаёт их пачкой после пробуждения. «Подключено, но порт никто не открыл» отсюда не видно
-	const bool host_listens = tud_mounted() && !tud_suspended();
+	// Хост не слушает (не подключено, спит, порт не открыт — по USB видно лишь, что IN не забирают): FIFO передачи
+	// очищаем, события выбрасываем, в midi_lost не считаем. Иначе старые ноты уйдут пачкой, когда хост снова начнёт читать
+	const uint32_t now = HAL_GetTick();
+	const uint32_t tx_done = tud_midi_n_tx_done(0);
+	if (!tud_mounted() || tud_suspended()) {
+		if (host_reads) {
+			host_reads = false;
+			tud_midi_n_tx_clear(0);
+		}
+	}
+	else if (tx_done != host_tx_done_seen) { // хост забрал передачу
+		host_tx_done_seen = tx_done;
+		host_tx_edge_ms = now;
+		host_reads = true;
+	}
+	else if (now - host_tx_edge_ms >= host_read_timeout_ms) {
+		if (tud_midi_n_tx_probe(0)) { // IN свободен — проба
+			host_tx_edge_ms = now;
+		}
+		else if (host_reads) { // передача висит — хост не читает
+			host_reads = false;
+			tud_midi_n_tx_clear(0);
+		}
+	}
 	while (g4_ring_r != g4_ring_w) {
 		const uint32_t r = g4_ring_r;
-		if (host_listens) {
+		if (host_reads) {
 			g4_to_midi(g4_ring[r % g4_ring_size]);
 		}
 		g4_ring_r = r + 1;
