@@ -119,6 +119,32 @@ extern "C" {
 	const float vel_t_fast = 400.0f;   // 339.7 // мкс — 127 у реального ff; рекорд 298.0 мкс — разброс датчиков
 	const float vel_t_slow = 28411.8f; // мкс — по max из замеров (28394.8, окно G4 было 30 мс)
 
+	// Кривая ON «user» (роллер 11) — формула curve_ON: K / (t + x0)² + offset_y, K = key_mass · distance² / 2.
+	// Задаётся на экране кривой тем, что слышно: t_fast → 127, t_slow → 1, x0 — изгиб (больше — громче середина).
+	// K и offset_y считает user_curve_set()
+	const uint8_t curve_user = 11;
+	struct user_curve_rec { // запись во flash — ровно один FLASHWORD
+		uint32_t magic;
+		float t_fast; // мкс
+		float t_slow; // мкс
+		float x0;     // мкс
+		uint32_t reserved[4];
+	};
+	static_assert(sizeof(user_curve_rec) == 32, "запись кривой user пишется одним FLASHWORD");
+	const uint32_t user_curve_magic = 0x55435256;
+	// Пределы ползунков, мкс: t_fast + x0 ≥ 50 — знаменатель не обнуляется; t_fast < t_slow при любых значениях
+	const int32_t user_t_fast_min = 200;
+	const int32_t user_t_fast_max = 2000;
+	const int32_t user_t_slow_min = 5000;
+	const int32_t user_t_slow_max = 30000;
+	const int32_t user_x0_min = -150;
+	const int32_t user_x0_max = 10000;
+	// «user lin» и «user log» (роллер 12, 13) — speed_vel, как OFF и LIFT: t_fast → 127, t_slow → 1, между ними
+	// ∝ скорости или её логарифму. В отличие от lin speed (127 · t_fast / t) медленный край задан и не уезжает за t_fast.
+	// Правятся на экране кривой, но не сохраняются: при старте и по reset — vel_t_fast / vel_t_slow. Опора, с которой сравнивать user
+	const uint8_t curve_user_lin = 12;
+	const uint8_t curve_user_log = 13;
+
 	// OFF (G↑→R↑, демпфер ложится) и LIFT (R↓→G↓, клавиша поднимает демпфер) — свои карты скорости,
 	// роллер ON на них не влияет. Роллеры roller_off / roller_lift: 0 — lin (∝ скорости, t_slow → 1), 1 — log (как log speed).
 	// Границы — по замеру min/max, мкс (off 2067.8..61680.9, lift 957.8..15138.9).
@@ -149,6 +175,8 @@ extern "C" {
 	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
 	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
 	static const uint32_t ADDRESS_H7_CALIB = 0x080E0000; // -здесь лежит калибровка
+	static const uint32_t ADDRESS_H7_USER_CURVE = 0x080F0000; // вторая половина сектора 7 — журнал записей кривой user
+	static const uint32_t USER_CURVE_SLOTS = 0x10000 / sizeof(user_curve_rec);
 
 	static const uint32_t ADDRESS_G4_BOOTLOADER = 0x08000000; // 8k (4 банки)
 	static const uint32_t COUNT_PAGE_G4_FOR_BOOTLOADER = 4;
@@ -243,7 +271,6 @@ extern "C" {
 
 	int fl = 0.0f; // for test fl
 	float speed_F = 0.0f; // for test
-	float energy_F = 0.0f; // for test
 	float midi_hi_F = 0.0f; // for test
 	float midi_lo_F = 0.0f; // for test
 	uint32_t out_debug_ = 0; // for test
@@ -267,6 +294,14 @@ extern "C" {
 	volatile uint8_t curve_on_selected = 9;
 	volatile uint8_t curve_off_selected = 0;  // роллер OFF: 0 — lin, 1 — log
 	volatile uint8_t curve_lift_selected = 0; // роллер LIFT: 0 — lin, 1 — log
+	user_curve_rec user_curve = { user_curve_magic, 461.0f, 18305.0f, 2188.0f, {} }; // ползунки; по умолчанию ≈ normal upd
+	volatile float user_K = 0.0f;  // из user_curve; читает g4_to_midi (PendSV)
+	volatile float user_y0 = 0.0f;
+	volatile float user_x0 = 0.0f;
+	volatile float user_lin_t_fast = vel_t_fast; // user lin, мкс
+	volatile float user_lin_t_slow = vel_t_slow;
+	volatile float user_log_t_fast = vel_t_fast; // user log, мкс
+	volatile float user_log_t_slow = vel_t_slow;
 	float m_F = 0.0f; // for test
 	float sd_F = 0.0f; // for test
 	float sx_F = 0.0f; // for test
@@ -316,6 +351,22 @@ extern "C" {
 	void roller_curve_changed(lv_event_t* e);
 	void roller_mode_changed(lv_event_t* e);
 	float speed_vel(const float t, const float t_fast, const float t_slow, const bool log);
+	float on_vel(const uint32_t curve_num, const float t);
+	void user_curve_set();
+	uint32_t user_curve_free_slot();
+	const user_curve_rec* user_curve_saved();
+	bool flash_program(const uint32_t addr, const uint32_t* src, const uint32_t words);
+	bool user_curve_save();
+	void create_screen_curve();
+	lv_obj_t* curve_slider(const int32_t y, const int32_t min, const int32_t max, const float value, lv_obj_t** label);
+	void curve_screen_show();
+	void curve_screen_update();
+	void roller_curve_copy_changed(lv_event_t* e);
+	void button_to_curve(lv_event_t* e);
+	void button_curve_back(lv_event_t* e);
+	void button_curve_save(lv_event_t* e);
+	void button_curve_reset_pressed(lv_event_t* e);
+	void slider_curve_changed(lv_event_t* e);
 	void DMA2_Stream1_TransferComplete();
 	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
@@ -362,6 +413,25 @@ extern "C" {
 	lv_chart_cursor_t* cursor_on_hor;
 	lv_chart_cursor_t* cursor_off_vert;
 	lv_chart_cursor_t* cursor_off_hor;
+
+	// экран кривых ON (create_screen_curve). График — по логарифму t, от curve_t_min до curve_t_max
+	const uint32_t curve_points_count = 100;
+	const float curve_t_min = 200.0f;   // мкс, = user_t_fast_min
+	const float curve_t_max = 30000.0f; // мкс, = user_t_slow_max
+	int32_t curve_points[curve_points_count] = {};
+	lv_obj_t* scr_curve;
+	lv_obj_t* roller_curve; // копия objects.roller
+	lv_obj_t* chart_curve;
+	lv_chart_series_t* ser_curve;
+	lv_obj_t* slider_t_fast;
+	lv_obj_t* slider_t_slow;
+	lv_obj_t* slider_x0;
+	lv_obj_t* label_t_fast;
+	lv_obj_t* label_t_slow;
+	lv_obj_t* label_x0;
+	lv_obj_t* label_curve_save;
+	lv_obj_t* label_curve_info;
+	lv_obj_t* button_curve_reset;
 
 	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
 	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
