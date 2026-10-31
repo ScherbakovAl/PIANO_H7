@@ -290,6 +290,7 @@ extern "C" {
 	void read_on_memory();
 	void pause(const uint32_t& p);
 	void debugg_fn(const std::string& str);  // DEBUG
+	void debugg_printf(const char* fmt, ...) __attribute__((format(printf, 1, 2)));  // DEBUG, через lv_snprintf
 	void debugg_clear();
 	void resetPin();
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
