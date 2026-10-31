@@ -8,7 +8,7 @@
 #include "vector"
 #include "map"
 // #include <ranges>
-#include <format>
+#include "string"
 #include "piano_h7.hpp"
 
 // inline constexpr uint32_t NOTE_OFFSETS[196] = {
@@ -232,10 +232,10 @@ void init_chips() {
 
 			if (chip_state != chip_state_prev) {
 				chip_state_prev = chip_state;
-				strOut += std::format("  chip_state fail {} ", chip_N);
+				strOut += "  chip_state fail " + std::to_string(chip_N) + " ";
 			}
 
-			strOut += std::format(" {}", chip_N);
+			strOut += " " + std::to_string(chip_N);
 		}
 	}
 
@@ -253,7 +253,7 @@ void init_chips() {
 		stat = "\n bootloaders v2";
 	}
 
-	strOut += std::format(" = {}", (counter_on + counter_off) / count_comparators);
+	strOut += " = " + std::to_string((counter_on + counter_off) / count_comparators);
 	strOut += stat;
 	debugg_fn(strOut);
 }
@@ -279,7 +279,7 @@ void init_buffers() {
 
 void init_midi_speeds() {
 
-	for (uint i = 0; i < size_BUFFER; ++i) {
+	for (uint32_t i = 0; i < size_BUFFER; ++i) {
 		if (i < 55) {
 			noteAdder[i] = 14;
 		}
@@ -514,17 +514,17 @@ void h7() {
 
 		if (noise_count != noise_shown) {
 			noise_shown = noise_count;
-			debugg_fn(std::format("USART noise {} : {}-{}-{}-{}", noise_shown, (unsigned)noise_bytes[0], (unsigned)noise_bytes[1], (unsigned)noise_bytes[2], (unsigned)noise_bytes[3]));
+			debugg_printf("USART noise %" LV_PRIu32 " : %u-%u-%u-%u", noise_shown, (unsigned)noise_bytes[0], (unsigned)noise_bytes[1], (unsigned)noise_bytes[2], (unsigned)noise_bytes[3]);
 		}
 
 		if (midi_lost != midi_lost_shown) {
 			midi_lost_shown = midi_lost;
-			debugg_fn(std::format("MIDI lost {}", midi_lost_shown));
+			debugg_printf("MIDI lost %" LV_PRIu32, midi_lost_shown);
 		}
 
 		if (lcd_dma_errors != lcd_dma_errors_shown) {
 			lcd_dma_errors_shown = lcd_dma_errors;
-			debugg_fn(std::format("LCD DMA error {}", lcd_dma_errors_shown));
+			debugg_printf("LCD DMA error %" LV_PRIu32, lcd_dma_errors_shown);
 			lv_obj_invalidate(lv_screen_active()); // кусок кадра не дошёл — перерисовать экран
 		}
 
@@ -533,14 +533,14 @@ void h7() {
 			static const char* const names[] = { "OK", "BUSY", "NACK", "BERR/ARLO", "TIMEOUT" };
 			touch_errors_shown = ft6336_errors;
 			touch_errors_tick = HAL_GetTick();
-			debugg_fn(std::format("Touch I2C error {}: {}", touch_errors_shown, names[ft6336_last_error]));
+			debugg_printf("Touch I2C error %" LV_PRIu32 ": %s", touch_errors_shown, names[ft6336_last_error]);
 		}
 
 		if (fl == 1) { // DEBUG
 
 			// tud_disconnect();
 			// debugg_fn("usb disconnect!")
-			debugg_fn(std::format("min {},    max {}", min, max));
+			debugg_printf("min %d,    max %d", (int)min, (int)max);
 			// debugg_fn(std::format("  .   .    .   . . "));
 			// debugg_fn(std::format("tx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", tx_settings[0], tx_settings[1], tx_settings[2], tx_settings[3], tx_settings[4]));
 			// debugg_fn(std::format("rx = {:#04x} - {:#04x} - {:#04x} - {:#04x} - {:#04x}", rx_settings[0], rx_settings[1], rx_settings[2], rx_settings[3], rx_settings[4]));
@@ -590,12 +590,12 @@ void h7() {
 		}
 
 		if (fl == 2) {
-			debugg_fn(std::format(" OVER {}  m{:.2f}  d{}  x{}  y{:.2f} ", out_debug_, m_F, sd_F, sx_F, sy_F));
+			debugg_printf(" OVER %" LV_PRIu32 "  m%d  d%d  x%d  y%d ", out_debug_, (int)m_F, (int)sd_F, (int)sx_F, (int)sy_F);
 			fl = 0;
 		}
 
 		if (fl == 3) {
-			debugg_fn(std::format("  {}", speed_F));
+			debugg_printf("  %d", (int)speed_F);
 			fl = 0;
 		}
 	}
@@ -611,7 +611,7 @@ void sync() { // включает прерывания, осторожно!
 		fl_sync += sync_sender(chip.number_chip);
 	}
 	if (fl_sync) {
-		debugg_fn(std::format("Sync {} bugs", fl_sync));
+		debugg_printf("Sync %d bugs", fl_sync);
 	}
 	else {
 		debugg_fn("   sync OK");
@@ -734,26 +734,26 @@ bool sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 	if (UART4_receive_settings()) {
 		if (!chip_silent[adress]) { // печатаем один раз, а не на каждом опросе калибровки
 			chip_silent[adress] = true;
-			debugg_fn(std::format("G4 #{} NO ANSWER (com {})", adress, (int)com));
+			debugg_printf("G4 #%d NO ANSWER (com %d)", adress, (int)com);
 		}
 		return false;
 	}
 	if (chip_silent[adress]) {
 		chip_silent[adress] = false;
-		debugg_fn(std::format("G4 #{} answers again", adress));
+		debugg_printf("G4 #%d answers again", adress);
 	}
 	pause(1); // 1 for release, 4-debug g4
 	if (adress != rx_settings[0]) {
-		debugg_fn(std::format("BAD ADRESS {}   rx_settings {}", adress, rx_settings[0]));
+		debugg_printf("BAD ADRESS %d   rx_settings %d", adress, rx_settings[0]);
 	}
 	if (com == command::set_comp_value) {
 		if (convert_8_16(a_, b_) != value) {
-			debugg_fn(std::format("BAD SET DATA rx={}, add={}, comp={}, dot={}, value={}, in={}", rx_settings[0], adress, compN, (uint8_t)dot, value, convert_8_16(a_, b_)));
+			debugg_printf("BAD SET DATA rx=%d, add=%d, comp=%d, dot=%d, value=%" LV_PRIu32 ", in=%" LV_PRId32, rx_settings[0], adress, compN, (uint8_t)dot, value, convert_8_16(a_, b_));
 		}
 	}
 	if (com == command::mute || com == command::unmute) {
 		if (convert_8_16(a_, b_) != (int32_t)chip_states::piano) {
-			debugg_fn(std::format(" mute - unmute  fail {}", adress));
+			debugg_printf(" mute - unmute  fail %d", adress);
 		}
 	}
 	return true;
@@ -1147,6 +1147,15 @@ void debugg_fn(const std::string& str) {
 	++debug_counter;
 }
 
+void debugg_printf(const char* fmt, ...) {
+	char buf[96];
+	va_list va;
+	va_start(va, fmt);
+	lv_vsnprintf(buf, sizeof(buf), fmt, va);
+	va_end(va);
+	debugg_fn(buf);
+}
+
 void debugg_clear() {
 	debugg.clear();
 }
@@ -1332,14 +1341,14 @@ bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, c
 	}
 	for (const auto& chip : vChips) {
 		if (chip.st != chip_state) {
-			debugg_fn(std::format(" flash: chip {} in other state", chip.number_chip));
+			debugg_printf(" flash: chip %d in other state", chip.number_chip);
 			return false;
 		}
 	}
 
 	const uint32_t size = count_page * 0x800;
 	if (target < running + running_pages * 0x800 && running < target + size) {
-		debugg_fn(std::format(" flash: {:x} = running bootloader", target));
+		debugg_printf(" flash: %" LV_PRIx32 " = running bootloader", target);
 		return false;
 	}
 
@@ -1347,7 +1356,7 @@ bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, c
 	const uint32_t sp = ((volatile uint32_t*)image_in_H7)[0];
 	const uint32_t reset = ((volatile uint32_t*)image_in_H7)[1];
 	if (sp <= 0x20000000 || sp > 0x20020000 || reset < target || reset >= target + size) {
-		debugg_fn(std::format(" flash: image not for {:x}\n SP {:x} reset {:x}", target, sp, reset));
+		debugg_printf(" flash: image not for %" LV_PRIx32 "\n SP %" LV_PRIx32 " reset %" LV_PRIx32, target, sp, reset);
 		return false;
 	}
 	return true;
@@ -1395,7 +1404,7 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 
 			__set_PRIMASK(primask);
 			if (timeout || UART4_receive_settings_bootloader()) { // response::ok
-				debugg_fn(std::format(" flash: chip {} timeout at {:x}", chip.number_chip, mem));
+				debugg_printf(" flash: chip %d timeout at %" LV_PRIx32, chip.number_chip, mem);
 				return;
 			}
 			pause(2);
@@ -1405,7 +1414,7 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 			// _+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+__+_+_+_
 
 			if (flash_g4(mem, chip.number_chip)) {
-				debugg_fn(std::format(" flash: chip {} stop at {:x}", chip.number_chip, mem));
+				debugg_printf(" flash: chip %d stop at %" LV_PRIx32, chip.number_chip, mem);
 				return;
 			}
 
@@ -1421,7 +1430,7 @@ void data_from_H7_to_g4(const uint32_t& adress_g4_firmware_in_H7, const uint32_t
 	}
 	// прыгаем по предустановленному в G4 адресу (0x08008000)
 	if (bug) {
-		debugg_fn(std::format("{} -- copy bugs", bug));
+		debugg_printf("%d -- copy bugs", bug);
 	}
 	else {
 		// debugg_clear();
@@ -1474,7 +1483,7 @@ int flash_g4(const uint32_t& addr, const int& chip_number) { // 1 — стран
 	pause(1);
 	uint32_t addr_back = bytes_to_uint32_pointer(rx_settings);
 	if (addr_back != addr) {
-		debugg_fn(std::format("  addr  fail  {:x}", addr_back));
+		debugg_printf("  addr  fail  %" LV_PRIx32, addr_back);
 		Set_tx_s((uint8_t)response::fail, 0x55, 0x56, 0x57, 0x58);
 		UART4_send_settings_bootloader();
 		UART4_receive_settings_bootloader(); // без записи G4 сразу шлёт итог (4), без 32 и 35
@@ -1491,7 +1500,7 @@ int flash_g4(const uint32_t& addr, const int& chip_number) { // 1 — стран
 	}
 
 	if (rx_settings[1] != (uint8_t)response::ok) {
-		debugg_fn(std::format("  FLASH G4 fail  ((  {}", chip_number));
+		debugg_printf("  FLASH G4 fail  ((  %d", chip_number);
 		return 1;
 	}
 	return 0;
@@ -1511,7 +1520,7 @@ int echo_until(const uint8_t& chip_N, const uint32_t& i, const uint8_t& value) {
 		}
 		pause(100);
 	}
-	debugg_fn(std::format(" chip {} no echo", chip_N));
+	debugg_printf(" chip %d no echo", chip_N);
 	return 1;
 }
 
@@ -1526,7 +1535,7 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		Set_tx_s((uint8_t)bootloader_command::jump_g4_to_adress, 0x88, 0x88, 0x88, 0x88);
 		UART4_send_settings_bootloader();
 		if (UART4_receive_settings_bootloader() || UART4_receive_settings_bootloader()) { // принять (ChipN_32, 0x88, 0x88, 0x88, 0x88)
-			debugg_fn(std::format(" jump: chip {} timeout", chip.number_chip));
+			debugg_printf(" jump: chip %d timeout", chip.number_chip);
 			++bug;
 			continue; // сломанный чип не держит остальные (и старт H7)
 		}
@@ -1541,7 +1550,7 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		tx_settings[4] = chip.number_chip;
 		UART4_send_settings_bootloader();
 		if (UART4_receive_settings_bootloader()) { // принять (полученный g4 адрес)
-			debugg_fn(std::format(" jump: chip {} timeout", chip.number_chip));
+			debugg_printf(" jump: chip %d timeout", chip.number_chip);
 			++bug;
 			continue;
 		}
@@ -1554,7 +1563,7 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 			UART4_send_settings_bootloader();
 		}
 		else {
-			debugg_fn(std::format("  jumping addr  bug  {:x} != {}", addr_back, addr_jump));
+			debugg_printf("  jumping addr  bug  %" LV_PRIx32 " != %" LV_PRIu32, addr_back, addr_jump);
 		}
 		int timeout = UART4_receive_settings_bootloader();
 
@@ -1569,14 +1578,14 @@ void jump_g4s_to_adress(const uint32_t& addr_jump, const chip_states& jump_to_) 
 		}
 
 		if (timeout || rx_settings[0] != chip.number_chip) {
-			debugg_fn(std::format(" start {} fail \n", chip.number_chip));
+			debugg_printf(" start %d fail \n", chip.number_chip);
 		}
 
 		pause(2);
 	}
 
 	if (bug) {
-		debugg_fn(std::format(" jump to address FAIL {} bugs", bug));
+		debugg_printf(" jump to address FAIL %d bugs", bug);
 		return;
 	}
 }
@@ -1589,7 +1598,7 @@ void reset_bootloaders() {
 			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
 			UART4_send_settings_bootloader();
 			if (UART4_receive_settings_bootloader()) {
-				debugg_fn(std::format(" reset: chip {} timeout", chip.number_chip));
+				debugg_printf(" reset: chip %d timeout", chip.number_chip);
 				continue;
 			}
 			echo_until(chip.number_chip, 4, 1); // ждём v1 после сброса
@@ -1601,7 +1610,7 @@ void reset_bootloaders() {
 			Set_tx_s((uint8_t)bootloader_command::reset, 0x04, 0x03, 0x02, 0x01); // 200ms delay
 			UART4_send_settings_bootloader();
 			if (UART4_receive_settings_bootloader()) {
-				debugg_fn(std::format(" reset: chip {} timeout", chip.number_chip));
+				debugg_printf(" reset: chip %d timeout", chip.number_chip);
 				continue;
 			}
 			echo_until(chip.number_chip, 4, 1); // ждём v1 после сброса
