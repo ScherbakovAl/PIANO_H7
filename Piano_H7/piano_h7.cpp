@@ -70,6 +70,8 @@ void init() {
 	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
 	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
 	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
+	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available в class/midi/midi_device.c/.h.
+	// При обновлении библиотеки — перенести, иначе g4_to_midi не соберётся
 	tusb_init();
 
 	lv_timer_handler();
@@ -895,6 +897,11 @@ void DMA1_RX(void) {
 // Основной цикл TinyUSB не трогает: иначе DMA1_RX/PendSV врезаются в tud_task посреди захвата endpoint'а.
 void usb_task() {
 	tud_task(); // первым: завершённая передача освобождает IN, и нота ниже уйдёт с ближайшим опросом хоста, а не со следующим
+	// OUT от хоста не нужен, но вычитывать обязательно: TinyUSB заряжает OUT, только когда FIFO приёма (64 Б) пуст,
+	// иначе хост получает NAK, и запись в этот порт у хоста встаёт (DAW шлёт clock, sysex всем портам)
+	uint8_t packet[4];
+	while (tud_midi_packet_read(packet)) {
+	}
 	while (g4_ring_r != g4_ring_w) {
 		const uint32_t r = g4_ring_r;
 		g4_to_midi(g4_ring[r % g4_ring_size]);
@@ -996,20 +1003,28 @@ void g4_to_midi(const uint32_t p) {
 		// fl = 2;
 	}
 
-	uint8_t note_buf[] = {
-		0xB0,
-		0x58,
-		(uint8_t)midi_lo_F,
-		(uint8_t)rxB < 98U ? 0x90U : 0x80U, // 0x90 note on
-		note_,
-		(uint8_t)midi_hi_F
-	};
+	// Событие целиком или никак: иначе уйдёт CC88 без ноты, а у верхних нот — note-on без note-off (нота зависнет).
+	// В USB-MIDI каждое сообщение — пакет 4 Б: CC88 + нота = 8, с note-off — 12
+	const uint32_t need = (rxB > 76 && rxB < 98) ? 12 : 8;
+	if (tud_midi_n_tx_available(0) < need) {
+		midi_lost = midi_lost + 1;
+	}
+	else {
+		uint8_t note_buf[] = {
+			0xB0,
+			0x58,
+			(uint8_t)midi_lo_F,
+			(uint8_t)rxB < 98U ? 0x90U : 0x80U, // 0x90 note on
+			note_,
+			(uint8_t)midi_hi_F
+		};
 
-	midi_write(note_buf, 6);
+		midi_write(note_buf, 6);
 
-	if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов: release velocity не замеряется — 64 по стандарту MIDI
-		uint8_t note_buff[] = { 0x80, note_, 64 };
-		midi_write(note_buff, 3);
+		if (rxB > 76 && rxB < 98) { // верхние ноты без демпферов: release velocity не замеряется — 64 по стандарту MIDI
+			uint8_t note_buff[] = { 0x80, note_, 64 };
+			midi_write(note_buff, 3);
+		}
 	}
 
 	if (rxB < 98) { // DEBUG

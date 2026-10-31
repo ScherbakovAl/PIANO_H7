@@ -75,6 +75,9 @@ bool     tud_midi_n_packet_read  (uint8_t itf, uint8_t packet[4]);
 // Write event packet            (4 bytes)
 bool     tud_midi_n_packet_write (uint8_t itf, uint8_t const packet[4]);
 
+// PIANO_H7: свободно в FIFO передачи, байт (0 — не подключено). Нужна, чтобы писать событие из нескольких сообщений целиком
+uint32_t tud_midi_n_tx_available (uint8_t itf);
+
 //--------------------------------------------------------------------+
 // Application API (Single Interface)
 //--------------------------------------------------------------------+

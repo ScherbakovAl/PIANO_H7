@@ -77,7 +77,13 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
     HAL_NVIC_SetPriority(OTG_HS_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(OTG_HS_IRQn);
   /* USER CODE BEGIN USB_OTG_HS_MspInit 1 */
-
+    // HSI48 сам по себе не держит ±0.25 % для USB FS: CRS подстраивает его по SOF хоста (раз в 1 мс).
+    // LL_CRS_SYNC_SOURCE_USB — SOF USB1, это наш OTG_HS. RELOAD по умолчанию 47999 = 48 МГц / 1 кГц − 1
+    LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_CRS);
+    LL_CRS_ConfigSynchronization(LL_CRS_HSI48CALIBRATION_DEFAULT, LL_CRS_ERRORLIMIT_DEFAULT, LL_CRS_RELOADVALUE_DEFAULT,
+                                 LL_CRS_SYNC_DIV_1 | LL_CRS_SYNC_SOURCE_USB | LL_CRS_SYNC_POLARITY_RISING);
+    LL_CRS_EnableAutoTrimming();
+    LL_CRS_EnableFreqErrorCounter();
   /* USER CODE END USB_OTG_HS_MspInit 1 */
   }
 }

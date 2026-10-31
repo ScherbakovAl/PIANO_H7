@@ -363,6 +363,13 @@ bool tud_midi_n_packet_write (uint8_t itf, const uint8_t packet[4]) {
   return true;
 }
 
+// PIANO_H7: свободно в FIFO передачи, байт; 0 — не подключено (stream_write тогда тоже ничего не пишет)
+uint32_t tud_midi_n_tx_available (uint8_t itf) {
+  midid_interface_t* midi = &_midid_itf[itf];
+  TU_VERIFY(midi->ep_in, 0);
+  return tu_fifo_remaining(&midi->tx_ff);
+}
+
 //--------------------------------------------------------------------+
 // USBD Driver API
 //--------------------------------------------------------------------+
