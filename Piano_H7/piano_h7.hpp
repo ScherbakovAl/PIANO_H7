@@ -101,31 +101,31 @@ extern "C" {
 	};
 
 	struct speed_for_midi { // mass, distance, offset_X, offset_Y
-		const float key_mass = 0.0f; // 80000 == 80 gr
-		const float distance = 0.0f; // 1710 == 1.71 mm
-		const float offset_x = 0.0f; // offset x
+		const float key_mass = 0.0f; // масштаб энергии → velocity (не граммы)
+		const float distance = 0.0f; // мкм: 1710 == 1.71 mm; мкм / мкс = м/с
+		const float offset_x = 0.0f; // offset x, мкс
 		const float offset_y = 0.0f; // offcet y
 	};
 
-	// G4 считает интервал тиками TIM2 с PSC 0 — 7.35 нс; кривые, min/max и v1 заданы в прежних тиках
-	// PSC 13 — 102.9 нс, которых в 14 раз меньше. Делим во float: дробная часть — та точность, что нужна hi-res velocity.
-	const float g4_tick_div = 14.0f;
+	// G4 считает интервал тиками TIM2 с PSC 0 — 1/136 МГц ≈ 7.35 нс (TICK_US в G4). t_F и все времена ниже —
+	// в микросекундах. Делим во float: дробная часть — та точность, что нужна hi-res velocity.
+	const float g4_ticks_per_us = 136.0f;
 
 	// Кривые ON «по скорости» (роллер 9, 10): velocity — функция скорости d/t, без массы и сдвигов.
-	// Границы — в тех же тиках 102.9 нс, что t_F: vel_t_fast → 127 в обеих; vel_t_slow → 1 в log
+	// Границы — в мкс, как t_F: vel_t_fast → 127 в обеих; vel_t_slow → 1 в log
 	// (в lin медленный конец не задаётся: 127 · t_fast / t, при vel_t_slow ≈ 1.5).
 	const uint8_t curve_lin_speed = 9; // velocity ∝ скорость: для piano_sim (v0 ∝ velocity, нужен 14 бит)
 	const uint8_t curve_log_speed = 10; // velocity ∝ ln скорости: для синтезаторов без hi-res velocity
-	const float vel_t_fast = 3300.0f;   // ≈ 340 мкс — 127 у реального ff; рекорд 2894.5 (≈ 299 мкс) — разброс датчиков
-	const float vel_t_slow = 276000.0f; // ≈ 28.4 мс — по max из замеров (275835, окно G4 было 30 мс)
+	const float vel_t_fast = 400.0f;   // 339.7 // мкс — 127 у реального ff; рекорд 298.0 мкс — разброс датчиков
+	const float vel_t_slow = 28411.8f; // мкс — по max из замеров (28394.8, окно G4 было 30 мс)
 
 	// OFF (G↑→R↑, демпфер ложится) и LIFT (R↓→G↓, клавиша поднимает демпфер) — свои карты скорости,
 	// роллер ON на них не влияет. Роллеры roller_off / roller_lift: 0 — lin (∝ скорости, t_slow → 1), 1 — log (как log speed).
-	// Границы — по замеру min/max (off 20087..599186, lift 9304..147064).
-	const float off_t_fast = 20000.0f;   // ≈ 2.1 мс
-	const float off_t_slow = 599186.0f;  // ≈ 61.7 мс — насыщение G4 (LEN_MAX / 14): медленнее не замерить
-	const float lift_t_fast = 9300.0f;   // ≈ 0.96 мс
-	const float lift_t_slow = 147000.0f; // ≈ 15.1 мс — OFF_LIFT_WAIT в G4: дольше подъём идёт без замера
+	// Границы — по замеру min/max, мкс (off 2067.8..61680.9, lift 957.8..15138.9).
+	const float off_t_fast = 2058.8f;   // мкс
+	const float off_t_slow = 61680.9f;  // мкс — насыщение G4 (LEN_MAX / 136): медленнее не замерить
+	const float lift_t_fast = 957.4f;   // мкс
+	const float lift_t_slow = 15132.4f; // мкс — OFF_LIFT_WAIT в G4: дольше подъём идёт без замера
 
 
 	// ***** 390(263)-14000(22723)us пролёт молоточка
@@ -235,8 +235,8 @@ extern "C" {
 	uint32_t debug_counter = 0.0f;
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
-	float min = 3800.0f; // 3261 (3834) (~3600)
-	float max = 186582.0f; // 170106 (170000) 181000
+	float min = 391.2f; // мкс; прежние, в тиках 102.9 нс: 3261 (3834) (~3600)
+	float max = 19207.0f; // мкс; прежние, в тиках 102.9 нс: 170106 (170000) 181000
 
 
 	// const float key_mass = 0.008f; // 8 гр -->> переехал в массив

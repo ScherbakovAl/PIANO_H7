@@ -299,15 +299,17 @@ void init_midi_speeds() {
 	// }
 
 
+	// Времена в мкс (offset_x), distance в мкм — скорость в м/с. Пересчёт из прежних тиков 102.9 нс (k = 14/136):
+	// offset_x · k, key_mass · k², distance как была — velocity та же.
 	curve_ON.push_back(speed_for_midi(0.0f, 0.0f, 0.0f, 0.0f)); // ---
-	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 18250.0f, -1.14f));	// -normal
-	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75300.0f, -12.5f)); 	// -bright
-	curve_ON.push_back(speed_for_midi(800.0f, 1710.0f, -600.0f, 1.0f)); 		// -muffled
-	curve_ON.push_back(speed_for_midi(98005.0f, 1710.0f, 28250.0f, -2.3f)); 	// -experiment
-	curve_ON.push_back(speed_for_midi(120000.0f, 1710.0f, 33000.0f, -3.0f)); 	// -new
-	curve_ON.push_back(speed_for_midi(600000.0f, 1710.0f, 75500.0f, -13.0f)); 	// -new 2
-	curve_ON.push_back(speed_for_midi(200000.0f, 1710.0f, 43000.0f, -6.0f)); 	// -new 3
-	curve_ON.push_back(speed_for_midi(58005.0f, 1710.0f, 21250.0f, -1.14f)); 	// -normal upd -10db D38db
+	curve_ON.push_back(speed_for_midi(614.672f, 1710.0f, 1878.68f, -1.14f));	// -normal
+	curve_ON.push_back(speed_for_midi(6358.13f, 1710.0f, 7751.47f, -12.5f)); 	// -bright
+	curve_ON.push_back(speed_for_midi(8.47751f, 1710.0f, -61.7647f, 1.0f)); 		// -muffled
+	curve_ON.push_back(speed_for_midi(1038.55f, 1710.0f, 2908.09f, -2.3f)); 	// -experiment
+	curve_ON.push_back(speed_for_midi(1271.63f, 1710.0f, 3397.06f, -3.0f)); 	// -new
+	curve_ON.push_back(speed_for_midi(6358.13f, 1710.0f, 7772.06f, -13.0f)); 	// -new 2
+	curve_ON.push_back(speed_for_midi(2119.38f, 1710.0f, 4426.47f, -6.0f)); 	// -new 3
+	curve_ON.push_back(speed_for_midi(614.672f, 1710.0f, 2187.5f, -1.14f)); 	// -normal upd -10db D38db
 
 	// const float key_mass = 89.0f;
 	// const float interval = 1710.0f;
@@ -874,7 +876,7 @@ void DMA1_RX(void) {
 
 		uint32_t tOut = 0;
 		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
-		const float t_F = (float)tOut / g4_tick_div; // в прежних тиках 102.9 нс, как кривые
+		const float t_F = (float)tOut / g4_ticks_per_us; // мкс, как кривые
 		float integerPart_F;
 		uint8_t note_ = rxB + noteAdder[rxB];
 
@@ -883,7 +885,7 @@ void DMA1_RX(void) {
 		if (rxB >= 98 && send_damper_lift && (tOut & 0x800000)) {
 			uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
 			if (tOut & 0x7FFFFF) {
-				const float e = speed_vel((float)(tOut & 0x7FFFFF) / g4_tick_div, lift_t_fast, lift_t_slow, curve_lift_selected);
+				const float e = speed_vel((float)(tOut & 0x7FFFFF) / g4_ticks_per_us, lift_t_fast, lift_t_slow, curve_lift_selected);
 				v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
 			}
 			uint8_t lift_buf[] = { 0xA0, note_, v }; // Poly Key Pressure: подъём демпфера, data2 — скорость подъёма
@@ -927,7 +929,7 @@ void DMA1_RX(void) {
 
 				const float key_mass = 0.008f; // 8 гр -->> переехал в массив
 				const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-				const float div_on = 0.000000000092f; // меньше - громче
+				const float div_on = 0.00000000089371f; // меньше - громче; на t_F в мкс (было 0.000000000092f на тики 102.9 нс)
 				const float deriv_F = 2.0f; // делить на 2 в формуле
 				const float maxMidi_F = 127.99f;
 				float timerLenght_F = t_F * div_on;
