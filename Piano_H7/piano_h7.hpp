@@ -113,10 +113,10 @@ extern "C" {
 
 	// Кривые ON «по скорости» (роллер 9, 10): velocity — функция скорости d/t, без массы и сдвигов.
 	// Границы — в тех же тиках 102.9 нс, что t_F: vel_t_fast → 127 в обеих; vel_t_slow → 1 в log
-	// (в lin медленный конец не задаётся: 127 · t_fast / t, при vel_t_slow ≈ 1.3).
+	// (в lin медленный конец не задаётся: 127 · t_fast / t, при vel_t_slow ≈ 1.5).
 	const uint8_t curve_lin_speed = 9; // velocity ∝ скорость: для piano_sim (v0 ∝ velocity, нужен 14 бит)
 	const uint8_t curve_log_speed = 10; // velocity ∝ ln скорости: для синтезаторов без hi-res velocity
-	const float vel_t_fast = 2900.0f;   // ≈ 299 мкс — по min из замеров (2894.5)
+	const float vel_t_fast = 3300.0f;   // ≈ 340 мкс — 127 у реального ff; рекорд 2894.5 (≈ 299 мкс) — разброс датчиков
 	const float vel_t_slow = 276000.0f; // ≈ 28.4 мс — по max из замеров (275835, окно G4 было 30 мс)
 
 	// OFF (G↑→R↑, демпфер ложится) и LIFT (R↓→G↓, клавиша поднимает демпфер) — свои карты скорости,
