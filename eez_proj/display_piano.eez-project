@@ -1197,7 +1197,7 @@
               },
               "group": "",
               "groupIndex": 0,
-              "options": "older curve\nnormal\nbright\nmuffled\nexperiment\nnew\nnew 2\nnew 3\nnormal upd\nlin speed\nlog speed",
+              "options": "older curve\nnormal\nbright\nmuffled\nexperiment\nnew\nnew 2\nnew 3\nnormal upd\nlin speed\nlog speed\nuser\nuser lin\nuser log",
               "optionsType": "literal",
               "selected": 9,
               "selectedType": "literal",

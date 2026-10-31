@@ -68,6 +68,11 @@ void init() {
 	curve_off_selected = lv_roller_get_selected(objects.roller_off);
 	lv_obj_add_event_cb(objects.roller_lift, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_lift_selected);
 	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
+	if (const user_curve_rec* saved = user_curve_saved()) {
+		user_curve = *saved;
+	}
+	user_curve_set();
+	create_screen_curve();
 	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
 	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
 	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available, _tx_done, _tx_clear, _tx_probe
@@ -969,49 +974,8 @@ void g4_to_midi(const uint32_t p) {
 		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 	}
 	else { // for ON
-
-		const uint32_t curve_num = curve_on_selected;
-
-		if (curve_num == curve_lin_speed) { // v / v_max = t_fast / t
-
-			midi_hi_F = 127.0f * vel_t_fast / t_F;
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-
-		}
-		else if (curve_num == curve_log_speed) { // ln(v / v_min) / ln(v_max / v_min)
-
-			midi_hi_F = 1.0f + 126.0f * logf(vel_t_slow / t_F) / logf(vel_t_slow / vel_t_fast);
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-
-		}
-		else if (curve_num) {
-
-			const speed_for_midi& curve = curve_ON[curve_num];
-
-			speed_F = curve.distance / (t_F + curve.offset_x);
-			energy_F = ((curve.key_mass * speed_F * speed_F) / 2.0f) + curve.offset_y;
-			midi_hi_F = energy_F;
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-
-		}
-		else { // curve_num > 0, v1 старые значения, для использования вместе с программной-rust кривой на компе
-
-			const float key_mass = 0.008f; // 8 гр -->> переехал в массив
-			const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-			const float div_on = 0.00000000089371f; // меньше - громче; на t_F в мкс (было 0.000000000092f на тики 102.9 нс)
-			const float deriv_F = 2.0f; // делить на 2 в формуле
-			const float maxMidi_F = 127.99f;
-			float timerLenght_F = t_F * div_on;
-
-			speed_F = distance_F / timerLenght_F;
-			energy_F = (key_mass * speed_F * speed_F) / deriv_F;
-			midi_hi_F = energy_F / maxMidi_F;
-			float integerPart_F;
-			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-			int note_ = rxB + noteAdder[rxB];
-
-		}
-
+		midi_hi_F = on_vel(curve_on_selected, t_F);
+		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 	}
 
 	if (midi_hi_F < 1.0f) {
@@ -1147,6 +1111,12 @@ void save_to_memory() {
 	SCB_DisableDCache();
 	HAL_FLASH_Unlock();
 
+	// кривая user в том же секторе: последнюю сохранённую — после стирания в начало журнала
+	user_curve_rec curve_rec = {};
+	const user_curve_rec* saved = user_curve_saved();
+	const bool has_curve = saved != nullptr;
+	if (has_curve) curve_rec = *saved;
+
 	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
 	uint32_t Addr = ADDRESS_H7_CALIB;
@@ -1169,6 +1139,10 @@ void save_to_memory() {
 			return;
 		}
 		Addr += 0x20;
+	}
+
+	if (has_curve && !flash_program(ADDRESS_H7_USER_CURVE, (const uint32_t*)&curve_rec, sizeof(curve_rec) / 4)) {
+		debugg_fn(" FLASH err 3 ");
 	}
 
 	// // замок на запись (по адресу Flash_Address + 0x640)
@@ -1291,6 +1265,310 @@ void roller_mode_changed(lv_event_t* e) {
 float speed_vel(const float t, const float t_fast, const float t_slow, const bool log) {
 	if (log) return 1.0f + 126.0f * logf(t_slow / t) / logf(t_slow / t_fast); // ln(v / v_min) / ln(v_max / v_min)
 	return 1.0f + 126.0f * (t_fast / t - t_fast / t_slow) / (1.0f - t_fast / t_slow); // (v − v_min) / (v_max − v_min)
+}
+
+// velocity ON кривой curve_num (номер в роллере) при пролёте t, мкс, без ограничения 1..127.
+// Зовут g4_to_midi (PendSV) и график экрана кривых
+float on_vel(const uint32_t curve_num, const float t) {
+	if (curve_num == curve_lin_speed) return 127.0f * vel_t_fast / t; // v / v_max = t_fast / t
+	if (curve_num == curve_log_speed) return 1.0f + 126.0f * logf(vel_t_slow / t) / logf(vel_t_slow / vel_t_fast); // ln(v / v_min) / ln(v_max / v_min)
+	if (curve_num == curve_user_lin) return speed_vel(t, user_lin_t_fast, user_lin_t_slow, false);
+	if (curve_num == curve_user_log) return speed_vel(t, user_log_t_fast, user_log_t_slow, true);
+	if (curve_num == curve_user) { // как curve_ON, коэффициенты — с экрана кривой
+		const float d = t + user_x0;
+		return user_K / (d * d) + user_y0;
+	}
+	if (curve_num) {
+		const speed_for_midi& curve = curve_ON[curve_num];
+		const float speed = curve.distance / (t + curve.offset_x);
+		return ((curve.key_mass * speed * speed) / 2.0f) + curve.offset_y;
+	}
+	// 0 — older curve: v1 старые значения, для использования вместе с программной-rust кривой на компе
+	const float key_mass = 0.008f; // 8 гр
+	const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+	const float div_on = 0.00000000089371f; // меньше - громче; на t в мкс (было 0.000000000092f на тики 102.9 нс)
+	const float speed = distance_F / (t * div_on);
+	return (key_mass * speed * speed) / deriv_F / maxMidi_F;
+}
+
+// K и offset_y — из концов: K / (t_fast + x0)² + y0 = 127, K / (t_slow + x0)² + y0 = 1
+void user_curve_set() {
+	const float x0 = user_curve.x0;
+	const float a = 1.0f / ((user_curve.t_fast + x0) * (user_curve.t_fast + x0));
+	const float b = 1.0f / ((user_curve.t_slow + x0) * (user_curve.t_slow + x0));
+	const float K = 126.0f / (a - b);
+	__disable_irq(); // g4_to_midi (PendSV) не должен застать K от новой кривой, а x0 от старой
+	user_K = K;
+	user_y0 = 1.0f - K * b;
+	user_x0 = x0;
+	__enable_irq();
+}
+
+// Журнал кривой user (ADDRESS_H7_USER_CURVE): сохранение дописывает запись за последней, не стирая сектор.
+// Стирание (~1–2 с) останавливает чтение flash, а с ним прерывания и MIDI — оно нужно, только когда журнал полон.
+// Индекс первой свободной записи; USER_CURVE_SLOTS — журнал полон
+uint32_t user_curve_free_slot() {
+	const user_curve_rec* rec = (const user_curve_rec*)ADDRESS_H7_USER_CURVE;
+	uint32_t i = 0;
+	while (i < USER_CURVE_SLOTS && rec[i].magic != 0xFFFFFFFF) {
+		++i;
+	}
+	return i;
+}
+
+// последняя сохранённая запись; nullptr — записей нет, или она вне пределов ползунков
+const user_curve_rec* user_curve_saved() {
+	const uint32_t slot = user_curve_free_slot();
+	if (slot == 0) return nullptr;
+	const user_curve_rec* rec = (const user_curve_rec*)ADDRESS_H7_USER_CURVE + slot - 1;
+	if (rec->magic != user_curve_magic) return nullptr;
+	if (!(rec->t_fast >= user_t_fast_min && rec->t_fast <= user_t_fast_max)) return nullptr;
+	if (!(rec->t_slow >= user_t_slow_min && rec->t_slow <= user_t_slow_max)) return nullptr;
+	if (!(rec->x0 >= user_x0_min && rec->x0 <= user_x0_max)) return nullptr;
+	return rec;
+}
+
+// words — кратно 8 (FLASHWORD, 32 Б). Сектор стёрт, flash отперта, кэши выключены — у вызывающего
+bool flash_program(const uint32_t addr, const uint32_t* src, const uint32_t words) {
+	for (uint32_t i = 0; i < words; i += 8) {
+		if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, addr + i * sizeof(uint32_t), (uint32_t)&src[i]) != HAL_OK) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool user_curve_save() {
+	uint32_t slot = user_curve_free_slot();
+	bool ok = true;
+
+	SCB_DisableICache();
+	SCB_DisableDCache();
+	HAL_FLASH_Unlock();
+
+	if (slot == USER_CURVE_SLOTS) {
+		// журнал полон: стереть сектор и вернуть калибровку как она лежит во flash, а не из RAM —
+		// там могут быть несохранённые правки. buffer_green и buffer_red во flash идут подряд (size_BUFFER кратно 8)
+		static uint32_t calib[2 * size_BUFFER];
+		memcpy(calib, (const void*)ADDRESS_H7_CALIB, sizeof(calib));
+		FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
+		ok = flash_program(ADDRESS_H7_CALIB, calib, 2 * size_BUFFER);
+		slot = 0;
+	}
+	if (ok) {
+		ok = flash_program(ADDRESS_H7_USER_CURVE + slot * sizeof(user_curve_rec), (const uint32_t*)&user_curve, sizeof(user_curve_rec) / 4);
+	}
+
+	HAL_FLASH_Lock();
+	SCB_EnableICache();
+	SCB_EnableDCache();
+	return ok;
+}
+
+// Экран кривых ON — кодом, как события роллеров: перегенерация screens.c его не сотрёт.
+// Шину и G4 не трогает (в отличие от экранов калибровки): ноты идут в MIDI и на нём
+void create_screen_curve() {
+	// вход — кнопка на главном экране, слева от «clear disp»
+	lv_obj_t* obj = lv_button_create(objects.d_main);
+	lv_obj_set_pos(obj, 7, 428);
+	lv_obj_set_size(obj, 100, 50);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
+	lv_obj_add_event_cb(obj, button_to_curve, LV_EVENT_RELEASED, NULL);
+	lv_obj_t* label = lv_label_create(obj);
+	lv_obj_center(label);
+	lv_label_set_text(label, "curve");
+
+	scr_curve = lv_obj_create(NULL);
+	lv_obj_clear_flag(scr_curve, LV_OBJ_FLAG_SCROLLABLE);
+
+	chart_curve = lv_chart_create(scr_curve);
+	lv_obj_set_pos(chart_curve, 5, 5);
+	lv_obj_set_size(chart_curve, 230, 225);
+	lv_chart_set_point_count(chart_curve, curve_points_count);
+	lv_chart_set_axis_range(chart_curve, LV_CHART_AXIS_PRIMARY_Y, 0, 127);
+	ser_curve = lv_chart_add_series(chart_curve, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_Y);
+	lv_chart_set_series_ext_y_array(chart_curve, ser_curve, curve_points);
+	lv_obj_set_style_size(chart_curve, 0, 0, LV_PART_INDICATOR); // без точек — только линия
+	lv_chart_set_div_line_count(chart_curve, 5, 0); // velocity 0, 32, 64, 95, 127
+	lv_obj_set_style_radius(chart_curve, 0, 0);
+
+	const char* axis[] = { "0.2 ms", "30 ms" };
+	const lv_align_t axis_align[] = { LV_ALIGN_OUT_BOTTOM_LEFT, LV_ALIGN_OUT_BOTTOM_RIGHT };
+	for (uint32_t i = 0; i < 2; ++i) {
+		obj = lv_label_create(scr_curve);
+		lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN);
+		lv_label_set_text(obj, axis[i]);
+		lv_obj_align_to(obj, chart_curve, axis_align[i], 0, 2);
+	}
+	label_curve_info = lv_label_create(scr_curve); // под серединой графика, текст — в curve_screen_update
+	lv_obj_set_style_text_font(label_curve_info, &lv_font_montserrat_10, LV_PART_MAIN);
+	lv_obj_set_style_text_align(label_curve_info, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+	lv_obj_set_width(label_curve_info, 130);
+	lv_obj_align_to(label_curve_info, chart_curve, LV_ALIGN_OUT_BOTTOM_MID, 0, 2);
+
+	// копия objects.roller: тот же список, выбор — тот же curve_on_selected
+	roller_curve = lv_roller_create(scr_curve);
+	lv_obj_set_pos(roller_curve, 240, 5);
+	lv_obj_set_size(roller_curve, 75, 225);
+	lv_roller_set_options(roller_curve, lv_roller_get_options(objects.roller), LV_ROLLER_MODE_NORMAL);
+	lv_obj_set_style_text_font(roller_curve, &lv_font_montserrat_10, LV_PART_MAIN);
+	lv_obj_set_style_text_color(roller_curve, lv_color_hex(0xff127873), LV_PART_MAIN);
+	lv_obj_set_style_bg_color(roller_curve, lv_color_hex(0xff4e6475), LV_PART_SELECTED);
+	lv_obj_add_event_cb(roller_curve, roller_curve_copy_changed, LV_EVENT_VALUE_CHANGED, NULL);
+
+	slider_t_fast = curve_slider(258, user_t_fast_min, user_t_fast_max, user_curve.t_fast, &label_t_fast);
+	slider_t_slow = curve_slider(308, user_t_slow_min, user_t_slow_max, user_curve.t_slow, &label_t_slow);
+	slider_x0 = curve_slider(358, user_x0_min, user_x0_max, user_curve.x0, &label_x0);
+
+	obj = lv_button_create(scr_curve);
+	lv_obj_set_pos(obj, 2, 410);
+	lv_obj_set_size(obj, 145, 67);
+	lv_obj_set_style_radius(obj, 8, LV_PART_MAIN);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
+	lv_obj_add_event_cb(obj, button_curve_back, LV_EVENT_RELEASED, NULL);
+	label = lv_label_create(obj);
+	lv_obj_center(label);
+	lv_obj_set_style_text_color(label, lv_color_hex(0xff727272), LV_PART_MAIN);
+	lv_label_set_text(label, "<<<");
+
+	obj = lv_button_create(scr_curve);
+	lv_obj_set_pos(obj, 173, 410);
+	lv_obj_set_size(obj, 145, 67);
+	lv_obj_set_style_radius(obj, 8, LV_PART_MAIN);
+	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
+	lv_obj_add_event_cb(obj, button_curve_save, LV_EVENT_RELEASED, NULL);
+	label_curve_save = lv_label_create(obj);
+	lv_obj_center(label_curve_save);
+	lv_obj_set_style_text_color(label_curve_save, lv_color_hex(0xffeeab00), LV_PART_MAIN);
+	lv_label_set_text(label_curve_save, "save");
+
+	button_curve_reset = lv_button_create(scr_curve); // на месте save: save — у user, reset — у user lin и user log
+	lv_obj_set_pos(button_curve_reset, 173, 410);
+	lv_obj_set_size(button_curve_reset, 145, 67);
+	lv_obj_set_style_radius(button_curve_reset, 8, LV_PART_MAIN);
+	lv_obj_set_style_bg_color(button_curve_reset, lv_color_hex(0xff343638), LV_PART_MAIN);
+	lv_obj_add_event_cb(button_curve_reset, button_curve_reset_pressed, LV_EVENT_RELEASED, NULL);
+	label = lv_label_create(button_curve_reset);
+	lv_obj_center(label);
+	lv_obj_set_style_text_color(label, lv_color_hex(0xffeeab00), LV_PART_MAIN);
+	lv_label_set_text(label, "reset");
+
+	curve_screen_update();
+}
+
+// подпись в y, ползунок под ней
+lv_obj_t* curve_slider(const int32_t y, const int32_t min, const int32_t max, const float value, lv_obj_t** label) {
+	*label = lv_label_create(scr_curve);
+	lv_obj_set_pos(*label, 10, y);
+	lv_obj_t* obj = lv_slider_create(scr_curve);
+	lv_obj_set_pos(obj, 20, y + 24);
+	lv_obj_set_size(obj, 280, 12);
+	lv_slider_set_range(obj, min, max);
+	lv_slider_set_value(obj, (int32_t)value, LV_ANIM_OFF);
+	lv_obj_add_event_cb(obj, slider_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
+	return obj;
+}
+
+// График и ползунки — кривой, выбранной в роллере: user — все три и save, user lin и user log —
+// t_fast, t_slow и reset, остальные не правятся — только график
+void curve_screen_update() {
+	const uint32_t c = curve_on_selected;
+	const bool user = c == curve_user;
+	const bool lin = c == curve_user_lin;
+	const bool log = c == curve_user_log;
+	float t_fast = user_curve.t_fast;
+	float t_slow = user_curve.t_slow;
+	if (lin) {
+		t_fast = user_lin_t_fast;
+		t_slow = user_lin_t_slow;
+	}
+	if (log) {
+		t_fast = user_log_t_fast;
+		t_slow = user_log_t_slow;
+	}
+
+	lv_slider_set_value(slider_t_fast, (int32_t)t_fast, LV_ANIM_OFF); // событие не шлёт
+	lv_slider_set_value(slider_t_slow, (int32_t)t_slow, LV_ANIM_OFF);
+	lv_slider_set_value(slider_x0, (int32_t)user_curve.x0, LV_ANIM_OFF);
+	lv_obj_set_flag(slider_t_fast, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
+	lv_obj_set_flag(slider_t_slow, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
+	lv_obj_set_flag(label_t_slow, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
+	lv_obj_set_flag(slider_x0, LV_OBJ_FLAG_HIDDEN, !user);
+	lv_obj_set_flag(label_x0, LV_OBJ_FLAG_HIDDEN, !user);
+	lv_obj_set_flag(lv_obj_get_parent(label_curve_save), LV_OBJ_FLAG_HIDDEN, !user); // сохраняется только user
+	lv_obj_set_flag(button_curve_reset, LV_OBJ_FLAG_HIDDEN, !(lin || log));
+
+	if (user || lin || log) {
+		lv_label_set_text_fmt(label_t_fast, "127 at t = %d us", (int)t_fast);
+	}
+	else {
+		lv_label_set_text(label_t_fast, "fixed curve");
+	}
+	lv_label_set_text_fmt(label_t_slow, "1 at t = %d us", (int)t_slow);
+	lv_label_set_text_fmt(label_x0, "bend x0 = %d us", (int)user_curve.x0);
+	lv_label_set_text_fmt(label_curve_info, "t (log),  2 ms -> %d", (int)LV_CLAMP(1.0f, on_vel(c, 2000.0f), 127.0f));
+
+	for (uint32_t i = 0; i < curve_points_count; ++i) {
+		const float t = curve_t_min * powf(curve_t_max / curve_t_min, (float)i / (curve_points_count - 1));
+		curve_points[i] = (int32_t)LV_CLAMP(1.0f, on_vel(c, t), 127.0f);
+	}
+	lv_chart_refresh(chart_curve);
+}
+
+void button_to_curve(lv_event_t* e) {
+	lv_roller_set_selected(roller_curve, curve_on_selected, LV_ANIM_OFF);
+	curve_screen_update();
+	lv_screen_load(scr_curve);
+}
+
+// копия роллера ON: выбор сразу звучит и уходит в роллер главного экрана
+void roller_curve_copy_changed(lv_event_t* e) {
+	curve_on_selected = lv_roller_get_selected(roller_curve);
+	lv_roller_set_selected(objects.roller, curve_on_selected, LV_ANIM_OFF);
+	curve_screen_update();
+}
+
+void button_curve_back(lv_event_t* e) {
+	loadScreen(SCREEN_ID_D_MAIN);
+}
+
+void button_curve_save(lv_event_t* e) {
+	lv_label_set_text(label_curve_save, user_curve_save() ? "saved" : "flash error");
+}
+
+// выбранную user lin или user log — к vel_t_fast / vel_t_slow, как при старте
+void button_curve_reset_pressed(lv_event_t* e) {
+	if (curve_on_selected == curve_user_lin) {
+		user_lin_t_fast = vel_t_fast;
+		user_lin_t_slow = vel_t_slow;
+	}
+	else if (curve_on_selected == curve_user_log) {
+		user_log_t_fast = vel_t_fast;
+		user_log_t_slow = vel_t_slow;
+	}
+	curve_screen_update();
+}
+
+// ползунки правят кривую, выбранную в роллере (скрытые у неё не используются)
+void slider_curve_changed(lv_event_t* e) {
+	const float t_fast = (float)lv_slider_get_value(slider_t_fast);
+	const float t_slow = (float)lv_slider_get_value(slider_t_slow);
+	if (curve_on_selected == curve_user) {
+		user_curve.t_fast = t_fast;
+		user_curve.t_slow = t_slow;
+		user_curve.x0 = (float)lv_slider_get_value(slider_x0);
+		user_curve_set();
+		lv_label_set_text(label_curve_save, "save");
+	}
+	else if (curve_on_selected == curve_user_lin) {
+		user_lin_t_fast = t_fast;
+		user_lin_t_slow = t_slow;
+	}
+	else if (curve_on_selected == curve_user_log) {
+		user_log_t_fast = t_fast;
+		user_log_t_slow = t_slow;
+	}
+	curve_screen_update();
 }
 
 void DMA2_Stream1_TransferComplete() { // DMA дисплея
