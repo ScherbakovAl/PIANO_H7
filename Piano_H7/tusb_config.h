@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #ifndef BOARD_TUD_RHPORT
-#define BOARD_TUD_RHPORT            1
+#define BOARD_TUD_RHPORT            0
 #endif
 
     // RHPort max operational speed can defined by board.mk
@@ -30,10 +30,10 @@ extern "C" {
 #define CFG_TUD_MAX_SPEED           BOARD_TUD_MAX_SPEED
 //#define BOARD_DEVICE_RHPORT_SPEED   OPT_MODE_FULL_SPEED  // 480mbps
 #define BOARD_DEVICE_RHPORT_NUM     0
-#define CFG_TUSB_RHPORT1_MODE       (OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED)
+#define CFG_TUSB_RHPORT0_MODE       (OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED)
 
-// In the case of the STM32H7 with an external HS 480 PHY, you must use root hub port 1 instead of 0
-//    0 is for the internal FS 12mbit PHY so you'd use BOARD_DEVICE_RHPORT_NUM set to 0 and CFG_TUSB_RHPORT1_MODE set to (OPT_MODE_DEVICE | OPT_MODE_FULL_SPEED)
+// H723: один контроллер OTG_HS со встроенным FS PHY, dwc2_stm32.h сажает на него и порт 0, и порт 1.
+// Везде порт 0: tusb_init, tud_int_handler(BOARD_DEVICE_RHPORT_NUM) и midi_device (write_flush берёт rhport 0 жёстко).
 
 // vvv<...> (see tinyusb examples for remainder, configuring USB Class and buffer size basics)
 

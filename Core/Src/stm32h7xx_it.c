@@ -49,6 +49,7 @@ extern lv_display_t* disp;
 extern void DMA2_Stream1_TransferComplete(); // ??
 // extern void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
 extern void DMA1_RX();
+extern void usb_task();
 extern void resetPin();
 /* USER CODE END PV */
 
@@ -178,7 +179,7 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
-
+      usb_task(); // TinyUSB и MIDI; будят OTG_HS и DMA1_RX
   /* USER CODE END PendSV_IRQn 0 */
   /* USER CODE BEGIN PendSV_IRQn 1 */
 
@@ -315,6 +316,7 @@ void OTG_HS_IRQHandler(void)
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
   		// GPIOA->BSRR |= 0x10; // for test // DEBUG
       tud_int_handler(BOARD_DEVICE_RHPORT_NUM);
+      SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; // tud_task — в PendSV (usb_task)
       // GPIOA->BSRR |= 0x100000; // for test // DEBUG
       return;
   /* USER CODE END OTG_HS_IRQn 0 */
