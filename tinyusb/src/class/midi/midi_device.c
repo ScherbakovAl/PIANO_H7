@@ -363,6 +363,36 @@ bool tud_midi_n_packet_write (uint8_t itf, const uint8_t packet[4]) {
   return true;
 }
 
+// PIANO_H7: свободно в FIFO передачи, байт; 0 — не подключено (stream_write тогда тоже ничего не пишет)
+uint32_t tud_midi_n_tx_available (uint8_t itf) {
+  midid_interface_t* midi = &_midid_itf[itf];
+  TU_VERIFY(midi->ep_in, 0);
+  return tu_fifo_remaining(&midi->tx_ff);
+}
+
+// PIANO_H7: сколько IN-передач хост забрал (по модулю 2^32); растёт в midid_xfer_cb
+static uint32_t _midid_tx_done[CFG_TUD_MIDI];
+
+uint32_t tud_midi_n_tx_done (uint8_t itf) {
+  return _midid_tx_done[itf];
+}
+
+// PIANO_H7: выбросить неотправленное из FIFO передачи. Передачу, уже отданную контроллеру (до 64 Б), не трогает
+void tud_midi_n_tx_clear (uint8_t itf) {
+  midid_interface_t* midi = &_midid_itf[itf];
+  tu_fifo_clear(&midi->tx_ff);
+  midi->stream_write.index = midi->stream_write.total = 0;
+}
+
+// PIANO_H7: если IN свободен — поставить пустой пакет (ZLP): заберёт ли его хост. false — IN занят или не подключено
+bool tud_midi_n_tx_probe (uint8_t itf) {
+  midid_interface_t* midi = &_midid_itf[itf];
+  const uint8_t rhport = 0;
+  TU_VERIFY(midi->ep_in);
+  TU_VERIFY(usbd_edpt_claim(rhport, midi->ep_in));
+  return usbd_edpt_xfer(rhport, midi->ep_in, NULL, 0);
+}
+
 //--------------------------------------------------------------------+
 // USBD Driver API
 //--------------------------------------------------------------------+
@@ -537,6 +567,7 @@ bool midid_xfer_cb(uint8_t rhport, uint8_t ep_addr, xfer_result_t result, uint32
     // and does not need to claim like ep_in
     _prep_out_transaction(idx);
   } else if (ep_addr == p_midi->ep_in) {
+    _midid_tx_done[idx]++; // PIANO_H7
     if (0 == write_flush(idx)) {
       // If there is no data left, a ZLP should be sent if
       // xferred_bytes is multiple of EP size and not zero

@@ -213,8 +213,24 @@ extern "C" {
 	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
 	uint32_t noise_shown = 0;
 	volatile uint8_t noise_bytes[4] = { };
-	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет DMA1_RX)
+	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет usb_task)
 	uint32_t midi_lost_shown = 0;
+	// Пакеты G4 из DMA1_RX в usb_task (PendSV): rx_data[0] << 24 | 24 бита времени. Пишет только DMA1_RX, читает только usb_task.
+	// 64 — как FIFO TinyUSB (512 Б = 64 события по 8 Б); пакет по шине ≥ ~6 мкс — запас на ~0.4 мс простоя PendSV.
+	// Все очереди G4 (26 чипов × 16) — 416 событий, но приходят они не быстрее шины, а PendSV их разбирает сразу.
+	const uint32_t g4_ring_size = 64;
+	static_assert((g4_ring_size & (g4_ring_size - 1)) == 0, "индексы идут по модулю 2^32 — размер должен быть степенью 2");
+	volatile uint32_t g4_ring[g4_ring_size] = { };
+	volatile uint32_t g4_ring_w = 0;
+	volatile uint32_t g4_ring_r = 0;
+	volatile uint32_t g4_ring_lost = 0; // кольцо полно — usb_task не успевает (пишет DMA1_RX)
+	uint32_t g4_ring_lost_shown = 0;
+	// Читает ли хост IN (только usb_task). Открытый порт опрашивается каждые 30–90 мкс: передача, висящая 50 мс, —
+	// хост не читает; IN, свободный 50 мс, — проба пустым пакетом. Проба висит ≤ 1 опроса, ноту задержит редко
+	const uint32_t host_read_timeout_ms = 50;
+	bool host_reads = false;
+	uint32_t host_tx_done_seen = 0;
+	uint32_t host_tx_edge_ms = 0; // HAL_GetTick() последней забранной передачи или поставленной пробы
 	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
 	uint32_t lcd_dma_errors_shown = 0;
 	// Кусок кадра идёт по DMA (ставит my_flush_cb, снимает DMA2_Stream1). LVGL ждёт его только перед
@@ -281,6 +297,8 @@ extern "C" {
 	int UART4_receive_settings_bootloader();
 	int UART4_receive_timeout_10us();
 	void DMA1_RX();
+	void usb_task();
+	void g4_to_midi(const uint32_t p);
 	void USART_noise_error_detected();
 	void midi_write(const uint8_t* b, const uint32_t n);
 	void DMA_UART_ERRORS_HANDLER();

@@ -68,9 +68,12 @@ void init() {
 	curve_off_selected = lv_roller_get_selected(objects.roller_off);
 	lv_obj_add_event_cb(objects.roller_lift, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_lift_selected);
 	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
+	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
+	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
+	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available, _tx_done, _tx_clear, _tx_probe
+	// и счётчик в midid_xfer_cb — class/midi/midi_device.c/.h. При обновлении библиотеки — перенести, иначе не соберётся
 	tusb_init();
 
-	tud_task();
 	lv_timer_handler();
 	ui_tick();
 
@@ -460,7 +463,6 @@ void h7() {
 
 	while (1) { // основной цикл
 
-		tud_task();
 		lv_timer_handler_run_in_period(5);
 		ui_tick();
 
@@ -520,6 +522,11 @@ void h7() {
 		if (midi_lost != midi_lost_shown) {
 			midi_lost_shown = midi_lost;
 			debugg_printf("MIDI lost %" LV_PRIu32, midi_lost_shown);
+		}
+
+		if (g4_ring_lost != g4_ring_lost_shown) {
+			g4_ring_lost_shown = g4_ring_lost;
+			debugg_printf("G4 ring lost %" LV_PRIu32, g4_ring_lost_shown);
 		}
 
 		if (lcd_dma_errors != lcd_dma_errors_shown) {
@@ -843,6 +850,7 @@ int UART4_receive_timeout_10us() {
 }
 
 // DMA IQR Handler
+// Шина стоит (TIM1 выключен), пока идёт этот обработчик: здесь только пакет в кольцо, MIDI считает и шлёт usb_task (PendSV)
 void DMA1_RX(void) {
 
 
@@ -858,108 +866,176 @@ void DMA1_RX(void) {
 
 		SCB_InvalidateDCache_by_Addr(rx_data, sizeof(rx_data)); // только своя строка: DMA записал RAM мимо кэша
 
-		const uint32_t rxB = rx_data[0];
+		const uint32_t p = (uint32_t)rx_data[0] << 24 | rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
 
 		// const uint32_t tim_compare = TIM3->CNT;
-		// if (tim_compare != rxB / count_comparators) { // TODO сделать проверку номера чипа!
-		// 	debugg_fn(std::format(" chip number err {} != {}", rxB, tim_compare));
+		// if (tim_compare != rx_data[0] / count_comparators) { // TODO сделать проверку номера чипа!
+		// 	debugg_fn(std::format(" chip number err {} != {}", rx_data[0], tim_compare));
 		// }
 
-		midi_hi_F = 0.0f;
-		midi_lo_F = 0.0f;
-		// timer_data_in = 0;
-
-
-		if (rxB > 168) { // DEBUG
+		if (rx_data[0] > 168) { // DEBUG
 			USART_noise_error_detected();
 		}
 
-		uint32_t tOut = 0;
-		tOut = rx_data[1] << 16 | rx_data[2] << 8 | rx_data[3];
-		const float t_F = (float)tOut / g4_ticks_per_us; // мкс, как кривые
-		float integerPart_F;
-		uint8_t note_ = rxB + noteAdder[rxB];
-
-		// G4 OFF: бит 23 — подъём демпфера, младшие 23 — интервал R↓→G↓ (0 = не замерен).
-		// Только вместе с SEND_LIFT 1 в G4: старый G4 шлёт обрезанное время, и бит 23 у него случаен.
-		if (rxB >= 98 && send_damper_lift && (tOut & 0x800000)) {
-			uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
-			if (tOut & 0x7FFFFF) {
-				const float e = speed_vel((float)(tOut & 0x7FFFFF) / g4_ticks_per_us, lift_t_fast, lift_t_slow, curve_lift_selected);
-				v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
-			}
-			uint8_t lift_buf[] = { 0xA0, note_, v }; // Poly Key Pressure: подъём демпфера, data2 — скорость подъёма
-			midi_write(lift_buf, 3);
-			LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-			LL_TIM_EnableCounter(TIM1); // PWM - tim clk
-			return;
+		const uint32_t w = g4_ring_w;
+		if (w - g4_ring_r < g4_ring_size) {
+			g4_ring[w % g4_ring_size] = p;
+			g4_ring_w = w + 1; // после записи пакета: usb_task видит индекс — пакет уже на месте
+			SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
 		}
+		else {
+			g4_ring_lost = g4_ring_lost + 1;
+		}
+	}
 
-		if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
-			midi_hi_F = speed_vel(t_F, off_t_fast, off_t_slow, curve_off_selected); // LEN_NONE (без замера) → 1
+	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
+	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+
+}
+
+// PendSV: единственный контекст TinyUSB, кроме tud_int_handler в OTG_HS. Будят OTG_HS (события стека) и DMA1_RX (пакет G4).
+// Основной цикл TinyUSB не трогает: иначе DMA1_RX/PendSV врезаются в tud_task посреди захвата endpoint'а.
+void usb_task() {
+	tud_task(); // первым: завершённая передача освобождает IN, и нота ниже уйдёт с ближайшим опросом хоста, а не со следующим
+	// OUT от хоста не нужен, но вычитывать обязательно: TinyUSB заряжает OUT, только когда FIFO приёма (64 Б) пуст,
+	// иначе хост получает NAK, и запись в этот порт у хоста встаёт (DAW шлёт clock, sysex всем портам)
+	uint8_t packet[4];
+	while (tud_midi_packet_read(packet)) {
+	}
+	// Хост не слушает (не подключено, спит, порт не открыт — по USB видно лишь, что IN не забирают): FIFO передачи
+	// очищаем, события выбрасываем, в midi_lost не считаем. Иначе старые ноты уйдут пачкой, когда хост снова начнёт читать
+	const uint32_t now = HAL_GetTick();
+	const uint32_t tx_done = tud_midi_n_tx_done(0);
+	if (!tud_mounted() || tud_suspended()) {
+		if (host_reads) {
+			host_reads = false;
+			tud_midi_n_tx_clear(0);
+		}
+	}
+	else if (tx_done != host_tx_done_seen) { // хост забрал передачу
+		host_tx_done_seen = tx_done;
+		host_tx_edge_ms = now;
+		host_reads = true;
+	}
+	else if (now - host_tx_edge_ms >= host_read_timeout_ms) {
+		if (tud_midi_n_tx_probe(0)) { // IN свободен — проба
+			host_tx_edge_ms = now;
+		}
+		else if (host_reads) { // передача висит — хост не читает
+			host_reads = false;
+			tud_midi_n_tx_clear(0);
+		}
+	}
+	while (g4_ring_r != g4_ring_w) {
+		const uint32_t r = g4_ring_r;
+		if (host_reads) {
+			g4_to_midi(g4_ring[r % g4_ring_size]);
+		}
+		g4_ring_r = r + 1;
+	}
+}
+
+// пакет G4 → MIDI (из usb_task). p: номер компаратора << 24 | 24 бита времени
+void g4_to_midi(const uint32_t p) {
+
+	const uint32_t rxB = p >> 24;
+
+	midi_hi_F = 0.0f;
+	midi_lo_F = 0.0f;
+	// timer_data_in = 0;
+
+
+	uint32_t tOut = 0;
+	tOut = p & 0xFFFFFF;
+	const float t_F = (float)tOut / g4_ticks_per_us; // мкс, как кривые
+	float integerPart_F;
+	uint8_t note_ = rxB + noteAdder[rxB];
+
+	// G4 OFF: бит 23 — подъём демпфера, младшие 23 — интервал R↓→G↓ (0 = не замерен).
+	// Только вместе с SEND_LIFT 1 в G4: старый G4 шлёт обрезанное время, и бит 23 у него случаен.
+	if (rxB >= 98 && send_damper_lift && (tOut & 0x800000)) {
+		uint8_t v = 1; // не замерен — неглубокое/медленное нажатие
+		if (tOut & 0x7FFFFF) {
+			const float e = speed_vel((float)(tOut & 0x7FFFFF) / g4_ticks_per_us, lift_t_fast, lift_t_slow, curve_lift_selected);
+			v = e < 1.0f ? 1 : (e > 127.0f ? 127 : (uint8_t)e);
+		}
+		uint8_t lift_buf[] = { 0xA0, note_, v }; // Poly Key Pressure: подъём демпфера, data2 — скорость подъёма
+		midi_write(lift_buf, 3);
+		return;
+	}
+
+	if (rxB >= 98) { // for OFF // 98 = чип 14, компаратор 0 — уже OFF
+		midi_hi_F = speed_vel(t_F, off_t_fast, off_t_slow, curve_off_selected); // LEN_NONE (без замера) → 1
+		midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+	}
+	else { // for ON
+
+		const uint32_t curve_num = curve_on_selected;
+
+		if (curve_num == curve_lin_speed) { // v / v_max = t_fast / t
+
+			midi_hi_F = 127.0f * vel_t_fast / t_F;
 			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+
 		}
-		else { // for ON
+		else if (curve_num == curve_log_speed) { // ln(v / v_min) / ln(v_max / v_min)
 
-			const uint32_t curve_num = curve_on_selected;
+			midi_hi_F = 1.0f + 126.0f * logf(vel_t_slow / t_F) / logf(vel_t_slow / vel_t_fast);
+			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 
-			if (curve_num == curve_lin_speed) { // v / v_max = t_fast / t
+		}
+		else if (curve_num) {
 
-				midi_hi_F = 127.0f * vel_t_fast / t_F;
-				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+			const speed_for_midi& curve = curve_ON[curve_num];
 
-			}
-			else if (curve_num == curve_log_speed) { // ln(v / v_min) / ln(v_max / v_min)
+			speed_F = curve.distance / (t_F + curve.offset_x);
+			energy_F = ((curve.key_mass * speed_F * speed_F) / 2.0f) + curve.offset_y;
+			midi_hi_F = energy_F;
+			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
 
-				midi_hi_F = 1.0f + 126.0f * logf(vel_t_slow / t_F) / logf(vel_t_slow / vel_t_fast);
-				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+		}
+		else { // curve_num > 0, v1 старые значения, для использования вместе с программной-rust кривой на компе
 
-			}
-			else if (curve_num) {
+			const float key_mass = 0.008f; // 8 гр -->> переехал в массив
+			const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
+			const float div_on = 0.00000000089371f; // меньше - громче; на t_F в мкс (было 0.000000000092f на тики 102.9 нс)
+			const float deriv_F = 2.0f; // делить на 2 в формуле
+			const float maxMidi_F = 127.99f;
+			float timerLenght_F = t_F * div_on;
 
-				const speed_for_midi& curve = curve_ON[curve_num];
-
-				speed_F = curve.distance / (t_F + curve.offset_x);
-				energy_F = ((curve.key_mass * speed_F * speed_F) / 2.0f) + curve.offset_y;
-				midi_hi_F = energy_F;
-				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-
-			}
-			else { // curve_num > 0, v1 старые значения, для использования вместе с программной-rust кривой на компе
-
-				const float key_mass = 0.008f; // 8 гр -->> переехал в массив
-				const float distance_F = 0.0017f; // 1.7 мм (толщина шаблонов 1.9 и 0.2)
-				const float div_on = 0.00000000089371f; // меньше - громче; на t_F в мкс (было 0.000000000092f на тики 102.9 нс)
-				const float deriv_F = 2.0f; // делить на 2 в формуле
-				const float maxMidi_F = 127.99f;
-				float timerLenght_F = t_F * div_on;
-
-				speed_F = distance_F / timerLenght_F;
-				energy_F = (key_mass * speed_F * speed_F) / deriv_F;
-				midi_hi_F = energy_F / maxMidi_F;
-				float integerPart_F;
-				midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
-				int note_ = rxB + noteAdder[rxB];
-
-			}
+			speed_F = distance_F / timerLenght_F;
+			energy_F = (key_mass * speed_F * speed_F) / deriv_F;
+			midi_hi_F = energy_F / maxMidi_F;
+			float integerPart_F;
+			midi_lo_F = modf(midi_hi_F, &integerPart_F) * maxMidi_F;
+			int note_ = rxB + noteAdder[rxB];
 
 		}
 
-		if (midi_hi_F < 1.0f) {
-			midi_hi_F = 1.0f;
-			midi_lo_F = 1.0f;
-		}
-		if (midi_hi_F > 127.0f) {
-			midi_hi_F = 127.0f;
-			midi_lo_F = 127.0f;
-			// out_debug_ = tOut;
-			// m_F = 58005; // DEBUG
-			// sd_F = 1710;
-			// sx_F = 18250;
-			// sy_F = -1.18;
-			// fl = 2;
-		}
+	}
 
+	if (midi_hi_F < 1.0f) {
+		midi_hi_F = 1.0f;
+		midi_lo_F = 1.0f;
+	}
+	if (midi_hi_F > 127.0f) {
+		midi_hi_F = 127.0f;
+		midi_lo_F = 127.0f;
+		// out_debug_ = tOut;
+		// m_F = 58005; // DEBUG
+		// sd_F = 1710;
+		// sx_F = 18250;
+		// sy_F = -1.18;
+		// fl = 2;
+	}
+
+	// Событие целиком или никак: иначе уйдёт CC88 без ноты, а у верхних нот — note-on без note-off (нота зависнет).
+	// В USB-MIDI каждое сообщение — пакет 4 Б: CC88 + нота = 8, с note-off — 12
+	const uint32_t need = (rxB > 76 && rxB < 98) ? 12 : 8;
+	if (tud_midi_n_tx_available(0) < need) {
+		midi_lost = midi_lost + 1;
+	}
+	else {
 		uint8_t note_buf[] = {
 			0xB0,
 			0x58,
@@ -975,27 +1051,23 @@ void DMA1_RX(void) {
 			uint8_t note_buff[] = { 0x80, note_, 64 };
 			midi_write(note_buff, 3);
 		}
-
-		if (rxB < 98) { // DEBUG
-			if (t_F > max) {
-				max = t_F;
-				fl = 1;
-			}
-			if (t_F < min) {
-				min = t_F;
-				fl = 1;
-			}
-		}
-
-		// speed_F = tOut; // DEBUG
-		// timerLenght_F = midi_hi_F; // DEBUG
-		// speed_F = midi_hi_F; // DEBUG
-		// fl = rxB < 98 ? 3 : 0; // DEBUG // разрешить обновлять цифры на дисплее
 	}
 
-	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
-	LL_TIM_EnableCounter(TIM1); // PWM - tim clk
+	if (rxB < 98) { // DEBUG
+		if (t_F > max) {
+			max = t_F;
+			fl = 1;
+		}
+		if (t_F < min) {
+			min = t_F;
+			fl = 1;
+		}
+	}
 
+	// speed_F = tOut; // DEBUG
+	// timerLenght_F = midi_hi_F; // DEBUG
+	// speed_F = midi_hi_F; // DEBUG
+	// fl = rxB < 98 ? 3 : 0; // DEBUG // разрешить обновлять цифры на дисплее
 }
 
 void USART_noise_error_detected() { // из DMA1_RX: без std::format/кучи — печатает основной цикл
