@@ -21,7 +21,7 @@ typedef struct {
 	uint16_t point1_y;
 	uint16_t point2_x;
 	uint16_t point2_y;
-	uint8_t count; // точек касания: 0..2 (0 — нет касания или ошибка I2C)
+	uint8_t count; // точек касания: 0..2 (0 — нет касания, палец поднят или ошибка I2C)
 } TouchPoints_HandleTypeDef;
 
 #define FT6336_DEV_MODE 0x00

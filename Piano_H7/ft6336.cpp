@@ -227,6 +227,10 @@ TouchPoints_HandleTypeDef FT6336_GetTouchPoint() {
 	if (FT6336_ReadRegister(FT6336_TD_STATUS, touchData, 5)) return touchPoints; // ошибка I2C — касания нет
 	uint8_t touchCount = touchData[0] & 0x0F; // получить количество точек
 	if (touchCount > 2) return touchPoints; // FT6336 ведёт не больше 2 точек — остальное мусор
+	// P1_XH[7:6] — событие точки 1: 00 нажатие, 01 подъём, 10 касание, 11 нет события. Касание — только 00 и 10,
+	// как в Linux ft6236: в кадре подъёма координаты мусорные, и ползунок при отпускании прыгал на край
+	const uint8_t event = touchData[1] >> 6;
+	if (event != 0 && event != 2) return touchPoints;
 
 	if (touchCount > 0) {
 		touchPoints.count = 1;
