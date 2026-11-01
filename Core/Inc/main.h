@@ -68,7 +68,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void request_power_off(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
