@@ -80,7 +80,19 @@ int main(void) {
 // #define BOOTLOADER_ADDRESS 0x08000000 // здесь начало всех программ по умолчанию для старта
 // #define BOOTLOADER_ADDRESS 0x1FF09800 // << здесь usbDFU вшитый в контроллер
 // #define FLASH_DESC_STR      "@Internal Flash   /0x08000000/03*016Ka,01*016Kg,01*064Kg,07*128Kg,04*016Kg,01*064Kg,07*128Kg"
-  
+
+  // Уровни, которые держит выключенный H7 (power_off в main.c приложения), — сразу после сброса.
+  // Держатся всё время DFU и в приложении до MX_UART5_Init / MX_TIM1_Init / MX_GPIO_Init:
+  // U_TX (PB13) = 1 и TIM_CLK (PE11) = 0 — шина G4 в покое, а не в воздухе;
+  // подсветка (PD6) = 0 — не мигает при подаче питания. В DFU её включает MX_GPIO_Init ниже
+  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB | LL_AHB4_GRP1_PERIPH_GPIOD | LL_AHB4_GRP1_PERIPH_GPIOE);
+  LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_13);
+  LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_13, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_ResetOutputPin(GPIOE, LL_GPIO_PIN_11);
+  LL_GPIO_SetPinMode(GPIOE, LL_GPIO_PIN_11, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_ResetOutputPin(LCD_LED_GPIO_Port, LCD_LED_Pin);
+  LL_GPIO_SetPinMode(LCD_LED_GPIO_Port, LCD_LED_Pin, LL_GPIO_MODE_OUTPUT);
+
   void (*JumpToApplication)(void);
   uint32_t JumpAddress;
   extern int _bflag;
