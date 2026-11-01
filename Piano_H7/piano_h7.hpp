@@ -14,6 +14,7 @@
 #include "tusb.h"
 #include "vars.h"
 #include "actions.h"
+#include "gui.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -154,19 +155,21 @@ extern "C" {
 	const float lift_t_slow = 15132.4f; // мкс — OFF_LIFT_WAIT в G4: дольше подъём идёт без замера
 
 
+	// Переменные — объявления: определения в piano_h7.cpp, заголовок включает ещё и gui.cpp
+
 	// ***** 390(263)-14000(22723)us пролёт молоточка
 	// Приёмник DMA1 занимает целую строку D-cache (32 байта): CPU сюда не пишет, строка
 	// никогда не бывает «грязной», и очистка кэша не затрёт свежий пакет старой копией.
-	alignas(32) uint8_t rx_data[32] = { };
+	extern uint8_t rx_data[32];
 	const uint32_t dataLengthRX = 4;
-	__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
+	extern uint8_t tx_settings[5];
 	const uint32_t tx_settings_length = sizeof(tx_settings);
-	__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
+	extern uint8_t rx_settings[5];
 	const uint32_t rx_settings_length = sizeof(rx_settings);
-	uint8_t compN_ = 0;
-	uint8_t dot_ = 0;
-	uint8_t a_ = 0;
-	uint8_t b_ = 0;
+	extern uint8_t compN_;
+	extern uint8_t dot_;
+	extern uint8_t a_;
+	extern uint8_t b_;
 
 	// new variants
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
@@ -196,11 +199,11 @@ extern "C" {
 	const uint32_t buffer_division = size_BUFFER / 2;
 	const uint32_t count_comparators = 7;
 
-	int32_t buffer_green[size_BUFFER] = {};
-	int32_t buffer_red[size_BUFFER] = {};
-	int32_t buffer_blue_calib[size_BUFFER] = {};
-	int32_t buffer_blue_calib_old[size_BUFFER] = {};
-	int32_t buffer_dac[size_BUFFER] = {};
+	extern int32_t buffer_green[size_BUFFER];
+	extern int32_t buffer_red[size_BUFFER];
+	extern int32_t buffer_blue_calib[size_BUFFER];
+	extern int32_t buffer_blue_calib_old[size_BUFFER];
+	extern int32_t buffer_dac[size_BUFFER];
 
 	struct default_comp {
 		int32_t green_on_default = 2601;
@@ -208,7 +211,7 @@ extern "C" {
 		int32_t green_off_default = 2102;
 		int32_t red_off_default = 2402;
 	};
-	struct default_comp def_comp;
+	extern struct default_comp def_comp;
 
 	struct default_graph_min_max {
 		int32_t on_min = 3600;
@@ -216,72 +219,77 @@ extern "C" {
 		int32_t off_min = 2400;
 		int32_t off_max = 3700;
 	};
-	default_graph_min_max graph_min_max;
+	extern default_graph_min_max graph_min_max;
 
-	std::vector<Chip> vChips;
-	std::map<uint8_t, comparator> mCursor_to_comparator_on;
-	std::map<uint8_t, comparator> mCursor_to_comparator_off;
-	static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
+	extern std::vector<Chip> vChips;
+	extern std::map<uint8_t, comparator> mCursor_to_comparator_on;
+	extern std::map<uint8_t, comparator> mCursor_to_comparator_off;
 
-	chip_states chip_state = chip_states::none;
-	chip_states chip_state_prev = chip_states::none;
-	current_display cur_disp = current_display::none;
-	uint32_t cursor = 0;
+	extern chip_states chip_state;
+	extern chip_states chip_state_prev;
+	extern current_display cur_disp;
+	extern uint32_t cursor;
+	extern bool calib_follow; // курсор калибровки сам переходит на клавишу, которая движется (update_cursor)
+	extern uint32_t calib_dirty; // порогов задано после последнего сохранения во flash
+	extern bool calib_data_new; // calib_poll принёс свежие значения — экрану калибровки перерисоваться
 
-	int8_t noteAdder[size_BUFFER] = {};
+	extern int8_t noteAdder[size_BUFFER];
 	// float mass_F[size_BUFFER] = {}; // TODO FLASH сделать сохранениее в память
 
-	static int counter_on = 0;
-	static int counter_off = 0;
+	extern int counter_on;
+	extern int counter_off;
 
-	bool chip_silent[allChipCount] = { }; // G4 не ответил на последнюю команду (печать «NO ANSWER» один раз)
-	bool chip_bad_adress[allChipCount] = { }; // последний ответ G4 — с чужим адресом (печать «BAD ADRESS» один раз)
-	bool chip_bad_data[allChipCount] = { }; // последний set_comp_value вернул не то значение (печать «BAD SET DATA» один раз)
+	extern bool chip_silent[allChipCount]; // G4 не ответил на последнюю команду (печать «NO ANSWER» один раз)
+	extern bool chip_bad_adress[allChipCount]; // последний ответ G4 — с чужим адресом (печать «BAD ADRESS» один раз)
+	extern bool chip_bad_data[allChipCount]; // последний set_comp_value вернул не то значение (печать «BAD SET DATA» один раз)
 
-	bool send_damper_lift = true; // подъём демпфера (бит 23 от G4) → Poly Key Pressure 0xA0; включать только вместе с SEND_LIFT 1 в G4
+	extern bool send_damper_lift; // подъём демпфера (бит 23 от G4) → Poly Key Pressure 0xA0; включать только вместе с SEND_LIFT 1 в G4
 
-	volatile uint32_t noise_count = 0; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
-	uint32_t noise_shown = 0;
-	volatile uint8_t noise_bytes[4] = { };
-	volatile uint32_t midi_lost = 0; // событий, не влезших в FIFO TinyUSB (пишет usb_task)
-	uint32_t midi_lost_shown = 0;
+	extern volatile uint32_t noise_count; // ошибки шины G4 в DMA1_RX; печать — в основном цикле
+	extern uint32_t noise_shown;
+	extern volatile uint8_t noise_bytes[4];
+	extern volatile uint32_t midi_lost; // событий, не влезших в FIFO TinyUSB (пишет usb_task)
+	extern uint32_t midi_lost_shown;
 	// Пакеты G4 из DMA1_RX в usb_task (PendSV): rx_data[0] << 24 | 24 бита времени. Пишет только DMA1_RX, читает только usb_task.
 	// 64 — как FIFO TinyUSB (512 Б = 64 события по 8 Б); пакет по шине ≥ ~6 мкс — запас на ~0.4 мс простоя PendSV.
 	// Все очереди G4 (26 чипов × 16) — 416 событий, но приходят они не быстрее шины, а PendSV их разбирает сразу.
 	const uint32_t g4_ring_size = 64;
 	static_assert((g4_ring_size & (g4_ring_size - 1)) == 0, "индексы идут по модулю 2^32 — размер должен быть степенью 2");
-	volatile uint32_t g4_ring[g4_ring_size] = { };
-	volatile uint32_t g4_ring_w = 0;
-	volatile uint32_t g4_ring_r = 0;
-	volatile uint32_t g4_ring_lost = 0; // кольцо полно — usb_task не успевает (пишет DMA1_RX)
-	uint32_t g4_ring_lost_shown = 0;
+	extern volatile uint32_t g4_ring[g4_ring_size];
+	extern volatile uint32_t g4_ring_w;
+	extern volatile uint32_t g4_ring_r;
+	extern volatile uint32_t g4_ring_lost; // кольцо полно — usb_task не успевает (пишет DMA1_RX)
+	extern uint32_t g4_ring_lost_shown;
 	// Читает ли хост IN (только usb_task). Открытый порт опрашивается каждые 30–90 мкс: передача, висящая 50 мс, —
 	// хост не читает; IN, свободный 50 мс, — проба пустым пакетом. Проба висит ≤ 1 опроса, ноту задержит редко
 	const uint32_t host_read_timeout_ms = 50;
-	bool host_reads = false;
-	uint32_t host_tx_done_seen = 0;
-	uint32_t host_tx_edge_ms = 0; // HAL_GetTick() последней забранной передачи или поставленной пробы
-	volatile uint32_t lcd_dma_errors = 0; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
-	uint32_t lcd_dma_errors_shown = 0;
-	// Кусок кадра идёт по DMA (ставит my_flush_cb, снимает DMA2_Stream1). LVGL ждёт его только перед
-	// следующим flush, поэтому после lv_timer_handler он ещё может лететь: перед прямыми LCD_* — ждать
-	volatile bool lcd_dma_busy = false;
-	uint32_t touch_errors_shown = 0; // ft6336_errors на момент последней печати
-	uint32_t touch_errors_tick = 0;  // HAL_GetTick() последней печати
+	extern bool host_reads;
+	extern uint32_t host_tx_done_seen;
+	extern uint32_t host_tx_edge_ms; // HAL_GetTick() последней забранной передачи или поставленной пробы
+	extern volatile uint32_t lcd_dma_errors; // ошибки DMA дисплея (пишет DMA2_Stream1); печать — в основном цикле
+	extern uint32_t lcd_dma_errors_shown;
+	extern uint32_t touch_errors_shown; // ft6336_errors на момент последней печати
+	extern uint32_t touch_errors_tick;  // HAL_GetTick() последней печати
+	// Последняя нота ON для строки на главном экране: пишет g4_to_midi (PendSV), читает основной цикл.
+	// last_note_seq — после остальных: основной цикл видит новый номер — нота уже на месте
+	extern volatile uint8_t last_note;
+	extern volatile uint8_t last_note_vel;
+	extern volatile uint32_t last_note_t_us;
+	extern volatile uint32_t last_note_seq;
 
 	// --()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()--()
 
-	int fl = 0.0f; // for test fl
-	float speed_F = 0.0f; // for test
-	float midi_hi_F = 0.0f; // for test
-	float midi_lo_F = 0.0f; // for test
-	uint32_t out_debug_ = 0; // for test
-	float timer_data_in = 0.0f;
-	uint32_t debug_counter = 0.0f;
+	extern int fl; // for test fl
+	extern float speed_F; // for test
+	extern float midi_hi_F; // for test
+	extern float midi_lo_F; // for test
+	extern uint32_t out_debug_; // for test
+	extern float timer_data_in;
+	extern uint32_t debug_counter;
 	const uint32_t key_to_change_memory = { 0xBAFC }; // allChipCount * 0x40 - смещение; 0xBAFC - просто код, который если изменить, то данные перезапишутся в памяти
 
-	float min = 391.2f; // мкс; прежние, в тиках 102.9 нс: 3261 (3834) (~3600)
-	float max = 19207.0f; // мкс; прежние, в тиках 102.9 нс: 170106 (170000) 181000
+	extern float min; // мкс; прежние, в тиках 102.9 нс: 3261 (3834) (~3600)
+	extern float max; // мкс; прежние, в тиках 102.9 нс: 170106 (170000) 181000
 
 
 	// const float key_mass = 0.008f; // 8 гр -->> переехал в массив
@@ -290,41 +298,49 @@ extern "C" {
 	// const float div_off = 0.00000000004f; // меньше - громче 
 	const float deriv_F = 2.0f; // делить на 2 в формуле
 	const float maxMidi_F = 127.99f;
-	std::vector<speed_for_midi> curve_ON;
+	extern std::vector<speed_for_midi> curve_ON;
 	// Кривая ON из роллера. DMA1_RX читает её отсюда, а не lv_roller_get_selected: LVGL нельзя звать
-	// из прерывания, а до ui_init objects.roller == NULL. 9 (lin speed) — как lv_roller_set_selected в screens.c
-	volatile uint8_t curve_on_selected = 9;
-	volatile uint8_t curve_off_selected = 0;  // роллер OFF: 0 — lin, 1 — log
-	volatile uint8_t curve_lift_selected = 0; // роллер LIFT: 0 — lin, 1 — log
-	user_curve_rec user_curve = { user_curve_magic, 461.0f, 18305.0f, 2188.0f, {} }; // ползунки; по умолчанию ≈ normal upd
-	volatile float user_K = 0.0f;  // из user_curve; читает g4_to_midi (PendSV)
-	volatile float user_y0 = 0.0f;
-	volatile float user_x0 = 0.0f;
-	volatile float user_lin_t_fast = vel_t_fast; // user lin, мкс
-	volatile float user_lin_t_slow = vel_t_slow;
-	volatile float user_log_t_fast = vel_t_fast; // user log, мкс
-	volatile float user_log_t_slow = vel_t_slow;
-	float m_F = 0.0f; // for test
-	float sd_F = 0.0f; // for test
-	float sx_F = 0.0f; // for test
-	float sy_F = 0.0f; // for test
+	// из прерывания, а до ui_init objects.curve_roller == NULL. 9 (lin speed) — как lv_roller_set_selected в screens.c
+	extern volatile uint8_t curve_on_selected;
+	extern volatile uint8_t curve_off_selected;  // OFF: 0 — lin, 1 — log
+	extern volatile uint8_t curve_lift_selected; // LIFT: 0 — lin, 1 — log
+	extern user_curve_rec user_curve; // ползунки; по умолчанию ≈ normal upd
+	extern volatile float user_K;  // из user_curve; читает g4_to_midi (PendSV)
+	extern volatile float user_y0;
+	extern volatile float user_x0;
+	extern volatile float user_lin_t_fast; // user lin, мкс
+	extern volatile float user_lin_t_slow;
+	extern volatile float user_log_t_fast; // user log, мкс
+	extern volatile float user_log_t_slow;
+	extern float m_F; // for test
+	extern float sd_F; // for test
+	extern float sx_F; // for test
+	extern float sy_F; // for test
 
 	void to_sleep();
 	void init();
 	void init_LL();
-	void init_LCD_and_touch();
-	void disp_create_and_touch_start();
 	void init_chips();
 	void init_buffers();
 	void init_midi_speeds();
-	void config_charts();
 	void reconfig_charts();
 	void h7();
 	void sync();
 	int sync_sender(const uint8_t& i);
 	void all_H7_to_g4();
 	void all_g4_to_H7();
+	void read_comp_setting(const typeAction& t);
 	void update_cursor(const Chip& comp);
+	void calib_enter(const typeAction t);
+	void calib_leave();
+	void calib_poll();
+	void calib_set_threshold(const dot d);
+	void calib_cursor_move(const int32_t delta);
+	void calib_save();
+	void calib_restore();
+	void bus_stop();
+	void bus_resume();
+	void chips_rescan();
 	bool sender(const command& com, const uint8_t& adress, const uint8_t& compN, const dot& dot, const uint32_t& value);
 	void UART4_send_address(const uint8_t& slave_address);
 	void UART4_send_settings(const command& com, const uint8_t& compN, const uint8_t& dot, const uint32_t& value);
@@ -348,9 +364,6 @@ extern "C" {
 	void debugg_clear();
 	void resetPin();
 	// void DMA2_Stream3_i2c(); // не используется: DMA для тача отключён
-	void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data);
-	void roller_curve_changed(lv_event_t* e);
-	void roller_mode_changed(lv_event_t* e);
 	float speed_vel(const float t, const float t_fast, const float t_slow, const bool log);
 	float on_vel(const uint32_t curve_num, const float t);
 	void user_curve_set();
@@ -358,22 +371,7 @@ extern "C" {
 	const user_curve_rec* user_curve_saved();
 	bool flash_program(const uint32_t addr, const uint32_t* src, const uint32_t words);
 	bool user_curve_save();
-	void create_screen_curve();
-	lv_obj_t* curve_slider(const int32_t y, const int32_t min, const int32_t max, const float value, lv_obj_t** label);
-	void curve_screen_show();
-	void curve_screen_update();
-	void roller_curve_copy_changed(lv_event_t* e);
-	void button_to_curve(lv_event_t* e);
-	void button_off(lv_event_t* e);
-	void button_curve_back(lv_event_t* e);
-	void button_curve_save(lv_event_t* e);
-	void button_curve_reset_pressed(lv_event_t* e);
-	void slider_curve_changed(lv_event_t* e);
-	void DMA2_Stream1_TransferComplete();
-	void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p);
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
-	static inline void uint32_to_bytes_pointer(uint32_t value, uint8_t* bytes);
-	static inline uint32_t bytes_to_uint32_pointer(const uint8_t* bytes);
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
 	bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, const uint32_t& target);
 	int echo_until(const uint8_t& chip_N, const uint32_t& i, const uint8_t& value);
@@ -383,65 +381,8 @@ extern "C" {
 	void reset_bootloaders();
 	void reset_main_to_bootloader();
 	const comparator& searcher_addr_in_cursor(const uint32_t& chip);
-	void set_cursor_piont_on(const comparator& comp);
-	void set_cursor_piont_off(const comparator& comp);
 
-
-	std::string debugg;
-	std::string cursor_string;
-	std::string chart_calib_online;
-	std::string l;
-	std::string r;
-	std::string sensor_on_1_data_string;
-	std::string sensor_on_2_data_string;
-	std::string sensor_off_1_data_string;
-	std::string sensor_off_2_data_string;
-	std::string n_chip;
-	std::string n_comp;
-
-	lv_display_t* disp;
-	lv_indev_t* indev;
-	lv_obj_t* cur_chart;
-	lv_chart_series_t* ser_on_green;
-	lv_chart_series_t* ser_on_red;
-	lv_chart_series_t* ser_on_blue;
-	lv_chart_series_t* ser_on_dac;
-	lv_chart_series_t* ser_off_green;
-	lv_chart_series_t* ser_off_red;
-	lv_chart_series_t* ser_off_blue;
-	lv_chart_series_t* ser_off_dac;
-	lv_style_t cursor_style;
-	lv_chart_cursor_t* cursor_on_vert;
-	lv_chart_cursor_t* cursor_on_hor;
-	lv_chart_cursor_t* cursor_off_vert;
-	lv_chart_cursor_t* cursor_off_hor;
-
-	// экран кривых ON (create_screen_curve). График — по логарифму t, от curve_t_min до curve_t_max
-	const uint32_t curve_points_count = 100;
-	const float curve_t_min = 200.0f;   // мкс, = user_t_fast_min
-	const float curve_t_max = 30000.0f; // мкс, = user_t_slow_max
-	int32_t curve_points[curve_points_count] = {};
-	lv_obj_t* scr_curve;
-	lv_obj_t* roller_curve; // копия objects.roller
-	lv_obj_t* chart_curve;
-	lv_chart_series_t* ser_curve;
-	lv_obj_t* slider_t_fast;
-	lv_obj_t* slider_t_slow;
-	lv_obj_t* slider_x0;
-	lv_obj_t* label_t_fast;
-	lv_obj_t* label_t_slow;
-	lv_obj_t* label_x0;
-	lv_obj_t* label_curve_save;
-	lv_obj_t* label_curve_info;
-	lv_obj_t* button_curve_reset;
-
-	// настройки gpio для DISPLAY взяты отсюда: https://github.com/zeruns/STM32F407_LVGL_Template_MSP3526/blob/master/Core/Src/gpio.c
-	const uint32_t BYTES_PER_PIXEL = (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)); // 565 or 888? (было 565)
-	const uint32_t BUFF_SIZE = (320 * 60 * BYTES_PER_PIXEL); // 60 строк по 320 px = 57600 байт
-	static_assert(BUFF_SIZE <= 0xFFFF, "кусок уходит одним DMA: NDTR и Send_DMA_Data8 — 16 бит");
-	static_assert(LV_DRAW_BUF_STRIDE_ALIGN == 1, "my_flush_cb шлёт width * height * BYTES_PER_PIXEL подряд — строки не должны дополняться");
-	alignas(32) static uint8_t buf_1[BUFF_SIZE]; // выравнивание по строке D-cache — для SCB_CleanDCache_by_Addr
-	alignas(32) static uint8_t buf_2[BUFF_SIZE];
+	extern std::string debugg;
 
 	// int32_t on_green_max = 4095;
 	// int32_t on_green_min = 0;

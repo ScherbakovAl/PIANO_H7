@@ -80,12 +80,16 @@ tinyusb_target_add(${CMAKE_PROJECT_NAME})
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Piano_H7/piano_h7.cpp
+    Piano_H7/gui.cpp
     Piano_H7/ft6336.cpp
     Piano_H7/st7796.cpp
     Piano_H7/ui/ui.c
     Piano_H7/ui/screens.c
     Piano_H7/ui/images.c
     Piano_H7/ui/styles.c
+    Piano_H7/ui/ui_font_ru_10.c
+    Piano_H7/ui/ui_font_ru_14.c
+    Piano_H7/ui/ui_font_ru_24.c
     # tinyUSB
     Piano_H7/usb_descriptors.c
     tinyusb/src/tusb.c
