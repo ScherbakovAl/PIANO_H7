@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- Макет редизайна экранов H7 от 2026-11-01, до реализации. Готовые экраны отличаются в деталях: см. display_piano.eez-project и Piano_H7/ui/screens.c -->
+<title>Экраны PIANO_H7</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;600&family=Montserrat:wght@500;600&display=swap">
+<style>
+/* Лист разработчика: слева макет 320×480 в натуральную величину, справа пояснения. Макеты всегда тёмные — так выглядит дисплей. */
+:root{
+  --bg:#f3f4f2; --paper:#ffffff; --fg:#1d2024; --muted:#5d636b; --line:#d9dcd8;
+  --accent:#0a7d8c; --warn:#a86b00; --danger:#b4232a;
+  --f-disp:"Montserrat",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121417; --paper:#1a1d21; --fg:#e6e7e9; --muted:#9aa0a8; --line:#2c3036;
+  --accent:#3cc3d4; --warn:#e3a52a; --danger:#ef6b70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121417; --paper:#1a1d21; --fg:#e6e7e9; --muted:#9aa0a8; --line:#2c3036;
+  --accent:#3cc3d4; --warn:#e3a52a; --danger:#ef6b70; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:48px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:600;text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:30px}
+h2{font-size:21px}
+h3{font-size:16px}
+p{margin:0;max-width:68ch}
+.lede{color:var(--muted);font-size:16px}
+.eyebrow{font:600 11px/1 var(--f-disp);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+section{display:flex;flex-direction:column;gap:18px}
+ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+li{max-width:66ch}
+.muted{color:var(--muted)}
+.tag{display:inline-block;font:600 11px/1 var(--f-disp);letter-spacing:.06em;padding:4px 7px;border-radius:4px;border:1px solid var(--line);color:var(--muted);vertical-align:2px}
+.tag.w{color:var(--warn);border-color:currentColor}
+.tag.d{color:var(--danger);border-color:currentColor}
+
+/* пара: макет + пояснение */
+.pair{display:grid;grid-template-columns:340px minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:760px){.pair{grid-template-columns:minmax(0,1fr)}}
+.notes{display:flex;flex-direction:column;gap:14px;min-width:0}
+.from{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.from b{font-weight:600}
+
+/* устройство */
+.bezel{width:340px;max-width:100%;padding:10px;background:#050607;border-radius:14px;box-sizing:border-box}
+.dev{position:relative;width:320px;height:480px;background:#15171a;color:#e8e9eb;font:500 14px/1.15 "Montserrat",sans-serif;overflow:hidden}
+.dev *{box-sizing:border-box}
+.a{position:absolute}
+.btn{position:absolute;background:#343638;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:pre-line}
+.btn.r0{border-radius:4px}
+.card{position:absolute;background:#24272b;border-radius:10px}
+.s10{font-size:10px;line-height:1.2}
+.s14{font-size:14px}
+.s24{font-size:24px;line-height:1}
+.mu{color:#8b9098}
+.g{color:#2fc25b}.r{color:#e8692f}.b{color:#0dcaf3}.am{color:#eeab00}.dg{color:#ff6b6b}
+.hdr{position:absolute;left:0;top:0;width:320px;height:44px;background:#0f1012}
+.seg{position:absolute;display:flex;background:#0f1012;border-radius:8px;padding:2px;gap:2px}
+.seg span{flex:1;display:flex;align-items:center;justify-content:center;border-radius:6px;color:#8b9098}
+.seg span.on{background:#3a4a57;color:#fff}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:1px;margin-right:5px}
+.sl{position:absolute;height:6px;background:#3a3d42;border-radius:3px}
+.sl i{position:absolute;left:0;top:0;bottom:0;background:#0dcaf3;border-radius:3px}
+.sl b{position:absolute;top:-7px;width:20px;height:20px;border-radius:50%;background:#e8e9eb}
+.cell{position:absolute;width:18px;height:18px;border-radius:4px}
+.dash{outline:1px dashed #8b9098;outline-offset:-1px}
+.cap{font:12px/1.4 var(--f-body);color:var(--muted);margin-top:8px;max-width:340px}
+
+/* карта переходов */
+.map{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px}
+.map svg{display:block;min-width:720px;width:100%;height:auto}
+.n rect{fill:var(--bg);stroke:var(--line);stroke-width:1.5}
+.n.main rect{stroke:var(--accent);stroke-width:2}
+.n text{fill:var(--fg);font:600 15px var(--f-disp)}
+.n text.sub{fill:var(--muted);font:400 12px var(--f-body)}
+.edge{stroke:var(--muted);stroke-width:1.5;fill:none}
+.edge.sc{stroke:var(--warn);stroke-dasharray:5 4}
+.lbl{fill:var(--muted);font:400 12px var(--f-body)}
+.lbl.w{fill:var(--warn)}
+.lvl{fill:var(--accent);font:600 11px var(--f-disp);letter-spacing:.1em}
+
+/* таблица замен */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:600 12px var(--f-disp);letter-spacing:.04em;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{color:var(--muted)}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.rule{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.sw{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.sw div{display:flex;align-items:center;gap:8px}
+.sw i{width:14px;height:14px;border-radius:3px;flex:none}
+
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px}
+ol.steps li{max-width:72ch}
+.q{display:flex;flex-direction:column;gap:12px}
+.q div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+</style>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">PIANO_H7 · ST7796 320×480 · LVGL 9</span>
+  <h1>Экраны контроллера: что есть и как перестроить</h1>
+  <p class="lede">Главный экран сейчас совмещает игру, калибровку, прошивку G4, память и журнал. Предлагаю один главный экран для игры и три раздела под ним. Глубина меню не больше двух уровней, кнопка «назад» на всех экранах в одном месте.</p>
+</header>
+
+<!-- ============ СЕЙЧАС ============ -->
+<section>
+  <span class="eyebrow">Сейчас</span>
+  <h2>Главный экран по координатам из screens.c</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev" id="cur-main">
+        <div class="btn am s14" style="left:7px;top:9px;width:100px;height:60px">save calib
+to H7
+memory</div>
+        <div class="btn" style="left:118px;top:10px;width:80px;height:60px;color:#12c114">jump to
+usb dfu</div>
+        <div class="btn am s14" style="left:209px;top:10px;width:100px;height:60px">restore calib
+from H7
+memory</div>
+        <div class="btn" style="left:7px;top:91px;width:100px;height:50px;color:#000">reset</div>
+        <div class="btn" style="left:118px;top:90px;width:90px;height:50px;color:#a66473">to flash
+    G4</div>
+        <div class="a s10" style="left:229px;top:79px;width:80px;height:71px;background:#282b30;border-radius:6px;color:#127873;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px">
+          <span>normal upd</span><span style="background:#4e6475;width:100%;text-align:center;padding:3px 0">lin speed</span><span>log speed</span></div>
+        <div class="a s10" style="left:0;top:150px;width:320px;height:170px;background:#000;color:#9a9a9a;padding:2px 4px;white-space:pre;line-height:1.3">0        *+*+*+*   piano   *+*+*+*
+1        calib H7 &gt;&gt; G4
+2        sync OK
+3         1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... = 7
+         pianos
+4        USART noise 2 : 0-0-255-0
+5        MIDI lost 0</div>
+        <div class="btn" style="left:7px;top:324px;width:230px;height:47px">edit calibratilon ON</div>
+        <div class="btn" style="left:7px;top:376px;width:230px;height:47px">edit calibratilon OFF</div>
+        <div class="a s10" style="left:242px;top:324px;width:71px;height:74px;background:#282b30;border-radius:6px;color:#127873;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px">
+          <span style="background:#4e6475;width:100%;text-align:center;padding:3px 0">OFF lin</span><span>OFF log</span></div>
+        <div class="a s10" style="left:242px;top:404px;width:71px;height:74px;background:#282b30;border-radius:6px;color:#127873;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px">
+          <span style="background:#4e6475;width:100%;text-align:center;padding:3px 0">LIFT lin</span><span>LIFT log</span></div>
+        <div class="btn" style="left:7px;top:428px;width:72px;height:50px">curve</div>
+        <div class="btn" style="left:83px;top:428px;width:78px;height:50px">clear disp</div>
+        <div class="btn" style="left:165px;top:428px;width:72px;height:50px">off</div>
+      </div></div>
+      <p class="cap">16 элементов: 11 кнопок, 3 роллера, журнал. Цвета текста как в проекте EEZ.</p>
+    </div>
+    <div class="notes">
+      <h3>Что мешает</h3>
+      <ul>
+        <li><b>Опасное рядом с повседневным.</b> «save» и «restore» срабатывают по <code>PRESSED</code>, то есть от касания, и стоят вплотную к «jump to usb dfu». Всё это видно во время игры.</li>
+        <li><b>Кнопка «reset» не читается:</b> чёрный текст на тёмно-сером фоне. Она перезагружает H7 (<code>action_piano_off → to_sleep</code>).</li>
+        <li><b>Роллер на два пункта</b> (OFF lin/log, LIFT lin/log): чтобы сменить режим, его надо прокрутить. Шрифт 10 и ширина 71 px тесны для пальца.</li>
+        <li><b>Роллер кривых продублирован</b> на главном экране и на экране «curve».</li>
+        <li><b>Журнал занимает 170 px</b> главного экрана. Счётчики ошибок (noise, MIDI lost) уходят из окна в 13 строк вместе с обычными сообщениями.</li>
+        <li><b>Не видно состояния.</b> Подключён ли USB, все ли G4 ответили, есть ли несохранённые правки калибровки, видно только по журналу или никак.</li>
+        <li><b>Кнопка «назад» разная:</b> «&lt;&lt;&lt;» размером 145×67 на экранах прошивки и кривых, 50×67 на калибровке.</li>
+        <li><b>Мелочи:</b> опечатка «calibratilon», центровка текста пробелами («    boot 1 \n     jump»), цвет текста у каждой кнопки свой и ничего не обозначает.</li>
+      </ul>
+      <h3>Экран калибровки</h3>
+      <ul>
+        <li>Курсор двигают четыре невидимые зоны 138×201 поверх графика (L, R, LL, RR; прозрачность текста 20). Подсказки нет, и случайное касание графика сдвигает курсор.</li>
+        <li>Внизу в полосе 70 px шесть подписей разными шрифтами: номер курсора, чип, компаратор, соседи, живое значение. Что к чему, приходится помнить.</li>
+        <li>На кнопках green и red написано только число. Не видно, что нажатие запишет текущее значение в порог.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КАРТА ============ -->
+<section>
+  <span class="eyebrow">Структура</span>
+  <h2>Карта экранов</h2>
+  <p>Пять экранов вместо четырёх и одна общая панель подтверждения. С главного экрана в любой раздел ведёт одно касание, в самый дальний экран два.</p>
+  <div class="map">
+    <svg viewBox="0 0 860 300" role="img" aria-label="Карта переходов: главный экран ведёт в Кривые, Калибровку и Сервис; Сервис ведёт в Прошивку G4 и Журнал">
+      <text class="lvl" x="10" y="42">СТАРТ</text>
+      <text class="lvl" x="10" y="142">УРОВЕНЬ 1</text>
+      <text class="lvl" x="10" y="242">УРОВЕНЬ 2</text>
+      <path class="edge" d="M420 66 V90 H125 V112"/>
+      <path class="edge" d="M420 66 V112"/>
+      <path class="edge" d="M420 66 V90 H705 V112"/>
+      <path class="edge" d="M705 166 V190 H615 V212"/>
+      <path class="edge" d="M705 166 V190 H765 V212"/>
+      <path class="edge sc" d="M495 39 H848 V239 H830"/>
+      <text class="lbl w" x="510" y="31">⚠ из строки статуса прямо в журнал</text>
+      <g class="n main"><rect x="345" y="12" width="150" height="54" rx="8"/><text x="420" y="36" text-anchor="middle">Главный</text><text class="sub" x="420" y="54" text-anchor="middle">статус, кривая, выкл.</text></g>
+      <g class="n"><rect x="50" y="112" width="150" height="54" rx="8"/><text x="125" y="136" text-anchor="middle">Кривые</text><text class="sub" x="125" y="154" text-anchor="middle">ON · OFF · LIFT</text></g>
+      <g class="n"><rect x="345" y="112" width="150" height="54" rx="8"/><text x="420" y="136" text-anchor="middle">Калибровка</text><text class="sub" x="420" y="154" text-anchor="middle">молоточки · демпферы</text></g>
+      <g class="n"><rect x="630" y="112" width="150" height="54" rx="8"/><text x="705" y="136" text-anchor="middle">Сервис</text><text class="sub" x="705" y="154" text-anchor="middle">платы, DFU, память</text></g>
+      <g class="n"><rect x="545" y="212" width="140" height="54" rx="8"/><text x="615" y="236" text-anchor="middle">Прошивка G4</text><text class="sub" x="615" y="254" text-anchor="middle">по шагам</text></g>
+      <g class="n"><rect x="700" y="212" width="130" height="54" rx="8"/><text x="765" y="236" text-anchor="middle">Журнал</text><text class="sub" x="765" y="254" text-anchor="middle">лог и счётчики</text></g>
+      <text class="lbl" x="125" y="190" text-anchor="middle">можно играть и слушать</text>
+      <text class="lbl" x="420" y="190" text-anchor="middle">пианино молчит;</text>
+      <text class="lbl" x="420" y="206" text-anchor="middle">при выходе — «Сохранить N правок?»</text>
+      <text class="lbl" x="10" y="292" text-anchor="start">Панель подтверждения: DFU, перезагрузка, восстановление калибровки, загрузчики G4</text>
+    </svg>
+  </div>
+  <p class="muted">Экран «Кривые» уже существует и шину не трогает. Экраны калибровки ON и OFF сливаются в один с переключателем сверху. Экраны «Сервис» и «Журнал» новые. Экран прошивки G4 остаётся, но кнопки на нём выстроены по порядку операций.</p>
+</section>
+
+<!-- ============ ГЛАВНЫЙ ============ -->
+<section>
+  <span class="eyebrow">Предложение · 1 из 6</span>
+  <h2>Главный: только то, что нужно во время игры</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="a" style="left:0;top:0;width:320px;height:28px;background:#0f1012"></div>
+        <div class="a s14" style="left:8px;top:6px"><span class="dot" style="background:#2fc25b"></span>26/26</div>
+        <div class="a s14 mu" style="left:96px;top:6px"><span class="dot" style="background:#2fc25b"></span>USB</div>
+        <div class="a s14 am" style="left:174px;top:6px"><span class="dot" style="background:#eeab00"></span>калибр.</div>
+        <div class="btn r0 s14 am" style="left:262px;top:2px;width:54px;height:24px;background:#3a2f12">⚠ 2</div>
+
+        <div class="card" style="left:8px;top:36px;width:304px;height:176px"></div>
+        <div class="a s10 mu" style="left:20px;top:46px;letter-spacing:.08em">КРИВАЯ ON</div>
+        <div class="a s24" style="left:20px;top:62px">lin speed</div>
+        <div class="a s24 mu" style="left:286px;top:62px">›</div>
+        <svg class="a" style="left:20px;top:96px" width="280" height="80" viewBox="0 0 280 80" id="mini-curve"></svg>
+        <div class="a s14 mu" style="left:20px;top:184px">OFF <span style="color:#e8e9eb">log</span> · LIFT <span style="color:#e8e9eb">lin</span></div>
+
+        <div class="card dash" style="left:8px;top:220px;width:304px;height:44px;background:#1c1e21"></div>
+        <div class="a s14" style="left:20px;top:234px">A4 <span class="mu">·</span> vel 87 <span class="mu">· 3.2 ms</span></div>
+        <div class="sl" style="left:200px;top:239px;width:100px"><i style="width:68%"></i></div>
+
+        <div class="btn" style="left:8px;top:272px;width:148px;height:104px;flex-direction:column;gap:6px;align-items:flex-start;padding:0 14px;justify-content:center;text-align:left">
+          <span class="s24 b">≋</span><span>Калибровка</span><span class="s10 mu">молоточки, демпферы</span></div>
+        <div class="btn" style="left:164px;top:272px;width:148px;height:104px;flex-direction:column;gap:6px;align-items:flex-start;padding:0 14px;justify-content:center;text-align:left">
+          <span class="s24 mu">⚙</span><span>Сервис</span><span class="s10 mu">платы G4, DFU, журнал</span></div>
+
+        <div class="btn mu" style="left:8px;top:424px;width:304px;height:48px">⏻  Выключить <span class="s10" style="margin-left:6px">(удерживать)</span></div>
+      </div></div>
+      <p class="cap">Строка «A4 · vel 87» обведена пунктиром: она по желанию, см. вопросы в конце.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Строка статуса, 28 px.</b> Число ответивших G4, USB, янтарная метка «калибр.» при несохранённых правках. Справа «⚠ 2»: счётчик новых ошибок, касание открывает журнал. Перерисовывается только при изменении.</li>
+        <li><b>Плитка кривой</b> вместо роллера: крупное название, график кривой, режимы OFF и LIFT. Касание открывает «Кривые». Это самое частое действие, поэтому у него самая большая цель.</li>
+        <li><b>Две плитки разделов</b> по 148×104. Подпись под названием подсказывает, что внутри.</li>
+        <li><b>«Выключить» по долгому нажатию</b> (<code>LV_EVENT_LONG_PRESSED</code>): кнопка у нижнего края, вдали от остального. Включается, как и сейчас, кнопкой SW1.</li>
+      </ul>
+      <div class="from">
+        <b>Куда ушло со старого главного</b>
+        <span>роллер кривых, роллеры OFF и LIFT → «Кривые»</span>
+        <span>edit calibration ON / OFF, save calib → «Калибровка»</span>
+        <span>restore calib, jump to usb dfu, reset, to flash G4 → «Сервис»</span>
+        <span>журнал, clear disp → «Журнал»</span>
+        <span>curve → плитка кривой; off → «Выключить»</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КРИВЫЕ ============ -->
+<section>
+  <span class="eyebrow">Предложение · 2 из 6</span>
+  <h2>Кривые: все три кривые velocity на одном экране</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="hdr"></div>
+        <div class="btn s24 mu" style="left:4px;top:4px;width:44px;height:36px">‹</div>
+        <div class="a s14" style="left:58px;top:14px">Кривые</div>
+        <div class="btn s14 am" style="left:212px;top:4px;width:104px;height:36px"><span class="dot" style="background:#eeab00"></span>Сохранить</div>
+
+        <div class="seg s14" style="left:8px;top:52px;width:304px;height:36px"><span class="on">ON</span><span>OFF</span><span>LIFT</span></div>
+
+        <div class="a" style="left:8px;top:96px;width:220px;height:188px;background:#1c1e21;border-radius:4px"></div>
+        <svg class="a" style="left:8px;top:96px" width="220" height="188" viewBox="0 0 220 188" id="big-curve"></svg>
+        <div class="a s10 mu" style="left:8px;top:288px">0.2 ms</div>
+        <div class="a s10" style="left:70px;top:288px;width:100px;text-align:center">2 ms → 12</div>
+        <div class="a s10 mu" style="left:196px;top:288px">30 ms</div>
+
+        <div class="a s14" style="left:236px;top:96px;width:76px;height:188px;background:#282b30;border-radius:6px;display:flex;flex-direction:column;justify-content:center;gap:12px;text-align:center;color:#8b9098">
+          <span class="s10">lin speed</span><span>log speed</span><span style="background:#3a4a57;color:#fff;padding:8px 0">user</span><span>user lin</span><span class="s10">user log</span></div>
+
+        <div class="a s14 mu" style="left:8px;top:312px">127 при t</div><div class="a s14" style="left:250px;top:312px;width:62px;text-align:right">390 µs</div>
+        <div class="btn s14" style="left:8px;top:332px;width:32px;height:28px">−</div>
+        <div class="sl" style="left:52px;top:343px;width:216px"><i style="width:12%"></i><b style="left:16px"></b></div>
+        <div class="btn s14" style="left:280px;top:332px;width:32px;height:28px">+</div>
+
+        <div class="a s14 mu" style="left:8px;top:368px">1 при t</div><div class="a s14" style="left:230px;top:368px;width:82px;text-align:right">14000 µs</div>
+        <div class="btn s14" style="left:8px;top:388px;width:32px;height:28px">−</div>
+        <div class="sl" style="left:52px;top:399px;width:216px"><i style="width:70%"></i><b style="left:141px"></b></div>
+        <div class="btn s14" style="left:280px;top:388px;width:32px;height:28px">+</div>
+
+        <div class="a s14 mu" style="left:8px;top:424px">изгиб x0</div><div class="a s14" style="left:250px;top:424px;width:62px;text-align:right">300 µs</div>
+        <div class="btn s14" style="left:8px;top:444px;width:32px;height:28px">−</div>
+        <div class="sl" style="left:52px;top:455px;width:216px"><i style="width:40%"></i><b style="left:76px"></b></div>
+        <div class="btn s14" style="left:280px;top:444px;width:32px;height:28px">+</div>
+      </div></div>
+      <p class="cap">Выбрана кривая user: у неё все три ползунка и «Сохранить». Значения для примера.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Переключатель ON · OFF · LIFT</b> из трёх кнопок с <code>LV_OBJ_FLAG_CHECKABLE</code>, отмечена одна. На вкладках OFF и LIFT вместо роллера два сегмента «lin · log», а на графике кривая <code>speed_vel</code>. Режимы демпферов оказываются там же, где и ON, и их тоже видно на графике.</li>
+        <li><b>Роллер шире и крупнее:</b> 76 px, шрифт 14, видно пять строк. Единственный роллер кривых в прошивке.</li>
+        <li><b>Ползунок плюс кнопки «−» и «+».</b> На ёмкостном экране пальцем трудно попасть в конкретное значение на диапазоне в тысячи микросекунд. Кнопки дают шаг, например 10 µs, удержание повторяет его. Значение стоит справа над ползунком.</li>
+        <li><b>Справа в шапке одна кнопка действия:</b> «Сохранить» у кривой user, «Сброс» у user lin и user log, у остальных пусто. Янтарная точка означает несохранённую правку.</li>
+        <li>Экран, как и сейчас, шину не останавливает: можно играть и сразу слышать изменения.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КАЛИБРОВКА ============ -->
+<section>
+  <span class="eyebrow">Предложение · 3 из 6</span>
+  <h2>Калибровка: один экран для молоточков и демпферов</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="hdr"></div>
+        <div class="btn s24 mu" style="left:4px;top:4px;width:44px;height:36px">‹</div>
+        <div class="seg s14" style="left:54px;top:4px;width:178px;height:36px"><span class="on">Молоточки</span><span>Демпферы</span></div>
+        <div class="btn s14 am" style="left:238px;top:4px;width:78px;height:36px">Сохр. 3</div>
+
+        <svg class="a" style="left:0;top:48px" width="320" height="196" viewBox="0 0 320 196" id="cal-chart"></svg>
+
+        <div class="btn s14" style="left:8px;top:252px;width:44px;height:48px">«7</div>
+        <div class="btn s24" style="left:56px;top:252px;width:44px;height:48px">‹</div>
+        <div class="a" style="left:104px;top:254px;width:112px;text-align:center">
+          <div class="s14">Клавиша 23</div><div class="s10 mu" style="margin-top:5px">G2 · чип 4 · комп. 1</div></div>
+        <div class="btn s24" style="left:220px;top:252px;width:44px;height:48px">›</div>
+        <div class="btn s14" style="left:268px;top:252px;width:44px;height:48px">7»</div>
+
+        <div class="card" style="left:8px;top:308px;width:304px;height:96px;background:#1c1e21"></div>
+        <div class="a s10 mu" style="left:20px;top:316px">сейчас</div>
+        <div class="a s24 b" style="left:20px;top:330px">1834</div>
+        <div class="a s10 mu" style="left:96px;top:332px">← 1790 · 1851 →</div>
+        <div class="a s10" style="left:96px;top:347px;color:#9fe3b3">запас R до покоя 254 ✓</div>
+        <div class="btn s10" style="left:226px;top:314px;width:80px;height:26px;background:#2b3b2f;color:#9fe3b3">следить ●</div>
+        <svg class="a" style="left:20px;top:366px" width="280" height="36" viewBox="0 0 280 36" id="cal-scale"></svg>
+
+        <div class="btn" style="left:8px;top:412px;width:148px;height:60px;flex-direction:column;gap:6px;border:1px solid #2fc25b55">
+          <span class="s14 g">Задать G</span><span class="s10 mu">2101 → 1834</span></div>
+        <div class="btn" style="left:164px;top:412px;width:148px;height:60px;flex-direction:column;gap:6px;border:1px solid #e8692f55">
+          <span class="s14 r">Задать R</span><span class="s10 mu">1580 → 1834</span></div>
+      </div></div>
+      <p class="cap">График 320×196 вместо 320×409: при перерисовке каждые ~3 мс по SPI уходит вдвое меньше пикселей.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Переключатель «Молоточки · Демпферы»</b> в шапке заменяет две кнопки на главном и два экрана. Переключение вызывает выход из одного режима и вход в другой. Это уже существующие <code>action_to_disp_calibration_on/off</code>.</li>
+        <li><b>Видимая навигация:</b> «‹ ›» на одну клавишу, ««7 7»» на целый чип. Касание точки графика сразу выбирает эту клавишу (<code>lv_chart_get_pressed_point</code>). Невидимые зоны поверх графика больше не нужны.</li>
+        <li><b>Клавиша вместо номера курсора.</b> Номер клавиши и нота по той же таблице адрес → нота, что и в MIDI. Чип и компаратор показаны мелко для отладки.</li>
+        <li><b>Шкала порогов</b> для текущей клавиши: R, G и живое значение на одной оси. Под ней запас «R до покоя». Если запас меньше ~100 кодов (гистерезис 70 мВ, пункт 7 в <code>планы/калибровка.md</code>), подпись становится янтарной.</li>
+        <li><b>«следить»</b> включает и выключает автопереход курсора на клавишу, которая сейчас движется (<code>update_cursor</code>). Выключенный не даст курсору перескочить перед нажатием «Задать».</li>
+        <li><b>«Задать G / R»</b> показывает, что произойдёт: «было → станет».</li>
+        <li><b>«Сохр. 3»</b> показывает число несохранённых правок и срабатывает по <code>RELEASED</code>. На «‹» при несохранённых правках выходит панель «Сохранить 3 правки? Не сохранять / Сохранить».</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ СЕРВИС ============ -->
+<section>
+  <span class="eyebrow">Предложение · 4 из 6</span>
+  <h2>Сервис: редкое и необратимое</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="hdr"></div>
+        <div class="btn s24 mu" style="left:4px;top:4px;width:44px;height:36px">‹</div>
+        <div class="a s14" style="left:58px;top:14px">Сервис</div>
+
+        <div class="card" style="left:8px;top:52px;width:304px;height:136px"></div>
+        <div class="a s14" style="left:20px;top:62px">Платы G4</div>
+        <div class="a s10 mu" style="left:20px;top:80px">25 из 26 в piano</div>
+        <div class="btn s14" style="left:200px;top:58px;width:104px;height:32px">↻ Опросить</div>
+        <div class="a s10 mu" style="left:16px;top:108px">ON</div>
+        <div class="a s10 mu" style="left:16px;top:132px">OFF</div>
+        <div id="grid"></div>
+        <div class="a s10 mu" style="left:20px;top:162px"><span class="dot" style="background:#2fc25b"></span>piano <span class="dot" style="background:#eeab00;margin-left:8px"></span>boot 1 <span class="dot" style="background:#a98bf0;margin-left:8px"></span>boot 2 <span class="dot" style="background:#4a4e55;margin-left:8px"></span>нет ответа</div>
+
+        <div class="btn" style="left:8px;top:196px;width:304px;height:48px;justify-content:space-between;padding:0 14px"><span>Прошивка G4</span><span class="s24 mu">›</span></div>
+        <div class="btn" style="left:8px;top:250px;width:304px;height:48px;justify-content:space-between;padding:0 14px"><span>Журнал <span class="s10 am" style="margin-left:6px">⚠ 2</span></span><span class="s24 mu">›</span></div>
+        <div class="btn am" style="left:8px;top:304px;width:304px;height:48px;justify-content:flex-start;padding:0 14px">Восстановить калибровку из памяти</div>
+
+        <div class="a s10 mu" style="left:12px;top:368px;letter-spacing:.08em">СИСТЕМА H7</div>
+        <div class="btn dg" style="left:8px;top:386px;width:148px;height:48px;border:1px solid #ff6b6b66">USB DFU</div>
+        <div class="btn dg" style="left:164px;top:386px;width:148px;height:48px;border:1px solid #ff6b6b66">Перезагрузить</div>
+      </div></div>
+      <p class="cap">Пример состояния: плата 9 ушла в загрузчик. Сейчас такое видно только по журналу, а 7 клавиш молчат.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Сетка плат 13 × 2:</b> адреса 1–13 (ON) и 14–26 (OFF), цвет показывает состояние. Для этого нужно хранить состояние каждого чипа в <code>vChips</code>, а не общее по последнему ответившему (пункт 9 в <code>планы/обобщение_2026-10-18.md</code>).</li>
+        <li><b>«Опросить»</b> вместо «echo ?»: пересканировать платы без перезагрузки H7. Эту кнопку уже предлагали в <code>шум_при_включении.md</code>.</li>
+        <li><b>Восстановление калибровки</b> переносится сюда: оно редкое и стирает несохранённые правки. Подтверждение обязательно.</li>
+        <li><b>USB DFU и перезагрузка</b> обведены красным и спрашивают подтверждение.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ПРОШИВКА ============ -->
+<section>
+  <span class="eyebrow">Предложение · 5 из 6</span>
+  <h2>Прошивка G4: шаги по порядку</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="hdr"></div>
+        <div class="btn s24 mu" style="left:4px;top:4px;width:44px;height:36px">‹</div>
+        <div class="a s14" style="left:58px;top:14px">Прошивка G4</div>
+
+        <div class="card" style="left:8px;top:52px;width:304px;height:36px;background:#1c1e21"></div>
+        <div class="a s14" style="left:20px;top:62px"><span class="dot" style="background:#eeab00"></span>26 плат в загрузчике 1</div>
+
+        <div class="a s10 mu" style="left:12px;top:100px;letter-spacing:.08em">ОСНОВНАЯ ПРОШИВКА</div>
+        <div class="btn mu" style="left:8px;top:116px;width:304px;height:44px;justify-content:flex-start;padding:0 14px;background:#24272b">1  В загрузчик <span class="g" style="margin-left:auto">✓</span></div>
+        <div class="btn" style="left:8px;top:166px;width:304px;height:60px;justify-content:flex-start;padding:0 14px;background:#1e4f5c;flex-direction:column;align-items:flex-start;gap:8px">
+          <span>2  Записать прошивку H7 → G4</span>
+          <span style="display:block;width:276px;height:6px;background:#0f1012;border-radius:3px;position:relative"><i style="position:absolute;left:0;top:0;bottom:0;width:38%;background:#0dcaf3;border-radius:3px"></i></span></div>
+        <div class="btn" style="left:8px;top:232px;width:304px;height:44px;justify-content:flex-start;padding:0 14px;background:#1c1e21;color:#5a5f66">3  Запустить piano</div>
+
+        <div class="btn mu" style="left:8px;top:286px;width:304px;height:40px;justify-content:flex-start;padding:0 14px;background:#1c1e21">▸  Загрузчики <span class="s10 dg" style="margin-left:8px">опасно</span></div>
+
+        <div class="a s10" style="left:0;top:336px;width:320px;height:144px;background:#000;color:#9a9a9a;padding:6px 8px;white-space:pre;line-height:1.35">12        reset to boot 1: 26 ok
+13        flash start
+14        page 34 / 89
+15        page 35 / 89
+16        page 36 / 89</div>
+      </div></div>
+      <p class="cap">Число страниц и строки журнала для примера.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Три шага основной прошивки</b> вместо трёх разбросанных кнопок «piano reset to boot 1», «boot 1 copy &amp; flash», «boot 1 jump to piano». Нумерация здесь означает настоящий порядок. Шаг, недоступный при текущем <code>chip_state</code>, серый и не нажимается. Сделанный отмечен галочкой.</li>
+        <li><b>Полоса прогресса</b> во время записи (<code>lv_bar</code> включён). Для неё цикл записи страниц должен между страницами отдавать время <code>lv_timer_handler</code>. Сейчас UI на это время замирает.</li>
+        <li><b>«Загрузчики» свёрнуты:</b> boot 1 → boot 2, переход в boot 2, boot 2 → boot 1, «boots reset to boot 1». Каждая кнопка с подтверждением, потому что ошибка там может окирпичить плату (пункт 8 обобщения).</li>
+        <li><b>Хвост журнала внизу:</b> во время прошивки он нужен прямо здесь.</li>
+        <li>После шага 3 и выхода по «‹» пианино должно заиграть. Сейчас этого не происходит: <code>chip_state</code> остаётся <code>boot1</code>, пункт 9 обобщения. С пошаговым экраном это заметно сразу.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ЖУРНАЛ + ДИАЛОГ ============ -->
+<section>
+  <span class="eyebrow">Предложение · 6 из 6</span>
+  <h2>Журнал и панель подтверждения</h2>
+  <div class="pair">
+    <div>
+      <div class="bezel"><div class="dev">
+        <div class="hdr"></div>
+        <div class="btn s24 mu" style="left:4px;top:4px;width:44px;height:36px">‹</div>
+        <div class="a s14" style="left:58px;top:14px">Журнал</div>
+        <div class="btn s14" style="left:212px;top:4px;width:104px;height:36px">Очистить</div>
+        <div class="card" style="left:8px;top:52px;width:148px;height:34px;background:#1c1e21"></div><div class="a s10" style="left:18px;top:64px"><span class="mu">USART noise</span>  <span class="am">2</span></div>
+        <div class="card" style="left:164px;top:52px;width:148px;height:34px;background:#1c1e21"></div><div class="a s10" style="left:174px;top:64px"><span class="mu">MIDI lost</span>  0</div>
+        <div class="card" style="left:8px;top:92px;width:148px;height:34px;background:#1c1e21"></div><div class="a s10" style="left:18px;top:104px"><span class="mu">G4 ring lost</span>  0</div>
+        <div class="card" style="left:164px;top:92px;width:148px;height:34px;background:#1c1e21"></div><div class="a s10" style="left:174px;top:104px"><span class="mu">sync err</span>  0</div>
+        <div class="a s10" style="left:0;top:134px;width:320px;height:346px;background:#000;color:#9a9a9a;padding:6px 8px;white-space:pre;line-height:1.4">0        *+*+*+*   piano   *+*+*+*
+1        calib H7 &gt;&gt; G4
+2        sync OK
+3         1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... = 7
+         pianos
+4        calib G4 &gt;&gt; H7
+5        calib saved
+6        <span style="color:#eeab00">USART noise 1 : 0-0-255-0</span>
+7        <span style="color:#eeab00">USART noise 2 : 0-0-255-0</span></div>
+
+        <div class="a" style="left:0;top:0;width:320px;height:480px;background:rgba(0,0,0,.62)"></div>
+        <div class="card" style="left:20px;top:150px;width:280px;height:184px;background:#2a2d31"></div>
+        <div class="a s14" style="left:36px;top:168px">Перейти в USB DFU?</div>
+        <div class="a s14 mu" style="left:36px;top:196px;width:248px;line-height:1.4">H7 перезагрузится в DFU-загрузчик. Пианино замолчит.</div>
+        <div class="btn s14" style="left:36px;top:266px;width:120px;height:48px">Отмена</div>
+        <div class="btn s14" style="left:164px;top:266px;width:120px;height:48px;background:#7a1f22;color:#fff">Перейти</div>
+      </div></div>
+      <p class="cap">Под затемнением экран журнала. Панель показана для примера: из журнала DFU не вызывается.</p>
+    </div>
+    <div class="notes">
+      <h3>Журнал</h3>
+      <ul>
+        <li>Тот же <code>debugg</code>, но на весь экран и с прокруткой. Счётчики ошибок вынесены наверх и не уходят из окна.</li>
+        <li>Предупреждения выделены янтарным. Число в «⚠» строки статуса считает их с последнего открытия журнала.</li>
+        <li>«Очистить» вместо двух кнопок «clear disp».</li>
+      </ul>
+      <h3>Панель подтверждения</h3>
+      <ul>
+        <li>Одна функция на все случаи: заголовок, одна фраза о последствиях, «Отмена» слева и действие справа. Действие подписано глаголом («Перейти», «Восстановить»), а не «Да».</li>
+        <li>Собирается из <code>lv_obj</code> на <code>lv_layer_top()</code>, <code>LV_USE_MSGBOX</code> включать не нужно. Затемнение рисуется один раз при открытии.</li>
+        <li>Где нужна: DFU, перезагрузка, восстановление калибровки, все операции загрузчиков, выход из калибровки с несохранёнными правками.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ЗАМЕНЫ ============ -->
+<section>
+  <span class="eyebrow">Элементы</span>
+  <h2>Что на что заменить</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Сейчас</th><th>Предлагаю</th><th>Зачем</th><th>Цена в LVGL</th></tr></thead>
+    <tbody>
+      <tr><td>Роллер на 2 пункта: OFF lin/log, LIFT lin/log</td><td>Сегмент из двух кнопок, отмечена одна</td><td>Оба варианта видны сразу, смена одним касанием</td><td>Обычные кнопки с <code>CHECKABLE</code> или <code>LV_USE_BUTTONMATRIX</code> (~3 КБ)</td></tr>
+      <tr><td>Роллер кривых 80×71, шрифт 10, в двух местах</td><td>Плитка с названием на главном, один роллер 76×188 со шрифтом 14 в «Кривых»</td><td>Нет дубля, крупнее цель</td><td>0</td></tr>
+      <tr><td>Невидимые зоны L / R / LL / RR поверх графика</td><td>Кнопки «‹ › «7 7»» под графиком и касание точки графика</td><td>Понятно без подсказки, нет случайных сдвигов</td><td><code>lv_chart_get_pressed_point</code>, есть в v9</td></tr>
+      <tr><td>Номер курсора, чип и компаратор отдельными подписями</td><td>«Клавиша 23», под ней нота, чип и компаратор</td><td>Видно, какую клавишу калибруешь</td><td>0</td></tr>
+      <tr><td>Кнопки green и red с числом</td><td>«Задать G / R» и «было → станет», шкала порогов</td><td>Видно, что сделает нажатие и не слишком ли близко R к покою</td><td>Шкала: <code>lv_obj</code> с тремя метками или <code>lv_bar</code></td></tr>
+      <tr><td>save и restore по <code>PRESSED</code> на главном</td><td>Сохранение в шапке калибровки по <code>RELEASED</code> со счётчиком правок, восстановление в «Сервисе» с подтверждением</td><td>Нет случайного нажатия во время игры</td><td>0</td></tr>
+      <tr><td>Журнал 320×170 на главном</td><td>Строка статуса и экран «Журнал»</td><td>Главный экран освобождается для игры</td><td>0</td></tr>
+      <tr><td>8 кнопок загрузчиков сеткой</td><td>3 шага, свёрнутый блок «Загрузчики», недоступное серым</td><td>Порядок операций виден на экране, его не нужно помнить</td><td>0, полоса прогресса через <code>lv_bar</code></td></tr>
+      <tr><td>Ползунок без точной подстройки</td><td>Ползунок, «−» и «+», значение над ним</td><td>Точное значение пальцем</td><td>0</td></tr>
+      <tr><td>Кнопка «off» по касанию</td><td>«Выключить» по долгому нажатию</td><td>Не выключится от случайного касания</td><td>0</td></tr>
+      <tr><td>«&lt;&lt;&lt;» трёх размеров</td><td>«‹» 44×36 в точке (4, 4) на всех экранах</td><td>Рука находит без взгляда</td><td>0</td></tr>
+      <tr><td>Центровка пробелами</td><td><code>text_align: center</code></td><td>Ровно при любом тексте и шрифте</td><td>0</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ ПРАВИЛА ============ -->
+<section>
+  <span class="eyebrow">Визуальные правила</span>
+  <h2>Чтобы экраны выглядели одной системой</h2>
+  <div class="rules">
+    <div class="rule"><h3>Сетка</h3><p>Шаг 8 px, поля 8 px. Шапка 44 px, строка статуса 28 px. Касаемая цель не меньше 44×44, основные кнопки высотой 48. Скругление 8 у кнопок, 10 у карточек.</p></div>
+    <div class="rule"><h3>Цвет только со смыслом</h3>
+      <div class="sw">
+        <div><i style="background:#2fc25b"></i>G-порог, «всё в порядке»</div>
+        <div><i style="background:#e8692f"></i>R-порог</div>
+        <div><i style="background:#0dcaf3"></i>живое значение, выбранное</div>
+        <div><i style="background:#eeab00"></i>память: сохранить, есть правки, предупреждение</div>
+        <div><i style="background:#ff6b6b"></i>необратимое: DFU, перезагрузка, загрузчики</div>
+        <div><i style="background:#343638;outline:1px solid #8b9098"></i>все остальные кнопки, белый текст</div>
+      </div></div>
+    <div class="rule"><h3>Три размера шрифта</h3><p>24 для главного числа или названия на экране, 14 для всего остального, 10 только для осей, журнала и мелких подписей. Все три уже включены в <code>lv_conf.h</code>.</p></div>
+    <div class="rule"><h3>Скорость</h3><p>Без теней, прозрачности и анимаций, кроме затемнения под панелью. Статус и подписи перерисовываются только при изменении. График калибровки вдвое меньше по площади.</p></div>
+  </div>
+</section>
+
+<!-- ============ ПОРЯДОК ============ -->
+<section>
+  <span class="eyebrow">Внедрение</span>
+  <h2>Порядок: каждый этап работает сам по себе</h2>
+  <ol class="steps">
+    <li><b>Главный, Сервис, Журнал, панель подтверждения.</b> Опасные кнопки уходят с главного экрана, логика не меняется. Сетку плат сначала можно показать по общему <code>chip_state</code>, а по чипам сделать позже.</li>
+    <li><b>Кривые.</b> OFF и LIFT переезжают на экран кривых, двухпозиционные роллеры заменяются сегментами, у ползунков появляются «−» и «+».</li>
+    <li><b>Калибровка.</b> Делать вместе с исправлениями из <code>планы/калибровка.md</code> (пункты 1, 2, 4, 5): это тот же код курсора и кнопок порога, и шкала порогов опирается на проверку значений из пункта 2.</li>
+    <li><b>Прошивка G4 по шагам.</b> Требует учёта состояния каждого чипа и отдачи времени UI во время записи. По памяти «прошивку G4 по UART не трогать до доступа по SWD» этот этап логично отложить до SWD.</li>
+  </ol>
+</section>
+
+<!-- ============ ВОПРОСЫ ============ -->
+<section>
+  <span class="eyebrow">Решения за вами</span>
+  <h2>Что нужно решить до начала</h2>
+  <div class="q">
+    <div><b>Язык интерфейса.</b><span class="muted">Встроенный Montserrat в LVGL без кириллицы. Для русского нужен свой шрифт из <code>lv_font_conv</code> (Montserrat с кириллицей и значками LV_SYMBOL) в размерах 10, 14 и 24. Это десятки КБ. Место есть: занято ~263 КБ из 640. Английский бесплатен.</span></div>
+    <div><b>EEZ Studio или код.</b><span class="muted">Сейчас половина UI сгенерирована EEZ, половина (экран кривых, кнопки off и curve) написана кодом, чтобы перегенерация её не стёрла. Предлагаю перенести весь UI в отдельный файл с общими стилями и функциями вроде «шапка», «кнопка», «панель подтверждения». Тогда единый вид получается сам собой. Второй вариант: перерисовать всё в EEZ и держать стили там.</span></div>
+    <div><b>Какие кривые оставить в роллере.</b><span class="muted">Их 14: older curve, normal, bright, muffled, experiment, new, new 2, new 3, normal upd, lin speed, log speed, user, user lin, user log. Если часть из них уже не нужна, роллер станет короче.</span></div>
+    <div><b>Строка «последняя нота» на главном.</b><span class="muted">Нота, velocity, время пролёта. Удобно проверять кривую на слух и глазом. Это новая функция, и экран будет перерисовываться во время игры, хоть и только эта строка. Нужна ли?</span></div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const NS="http://www.w3.org/2000/svg";
+  function el(svg,tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);svg.appendChild(e);return e}
+  // velocity lin speed: 127 · t_fast / t на логарифмической оси 0.2..30 мс
+  function curve(svg,w,h,grid,fn){
+    fn=fn||(t=>127*390/t);
+    if(!svg)return;
+    if(grid){for(let i=1;i<4;i++)el(svg,"line",{x1:0,x2:w,y1:h*i/4,y2:h*i/4,stroke:"#2f3338","stroke-width":1})}
+    const pts=[];
+    for(let i=0;i<=80;i++){const x=i/80,t=200*Math.pow(150,x),v=Math.max(1,Math.min(127,fn(t)));pts.push((x*w).toFixed(1)+","+(h-4-(v/127)*(h-8)).toFixed(1))}
+    el(svg,"polyline",{points:pts.join(" "),fill:"none",stroke:"#0dcaf3","stroke-width":2});
+  }
+  curve(document.getElementById("mini-curve"),280,80,false);
+  curve(document.getElementById("big-curve"),220,188,true,t=>{const a=1/(690*690),b=1/(14300*14300),K=126/(a-b);return K/((t+300)*(t+300))+1-K*b});
+
+  // график калибровки: 91 точка, G, R, живое
+  const cal=document.getElementById("cal-chart");
+  if(cal){
+    let s=11;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+    const W=320,H=196,N=91,lo=1300,hi=2400,y=v=>(H-6-(v-lo)/(hi-lo)*(H-12)).toFixed(1),x=i=>(2+i*(W-4)/(N-1)).toFixed(1);
+    el(cal,"rect",{x:0,y:0,width:W,height:H,fill:"#000"});
+    const ser=[[2100,150,"#2fc25b"],[1600,140,"#e8692f"],[1850,110,"#0dcaf3"]];
+    const data=ser.map(([b,a])=>Array.from({length:N},(_,i)=>b+(rnd()-.5)*a+50*Math.sin(i/8)));
+    data[0][23]=2101;data[1][23]=1580;data[2][23]=1834;
+    ser.forEach(([,,c],k)=>el(cal,"polyline",{points:data[k].map((v,i)=>x(i)+","+y(v)).join(" "),fill:"none",stroke:c,"stroke-width":1.5}));
+    el(cal,"line",{x1:x(23),x2:x(23),y1:0,y2:H,stroke:"#9aa0a8","stroke-width":1});
+    el(cal,"line",{x1:0,x2:W,y1:y(1834),y2:y(1834),stroke:"#9aa0a8","stroke-width":1,"stroke-dasharray":"3 3"});
+    el(cal,"circle",{cx:x(23),cy:y(1834),r:4,fill:"#0dcaf3"});
+  }
+
+  // шкала порогов текущей клавиши
+  const sc=document.getElementById("cal-scale");
+  if(sc){
+    const lo=1300,hi=2400,X=v=>(4+(v-lo)/(hi-lo)*272).toFixed(1);
+    el(sc,"rect",{x:4,y:6,width:272,height:6,rx:3,fill:"#3a3d42"});
+    el(sc,"rect",{x:X(1580),y:6,width:(X(1834)-X(1580)).toFixed(1),height:6,fill:"#2fc25b",opacity:.45});
+    [[1580,"#e8692f","R"],[2101,"#2fc25b","G"],[1834,"#0dcaf3",""]].forEach(([v,c,t])=>{
+      el(sc,"rect",{x:X(v)-1.5,y:0,width:3,height:18,fill:c});
+      if(t){const tx=el(sc,"text",{x:X(v),y:31,fill:c,"font-size":10,"font-family":"Montserrat,sans-serif","text-anchor":"middle"});tx.textContent=t+" "+v}
+    });
+  }
+
+  // сетка плат: 1..13 ON, 14..26 OFF; плата 9 в загрузчике
+  const g=document.getElementById("grid");
+  if(g){
+    let h="";
+    for(let r=0;r<2;r++)for(let c=0;c<13;c++){
+      const n=r*13+c+1,col=n===9?"#eeab00":"#2fc25b";
+      h+=`<div class="cell" title="плата ${n}" style="left:${48+c*20}px;top:${104+r*24}px;background:${col}"></div>`;
+    }
+    g.innerHTML=h;
+  }
+})();
+</script>
