@@ -365,6 +365,7 @@ extern "C" {
 	void curve_screen_update();
 	void roller_curve_copy_changed(lv_event_t* e);
 	void button_to_curve(lv_event_t* e);
+	void button_off(lv_event_t* e);
 	void button_curve_back(lv_event_t* e);
 	void button_curve_save(lv_event_t* e);
 	void button_curve_reset_pressed(lv_event_t* e);

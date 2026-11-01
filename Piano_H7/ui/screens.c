@@ -224,8 +224,8 @@ void create_screen_d_main() {
         {
             lv_obj_t *obj = lv_button_create(parent_obj);
             objects.obj4 = obj;
-            lv_obj_set_pos(obj, 110, 428);
-            lv_obj_set_size(obj, 100, 50);
+            lv_obj_set_pos(obj, 83, 428);
+            lv_obj_set_size(obj, 78, 50);
             lv_obj_add_event_cb(obj, action_clear_disp, LV_EVENT_RELEASED, (void *)0);
             lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICK_FOCUSABLE|LV_OBJ_FLAG_GESTURE_BUBBLE|LV_OBJ_FLAG_PRESS_LOCK|LV_OBJ_FLAG_SCROLL_CHAIN_HOR|LV_OBJ_FLAG_SCROLL_CHAIN_VER|LV_OBJ_FLAG_SCROLL_ELASTIC|LV_OBJ_FLAG_SCROLL_MOMENTUM|LV_OBJ_FLAG_SCROLL_ON_FOCUS|LV_OBJ_FLAG_SCROLL_WITH_ARROW|LV_OBJ_FLAG_SNAPPABLE);
             lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN | LV_STATE_DEFAULT);

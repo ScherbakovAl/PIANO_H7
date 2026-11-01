@@ -38,7 +38,8 @@ extern void h7();
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+// в слове над _bflag (флаг DFU): «после сброса уйти в выкл.»
+#define POWER_OFF_FLAG 0xDEAD0FF0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -49,7 +50,10 @@ extern void h7();
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+// бутлоадер обнуляет только _bflag, а стеки бутлоадера и приложения начинаются ниже _bflag —
+// это слово переживает сброс и прыжок из бутлоадера
+extern uint32_t _bflag[]; // массив без длины: компилятор не считает доступ к слову за _bflag выходом за границы
+static volatile uint32_t* const power_off_flag = &_bflag[1];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +65,60 @@ void PeriphCommonClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// SW1 (PC13) отпущена 50 мс подряд — дребезг закончился
+static void power_button_wait_release(void) {
+  for (int released_ms = 0; released_ms < 50;) {
+    LL_mDelay(1);
+    released_ms = LL_GPIO_IsInputPinSet(GPIOC, LL_GPIO_PIN_13) ? 0 : released_ms + 1;
+  }
+}
+
+// «Выключено»: H7 в Stop, выводы держат заданные уровни (в Standby они ушли бы в Hi-Z).
+// Выход — сбросом: по SW1 (ниже) или по NRST (TP2)
+static void power_off(void) {
+  // питание ядра — как в SystemClock_Config: пока ACTVOSRDY = 0, чип в ограниченном режиме Run*
+  LL_PWR_ConfigSupply(LL_PWR_LDO_SUPPLY);
+  while (LL_PWR_IsActiveFlag_ACTVOS() == 0) {
+  }
+  LL_Init1msTick(64000000); // после сброса ядро на HSI 64 МГц
+  LL_AHB4_GRP1_EnableClock(LL_AHB4_GRP1_PERIPH_GPIOB | LL_AHB4_GRP1_PERIPH_GPIOC
+                         | LL_AHB4_GRP1_PERIPH_GPIOD | LL_AHB4_GRP1_PERIPH_GPIOE);
+  LL_APB4_GRP1_EnableClock(LL_APB4_GRP1_PERIPH_SYSCFG);
+
+  // шина G4 в покое, как между пакетами: U_TX (PB13) = 1, TIM_CLK = 0.
+  // U_RX (PB12) и TIM_TRIGG (PE7) держат R18 и R11 — там работают выходы G4, эти пины не трогать
+  LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_13);
+  LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_13, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_ResetOutputPin(TIM1_CLK_GPIO_Port, TIM1_CLK_Pin);
+  LL_GPIO_SetPinMode(TIM1_CLK_GPIO_Port, TIM1_CLK_Pin, LL_GPIO_MODE_OUTPUT);
+
+  // +5 В модуля дисплея не отключить: подсветку (PD6, на модуле подтянута вверх) держим в 0,
+  // дисплей и тач — в сбросе
+  LL_GPIO_ResetOutputPin(GPIOD, LL_GPIO_PIN_6);
+  LL_GPIO_SetPinMode(GPIOD, LL_GPIO_PIN_6, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_ResetOutputPin(LCD_RESET_GPIO_Port, LCD_RESET_Pin);
+  LL_GPIO_SetPinMode(LCD_RESET_GPIO_Port, LCD_RESET_Pin, LL_GPIO_MODE_OUTPUT);
+  LL_GPIO_ResetOutputPin(CTP_RST_GPIO_Port, CTP_RST_Pin);
+  LL_GPIO_SetPinMode(CTP_RST_GPIO_Port, CTP_RST_Pin, LL_GPIO_MODE_OUTPUT);
+
+  // SW1: R20 на плате не стоит — подтяжка вниз внутренняя. В analog EXTI фронтов не видит
+  LL_GPIO_SetPinPull(GPIOC, LL_GPIO_PIN_13, LL_GPIO_PULL_DOWN);
+  LL_GPIO_SetPinMode(GPIOC, LL_GPIO_PIN_13, LL_GPIO_MODE_INPUT);
+  power_button_wait_release();
+  LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTC, LL_SYSCFG_EXTI_LINE13);
+  LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_13);
+  LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_13);
+  LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+  NVIC_ClearPendingIRQ(EXTI15_10_IRQn);
+  NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  __disable_irq(); // обработчик не нужен: WFI просыпается по прерыванию и при PRIMASK = 1
+  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+
+  power_button_wait_release(); // старт после отпускания — дребезг не даст лишних сбросов
+  NVIC_SystemReset();
+}
 
 /* USER CODE END 0 */
 
@@ -116,6 +174,16 @@ int main(void)
 	// else {
 	// 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
 	// }
+
+  // H7 всегда в USB: подача питания и «off» в меню — в Stop до нажатия SW1.
+  // Бутлоадер прыгает сюда, не трогая RCC, — флаги сброса доходят целыми. Они копятся до RMVF:
+  // без сброса флагов любой сброс выглядел бы как подача питания
+  const int power_up = LL_RCC_IsActiveFlag_PORRST() || LL_RCC_IsActiveFlag_BORRST();
+  LL_RCC_ClearResetFlags();
+  if (power_up || *power_off_flag == POWER_OFF_FLAG) {
+    *power_off_flag = 0;
+    power_off();
+  }
   /* USER CODE END 1 */
 
   /* Enable the CPU Cache */
@@ -283,6 +351,14 @@ void PeriphCommonClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+// «off» в меню: выключение через сброс — из чистого состояния, тем же путём, что при подаче питания.
+// Сброс сам отключает USB: у хоста устройство пропадает
+void request_power_off(void) {
+  *power_off_flag = POWER_OFF_FLAG;
+  SCB_CleanDCache(); // иначе флаг останется в кэше и пропадёт при сбросе
+  NVIC_SystemReset();
+}
 
 /* USER CODE END 4 */
 

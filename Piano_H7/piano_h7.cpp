@@ -74,6 +74,15 @@ void init() {
 	}
 	user_curve_set();
 	create_screen_curve();
+	// «off» — кодом, как «curve»: справа от «clear disp». Включение — кнопкой SW1
+	lv_obj_t* button_off_obj = lv_button_create(objects.d_main);
+	lv_obj_set_pos(button_off_obj, 165, 428);
+	lv_obj_set_size(button_off_obj, 72, 50);
+	lv_obj_set_style_bg_color(button_off_obj, lv_color_hex(0xff343638), LV_PART_MAIN);
+	lv_obj_add_event_cb(button_off_obj, button_off, LV_EVENT_RELEASED, NULL);
+	lv_obj_t* button_off_label = lv_label_create(button_off_obj);
+	lv_obj_center(button_off_label);
+	lv_label_set_text(button_off_label, "off");
 	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
 	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
 	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available, _tx_done, _tx_clear, _tx_probe
@@ -1379,7 +1388,7 @@ void create_screen_curve() {
 	// вход — кнопка на главном экране, слева от «clear disp»
 	lv_obj_t* obj = lv_button_create(objects.d_main);
 	lv_obj_set_pos(obj, 7, 428);
-	lv_obj_set_size(obj, 100, 50);
+	lv_obj_set_size(obj, 72, 50);
 	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
 	lv_obj_add_event_cb(obj, button_to_curve, LV_EVENT_RELEASED, NULL);
 	lv_obj_t* label = lv_label_create(obj);
@@ -1527,6 +1536,10 @@ void button_to_curve(lv_event_t* e) {
 	lv_roller_set_selected(roller_curve, curve_on_selected, LV_ANIM_OFF);
 	curve_screen_update();
 	lv_screen_load(scr_curve);
+}
+
+void button_off(lv_event_t* e) {
+	request_power_off();
 }
 
 // копия роллера ON: выбор сразу звучит и уходит в роллер главного экрана
