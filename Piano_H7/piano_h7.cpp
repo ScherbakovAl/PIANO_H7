@@ -22,33 +22,8 @@
 // };
 
 
-void pwr() {
-
-	if (!__HAL_PWR_GET_FLAG(PWR_FLAG_SB)) {
-		while (lcd_dma_busy) {
-		};
-		LCD_WR_REG(0x10); // Sleep In
-		LL_mDelay(120);
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4); //pin4 == кнопка К1 на плате
-		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-		HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-		HAL_PWR_EnterSTANDBYMode();
-	}
-	else {
-		HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-	}
-
-}
-
 void to_sleep() {
 
-	// LCD_WR_REG(0x10); // Sleep In
-	// LL_mDelay(120);
-	// tud_disconnect();
-	// HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN4);
-	// __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-	// HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN4);
-	// HAL_PWR_EnterSTANDBYMode();
 	LL_mDelay(200);
 	NVIC_SystemReset();
 
@@ -59,7 +34,6 @@ void init() {
 	init_LL();
 	init_LCD_and_touch();
 	lv_init();
-	// pwr();
 	disp_create_and_touch_start();
 	ui_init();
 	// не через EEZ: в проекте событие не видно, но и перегенерация screens.c его не сотрёт

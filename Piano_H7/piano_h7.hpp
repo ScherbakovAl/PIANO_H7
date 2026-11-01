@@ -309,7 +309,6 @@ extern "C" {
 	float sx_F = 0.0f; // for test
 	float sy_F = 0.0f; // for test
 
-	void pwr();
 	void to_sleep();
 	void init();
 	void init_LL();
