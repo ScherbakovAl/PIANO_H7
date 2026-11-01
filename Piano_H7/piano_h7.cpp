@@ -803,6 +803,7 @@ int UART4_receive_settings() { // 1 — тайм-аут: G4 не ответил,
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
 			if (TIM2->CNT - start > timeout) {
 				LL_USART_RequestRxDataFlush(UART5); // недопринятое — не в следующий ответ
+				LL_USART_ClearFlag_ORE(UART5); // пока ORE стоит, приёмник байты выбрасывает — и DMA шины тоже
 				return 1;
 			}
 		}
@@ -831,6 +832,7 @@ int UART4_receive_settings_bootloader() { // rx_settings[0] - [4]; 1 — тай�
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
 			if (TIM2->CNT - start > timeout) {
 				LL_USART_RequestRxDataFlush(UART5); // недопринятое — не в следующий ответ
+				LL_USART_ClearFlag_ORE(UART5);
 				return 1;
 			}
 		}
@@ -846,6 +848,7 @@ int UART4_receive_timeout_10us() {
 
 		while (!LL_USART_IsActiveFlag_RXNE(UART5)) {
 			if (TIM2->CNT >= timeout) { // Время ожидания истекло, выходим без чтения
+				LL_USART_ClearFlag_ORE(UART5);
 				return 1;
 			}
 		}
