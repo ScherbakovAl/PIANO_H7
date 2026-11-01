@@ -235,6 +235,8 @@ extern "C" {
 	static int counter_off = 0;
 
 	bool chip_silent[allChipCount] = { }; // G4 не ответил на последнюю команду (печать «NO ANSWER» один раз)
+	bool chip_bad_adress[allChipCount] = { }; // последний ответ G4 — с чужим адресом (печать «BAD ADRESS» один раз)
+	bool chip_bad_data[allChipCount] = { }; // последний set_comp_value вернул не то значение (печать «BAD SET DATA» один раз)
 
 	bool send_damper_lift = true; // подъём демпфера (бит 23 от G4) → Poly Key Pressure 0xA0; включать только вместе с SEND_LIFT 1 в G4
 

@@ -9,6 +9,7 @@
 #include "map"
 // #include <ranges>
 #include "string"
+#include "algorithm"
 #include "piano_h7.hpp"
 
 // inline constexpr uint32_t NOTE_OFFSETS[196] = {
@@ -755,13 +756,17 @@ bool sender(const command& com, const uint8_t& adress, const uint8_t& compN, con
 		debugg_printf("G4 #%d answers again", adress);
 	}
 	pause(1); // 1 for release, 4-debug g4
-	if (adress != rx_settings[0]) {
+	const bool bad_adress = adress != rx_settings[0];
+	if (bad_adress && !chip_bad_adress[adress]) { // один раз, пока G4 не ответит со своим адресом
 		debugg_printf("BAD ADRESS %d   rx_settings %d", adress, rx_settings[0]);
 	}
+	chip_bad_adress[adress] = bad_adress;
 	if (com == command::set_comp_value) {
-		if (convert_8_16(a_, b_) != value) {
+		const bool bad_data = convert_8_16(a_, b_) != value;
+		if (bad_data && !chip_bad_data[adress]) { // один раз, пока set_comp_value не пройдёт
 			debugg_printf("BAD SET DATA rx=%d, add=%d, comp=%d, dot=%d, value=%" LV_PRIu32 ", in=%" LV_PRId32, rx_settings[0], adress, compN, (uint8_t)dot, value, convert_8_16(a_, b_));
 		}
+		chip_bad_data[adress] = bad_data;
 	}
 	if (com == command::mute || com == command::unmute) {
 		if (convert_8_16(a_, b_) != (int32_t)chip_states::piano) {
@@ -1188,8 +1193,8 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {
-	if (debug_counter % 13 == 0)debugg_clear();
-	if (debug_counter) debugg += "\n";
+	if (std::count(debugg.begin(), debugg.end(), '\n') >= 12) debugg.erase(0, debugg.find('\n') + 1); // окно 13 строк: уходит самая старая
+	if (!debugg.empty()) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
 	debugg += str;
@@ -2064,7 +2069,6 @@ extern "C" {
 
 		cur_disp = current_display::main;
 		loadScreen(SCREEN_ID_D_MAIN);
-		debugg_clear();
 
 		if (chip_state == chip_states::piano) {
 			all_H7_to_g4();
@@ -2078,7 +2082,6 @@ extern "C" {
 		cur_disp = current_display::on;
 		cur_chart = objects.chart_on;
 		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
-		debugg_clear();
 		all_g4_to_H7();
 		if (!vChips.empty()) {
 			cursor = vChips.front().comparators.front().cursor;
@@ -2102,7 +2105,6 @@ extern "C" {
 		cur_disp = current_display::off;
 		cur_chart = objects.chart_off;
 		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
-		debugg_clear();
 		if (!vChips.empty()) {
 			all_g4_to_H7();
 			cursor = vChips.back().comparators.back().cursor;
