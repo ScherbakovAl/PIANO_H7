@@ -586,15 +586,11 @@ static void calib_refresh() {
 	const int32_t r = buffer_red[addr];
 	set_textf(objects.calib_live, "%d", (int)live);
 	set_textf(objects.calib_neighbors, "← %d · %d →", (int)buffer_blue_calib[addr - 1], (int)buffer_blue_calib[addr + 1]);
-	// молоточкам нужно G > R, демпферам — R ниже покоя больше чем на ~100 кодов (гистерезис 70 мВ, калибровка.md п. 7)
-	if (on) {
-		set_textf(objects.calib_margin, "G − R  %d", (int)(g - r));
-		set_color(objects.calib_margin, g > r ? col_muted : col_amber);
-	}
-	else {
-		set_textf(objects.calib_margin, "запас R  %d", (int)(live - r));
-		set_color(objects.calib_margin, live - r >= 100 ? col_muted : col_amber);
-	}
+	// запас между порогами: молоточкам нужно G > R, демпферам G < R; уже 130 кодов —
+	// гистерезис 70 мВ (~87 кодов) плюс его разброс и шум обучения (калибровка.md п. 7)
+	const int32_t margin = on ? g - r : r - g;
+	set_textf(objects.calib_margin, on ? "G − R  %d" : "R − G  %d", (int)margin);
+	set_color(objects.calib_margin, margin >= 130 ? col_muted : col_amber);
 	set_textf(objects.calib_g_change, "%d → %d", (int)g, (int)live);
 	set_textf(objects.calib_r_change, "%d → %d", (int)r, (int)live);
 
