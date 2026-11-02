@@ -54,6 +54,34 @@ used to play on a real instrument.
   flash the firmware of the G4 boards over the UART bus, including jumping
   between bootloader and main-application regions.
 
+### GUI
+
+The 320×480 touch screens, rendered on a PC by LVGL from the firmware's own UI
+code (sample data):
+
+<table>
+<tr>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/1b_main_note.png" alt="Main screen"></td>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/2_curve.png" alt="Velocity curves"></td>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/3_calib.png" alt="Calibration"></td>
+</tr>
+<tr>
+<td valign="top"><b>Main</b> — sensor-bus and USB status, the active velocity curve, the last note played (key, velocity, flight time), power off.</td>
+<td valign="top"><b>Curves</b> — ON / OFF / LIFT tabs. Five ON curves; the user ones are tuned with sliders (time for vel 127 and vel 1, bend) and saved to flash. A crosshair shows where the last note fell on the curve.</td>
+<td valign="top"><b>Calibration</b> — live signals of every optical sensor, for hammers and dampers. G/R comparator thresholds per key; step by key or by chip, or follow the key just played. A too-narrow G↔R gap is highlighted.</td>
+</tr>
+<tr>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/4_service.png" alt="Service"></td>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/5_flash.png" alt="G4 flashing"></td>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/6_log_confirm.png" alt="Log and confirmation"></td>
+</tr>
+<tr>
+<td valign="top"><b>Service</b> — polls all 26 G4 boards and shows which run the piano firmware or a bootloader; restore calibration from flash, USB DFU, reboot.</td>
+<td valign="top"><b>G4 flashing</b> — step by step over the sensor bus: to the bootloader, write the firmware H7 → G4, start piano. Bootloader updates sit behind a "dangerous" fold.</td>
+<td valign="top"><b>Log</b> — error counters (UART noise, lost MIDI, G4 ring buffer, LCD DMA, touch I2C) and the debug log. Irreversible actions ask for confirmation.</td>
+</tr>
+</table>
+
 ### Hardware
 
 - MCU: **STM32H723VGTx**
@@ -159,6 +187,34 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
   перепрошит по USB (USB DFU) через свой бутлоадер, а также умеет прошивать
   платы G4 по шине UART, включая переключение между областями бутлоадера и
   основного приложения.
+
+### Интерфейс
+
+Экраны 320×480 с тачем — отрисованы на ПК средствами LVGL из кода интерфейса
+прошивки (данные-примеры):
+
+<table>
+<tr>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/1b_main_note.png" alt="Главный экран"></td>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/2_curve.png" alt="Кривые velocity"></td>
+<td width="33%"><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/3_calib.png" alt="Калибровка"></td>
+</tr>
+<tr>
+<td valign="top"><b>Главный</b> — состояние шины датчиков и USB, текущая кривая velocity, последняя сыгранная нота (клавиша, velocity, время пролёта), выключение.</td>
+<td valign="top"><b>Кривые</b> — вкладки ON / OFF / LIFT. Пять кривых ON; пользовательские настраиваются ползунками (время для vel 127 и vel 1, изгиб) и сохраняются во flash. Перекрестье показывает, куда на кривой попала последняя нота.</td>
+<td valign="top"><b>Калибровка</b> — живые сигналы всех оптических датчиков, для молоточков и демпферов. Пороги компараторов G/R для каждой клавиши; шаг по клавише или по чипу, или слежение за только что нажатой. Слишком узкий зазор G↔R подсвечивается.</td>
+</tr>
+<tr>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/4_service.png" alt="Сервис"></td>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/5_flash.png" alt="Прошивка G4"></td>
+<td><img src="eez_proj/%D1%80%D0%B5%D0%BD%D0%B4%D0%B5%D1%80%D1%8B/6_log_confirm.png" alt="Журнал и подтверждение"></td>
+</tr>
+<tr>
+<td valign="top"><b>Сервис</b> — опрос всех 26 плат G4: какие в прошивке piano, какие в загрузчике; восстановление калибровки из памяти, USB DFU, перезагрузка.</td>
+<td valign="top"><b>Прошивка G4</b> — по шагам через шину датчиков: в загрузчик, запись прошивки H7 → G4, запуск piano. Обновление самих загрузчиков — под «опасным» спойлером.</td>
+<td valign="top"><b>Журнал</b> — счётчики ошибок (шум UART, потерянные MIDI, кольцевой буфер G4, LCD DMA, тач I2C) и отладочный лог. Необратимые действия требуют подтверждения.</td>
+</tr>
+</table>
 
 ### Аппаратная часть
 
