@@ -57,7 +57,7 @@ used to play on a real instrument.
 ### GUI
 
 The 320×480 touch screens, rendered on a PC by LVGL from the firmware's own UI
-code (sample data):
+code (sample data; regenerate with `python3 eez_proj/рендер/рендер.py`):
 
 <table>
 <tr>
@@ -191,7 +191,7 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
 ### Интерфейс
 
 Экраны 320×480 с тачем — отрисованы на ПК средствами LVGL из кода интерфейса
-прошивки (данные-примеры):
+прошивки (данные-примеры; пересобрать — `python3 eez_proj/рендер/рендер.py`):
 
 <table>
 <tr>
