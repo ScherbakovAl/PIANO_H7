@@ -277,7 +277,6 @@ const uint32_t curve_points_count = 100;
 const float curve_t_min = 200.0f;   // мкс, = user_t_fast_min
 const float curve_t_max = 30000.0f; // мкс, = user_t_slow_max
 static int32_t main_curve_points[curve_points_count] = {};
-static bool show_last_note = false; // строка «последняя нота» (включается на экране «Сервис»)
 static uint32_t last_note_shown = 0;
 static int32_t main_tile_grow = 0; // на сколько плитка кривой длиннее без строки «последняя нота» — до её низа
 
@@ -818,7 +817,7 @@ void gui_init() {
 		- lv_obj_get_style_y(tile, LV_PART_MAIN) - lv_obj_get_style_height(tile, LV_PART_MAIN);
 	main_last_note_layout();
 
-	curve_on_selected = lv_roller_get_selected(objects.curve_roller);
+	lv_roller_set_selected(objects.curve_roller, curve_on_selected, LV_ANIM_OFF); // выбор из flash (init)
 	curve_screen_update();
 	main_curve_update();
 }
@@ -861,7 +860,9 @@ extern "C" {
 
 	// переходы
 
+	// с экранов кривой и «Сервис», где меняют выбор кривых и строку «последняя нота»: они сохраняются здесь
 	void action_to_main(lv_event_t* e) {
+		settings_save_selection();
 		loadScreen(SCREEN_ID_D_MAIN);
 	}
 

@@ -124,15 +124,26 @@ extern "C" {
 	// Задаётся на экране кривой тем, что слышно: t_fast → 127, t_slow → 1, x0 — изгиб (больше — громче середина).
 	// K и offset_y считает user_curve_set()
 	const uint8_t curve_user = 11;
-	struct user_curve_rec { // запись во flash — ровно один FLASHWORD
-		uint32_t magic;
+	struct user_curve_params {
 		float t_fast; // мкс
 		float t_slow; // мкс
 		float x0;     // мкс
-		uint32_t reserved[4];
 	};
-	static_assert(sizeof(user_curve_rec) == 32, "запись кривой user пишется одним FLASHWORD");
-	const uint32_t user_curve_magic = 0x55435256;
+	const user_curve_params user_curve_default = { 461.0f, 18305.0f, 2188.0f }; // ≈ normal upd
+	// Настройки во flash (ADDRESS_H7_SETTINGS): кривая user — по кнопке «Сохранить» на экране кривой,
+	// выбор кривых и строка «последняя нота» — при возврате на главный экран
+	struct settings_rec { // запись во flash — ровно один FLASHWORD
+		uint32_t magic;
+		user_curve_params curve;
+		uint8_t curve_on;       // роллер ON
+		uint8_t curve_off;      // 0 — lin, 1 — log
+		uint8_t curve_lift;     // 0 — lin, 1 — log
+		uint8_t show_last_note;
+		uint32_t reserved[3];
+	};
+	static_assert(sizeof(settings_rec) == 32, "запись настроек пишется одним FLASHWORD");
+	const uint32_t settings_magic = 0x53455431;
+	const uint32_t user_curve_magic = 0x55435256; // прежние записи: только кривая user, на месте выбора нули
 	// Пределы ползунков, мкс: t_fast + x0 ≥ 50 — знаменатель не обнуляется; t_fast < t_slow при любых значениях
 	const int32_t user_t_fast_min = 200;
 	const int32_t user_t_fast_max = 2000;
@@ -178,8 +189,8 @@ extern "C" {
 	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE = 0x08020000; // размер +- 0x0008E064 до ~0x080AE070 до 5го блока включительно
 	static const uint32_t ADDRESS_H7_MAIN_FIRMWARE_FOR_G4 = 0x080C0000; // хватает ли места для размещения прошивки? (6й блок) ~0x2f40 размер
 	static const uint32_t ADDRESS_H7_CALIB = 0x080E0000; // -здесь лежит калибровка
-	static const uint32_t ADDRESS_H7_USER_CURVE = 0x080F0000; // вторая половина сектора 7 — журнал записей кривой user
-	static const uint32_t USER_CURVE_SLOTS = 0x10000 / sizeof(user_curve_rec);
+	static const uint32_t ADDRESS_H7_SETTINGS = 0x080F0000; // вторая половина сектора 7 — журнал записей настроек
+	static const uint32_t SETTINGS_SLOTS = 0x10000 / sizeof(settings_rec);
 
 	static const uint32_t ADDRESS_G4_BOOTLOADER = 0x08000000; // 8k (4 банки)
 	static const uint32_t COUNT_PAGE_G4_FOR_BOOTLOADER = 4;
@@ -304,7 +315,8 @@ extern "C" {
 	extern volatile uint8_t curve_on_selected;
 	extern volatile uint8_t curve_off_selected;  // OFF: 0 — lin, 1 — log
 	extern volatile uint8_t curve_lift_selected; // LIFT: 0 — lin, 1 — log
-	extern user_curve_rec user_curve; // ползунки; по умолчанию ≈ normal upd
+	extern user_curve_params user_curve; // ползунки
+	extern bool show_last_note; // строка «последняя нота» на главном (включается на экране «Сервис»)
 	extern volatile float user_K;  // из user_curve; читает g4_to_midi (PendSV)
 	extern volatile float user_y0;
 	extern volatile float user_x0;
@@ -367,10 +379,12 @@ extern "C" {
 	float speed_vel(const float t, const float t_fast, const float t_slow, const bool log);
 	float on_vel(const uint32_t curve_num, const float t);
 	void user_curve_set();
-	uint32_t user_curve_free_slot();
-	const user_curve_rec* user_curve_saved();
+	uint32_t settings_free_slot();
+	const settings_rec* settings_saved();
 	bool flash_program(const uint32_t addr, const uint32_t* src, const uint32_t words);
+	bool settings_write(const settings_rec& rec);
 	bool user_curve_save();
+	void settings_save_selection();
 	void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size);
 	void Set_tx_s(uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e);
 	bool g4_flash_allowed(const uint32_t& image_in_H7, const uint32_t& count_page, const uint32_t& target);

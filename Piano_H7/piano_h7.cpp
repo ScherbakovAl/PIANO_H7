@@ -90,7 +90,8 @@ std::vector<speed_for_midi> curve_ON;
 volatile uint8_t curve_on_selected = 9;
 volatile uint8_t curve_off_selected = 0;
 volatile uint8_t curve_lift_selected = 0;
-user_curve_rec user_curve = { user_curve_magic, 461.0f, 18305.0f, 2188.0f, {} };
+user_curve_params user_curve = user_curve_default;
+bool show_last_note = false;
 volatile float user_K = 0.0f;
 volatile float user_y0 = 0.0f;
 volatile float user_x0 = 0.0f;
@@ -125,8 +126,14 @@ void to_sleep() {
 void init() {
 
 	init_LL();
-	if (const user_curve_rec* saved = user_curve_saved()) {
-		user_curve = *saved;
+	if (const settings_rec* saved = settings_saved()) {
+		user_curve = saved->curve;
+		if (saved->magic == settings_magic) {
+			curve_on_selected = saved->curve_on;
+			curve_off_selected = saved->curve_off;
+			curve_lift_selected = saved->curve_lift;
+			show_last_note = saved->show_last_note;
+		}
 	}
 	user_curve_set();
 	gui_init();
@@ -1186,11 +1193,11 @@ void save_to_memory() {
 	SCB_DisableDCache();
 	HAL_FLASH_Unlock();
 
-	// кривая user в том же секторе: последнюю сохранённую — после стирания в начало журнала
-	user_curve_rec curve_rec = {};
-	const user_curve_rec* saved = user_curve_saved();
-	const bool has_curve = saved != nullptr;
-	if (has_curve) curve_rec = *saved;
+	// настройки в том же секторе: последнюю сохранённую запись — после стирания в начало журнала
+	settings_rec settings = {};
+	const settings_rec* saved = settings_saved();
+	const bool has_settings = saved != nullptr;
+	if (has_settings) settings = *saved;
 
 	FLASH_Erase_Sector(FLASH_SECTOR_7, FLASH_BANK_1, FLASH_VOLTAGE_RANGE_2);
 
@@ -1216,7 +1223,7 @@ void save_to_memory() {
 		Addr += 0x20;
 	}
 
-	if (has_curve && !flash_program(ADDRESS_H7_USER_CURVE, (const uint32_t*)&curve_rec, sizeof(curve_rec) / 4)) {
+	if (has_settings && !flash_program(ADDRESS_H7_SETTINGS, (const uint32_t*)&settings, sizeof(settings) / 4)) {
 		debugg_fn(" FLASH err 3 ");
 	}
 
@@ -1358,27 +1365,29 @@ void user_curve_set() {
 	__enable_irq();
 }
 
-// Журнал кривой user (ADDRESS_H7_USER_CURVE): сохранение дописывает запись за последней, не стирая сектор.
+// Журнал настроек (ADDRESS_H7_SETTINGS): сохранение дописывает запись за последней, не стирая сектор.
 // Стирание (~1–2 с) останавливает чтение flash, а с ним прерывания и MIDI — оно нужно, только когда журнал полон.
-// Индекс первой свободной записи; USER_CURVE_SLOTS — журнал полон
-uint32_t user_curve_free_slot() {
-	const user_curve_rec* rec = (const user_curve_rec*)ADDRESS_H7_USER_CURVE;
+// Индекс первой свободной записи; SETTINGS_SLOTS — журнал полон
+uint32_t settings_free_slot() {
+	const settings_rec* rec = (const settings_rec*)ADDRESS_H7_SETTINGS;
 	uint32_t i = 0;
-	while (i < USER_CURVE_SLOTS && rec[i].magic != 0xFFFFFFFF) {
+	while (i < SETTINGS_SLOTS && rec[i].magic != 0xFFFFFFFF) {
 		++i;
 	}
 	return i;
 }
 
-// последняя сохранённая запись; nullptr — записей нет, или она вне пределов ползунков
-const user_curve_rec* user_curve_saved() {
-	const uint32_t slot = user_curve_free_slot();
+// последняя сохранённая запись; nullptr — записей нет, или она вне пределов ползунков и роллеров.
+// С user_curve_magic — прежняя запись: в ней верна только кривая user
+const settings_rec* settings_saved() {
+	const uint32_t slot = settings_free_slot();
 	if (slot == 0) return nullptr;
-	const user_curve_rec* rec = (const user_curve_rec*)ADDRESS_H7_USER_CURVE + slot - 1;
-	if (rec->magic != user_curve_magic) return nullptr;
-	if (!(rec->t_fast >= user_t_fast_min && rec->t_fast <= user_t_fast_max)) return nullptr;
-	if (!(rec->t_slow >= user_t_slow_min && rec->t_slow <= user_t_slow_max)) return nullptr;
-	if (!(rec->x0 >= user_x0_min && rec->x0 <= user_x0_max)) return nullptr;
+	const settings_rec* rec = (const settings_rec*)ADDRESS_H7_SETTINGS + slot - 1;
+	if (rec->magic != settings_magic && rec->magic != user_curve_magic) return nullptr;
+	if (!(rec->curve.t_fast >= user_t_fast_min && rec->curve.t_fast <= user_t_fast_max)) return nullptr;
+	if (!(rec->curve.t_slow >= user_t_slow_min && rec->curve.t_slow <= user_t_slow_max)) return nullptr;
+	if (!(rec->curve.x0 >= user_x0_min && rec->curve.x0 <= user_x0_max)) return nullptr;
+	if (rec->magic == settings_magic && (rec->curve_on > curve_user_log || rec->curve_off > 1 || rec->curve_lift > 1 || rec->show_last_note > 1)) return nullptr;
 	return rec;
 }
 
@@ -1392,15 +1401,15 @@ bool flash_program(const uint32_t addr, const uint32_t* src, const uint32_t word
 	return true;
 }
 
-bool user_curve_save() {
-	uint32_t slot = user_curve_free_slot();
+bool settings_write(const settings_rec& rec) {
+	uint32_t slot = settings_free_slot();
 	bool ok = true;
 
 	SCB_DisableICache();
 	SCB_DisableDCache();
 	HAL_FLASH_Unlock();
 
-	if (slot == USER_CURVE_SLOTS) {
+	if (slot == SETTINGS_SLOTS) {
 		// журнал полон: стереть сектор и вернуть калибровку как она лежит во flash, а не из RAM —
 		// там могут быть несохранённые правки. buffer_green и buffer_red во flash идут подряд (size_BUFFER кратно 8)
 		static uint32_t calib[2 * size_BUFFER];
@@ -1410,13 +1419,40 @@ bool user_curve_save() {
 		slot = 0;
 	}
 	if (ok) {
-		ok = flash_program(ADDRESS_H7_USER_CURVE + slot * sizeof(user_curve_rec), (const uint32_t*)&user_curve, sizeof(user_curve_rec) / 4);
+		ok = flash_program(ADDRESS_H7_SETTINGS + slot * sizeof(settings_rec), (const uint32_t*)&rec, sizeof(settings_rec) / 4);
 	}
 
 	HAL_FLASH_Lock();
 	SCB_EnableICache();
 	SCB_EnableDCache();
 	return ok;
+}
+
+// запись с текущим выбором кривых и строкой «последняя нота»; кривая user — curve
+static settings_rec settings_current(const user_curve_params& curve) {
+	settings_rec rec = {};
+	rec.magic = settings_magic;
+	rec.curve = curve;
+	rec.curve_on = curve_on_selected;
+	rec.curve_off = curve_off_selected;
+	rec.curve_lift = curve_lift_selected;
+	rec.show_last_note = show_last_note;
+	return rec;
+}
+
+// «Сохранить» на экране кривой: ползунки кривой user и выбор
+bool user_curve_save() {
+	return settings_write(settings_current(user_curve));
+}
+
+// Возврат на главный: выбор, если он не тот, что во flash. Кривая user — из flash: несохранённые ползунки не пишутся
+void settings_save_selection() {
+	const settings_rec* saved = settings_saved();
+	const settings_rec rec = settings_current(saved ? saved->curve : user_curve_default);
+	if (saved && memcmp(saved, &rec, sizeof(rec)) == 0) return;
+	if (!settings_write(rec)) {
+		debugg_fn(" FLASH err settings ");
+	}
 }
 
 void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size) {

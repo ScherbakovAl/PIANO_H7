@@ -67,7 +67,7 @@ code (sample data):
 </tr>
 <tr>
 <td valign="top"><b>Main</b> — sensor-bus and USB status, the active velocity curve, the last note played (key, velocity, flight time), power off.</td>
-<td valign="top"><b>Curves</b> — ON / OFF / LIFT tabs. Five ON curves; the user ones are tuned with sliders (time for vel 127 and vel 1, bend) and saved to flash. A crosshair shows where the last note fell on the curve.</td>
+<td valign="top"><b>Curves</b> — ON / OFF / LIFT tabs. Five ON curves; the user ones are tuned with sliders (time for vel 127 and vel 1, bend) and saved to flash. A crosshair shows where the last note fell on the curve. The selected curves and the "last note" row are remembered: saved to flash on return to the main screen.</td>
 <td valign="top"><b>Calibration</b> — live signals of every optical sensor, for hammers and dampers. G/R comparator thresholds per key; step by key or by chip, or follow the key just played. A too-narrow G↔R gap is highlighted.</td>
 </tr>
 <tr>
@@ -201,7 +201,7 @@ above) or the [`CITATION.cff`](CITATION.cff) file.
 </tr>
 <tr>
 <td valign="top"><b>Главный</b> — состояние шины датчиков и USB, текущая кривая velocity, последняя сыгранная нота (клавиша, velocity, время пролёта), выключение.</td>
-<td valign="top"><b>Кривые</b> — вкладки ON / OFF / LIFT. Пять кривых ON; пользовательские настраиваются ползунками (время для vel 127 и vel 1, изгиб) и сохраняются во flash. Перекрестье показывает, куда на кривой попала последняя нота.</td>
+<td valign="top"><b>Кривые</b> — вкладки ON / OFF / LIFT. Пять кривых ON; пользовательские настраиваются ползунками (время для vel 127 и vel 1, изгиб) и сохраняются во flash. Перекрестье показывает, куда на кривой попала последняя нота. Выбранные кривые и строка «последняя нота» запоминаются: сохраняются во flash при возврате на главный экран.</td>
 <td valign="top"><b>Калибровка</b> — живые сигналы всех оптических датчиков, для молоточков и демпферов. Пороги компараторов G/R для каждой клавиши; шаг по клавише или по чипу, или слежение за только что нажатой. Слишком узкий зазор G↔R подсвечивается.</td>
 </tr>
 <tr>

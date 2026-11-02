@@ -163,7 +163,7 @@
             "problemMatcher": []
         },
         {
-            // через DFU (H7 в загрузчике) — весь сектор 7: калибровка (ADDRESS_H7_CALIB) и журнал кривой user (ADDRESS_H7_USER_CURVE)
+            // через DFU (H7 в загрузчике) — весь сектор 7: калибровка (ADDRESS_H7_CALIB) и журнал настроек (ADDRESS_H7_SETTINGS)
             // одним файлом: -d стирает сектор, поэтому порознь их не восстановить
             // восстановление: STM32_Programmer_CLI -c port=usb1 -d calib_backup/<файл>.hex
             "type": "shell",
