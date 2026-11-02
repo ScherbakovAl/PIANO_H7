@@ -342,6 +342,22 @@ static void main_status_update() {
 
 static uint32_t curve_tab = 0; // 0 — ON, 1 — OFF, 2 — LIFT
 static int32_t curve_points[curve_points_count] = {};
+static lv_chart_series_t* curve_ser;
+static lv_chart_cursor_t* curve_cursor;
+static uint32_t curve_note_shown = 0;
+
+// Перекрестье на ON: t последней ноты (до первой — 2 мс) и её vel по выбранной кривой — линии от осей
+// до точки кривой, подпись под графиком. Ползунки меняют кривую — горизонталь и vel идут за ней
+static void curve_marker_update() {
+	curve_note_shown = last_note_seq;
+	const float t = last_note_seq ? (float)last_note_t_us : 2000.0f;
+	const float k = logf(t / curve_t_min) / logf(curve_t_max / curve_t_min);
+	const uint32_t i = (uint32_t)LV_CLAMP(0.0f, k * (curve_points_count - 1) + 0.5f, curve_points_count - 1.0f);
+	lv_chart_set_cursor_point(objects.curve_chart, curve_cursor, curve_ser, i);
+	char a[16];
+	ms2_text(a, sizeof(a), (int32_t)t);
+	set_textf(objects.curve_info, "%s → %d", a, (int)LV_CLAMP(1.0f, on_vel(curve_on_selected, t), 127.0f));
+}
 
 // График, ползунки и кнопки — для вкладки и кривой, выбранной в роллере: user — все три ползунка и «Сохранить»,
 // user lin и user log — t_fast, t_slow и «Сброс», остальные ON не правятся. OFF и LIFT — lin или log
@@ -414,9 +430,10 @@ static void curve_screen_update() {
 	ms_text(a, sizeof(a), t_max);
 	set_text(objects.curve_axis_max, a);
 	if (on) {
-		set_textf(objects.curve_info, "2 мс → %d", (int)LV_CLAMP(1.0f, on_vel(c, 2000.0f), 127.0f));
+		curve_marker_update();
 	}
 	else {
+		lv_chart_set_cursor_point(objects.curve_chart, curve_cursor, curve_ser, LV_CHART_POINT_NONE); // у OFF и LIFT t ноты нет
 		set_text(objects.curve_info, "t, лог. шкала");
 		ms_text(a, sizeof(a), mode_fast);
 		ms_text(b, sizeof(b), mode_slow);
@@ -773,12 +790,12 @@ static void log_update(const bool force) {
 
 // --------------------------------------------------------------- init и основной цикл
 
-static int32_t* curve_chart_config(lv_obj_t* chart, int32_t* points) {
+static lv_chart_series_t* curve_chart_config(lv_obj_t* chart, int32_t* points) {
 	lv_chart_series_t* ser = lv_chart_add_series(chart, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_Y);
 	lv_chart_set_series_ext_y_array(chart, ser, points);
 	lv_chart_set_axis_range(chart, LV_CHART_AXIS_PRIMARY_Y, 0, 127);
 	lv_obj_set_style_size(chart, 0, 0, LV_PART_INDICATOR); // без точек — только линия
-	return points;
+	return ser;
 }
 
 void gui_init() {
@@ -789,7 +806,9 @@ void gui_init() {
 
 	calib_chart_config();
 	calib_scale_create();
-	curve_chart_config(objects.curve_chart, curve_points);
+	curve_ser = curve_chart_config(objects.curve_chart, curve_points);
+	curve_cursor = lv_chart_add_cursor(objects.curve_chart, lv_color_hex(col_amber), (lv_dir_t)(LV_DIR_LEFT | LV_DIR_BOTTOM));
+	lv_obj_set_style_line_width(objects.curve_chart, 1, LV_PART_CURSOR);
 	curve_chart_config(objects.main_curve_chart, main_curve_points);
 	chip_grid_create();
 
@@ -819,6 +838,11 @@ void gui_tick() {
 		if (calib_data_new) {
 			calib_data_new = false;
 			calib_refresh();
+		}
+	}
+	else if (scr == objects.d_curve) {
+		if (curve_tab == 0 && last_note_seq != curve_note_shown) {
+			curve_marker_update();
 		}
 	}
 	else if (scr == objects.d_service) {
