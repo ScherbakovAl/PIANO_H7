@@ -214,10 +214,10 @@ extern "C" {
 	extern struct default_comp def_comp;
 
 	struct default_graph_min_max {
-		int32_t on_min = 3600;
-		int32_t on_max = 300;
-		int32_t off_min = 2400;
-		int32_t off_max = 3700;
+		int32_t on_min = 4095;
+		int32_t on_max = 0;
+		int32_t off_min = 0;
+		int32_t off_max = 4095;
 	};
 	extern default_graph_min_max graph_min_max;
 
