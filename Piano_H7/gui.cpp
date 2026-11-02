@@ -109,7 +109,7 @@ void DMA2_Stream1_TransferComplete() { // DMA дисплея
 // --------------------------------------------------------------- общее
 
 // цвета — те же, что в проекте EEZ
-const uint32_t col_text = 0xe8e9eb;
+const uint32_t col_text = 0xfafafa;
 const uint32_t col_muted = 0x8b9098;
 const uint32_t col_green = 0x2fc25b;
 const uint32_t col_red = 0xe8692f;
@@ -156,10 +156,16 @@ static int user_data(lv_event_t* e) {
 	return (int)(intptr_t)lv_event_get_user_data(e);
 }
 
-// мкс → «2.1 ms»
+// мкс → «2.1 мс»
 static void ms_text(char* buf, const uint32_t size, const float t_us) {
 	const int tenths = (int)(t_us / 100.0f + 0.5f);
-	lv_snprintf(buf, size, "%d.%d ms", tenths / 10, tenths % 10);
+	lv_snprintf(buf, size, "%d.%d мс", tenths / 10, tenths % 10);
+}
+
+// мкс → «0.35 мс», для ползунков с шагом 10 мкс
+static void ms2_text(char* buf, const uint32_t size, const int32_t t_us) {
+	const int32_t hundredths = LV_ABS(t_us) / 10;
+	lv_snprintf(buf, size, "%s%d.%02d мс", t_us < 0 ? "-" : "", (int)(hundredths / 100), (int)(hundredths % 100));
 }
 
 static uint32_t errors_total() {
@@ -247,7 +253,7 @@ static void confirm(const char* title, const char* text, const char* ok_text, gu
 	lv_obj_set_style_pad_all(card, 0, LV_PART_MAIN);
 	lv_obj_set_style_border_width(card, 0, LV_PART_MAIN);
 	lv_obj_set_style_radius(card, 10, LV_PART_MAIN);
-	lv_obj_set_style_bg_color(card, lv_color_hex(0x2a2d31), LV_PART_MAIN);
+	lv_obj_set_style_bg_color(card, lv_color_hex(0x24272b), LV_PART_MAIN);
 
 	lv_obj_t* l = lv_label_create(card);
 	lv_obj_set_pos(l, 16, 16);
@@ -326,7 +332,7 @@ static void main_status_update() {
 		const uint32_t note = last_note;
 		const uint32_t vel = last_note_vel;
 		const uint32_t t = last_note_t_us / 100; // десятые мс
-		set_textf(objects.main_last_note_label, "%s%d  ·  vel %" LV_PRIu32 "  ·  %" LV_PRIu32 ".%" LV_PRIu32 " ms",
+		set_textf(objects.main_last_note_label, "%s%d  ·  vel %" LV_PRIu32 "  ·  %" LV_PRIu32 ".%" LV_PRIu32 " мс",
 			note_names[note % 12], (int)(note / 12) - 1, vel, t / 10, t % 10);
 		lv_bar_set_value(objects.main_last_note_bar, vel, LV_ANIM_OFF);
 	}
@@ -371,9 +377,13 @@ static void curve_screen_update() {
 	lv_slider_set_value(objects.curve_s_fast, (int32_t)t_fast, LV_ANIM_OFF); // событие не шлёт
 	lv_slider_set_value(objects.curve_s_slow, (int32_t)t_slow, LV_ANIM_OFF);
 	lv_slider_set_value(objects.curve_s_x0, (int32_t)user_curve.x0, LV_ANIM_OFF);
-	set_textf(objects.curve_v_fast, "%d мкс", (int)t_fast);
-	set_textf(objects.curve_v_slow, "%d мкс", (int)t_slow);
-	set_textf(objects.curve_v_x0, "%d мкс", (int)user_curve.x0);
+	char v[16];
+	ms2_text(v, sizeof(v), (int32_t)t_fast);
+	set_text(objects.curve_v_fast, v);
+	ms_text(v, sizeof(v), t_slow); // шаг 100 мкс — десятых хватает
+	set_text(objects.curve_v_slow, v);
+	ms2_text(v, sizeof(v), (int32_t)user_curve.x0);
+	set_text(objects.curve_v_x0, v);
 
 	// OFF и LIFT: от половины t_fast до полутора t_slow — видно, где кривая упирается в 127 и в 1
 	float t_min = curve_t_min;
@@ -404,7 +414,7 @@ static void curve_screen_update() {
 	ms_text(a, sizeof(a), t_max);
 	set_text(objects.curve_axis_max, a);
 	if (on) {
-		set_textf(objects.curve_info, "2 ms → %d", (int)LV_CLAMP(1.0f, on_vel(c, 2000.0f), 127.0f));
+		set_textf(objects.curve_info, "2 мс → %d", (int)LV_CLAMP(1.0f, on_vel(c, 2000.0f), 127.0f));
 	}
 	else {
 		set_text(objects.curve_info, "t, лог. шкала");
@@ -505,7 +515,7 @@ static lv_obj_t* scale_rect(const int32_t x, const int32_t y, const int32_t w, c
 static lv_obj_t* scale_label(const uint32_t color) {
 	lv_obj_t* l = lv_label_create(objects.calib_scale);
 	lv_obj_set_width(l, 56);
-	lv_obj_set_style_text_font(l, &ui_font_ru_10, LV_PART_MAIN);
+	lv_obj_set_style_text_font(l, &ui_font_ru_12, LV_PART_MAIN);
 	lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 	lv_obj_set_style_text_color(l, lv_color_hex(color), LV_PART_MAIN);
 	lv_label_set_text(l, "");
@@ -514,14 +524,14 @@ static lv_obj_t* scale_label(const uint32_t color) {
 
 // шкала порогов клавиши под курсором: 0..4095 ЦАП слева направо, подписи над и под ней
 const int32_t scale_label_top = 0;
-const int32_t scale_label_bottom = 29;
+const int32_t scale_label_bottom = 33;
 
 static void calib_scale_create() {
-	lv_obj_t* bar = scale_rect(0, 17, 280, 6, col_bar);
+	lv_obj_t* bar = scale_rect(0, 21, 280, 6, col_bar);
 	lv_obj_set_style_radius(bar, 3, LV_PART_MAIN);
-	scale_r = scale_rect(0, 12, 3, 16, col_red);
-	scale_g = scale_rect(0, 12, 3, 16, col_green);
-	scale_live = scale_rect(0, 12, 3, 16, col_live);
+	scale_r = scale_rect(0, 16, 3, 16, col_red);
+	scale_g = scale_rect(0, 16, 3, 16, col_green);
+	scale_live = scale_rect(0, 16, 3, 16, col_live);
 	scale_r_label = scale_label(col_red);
 	scale_g_label = scale_label(col_green);
 }
@@ -615,8 +625,8 @@ static void chip_grid_create() {
 		lv_obj_t* o = lv_obj_create(objects.service_chip_grid);
 		lv_obj_remove_style_all(o);
 		lv_obj_remove_flag(o, (lv_obj_flag_t)(LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE));
-		lv_obj_set_pos(o, col * 20, row * 24);
-		lv_obj_set_size(o, 18, 18);
+		lv_obj_set_pos(o, col * 19, row * 24);
+		lv_obj_set_size(o, 17, 17);
 		lv_obj_set_style_radius(o, 4, LV_PART_MAIN);
 		lv_obj_set_style_bg_opa(o, LV_OPA_COVER, LV_PART_MAIN);
 		chip_cells[n] = o;
@@ -671,7 +681,7 @@ static void calib_restore_and_refresh() {
 // --------------------------------------------------------------- прошивка G4
 
 static bool flash_boot_open = false; // блок «Загрузчики» раскрыт
-const uint32_t flash_log_lines = 14;  // строк журнала под шагами
+const uint32_t flash_log_lines = 13;  // строк журнала под шагами
 
 static void flash_refresh() {
 	char buf[96];

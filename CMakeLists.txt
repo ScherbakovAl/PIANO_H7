@@ -88,7 +88,9 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Piano_H7/ui/images.c
     Piano_H7/ui/styles.c
     Piano_H7/ui/ui_font_ru_10.c
+    Piano_H7/ui/ui_font_ru_12.c
     Piano_H7/ui/ui_font_ru_14.c
+    Piano_H7/ui/ui_font_ru_18.c
     Piano_H7/ui/ui_font_ru_24.c
     # tinyUSB
     Piano_H7/usb_descriptors.c
