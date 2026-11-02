@@ -2,7 +2,7 @@
 <html lang="ru">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<!-- Обзор редизайна экранов H7: было и стало. Соответствует ветке gui-redesign на 2026-11-02 (коммит 7a3ab3e) -->
+<!-- Обзор редизайна экранов H7: было и стало. Соответствует ветке gui-redesign на 2026-11-02: коммит 7a3ab3e и гармонизация экранов -->
 <title>Экраны PIANO_H7</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,11 +105,8 @@ ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:12px}
 ol.steps li{max-width:72ch}
 .q{display:flex;flex-direction:column;gap:12px}
 .q div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
-/* экраны, нарисованные из описания проекта EEZ */
-.dev .w{position:absolute;box-sizing:border-box;margin:0}
-.dev .label{white-space:pre}
-.dev .label.wrap{white-space:pre-wrap}
-.dev svg.w{display:block}
+/* экраны — рендеры LVGL с хоста из проекта EEZ (eez_proj/рендеры) */
+.bezel img{display:block;width:320px;max-width:100%;height:auto}
 .done{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--f-disp);letter-spacing:.02em;color:var(--ok);border:1.5px solid currentColor;border-radius:999px;padding:7px 12px}
 </style>
 
@@ -119,7 +116,7 @@ ol.steps li{max-width:72ch}
   <span class="eyebrow">PIANO_H7 · ST7796 320×480 · LVGL 9</span>
   <h1>Экраны контроллера: что было и что стало</h1>
   <span class="done">✓ Выполнено · ветка gui-redesign · 2026-11-02</span>
-  <p class="lede">Главный экран совмещал игру, калибровку, прошивку G4, память и журнал. Теперь главный экран только для игры, под ним три раздела. Глубина меню не больше двух уровней, кнопка «назад» на всех экранах в одном месте. Макеты новых экранов нарисованы по тому же описанию, из которого собран проект EEZ.</p>
+  <p class="lede">Главный экран совмещал игру, калибровку, прошивку G4, память и журнал. Теперь главный экран только для игры, под ним три раздела. Глубина меню не больше двух уровней, кнопка «назад» на всех экранах в одном месте. Новые экраны здесь — рендеры LVGL с хоста из того же проекта EEZ, что и прошивка: те же шрифты, координаты и стили.</p>
 </header>
 
 <!-- ============ СЕЙЧАС ============ -->
@@ -221,15 +218,15 @@ memory</div>
   <h2>Главный: только то, что нужно во время игры</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:28px;background:#0f1012;border-radius:0px"><div class="w label" style="left:8px;top:5px;color:#2fc25b;font-size:14px;line-height:17px;overflow:hidden">G4: 26</div><div class="w label" style="left:112px;top:5px;color:#2fc25b;font-size:14px;line-height:17px;overflow:hidden">USB</div></div><div class="w button" style="left:8px;top:36px;width:304px;height:228px;background:#24272b;border-radius:10px"><div class="w label" style="left:12px;top:10px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">КРИВАЯ ON</div><div class="w label" style="left:12px;top:26px;font-size:24px;line-height:27px;overflow:hidden">lin speed</div><div class="w label" style="left:284px;top:24px;color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">›</div><div class="w chart" style="left:12px;top:62px;width:280px;height:132px;background:#24272b;border-radius:0px;overflow:hidden"><svg class="w" id="mc-a" style="left:0px;top:0px" width="280" height="132"></svg></div><div class="w label" style="left:12px;bottom:9px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">OFF lin · LIFT lin</div></div><div class="w button" style="left:8px;top:272px;width:148px;height:104px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:36px;font-size:14px;line-height:17px;overflow:hidden">Калибровка</div><div class="w label" style="left:14px;top:58px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">молоточки, демпферы</div></div><div class="w button" style="left:164px;top:272px;width:148px;height:104px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:36px;font-size:14px;line-height:17px;overflow:hidden">Сервис</div><div class="w label" style="left:14px;top:58px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">платы G4, DFU, журнал</div></div><div class="w button" style="left:8px;top:424px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">Выключить — удерживать</div></div></div></div>
+      <div class="bezel"><img src="рендеры/1_main.png" width="320" height="480" alt="Главный экран по умолчанию"></div>
       <p class="cap">По умолчанию строки «последняя нота» нет, и плитка кривой занимает её место.</p>
     </div>
     <div class="notes">
       <ul>
         <li><b>Строка статуса, 28 px.</b> «G4: 26» — сколько плат ответило: зелёным, если все в piano, янтарным, если какая-то в загрузчике, красное «G4: нет», если не ответила ни одна. «USB» зеленеет, когда хост читает MIDI. Перерисовывается только при изменении.</li>
         <li><b>Плитка кривой</b> вместо роллера: название кривой ON, её график, режимы OFF и LIFT. Касание открывает «Кривые». Это самое частое действие, поэтому у него самая большая цель.</li>
-        <li><b>Две плитки разделов</b> по 148×104. Подпись под названием подсказывает, что внутри.</li>
-        <li><b>«Выключить — удерживать»</b> срабатывает по долгому нажатию (<code>LV_EVENT_LONG_PRESSED</code>), кнопка у нижнего края, вдали от остального. Включается кнопкой SW1.</li>
+        <li><b>Две плитки разделов</b> по 148×88 со стрелкой, как у плитки кривой. Подпись под названием подсказывает, что внутри.</li>
+        <li><b>«Выключить»</b> с подписью «удерживать» срабатывает по долгому нажатию (<code>LV_EVENT_LONG_PRESSED</code>), кнопка у нижнего края, вдали от остального. Включается кнопкой SW1.</li>
       </ul>
       <div class="from">
         <b>Куда ушло со старого главного</b>
@@ -243,7 +240,7 @@ memory</div>
   </div>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:28px;background:#0f1012;border-radius:0px"><div class="w label" style="left:8px;top:5px;color:#2fc25b;font-size:14px;line-height:17px;overflow:hidden">G4: 26</div><div class="w label" style="left:112px;top:5px;color:#2fc25b;font-size:14px;line-height:17px;overflow:hidden">USB</div><div class="w label" style="left:164px;top:5px;color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">калибр.</div><div class="w button" style="left:254px;top:2px;width:62px;height:24px;background:#3a2f12;border-radius:4px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">▲ 2</div></div></div><div class="w button" style="left:8px;top:36px;width:304px;height:176px;background:#24272b;border-radius:10px"><div class="w label" style="left:12px;top:10px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">КРИВАЯ ON</div><div class="w label" style="left:12px;top:26px;font-size:24px;line-height:27px;overflow:hidden">lin speed</div><div class="w label" style="left:284px;top:24px;color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">›</div><div class="w chart" style="left:12px;top:62px;width:280px;height:80px;background:#24272b;border-radius:0px;overflow:hidden"><svg class="w" id="mc-b" style="left:0px;top:0px" width="280" height="80"></svg></div><div class="w label" style="left:12px;bottom:9px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">OFF lin · LIFT lin</div></div><div class="w container" style="left:8px;top:220px;width:304px;height:44px;background:#1c1e21;border-radius:10px"><div class="w label" style="left:12px;top:13px;font-size:14px;line-height:17px;overflow:hidden">A4  ·  vel 87  ·  3.2 ms</div><div class="w bar" style="left:200px;top:19px;width:92px;height:6px;background:#3a3d42;border-radius:3px"><i class="w" style="left:0;top:0;bottom:0;width:69%;background:#0dcaf3;border-radius:3px"></i></div></div><div class="w button" style="left:8px;top:272px;width:148px;height:104px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:36px;font-size:14px;line-height:17px;overflow:hidden">Калибровка</div><div class="w label" style="left:14px;top:58px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">молоточки, демпферы</div></div><div class="w button" style="left:164px;top:272px;width:148px;height:104px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:36px;font-size:14px;line-height:17px;overflow:hidden">Сервис</div><div class="w label" style="left:14px;top:58px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">платы G4, DFU, журнал</div></div><div class="w button" style="left:8px;top:424px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">Выключить — удерживать</div></div></div></div>
+      <div class="bezel"><img src="рендеры/1b_main_note.png" width="320" height="480" alt="Главный экран со строкой «последняя нота»"></div>
       <p class="cap">Строка включена в «Сервисе». Для примера в статусе видны несохранённая калибровка и две новые ошибки.</p>
     </div>
     <div class="notes">
@@ -251,7 +248,7 @@ memory</div>
       <ul>
         <li>Нота, velocity числом и полоской 0–127, время пролёта. Обновляется только при новой ноте.</li>
         <li>Включается строкой «Последняя нота на главном» в «Сервисе», по умолчанию выключена: во время игры на экране ничего не движется.</li>
-        <li>Без строки плитка кривой и её график растягиваются вниз на её место: график 132 px вместо 80. Насколько растягивать, код считает по положению строки в проекте EEZ.</li>
+        <li>Без строки плитка кривой и её график растягиваются вниз на её место: график 188 px вместо 136. Насколько растягивать, код считает по положению строки в проекте EEZ.</li>
       </ul>
       <h3>Метки статуса</h3>
       <ul>
@@ -268,7 +265,7 @@ memory</div>
   <h2>Кривые: все три кривые velocity на одном экране</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:44px;background:#0f1012;border-radius:0px"><div class="w button" style="left:4px;top:4px;width:44px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w label" style="left:58px;top:13px;font-size:14px;line-height:17px;overflow:hidden">Кривые</div><div class="w button" style="left:212px;top:4px;width:104px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">Сохранить</div></div></div><div class="w container" style="left:8px;top:52px;width:304px;height:36px;background:#0f1012;border-radius:8px"><div class="w button" style="left:2px;top:2px;width:98px;height:32px;background:#3a4a57;border-radius:6px;color:#e8e9eb"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">ON</div></div><div class="w button" style="left:102px;top:2px;width:98px;height:32px;background:#0f1012;border-radius:6px;color:#8b9098"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">OFF</div></div><div class="w button" style="left:202px;top:2px;width:100px;height:32px;background:#0f1012;border-radius:6px;color:#8b9098"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">LIFT</div></div></div><div class="w chart" style="left:8px;top:96px;width:200px;height:188px;background:#1c1e21;border-radius:4px;overflow:hidden"><svg class="w" id="cc" style="left:0px;top:0px" width="200" height="188"></svg></div><div class="w label" style="left:8px;top:288px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">0.2 ms</div><div class="w label wrap" style="left:48px;top:288px;width:120px;font-size:10px;line-height:11px;text-align:center;overflow:hidden">2 ms → 12</div><div class="w label wrap" style="left:128px;top:288px;width:80px;color:#8b9098;font-size:10px;line-height:11px;text-align:right;overflow:hidden">30.0 ms</div><div class="w roller" style="left:216px;top:96px;width:96px;height:188px;background:#1c1e21;color:#8b9098;overflow:hidden"><div class="w" style="left:0;right:0;top:79px;height:30px;background:#3a4a57"></div><div class="w" style="left:0;right:0;top:-11px;height:30px;line-height:30px;text-align:center">normal upd</div><div class="w" style="left:0;right:0;top:19px;height:30px;line-height:30px;text-align:center">lin speed</div><div class="w" style="left:0;right:0;top:49px;height:30px;line-height:30px;text-align:center">log speed</div><div class="w" style="left:0;right:0;top:79px;height:30px;line-height:30px;text-align:center;color:#e8e9eb">user</div><div class="w" style="left:0;right:0;top:109px;height:30px;line-height:30px;text-align:center">user lin</div><div class="w" style="left:0;right:0;top:139px;height:30px;line-height:30px;text-align:center">user log</div></div><div class="w container" style="left:0px;top:304px;width:320px;height:172px;border-radius:0px"><div class="w container" style="left:0px;top:0px;width:320px;height:50px;border-radius:0px"><div class="w label" style="left:8px;top:0px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">127 при t</div><div class="w label wrap" style="left:160px;top:0px;width:152px;font-size:14px;line-height:17px;text-align:right;overflow:hidden">390 мкс</div><div class="w button" style="left:8px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">−</div></div><div class="w slider" style="left:54px;top:29px;width:212px;height:10px;border-radius:5px;background:rgba(33,150,243,0.24)"><i class="w" style="left:0;top:0;bottom:0;width:11%;background:#2196f3;border-radius:5px"></i><i class="w" style="left:calc(11% - 10px);top:-5px;width:20px;height:20px;border-radius:50%;background:#2196f3"></i></div><div class="w button" style="left:280px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">+</div></div></div><div class="w container" style="left:0px;top:56px;width:320px;height:50px;border-radius:0px"><div class="w label" style="left:8px;top:0px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">1 при t</div><div class="w label wrap" style="left:160px;top:0px;width:152px;font-size:14px;line-height:17px;text-align:right;overflow:hidden">14000 мкс</div><div class="w button" style="left:8px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">−</div></div><div class="w slider" style="left:54px;top:29px;width:212px;height:10px;border-radius:5px;background:rgba(33,150,243,0.24)"><i class="w" style="left:0;top:0;bottom:0;width:36%;background:#2196f3;border-radius:5px"></i><i class="w" style="left:calc(36% - 10px);top:-5px;width:20px;height:20px;border-radius:50%;background:#2196f3"></i></div><div class="w button" style="left:280px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">+</div></div></div><div class="w container" style="left:0px;top:112px;width:320px;height:50px;border-radius:0px"><div class="w label" style="left:8px;top:0px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">изгиб x0</div><div class="w label wrap" style="left:160px;top:0px;width:152px;font-size:14px;line-height:17px;text-align:right;overflow:hidden">300 мкс</div><div class="w button" style="left:8px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">−</div></div><div class="w slider" style="left:54px;top:29px;width:212px;height:10px;border-radius:5px;background:rgba(33,150,243,0.24)"><i class="w" style="left:0;top:0;bottom:0;width:4%;background:#2196f3;border-radius:5px"></i><i class="w" style="left:calc(4% - 10px);top:-5px;width:20px;height:20px;border-radius:50%;background:#2196f3"></i></div><div class="w button" style="left:280px;top:20px;width:32px;height:28px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">+</div></div></div></div></div></div>
+      <div class="bezel"><img src="рендеры/2_curve.png" width="320" height="480" alt="Кривые, выбрана user"></div>
       <p class="cap">Выбрана кривая user: у неё три ползунка и «Сохранить». Значения для примера.</p>
     </div>
     <div class="notes">
@@ -276,9 +273,21 @@ memory</div>
         <li><b>Вкладки ON · OFF · LIFT</b> — три кнопки, отмечена одна. На OFF и LIFT справа вместо роллера стоят t для 127 и для 1, а вместо ползунков сегмент «lin · log». График там показывает <code>speed_vel</code> от половины t_fast до полутора t_slow.</li>
         <li><b>Роллер кривых</b> 96×188, шрифт 14, все 14 кривых. Он единственный в прошивке: главный экран только показывает выбранную кривую.</li>
         <li><b>Под графиком</b> края оси t (логарифмическая шкала) и velocity при 2 мс.</li>
-        <li><b>Ползунок и кнопки «−» и «+».</b> Шаг 10 мкс у «127 при t» и «изгиба x0», 100 мкс у «1 при t», удержание повторяет шаг. Значение справа над ползунком.</li>
+        <li><b>Ползунок и кнопки «−» и «+»</b> 36×32, как вкладки. Шаг 10 мкс у «127 при t» и «изгиба x0», 100 мкс у «1 при t», удержание повторяет шаг. Значение справа над ползунком, в мс: сотые при шаге 10 мкс, десятые при шаге 100 мкс.</li>
         <li><b>Кнопка справа в шапке:</b> «Сохранить» у кривой user, «Сброс» у user lin и user log. У остальных кривых кнопки нет, а вместо ползунков надпись «У этой кривой нет настроек».</li>
         <li>Экран шину не трогает: можно играть и сразу слышать изменения.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="pair">
+    <div>
+      <div class="bezel"><img src="рендеры/2b_curve_off.png" width="320" height="480" alt="Кривые, вкладка OFF"></div>
+      <p class="cap">Вкладка OFF. LIFT выглядит так же.</p>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><b>Справа карточка</b> на месте роллера: при каком t velocity 127 и при каком 1, шрифт 14.</li>
+        <li><b>Внизу сегмент «lin · log»</b> вместо ползунков. Под ним свободно: на этих вкладках больше нечего настраивать.</li>
       </ul>
     </div>
   </div>
@@ -290,7 +299,7 @@ memory</div>
   <h2>Калибровка: один экран для молоточков и демпферов</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:44px;background:#0f1012;border-radius:0px"><div class="w button" style="left:4px;top:4px;width:44px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w container" style="left:54px;top:4px;width:178px;height:36px;background:#24272b;border-radius:8px"><div class="w button" style="left:2px;top:2px;width:86px;height:32px;background:#3a4a57;border-radius:6px;color:#e8e9eb"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Молоточки</div></div><div class="w button" style="left:90px;top:2px;width:86px;height:32px;background:#24272b;border-radius:6px;color:#8b9098"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Демпферы</div></div></div><div class="w button" style="left:238px;top:4px;width:78px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">Сохр. 3</div></div></div><div class="w chart" style="left:0px;top:48px;width:320px;height:196px;background:#000000;border-radius:0px;overflow:hidden"><svg class="w" id="cal" style="left:1px;top:1px" width="318" height="194"></svg></div><div class="w button" style="left:8px;top:252px;width:44px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">«7</div></div><div class="w button" style="left:56px;top:252px;width:44px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w label wrap" style="left:104px;top:256px;width:112px;font-size:14px;line-height:17px;text-align:center;overflow:hidden">Клавиша 23</div><div class="w label wrap" style="left:104px;top:278px;width:112px;color:#8b9098;font-size:10px;line-height:11px;text-align:center;overflow:hidden">G2 · чип 4 · комп. 1</div><div class="w button" style="left:220px;top:252px;width:44px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:24px;line-height:27px;overflow:hidden">›</div></div><div class="w button" style="left:268px;top:252px;width:44px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">7»</div></div><div class="w container" style="left:8px;top:308px;width:304px;height:96px;background:#1c1e21;border-radius:10px"><div class="w label" style="left:12px;top:8px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">сейчас</div><div class="w label" style="left:12px;top:22px;color:#0dcaf3;font-size:24px;line-height:27px;overflow:hidden">1834</div><div class="w label" style="left:92px;top:24px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">← 1790 · 1851 →</div><div class="w label" style="left:92px;top:39px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">G − R  521</div><div class="w button" style="left:218px;top:6px;width:80px;height:26px;background:#2b3b2f;border-radius:6px;color:#9fe3b3"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:10px;line-height:11px;overflow:hidden">следить</div></div><div class="w container" style="left:12px;top:52px;width:280px;height:40px;border-radius:0px"><div class="w container" style="left:0px;top:17px;width:280px;height:6px;background:#3a3d42;border-radius:3px"></div><div class="w container" style="left:106px;top:12px;width:3px;height:16px;background:#e8692f;border-radius:0px"></div><div class="w container" style="left:142px;top:12px;width:3px;height:16px;background:#2fc25b;border-radius:0px"></div><div class="w container" style="left:124px;top:12px;width:3px;height:16px;background:#0dcaf3;border-radius:0px"></div><div class="w label wrap" style="left:78px;top:0px;width:56px;color:#e8692f;font-size:10px;line-height:11px;text-align:center;overflow:hidden">R 1580</div><div class="w label wrap" style="left:114px;top:29px;width:56px;color:#2fc25b;font-size:10px;line-height:11px;text-align:center;overflow:hidden">G 2101</div></div></div><div class="w button" style="left:8px;top:412px;width:148px;height:60px;background:#343638;border-radius:8px;border:1px solid rgba(47,194,91,0.35)"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + -9px));color:#2fc25b;font-size:14px;line-height:17px;overflow:hidden">Задать G</div><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 12px));color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">2101 → 1834</div></div><div class="w button" style="left:164px;top:412px;width:148px;height:60px;background:#343638;border-radius:8px;border:1px solid rgba(232,105,47,0.35)"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + -9px));color:#e8692f;font-size:14px;line-height:17px;overflow:hidden">Задать R</div><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 12px));color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">1580 → 1834</div></div></div></div>
+      <div class="bezel"><img src="рендеры/3_calib.png" width="320" height="480" alt="Калибровка молоточков"></div>
       <p class="cap">Молоточки, клавиша 23. График 320×196 вместо 320×409 и перерисовывается не чаще 50 раз в секунду, шина опрашивается, как и раньше, каждые 3 мс.</p>
     </div>
     <div class="notes">
@@ -314,7 +323,7 @@ memory</div>
   <h2>Сервис: редкое и необратимое</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:44px;background:#0f1012;border-radius:0px"><div class="w button" style="left:4px;top:4px;width:44px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w label" style="left:58px;top:13px;font-size:14px;line-height:17px;overflow:hidden">Сервис</div></div><div class="w container" style="left:8px;top:52px;width:304px;height:124px;background:#24272b;border-radius:10px"><div class="w label" style="left:12px;top:9px;font-size:14px;line-height:17px;overflow:hidden">Платы G4</div><div class="w label" style="left:12px;top:29px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">25 в piano · 1 в boot 1</div><div class="w button" style="left:200px;top:6px;width:96px;height:32px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Опросить</div></div><div class="w label" style="left:10px;top:50px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">ON</div><div class="w label" style="left:10px;top:74px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">OFF</div><div class="w container" style="left:38px;top:46px;width:260px;height:44px;border-radius:0px"><div class="w container" style="left:0px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:20px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:40px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:60px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:80px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:100px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:120px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:140px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:160px;top:0px;width:18px;height:18px;background:#eeab00;border-radius:4px"></div><div class="w container" style="left:180px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:200px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:220px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:240px;top:0px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:0px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:20px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:40px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:60px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:80px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:100px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:120px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:140px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:160px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:180px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:200px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:220px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div><div class="w container" style="left:240px;top:24px;width:18px;height:18px;background:#2fc25b;border-radius:4px"></div></div><div class="w container" style="left:12px;top:103px;width:8px;height:8px;background:#2fc25b;border-radius:2px"></div><div class="w label" style="left:24px;top:100px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">piano</div><div class="w container" style="left:70px;top:103px;width:8px;height:8px;background:#eeab00;border-radius:2px"></div><div class="w label" style="left:82px;top:100px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">boot 1</div><div class="w container" style="left:132px;top:103px;width:8px;height:8px;background:#a98bf0;border-radius:2px"></div><div class="w label" style="left:144px;top:100px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">boot 2</div><div class="w container" style="left:194px;top:103px;width:8px;height:8px;background:#4a4e55;border-radius:2px"></div><div class="w label" style="left:206px;top:100px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">нет ответа</div></div><div class="w button" style="left:8px;top:184px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Прошивка G4</div><div class="w label" style="right:14px;top:50%;transform:translateY(calc(-50% + -2px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">›</div></div><div class="w button" style="left:8px;top:236px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Журнал</div><div class="w label" style="right:14px;top:50%;transform:translateY(calc(-50% + -2px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">›</div><div class="w label" style="left:84px;top:50%;transform:translateY(calc(-50% + 0px));color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">▲ 2</div></div><div class="w button" style="left:8px;top:288px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Последняя нота на главном</div><div class="w label" style="right:14px;top:50%;transform:translateY(calc(-50% + 0px));color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">выкл</div></div><div class="w button" style="left:8px;top:340px;width:304px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));color:#eeab00;font-size:14px;line-height:17px;overflow:hidden">Восстановить калибровку из памяти</div></div><div class="w label" style="left:12px;top:398px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">СИСТЕМА H7</div><div class="w button" style="left:8px;top:414px;width:148px;height:48px;background:#343638;border-radius:8px;border:1px solid rgba(255,107,107,0.39)"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#ff6b6b;font-size:14px;line-height:17px;overflow:hidden">USB DFU</div></div><div class="w button" style="left:164px;top:414px;width:148px;height:48px;background:#343638;border-radius:8px;border:1px solid rgba(255,107,107,0.39)"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#ff6b6b;font-size:14px;line-height:17px;overflow:hidden">Перезагрузить</div></div></div></div>
+      <div class="bezel"><img src="рендеры/4_service.png" width="320" height="480" alt="Сервис"></div>
       <p class="cap">Пример: плата 9 в загрузчике, в журнале две новые ошибки.</p>
     </div>
     <div class="notes">
@@ -336,9 +345,7 @@ memory</div>
   <h2>Прошивка G4: шаги по порядку</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:44px;background:#0f1012;border-radius:0px"><div class="w button" style="left:4px;top:4px;width:44px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w label" style="left:58px;top:13px;font-size:14px;line-height:17px;overflow:hidden">Прошивка G4</div></div><div class="w container" style="left:8px;top:52px;width:304px;height:40px;background:#1c1e21;border-radius:8px"><div class="w label" style="left:12px;top:11px;font-size:14px;line-height:17px;overflow:hidden">26 в boot 1</div><div class="w button" style="left:204px;top:4px;width:96px;height:32px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Опросить</div></div></div><div class="w label" style="left:12px;top:102px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">ОСНОВНАЯ ПРОШИВКА</div><div class="w button" style="left:8px;top:118px;width:304px;height:44px;background:#1c1e21;border-radius:8px;color:#5a5f66"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">1   В загрузчик</div></div><div class="w button" style="left:8px;top:168px;width:304px;height:44px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">2   Записать прошивку H7 → G4</div></div><div class="w button" style="left:8px;top:218px;width:304px;height:44px;background:#343638;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">3   Запустить piano</div></div><div class="w button" style="left:8px;top:270px;width:304px;height:40px;background:#1c1e21;border-radius:8px"><div class="w label" style="left:14px;top:50%;transform:translateY(calc(-50% + 0px));color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">▶  Загрузчики</div><div class="w label" style="right:14px;top:50%;transform:translateY(calc(-50% + 0px));color:#ff6b6b;font-size:10px;line-height:11px;overflow:hidden">опасно</div></div><div class="w label clip" style="left:0px;top:316px;width:320px;height:164px;background:#000000;color:#9a9a9a;font-size:10px;line-height:11px;padding:4px 4px 0px 6px;overflow:hidden">8         1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... = 26
-         bootloaders
-9        *+*+*+*   bootloader   *+*+*+*</div></div></div>
+      <div class="bezel"><img src="рендеры/5_flash.png" width="320" height="480" alt="Прошивка G4"></div>
       <p class="cap">Платы в загрузчике 1, поэтому шаг 1 недоступен. Строки журнала для примера.</p>
     </div>
     <div class="notes">
@@ -347,7 +354,7 @@ memory</div>
         <li><b>Сверху</b> сводка плат и «Опросить».</li>
         <li><b>После шагов 1 и 3</b> H7 сам опрашивает платы. После шага 3 и выхода по «‹» пианино играет без перезагрузки.</li>
         <li><b>«Загрузчики» свёрнуты.</b> Раскрытый блок встаёт на место журнала: четыре операции, каждая с подтверждением, потому что ошибка там может окирпичить плату.</li>
-        <li><b>Хвост журнала</b>, 14 строк: во время прошивки он нужен прямо здесь.</li>
+        <li><b>Хвост журнала</b>, 13 строк в карточке: во время прошивки он нужен прямо здесь.</li>
         <li><b>Полосы прогресса пока нет:</b> на время записи экран замирает. Пробовать экран на платах — после доступа по SWD.</li>
       </ul>
     </div>
@@ -360,22 +367,13 @@ memory</div>
   <h2>Журнал и панель подтверждения</h2>
   <div class="pair">
     <div>
-      <div class="bezel"><div class="dev"><div class="w container" style="left:0px;top:0px;width:320px;height:44px;background:#0f1012;border-radius:0px"><div class="w button" style="left:4px;top:4px;width:44px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#8b9098;font-size:24px;line-height:27px;overflow:hidden">‹</div></div><div class="w label" style="left:58px;top:13px;font-size:14px;line-height:17px;overflow:hidden">Журнал</div><div class="w button" style="left:212px;top:4px;width:104px;height:36px;background:#0f1012;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Очистить</div></div></div><div class="w container" style="left:8px;top:52px;width:304px;height:40px;background:#1c1e21;border-radius:8px"><div class="w label wrap" style="left:10px;top:6px;width:284px;color:#8b9098;font-size:10px;line-height:11px;overflow:hidden">USART noise 2 · MIDI lost 0 · G4 ring 0
-LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;top:100px;width:320px;height:380px;background:#000000;color:#9a9a9a;font-size:10px;line-height:11px;padding:4px 4px 0px 6px;overflow:hidden">0        *+*+*+*   piano   *+*+*+*
-1        calib H7 &gt;&gt; G4
-2        sync OK
-3         1 2 3 4 5 6 7 8 9 10 11 12 13 14 ... = 26
-         pianos
-4        calib G4 &gt;&gt; H7
-5        calib saved
-6        USART noise 1 : 0-0-255-0
-7        USART noise 2 : 0-0-255-0</div><div class="w container" style="left:0px;top:0px;width:320px;height:480px;background:rgba(0,0,0,0.60);border-radius:0px"><div class="w container" style="left:20px;top:140px;width:280px;height:196px;background:#2a2d31;border-radius:10px"><div class="w label wrap" style="left:16px;top:16px;width:248px;font-size:14px;line-height:17px;overflow:hidden">Перейти в USB DFU?</div><div class="w label wrap" style="left:16px;top:46px;width:248px;color:#8b9098;font-size:14px;line-height:17px;overflow:hidden">H7 перезагрузится в DFU-загрузчик. Пианино замолчит.</div><div class="w button" style="left:16px;top:132px;width:120px;height:48px;background:#343638;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));font-size:14px;line-height:17px;overflow:hidden">Отмена</div></div><div class="w button" style="left:144px;top:132px;width:120px;height:48px;background:#7a1f22;border-radius:8px"><div class="w label" style="left:50%;top:50%;transform:translate(calc(-50% + 0px),calc(-50% + 0px));color:#ffffff;font-size:14px;line-height:17px;overflow:hidden">Перейти</div></div></div></div></div></div>
+      <div class="bezel"><img src="рендеры/6_log_confirm.png" width="320" height="480" alt="Журнал под панелью подтверждения"></div>
       <p class="cap">Под затемнением экран журнала. Панель показана для примера: из журнала DFU не вызывается.</p>
     </div>
     <div class="notes">
       <h3>Журнал</h3>
       <ul>
-        <li>Тот же <code>debugg</code> на весь экран, 30 строк вместо 13.</li>
+        <li>Тот же <code>debugg</code> в карточке на весь экран, 32 строки вместо 13.</li>
         <li>Счётчики ошибок вынесены наверх и не уходят из окна: шум USART, потерянные MIDI, кольцо G4, DMA дисплея, I2C тача.</li>
         <li>Открытие журнала сбрасывает «▲» в строке статуса и в «Сервисе».</li>
         <li>«‹» возвращает туда, откуда журнал открыт: на главный или в «Сервис». «Очистить» вместо двух кнопок «clear disp».</li>
@@ -407,7 +405,7 @@ LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;to
       <tr><td>8 кнопок загрузчиков сеткой</td><td>3 шага, свёрнутый блок «Загрузчики», недоступное серым</td><td>Порядок операций виден на экране, его не нужно помнить</td><td>0. Полосы прогресса пока нет</td></tr>
       <tr><td>Ползунок без точной подстройки</td><td>Ползунок, «−» и «+», значение над ним</td><td>Точное значение пальцем</td><td>0</td></tr>
       <tr><td>Кнопка «off» по касанию</td><td>«Выключить» по долгому нажатию</td><td>Не выключится от случайного касания</td><td>0</td></tr>
-      <tr><td>«&lt;&lt;&lt;» трёх размеров</td><td>«‹» 44×36 в точке (4, 4) на всех экранах</td><td>Рука находит без взгляда</td><td>0</td></tr>
+      <tr><td>«&lt;&lt;&lt;» трёх размеров</td><td>«‹» в точке (4, 4) на всех экранах: 44×36, на калибровке 40×36</td><td>Рука находит без взгляда</td><td>0</td></tr>
       <tr><td>Центровка пробелами</td><td><code>text_align: center</code></td><td>Ровно при любом тексте и шрифте</td><td>0</td></tr>
     </tbody>
   </table></div>
@@ -418,17 +416,19 @@ LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;to
   <span class="eyebrow">Визуальные правила</span>
   <h2>Чтобы экраны выглядели одной системой</h2>
   <div class="rules">
-    <div class="rule"><h3>Сетка</h3><p>Шаг 8 px, поля 8 px. Шапка 44 px, строка статуса 28 px. Касаемая цель не меньше 44×44, основные кнопки высотой 48. Скругление 8 у кнопок, 10 у карточек.</p></div>
+    <div class="rule"><h3>Сетка</h3><p>Поля экрана 8 px, отступ внутри карточек 12 px. Между строками одной группы 4 px, между группами 8–16. Шапка 44 px, строка статуса 28 px. Основные кнопки и строки высотой 48, шаги прошивки 44, мелкие кнопки 36×32 (вкладки, «−» и «+», «Опросить», «следить»). Скругление 8 у кнопок, 10 у карточек, 6 у вкладок внутри сегмента.</p></div>
     <div class="rule"><h3>Цвет только со смыслом</h3>
       <div class="sw">
         <div><i style="background:#2fc25b"></i>G-порог, «всё в порядке»</div>
         <div><i style="background:#e8692f"></i>R-порог</div>
-        <div><i style="background:#0dcaf3"></i>живое значение, velocity, выбранное</div>
+        <div><i style="background:#0dcaf3"></i>живое значение, velocity, ползунки</div>
         <div><i style="background:#eeab00"></i>память: сохранить, есть правки, предупреждение</div>
         <div><i style="background:#ff6b6b"></i>необратимое: DFU, перезагрузка, загрузчики</div>
         <div><i style="background:#343638;outline:1px solid #8b9098"></i>все остальные кнопки, белый текст</div>
+        <div><i style="background:#3a4a57"></i>выбранная вкладка и включённый переключатель</div>
+        <div><i style="background:#8b9098"></i>текст: один светлый #fafafa и один приглушённый</div>
       </div></div>
-    <div class="rule"><h3>Три размера шрифта</h3><p>24 для главного числа или названия на экране, 14 для всего остального, 10 только для осей, журнала и мелких подписей. Шрифт свой: Montserrat Medium с кириллицей (<code>ui_font_ru_10/14/24</code>), встроенный Montserrat в <code>lv_conf.h</code> выключен.</p></div>
+    <div class="rule"><h3>Пять размеров шрифта</h3><p>24 — главное число или название на экране. 18 — номер клавиши и знаки на кнопках (‹ › «7 7» − +). 14 — основной текст. 12 — второстепенные данные: соседи, G − R, пороги на шкале и кнопках «Задать», сводка плат, счётчики журнала. 10 — только подписи разделов, осей, легенды и сам журнал. Шрифт свой: Montserrat Medium с кириллицей (<code>ui_font_ru_10/12/14/18/24</code>), встроенный Montserrat в <code>lv_conf.h</code> выключен.</p></div>
     <div class="rule"><h3>Скорость</h3><p>Без теней, прозрачности и анимаций, кроме затемнения под панелью. Статус и подписи перерисовываются только при изменении, экран обновляется не чаще 50 раз в секунду. График калибровки вдвое меньше по площади.</p></div>
   </div>
 </section>
@@ -442,6 +442,14 @@ LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;to
     <li>Ветка <code>gui-redesign</code>, коммит <code>7a3ab3e</code> от 2026-11-02. На пианино ещё не проверено.</li>
     <li>Логика экранов в <code>Piano_H7/gui.cpp</code>, раскладка в <code>eez_proj/display_piano.eez-project</code>.</li>
   </ul>
+  <h3>Гармонизация экранов</h3>
+  <ul>
+    <li>Одна сетка и одни отступы на всех экранах, один светлый и один приглушённый цвет текста, одна подложка у всех сегментов, ползунки в цвет velocity вместо синего из темы LVGL.</li>
+    <li>Шрифты 12 и 18: данные, которые нужно прочесть на калибровке, больше не мелким 10.</li>
+    <li>Главный: график кривой на 70% выше за счёт плиток разделов. Калибровка: шире вкладки и «следить», карточка «сейчас» и шкала просторнее. Сервис: восстановление калибровки в группе «Система H7». Прошивка и журнал: лог в карточке.</li>
+    <li>Время везде в «мс», без смеси с «ms» и «мкс».</li>
+    <li>Не сделано: общие стили и flex-раскладка в EEZ — их удобнее заводить в самом EEZ Studio.</li>
+  </ul>
   <h3>Отложено</h3>
   <ul>
     <li>Полоса прогресса при записи G4: для неё цикл записи страниц должен отдавать время <code>lv_timer_handler</code>.</li>
@@ -454,7 +462,7 @@ LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;to
   <span class="eyebrow">Решения</span>
   <h2>Что решили до начала</h2>
   <div class="q">
-    <div><b>Язык интерфейса — русский.</b><span class="muted">Montserrat Medium с кириллицей в размерах 10, 14 и 24 из <code>lv_font_conv</code>, шрифты встроены в проект EEZ. Прошивка выросла с 223 до 238 КБ из 640.</span></div>
+    <div><b>Язык интерфейса — русский.</b><span class="muted">Montserrat Medium с кириллицей в размерах 10, 12, 14, 18 и 24 из <code>lv_font_conv</code>, шрифты встроены в проект EEZ. Прошивка выросла с 223 до 238 КБ из 640, после шрифтов 12 и 18 — до 269 КБ.</span></div>
     <div><b>EEZ Studio.</b><span class="muted">Все шесть экранов в проекте EEZ, их можно править и пересобирать. Логика экранов и действия кнопок в <code>gui.cpp</code>, шина и MIDI остались в <code>piano_h7.cpp</code>.</span></div>
     <div><b>Кривые — все 14.</b><span class="muted">Какие оставить, решим позже.</span></div>
     <div><b>Строка «последняя нота» — по желанию.</b><span class="muted">Включается в «Сервисе», по умолчанию выключена. Без неё во время игры экран не перерисовывается.</span></div>
@@ -463,38 +471,3 @@ LCD DMA 0 · Touch I2C 0</div></div><div class="w label clip" style="left:0px;to
 
 </div>
 
-<script>
-(function(){
-  const NS="http://www.w3.org/2000/svg";
-  function el(svg,tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);svg.appendChild(e);return e}
-  // кривая velocity 0..127 по логарифмической оси t 0.2..30 мс, как графики кривых в прошивке
-  function curve(id,grid,fn){
-    const svg=document.getElementById(id);
-    if(!svg)return;
-    const w=+svg.getAttribute("width"),h=+svg.getAttribute("height");
-    if(grid){for(let i=1;i<4;i++)el(svg,"line",{x1:0,x2:w,y1:h*i/4,y2:h*i/4,stroke:"#2f3338","stroke-width":1})}
-    const pts=[];
-    for(let i=0;i<100;i++){const x=i/99,t=200*Math.pow(150,x),v=Math.max(1,Math.min(127,fn(t)));pts.push((x*w).toFixed(1)+","+(h-(v/127)*h).toFixed(1))}
-    el(svg,"polyline",{points:pts.join(" "),fill:"none",stroke:"#0dcaf3","stroke-width":2});
-  }
-  const linSpeed=t=>127*390/t;
-  const user=t=>{const a=1/(690*690),b=1/(14300*14300),K=126/(a-b);return K/((t+300)*(t+300))+1-K*b};
-  curve("mc-a",false,linSpeed);
-  curve("mc-b",false,linSpeed);
-  curve("cc",true,user);
-
-  // график калибровки: точки 2×3 без линий, G, R, живое; курсоры по клавише 23
-  const cal=document.getElementById("cal");
-  if(cal){
-    let s=11;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
-    const W=+cal.getAttribute("width"),H=+cal.getAttribute("height"),N=91,lo=1300,hi=2400;
-    const y=v=>H-(v-lo)/(hi-lo)*H,x=i=>i*(W-1)/(N-1);
-    const ser=[[2100,150,"#00ff00"],[1600,140,"#ff0000"],[1850,110,"#0dcaf3"]];
-    const data=ser.map(([b,a])=>Array.from({length:N},(_,i)=>b+(rnd()-.5)*a+50*Math.sin(i/8)));
-    data[0][23]=2101;data[1][23]=1580;data[2][23]=1834;
-    el(cal,"line",{x1:x(23),x2:x(23),y1:0,y2:H,stroke:"#808080","stroke-width":1});
-    el(cal,"line",{x1:0,x2:W,y1:y(1834),y2:y(1834),stroke:"#808080","stroke-width":1});
-    ser.forEach(([,,c],k)=>data[k].forEach((v,i)=>el(cal,"rect",{x:(x(i)-1).toFixed(1),y:(y(v)-1.5).toFixed(1),width:2,height:3,fill:c})));
-  }
-})();
-</script>
