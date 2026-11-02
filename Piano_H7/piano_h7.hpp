@@ -332,7 +332,7 @@ extern "C" {
 	void to_sleep();
 	void init();
 	void init_LL();
-	void init_chips();
+	void init_chips(const bool quiet = false); // quiet — без записи в журнал
 	void init_buffers();
 	void init_midi_speeds();
 	void reconfig_charts();
