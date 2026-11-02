@@ -9,110 +9,108 @@ extern "C" {
 
 typedef struct _objects_t {
     lv_obj_t *d_main;
+    lv_obj_t *d_curve;
+    lv_obj_t *d_calib;
+    lv_obj_t *d_service;
     lv_obj_t *d_flash;
-    lv_obj_t *d_chart_calib_on;
-    lv_obj_t *d_chart_calib_off;
-    lv_obj_t *button_edit_calibration_on;
-    lv_obj_t *edit_calibration_label;
-    lv_obj_t *button_edit_calibration_off;
-    lv_obj_t *edit_calibration_label_2;
-    lv_obj_t *button_piano_off;
-    lv_obj_t *label_piano_off;
-    lv_obj_t *button_edit_calibration_off_1;
-    lv_obj_t *edit_calibration_label_3;
-    lv_obj_t *button_edit_calibration_off_2;
-    lv_obj_t *edit_calibration_label_4;
-    lv_obj_t *deb;
-    lv_obj_t *obj0;
-    lv_obj_t *obj1;
-    lv_obj_t *roller;
-    lv_obj_t *obj2;
-    lv_obj_t *obj3;
-    lv_obj_t *obj4;
-    lv_obj_t *roller_off;
-    lv_obj_t *roller_lift;
-    lv_obj_t *button_to_main_6;
-    lv_obj_t *obj5;
-    lv_obj_t *obj6;
-    lv_obj_t *obj7;
-    lv_obj_t *deb_1;
-    lv_obj_t *obj8;
-    lv_obj_t *obj9;
-    lv_obj_t *obj10;
-    lv_obj_t *obj11;
-    lv_obj_t *obj12;
-    lv_obj_t *obj13;
-    lv_obj_t *obj14;
-    lv_obj_t *obj15;
-    lv_obj_t *obj16;
-    lv_obj_t *obj17;
-    lv_obj_t *obj18;
-    lv_obj_t *obj19;
-    lv_obj_t *obj20;
-    lv_obj_t *obj21;
-    lv_obj_t *obj22;
-    lv_obj_t *chart_on;
-    lv_obj_t *button_to_main;
-    lv_obj_t *obj23;
-    lv_obj_t *button_calibration_sensor_on_1;
-    lv_obj_t *obj24;
-    lv_obj_t *button_calibration_sensor_on_2;
-    lv_obj_t *obj25;
-    lv_obj_t *label_on;
-    lv_obj_t *label_string_cursor;
-    lv_obj_t *label_string_sensor_8;
-    lv_obj_t *label_string_sensor_9;
-    lv_obj_t *label_string_sensor_13;
-    lv_obj_t *add_1;
-    lv_obj_t *sub_1;
-    lv_obj_t *add_10;
-    lv_obj_t *sub_10;
-    lv_obj_t *obj26;
-    lv_obj_t *obj27;
-    lv_obj_t *label_string_sensor_14;
-    lv_obj_t *label_string_sensor_15;
-    lv_obj_t *chart_off;
-    lv_obj_t *button_to_main_1;
-    lv_obj_t *obj28;
-    lv_obj_t *button_calibration_sensor_on_3;
-    lv_obj_t *obj29;
-    lv_obj_t *button_calibration_sensor_on_4;
-    lv_obj_t *obj30;
-    lv_obj_t *label_on_1;
-    lv_obj_t *label_string_cursor_1;
-    lv_obj_t *label_string_sensor_10;
-    lv_obj_t *label_string_sensor_11;
-    lv_obj_t *label_string_sensor_12;
-    lv_obj_t *add_11;
-    lv_obj_t *sub_11;
-    lv_obj_t *add_2;
-    lv_obj_t *sub_2;
-    lv_obj_t *obj31;
-    lv_obj_t *obj32;
-    lv_obj_t *label_string_sensor_16;
-    lv_obj_t *label_string_sensor_17;
+    lv_obj_t *d_log;
+    lv_obj_t *main_status_chips;
+    lv_obj_t *main_status_usb;
+    lv_obj_t *main_status_calib;
+    lv_obj_t *main_status_warn;
+    lv_obj_t *main_status_warn_label;
+    lv_obj_t *main_curve_tile;
+    lv_obj_t *main_curve_name;
+    lv_obj_t *main_curve_chart;
+    lv_obj_t *main_curve_modes;
+    lv_obj_t *main_last_note;
+    lv_obj_t *main_last_note_label;
+    lv_obj_t *main_last_note_bar;
+    lv_obj_t *curve_save;
+    lv_obj_t *curve_save_label;
+    lv_obj_t *curve_reset;
+    lv_obj_t *curve_tab_on;
+    lv_obj_t *curve_tab_off;
+    lv_obj_t *curve_tab_lift;
+    lv_obj_t *curve_chart;
+    lv_obj_t *curve_axis_min;
+    lv_obj_t *curve_info;
+    lv_obj_t *curve_axis_max;
+    lv_obj_t *curve_roller;
+    lv_obj_t *curve_mode_info;
+    lv_obj_t *curve_sliders;
+    lv_obj_t *curve_row_fast;
+    lv_obj_t *curve_v_fast;
+    lv_obj_t *curve_s_fast;
+    lv_obj_t *curve_row_slow;
+    lv_obj_t *curve_v_slow;
+    lv_obj_t *curve_s_slow;
+    lv_obj_t *curve_row_x0;
+    lv_obj_t *curve_v_x0;
+    lv_obj_t *curve_s_x0;
+    lv_obj_t *curve_fixed;
+    lv_obj_t *curve_mode_panel;
+    lv_obj_t *curve_mode_lin;
+    lv_obj_t *curve_mode_log;
+    lv_obj_t *calib_tab_on;
+    lv_obj_t *calib_tab_off;
+    lv_obj_t *calib_save;
+    lv_obj_t *calib_save_label;
+    lv_obj_t *calib_chart;
+    lv_obj_t *calib_key;
+    lv_obj_t *calib_key_info;
+    lv_obj_t *calib_live;
+    lv_obj_t *calib_neighbors;
+    lv_obj_t *calib_margin;
+    lv_obj_t *calib_follow;
+    lv_obj_t *calib_scale;
+    lv_obj_t *calib_set_g;
+    lv_obj_t *calib_g_change;
+    lv_obj_t *calib_set_r;
+    lv_obj_t *calib_r_change;
+    lv_obj_t *service_chips_summary;
+    lv_obj_t *service_chip_grid;
+    lv_obj_t *service_warn;
+    lv_obj_t *service_last_note_state;
+    lv_obj_t *flash_state;
+    lv_obj_t *flash_step1;
+    lv_obj_t *flash_step2;
+    lv_obj_t *flash_step3;
+    lv_obj_t *flash_boot_toggle_label;
+    lv_obj_t *flash_log;
+    lv_obj_t *flash_boot_panel;
+    lv_obj_t *log_counters;
+    lv_obj_t *log_text;
 } objects_t;
 
 extern objects_t objects;
 
 enum ScreensEnum {
     SCREEN_ID_D_MAIN = 1,
-    SCREEN_ID_D_FLASH = 2,
-    SCREEN_ID_D_CHART_CALIB_ON = 3,
-    SCREEN_ID_D_CHART_CALIB_OFF = 4,
+    SCREEN_ID_D_CURVE = 2,
+    SCREEN_ID_D_CALIB = 3,
+    SCREEN_ID_D_SERVICE = 4,
+    SCREEN_ID_D_FLASH = 5,
+    SCREEN_ID_D_LOG = 6,
 };
 
 void create_screen_d_main();
 void tick_screen_d_main();
 
+void create_screen_d_curve();
+void tick_screen_d_curve();
+
+void create_screen_d_calib();
+void tick_screen_d_calib();
+
+void create_screen_d_service();
+void tick_screen_d_service();
+
 void create_screen_d_flash();
 void tick_screen_d_flash();
 
-void create_screen_d_chart_calib_on();
-void tick_screen_d_chart_calib_on();
-
-void create_screen_d_chart_calib_off();
-void tick_screen_d_chart_calib_off();
+void create_screen_d_log();
+void tick_screen_d_log();
 
 void tick_screen_by_id(enum ScreensEnum screenId);
 void tick_screen(int screen_index);

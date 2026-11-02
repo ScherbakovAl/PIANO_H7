@@ -12,6 +12,99 @@
 #include "algorithm"
 #include "piano_h7.hpp"
 
+// Состояние; что значит каждая переменная — в piano_h7.hpp
+alignas(32) uint8_t rx_data[32] = { };
+__attribute__((aligned(8))) uint8_t tx_settings[5] = { };
+__attribute__((aligned(8))) uint8_t rx_settings[5] = { };
+uint8_t compN_ = 0;
+uint8_t dot_ = 0;
+uint8_t a_ = 0;
+uint8_t b_ = 0;
+
+int32_t buffer_green[size_BUFFER] = {};
+int32_t buffer_red[size_BUFFER] = {};
+int32_t buffer_blue_calib[size_BUFFER] = {};
+int32_t buffer_blue_calib_old[size_BUFFER] = {};
+int32_t buffer_dac[size_BUFFER] = {};
+struct default_comp def_comp;
+default_graph_min_max graph_min_max;
+
+std::vector<Chip> vChips;
+std::map<uint8_t, comparator> mCursor_to_comparator_on;
+std::map<uint8_t, comparator> mCursor_to_comparator_off;
+static comparator default_comparator; // для вывода из searcher_addr_in_cursor() когда нет объекта для возврата по ссылке
+
+chip_states chip_state = chip_states::none;
+chip_states chip_state_prev = chip_states::none;
+current_display cur_disp = current_display::none;
+uint32_t cursor = 0;
+bool calib_follow = true;
+uint32_t calib_dirty = 0;
+bool calib_data_new = false;
+
+int8_t noteAdder[size_BUFFER] = {};
+
+int counter_on = 0;
+int counter_off = 0;
+
+bool chip_silent[allChipCount] = { };
+bool chip_bad_adress[allChipCount] = { };
+bool chip_bad_data[allChipCount] = { };
+
+bool send_damper_lift = true;
+
+volatile uint32_t noise_count = 0;
+uint32_t noise_shown = 0;
+volatile uint8_t noise_bytes[4] = { };
+volatile uint32_t midi_lost = 0;
+uint32_t midi_lost_shown = 0;
+volatile uint32_t g4_ring[g4_ring_size] = { };
+volatile uint32_t g4_ring_w = 0;
+volatile uint32_t g4_ring_r = 0;
+volatile uint32_t g4_ring_lost = 0;
+uint32_t g4_ring_lost_shown = 0;
+bool host_reads = false;
+uint32_t host_tx_done_seen = 0;
+uint32_t host_tx_edge_ms = 0;
+volatile uint32_t lcd_dma_errors = 0;
+uint32_t lcd_dma_errors_shown = 0;
+uint32_t touch_errors_shown = 0;
+uint32_t touch_errors_tick = 0;
+volatile uint8_t last_note = 0;
+volatile uint8_t last_note_vel = 0;
+volatile uint32_t last_note_t_us = 0;
+volatile uint32_t last_note_seq = 0;
+
+int fl = 0.0f;
+float speed_F = 0.0f;
+float midi_hi_F = 0.0f;
+float midi_lo_F = 0.0f;
+uint32_t out_debug_ = 0;
+float timer_data_in = 0.0f;
+uint32_t debug_counter = 0.0f;
+
+float min = 391.2f;
+float max = 19207.0f;
+
+std::vector<speed_for_midi> curve_ON;
+volatile uint8_t curve_on_selected = 9;
+volatile uint8_t curve_off_selected = 0;
+volatile uint8_t curve_lift_selected = 0;
+user_curve_rec user_curve = { user_curve_magic, 461.0f, 18305.0f, 2188.0f, {} };
+volatile float user_K = 0.0f;
+volatile float user_y0 = 0.0f;
+volatile float user_x0 = 0.0f;
+volatile float user_lin_t_fast = vel_t_fast;
+volatile float user_lin_t_slow = vel_t_slow;
+volatile float user_log_t_fast = vel_t_fast;
+volatile float user_log_t_slow = vel_t_slow;
+float m_F = 0.0f;
+float sd_F = 0.0f;
+float sx_F = 0.0f;
+float sy_F = 0.0f;
+
+std::string debugg;
+
 // inline constexpr uint32_t NOTE_OFFSETS[196] = {
 //     // Индексы для коррекции MIDI номера
 //     // Эти значения зависят от конкретной клавиатуры
@@ -32,31 +125,11 @@ void to_sleep() {
 void init() {
 
 	init_LL();
-	init_LCD_and_touch();
-	lv_init();
-	disp_create_and_touch_start();
-	ui_init();
-	// не через EEZ: в проекте событие не видно, но и перегенерация screens.c его не сотрёт
-	lv_obj_add_event_cb(objects.roller, roller_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
-	curve_on_selected = lv_roller_get_selected(objects.roller);
-	lv_obj_add_event_cb(objects.roller_off, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_off_selected);
-	curve_off_selected = lv_roller_get_selected(objects.roller_off);
-	lv_obj_add_event_cb(objects.roller_lift, roller_mode_changed, LV_EVENT_VALUE_CHANGED, (void*)&curve_lift_selected);
-	curve_lift_selected = lv_roller_get_selected(objects.roller_lift);
 	if (const user_curve_rec* saved = user_curve_saved()) {
 		user_curve = *saved;
 	}
 	user_curve_set();
-	create_screen_curve();
-	// «off» — кодом, как «curve»: справа от «clear disp». Включение — кнопкой SW1
-	lv_obj_t* button_off_obj = lv_button_create(objects.d_main);
-	lv_obj_set_pos(button_off_obj, 165, 428);
-	lv_obj_set_size(button_off_obj, 72, 50);
-	lv_obj_set_style_bg_color(button_off_obj, lv_color_hex(0xff343638), LV_PART_MAIN);
-	lv_obj_add_event_cb(button_off_obj, button_off, LV_EVENT_RELEASED, NULL);
-	lv_obj_t* button_off_label = lv_label_create(button_off_obj);
-	lv_obj_center(button_off_label);
-	lv_label_set_text(button_off_label, "off");
+	gui_init();
 	// TinyUSB живёт в PendSV (usb_task): приоритет как у OTG_HS — друг друга не прерывают; DMA1_Stream2 (0) выше обоих
 	NVIC_SetPriority(PendSV_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 0));
 	// В tinyusb/ есть свои правки (искать «PIANO_H7»): tud_midi_n_tx_available, _tx_done, _tx_clear, _tx_probe
@@ -71,7 +144,6 @@ void init() {
 
 	init_buffers();
 	init_midi_speeds();
-	config_charts();
 	init_chips();
 
 	if (chip_state == chip_states::none) {
@@ -126,33 +198,6 @@ void init_LL() {
 	LL_DMA_EnableIT_TC(DMA1, LL_DMA_STREAM_2); // включает прерывание transfer complete
 	LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_2);
 
-}
-
-void init_LCD_and_touch() {
-
-	// LCD init
-	LL_SPI_EnableDMAReq_TX(SPI3); // TXDMAEN в CFG1 — до SPE (RM0468)
-	LL_SPI_Enable(SPI3);
-	LL_SPI_StartMasterTransfer(SPI3);
-	LCD_Init();
-
-	// TOUCH init
-	// LL_I2C_Enable(I2C5);
-	FT6336_Init();
-
-}
-
-void disp_create_and_touch_start() {
-
-	disp = lv_display_create(320, 480);
-	lv_display_set_color_format(disp, LV_COLOR_FORMAT_RGB888);
-	lv_display_set_flush_cb(disp, my_flush_cb);
-	lv_display_set_buffers(disp, buf_1, buf_2, sizeof(buf_1), LV_DISPLAY_RENDER_MODE_PARTIAL);
-
-	// LL_TIM_EnableIT_UPDATE(TIM6); // для TOUCH — не используется: TIM6 не инициализирован и не тактируется, обработчика нет (тач опрашивает LVGL)
-	indev = lv_indev_create();
-	lv_indev_set_type(indev, LV_INDEV_TYPE_POINTER);
-	lv_indev_set_read_cb(indev, my_input_read);
 }
 
 void init_chips() {
@@ -347,49 +392,6 @@ void init_midi_speeds() {
 	// }
 }
 
-void config_charts() {
-	lv_obj_t* ob = objects.chart_on;
-	// lv_chart_set_point_count(ob, buffer_division);
-	lv_chart_set_point_count(ob, 91);
-	ser_on_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_X);
-	ser_on_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_X);
-	ser_on_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_X); // LV_COLOR_MAKE(0xE9, 0x1E, 0x63)
-	ser_on_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_X);
-	lv_chart_set_series_ext_y_array(ob, ser_on_green, &buffer_green[7]);
-	lv_chart_set_series_ext_y_array(ob, ser_on_red, &buffer_red[7]);
-	lv_chart_set_series_ext_y_array(ob, ser_on_blue, &buffer_blue_calib[7]);
-	lv_chart_set_series_ext_y_array(ob, ser_on_dac, &buffer_dac[7]);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, graph_min_max.on_min, graph_min_max.on_max);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, graph_min_max.on_min, graph_min_max.on_max);
-	cursor_on_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER);
-	cursor_on_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
-	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
-	lv_chart_set_div_line_count(ob, 0, 0);
-	lv_obj_set_style_radius(ob, 0, 0);
-
-	ob = objects.chart_off;
-	lv_chart_set_point_count(ob, 70);
-	ser_off_green = lv_chart_add_series(ob, lv_color_hex(0x00ff00), LV_CHART_AXIS_PRIMARY_X);
-	ser_off_red = lv_chart_add_series(ob, lv_color_hex(0xff0000), LV_CHART_AXIS_PRIMARY_X);
-	ser_off_blue = lv_chart_add_series(ob, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_X);
-	ser_off_dac = lv_chart_add_series(ob, lv_color_hex(0x757575), LV_CHART_AXIS_PRIMARY_X);
-	lv_chart_set_series_ext_y_array(ob, ser_off_green, &buffer_green[buffer_division]);
-	lv_chart_set_series_ext_y_array(ob, ser_off_red, &buffer_red[buffer_division]);
-	lv_chart_set_series_ext_y_array(ob, ser_off_blue, &buffer_blue_calib[buffer_division]);
-	lv_chart_set_series_ext_y_array(ob, ser_off_dac, &buffer_dac[buffer_division]);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_PRIMARY_Y, graph_min_max.off_max, graph_min_max.off_min);
-	lv_chart_set_axis_range(ob, LV_CHART_AXIS_SECONDARY_Y, graph_min_max.off_max, graph_min_max.off_min);
-	cursor_off_vert = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_VER); // lv_color_make(200, 200, 200)
-	cursor_off_hor = lv_chart_add_cursor(ob, lv_color_hex(0x808080), LV_DIR_HOR);
-	lv_obj_set_style_line_width(ob, 1, LV_PART_CURSOR); // толщина курсора
-	lv_obj_set_style_line_width(ob, 0, LV_PART_ITEMS);  // толщина линий между точками на графике
-	lv_obj_set_style_size(ob, 2, 3, LV_PART_INDICATOR); // размер точек на графике
-	lv_chart_set_div_line_count(ob, 0, 0);
-	lv_obj_set_style_radius(ob, 0, 0);
-}
-
 void reconfig_charts() { // должен быть только после config_charts();s
 
 	// uint8_t start_on = 0;
@@ -456,52 +458,13 @@ void h7() {
 		ui_tick();
 
 		if (TIM5->CNT > 3000) { // 1000 = 1ms (чтобы калибровка не наступала себе на пятки)
-
-			if (cur_disp == current_display::on) {
-
-				// for (const auto& [prev, current] : vChips | std::views::slide(2)) {}
-				// for (auto n : v | std::views::drop(3) | std::views::take(4)) {}
-				for (const auto& chip : vChips) {
-					if (chip.typ == typeAction::on) {
-						if (sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration)) {
-							for (const auto& comp : chip.comparators) {
-								if (UART4_receive_settings()) break;
-								buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
-							}
-							update_cursor(chip);
-						}
-					}
-				}
-				uint8_t addr = mCursor_to_comparator_on[cursor].address;
-				chart_calib_online = std::to_string(buffer_blue_calib[addr]);
-				l = std::to_string(buffer_blue_calib[addr - 1]);
-				r = std::to_string(buffer_blue_calib[addr + 1]);
-				lv_chart_set_cursor_point(objects.chart_on, cursor_on_hor, ser_on_blue, cursor);
-				lv_chart_refresh(cur_chart);
-			}
-
-			if (cur_disp == current_display::off) {
-
-				for (const auto& chip : vChips) {
-					if (chip.typ == typeAction::off) {
-						if (sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration)) {
-							for (const auto& comp : chip.comparators) {
-								if (UART4_receive_settings()) break;
-								buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
-							}
-							update_cursor(chip);
-						}
-					}
-				}
-				uint8_t addr = mCursor_to_comparator_off[cursor].address;
-				chart_calib_online = std::to_string(buffer_blue_calib[addr]);
-				l = std::to_string(buffer_blue_calib[addr - 1]);
-				r = std::to_string(buffer_blue_calib[addr + 1]);
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_hor, ser_off_blue, cursor);
-				lv_chart_refresh(cur_chart);
+			if (cur_disp == current_display::on || cur_disp == current_display::off) {
+				calib_poll();
 			}
 			TIM5->CNT = 0;
 		}
+
+		gui_tick();
 
 		if (noise_count != noise_shown) {
 			noise_shown = noise_count;
@@ -703,23 +666,137 @@ void update_cursor(const Chip& chip) {
 		}
 
 		if (fl_c) {
-			cursor = comp.cursor;
-			if (addr > buffer_division) {
-				lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
-				sensor_off_1_data_string = std::to_string(buffer_green[addr]);
-				sensor_off_2_data_string = std::to_string(buffer_red[addr]);
-				cursor_string = std::to_string(cursor);
+			if (calib_follow) {
+				cursor = comp.cursor;
 			}
-			else {
-				lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
-				sensor_on_1_data_string = std::to_string(buffer_green[addr]);
-				sensor_on_2_data_string = std::to_string(buffer_red[addr]);
-				cursor_string = std::to_string(cursor);
-			}
-			n_chip = std::to_string(comp.number_chip);
-			n_comp = std::to_string(comp.number_comparator);
 			fl_c = false;
 		}
+	}
+}
+
+// Экраны калибровки. Шина стоит (TIM1 и DMA приёма выключены): G4 калибруемого типа гоняют ЦАП, другой — молчит
+void calib_enter(const typeAction t) {
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	LL_USART_DisableDMAReq_RX(UART5);
+	cur_disp = t == typeAction::on ? current_display::on : current_display::off;
+	if (vChips.empty()) {
+		return;
+	}
+	all_g4_to_H7();
+	cursor = t == typeAction::on ? vChips.front().comparators.front().cursor : vChips.back().comparators.back().cursor;
+	read_comp_setting(t);
+
+	for (const auto& chip : vChips) {
+		if (chip.typ == t) {
+			sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
+		}
+		else {
+			sender(command::mute, chip.number_chip, 0, dot::green, 0);
+		}
+	}
+}
+
+// Выход из калибровки без запуска шины: G4 калибруемого типа — stop_calibration, другим — unmute
+void calib_leave() {
+	LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть здесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
+	pause(2);
+
+	if (!vChips.empty() && (cur_disp == current_display::on || cur_disp == current_display::off)) {
+		const typeAction t = cur_disp == current_display::on ? typeAction::on : typeAction::off;
+		for (const auto& chip : vChips) {
+			if (chip.typ == t) {
+				sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
+			}
+			else {
+				sender(command::unmute, chip.number_chip, 0, dot::green, 0);
+			}
+		}
+	}
+	cur_disp = current_display::none;
+}
+
+// раз в 3 мс из основного цикла: синие значения калибруемых G4
+void calib_poll() {
+	const typeAction t = cur_disp == current_display::on ? typeAction::on : typeAction::off;
+	for (const auto& chip : vChips) {
+		if (chip.typ == t) {
+			if (sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::read_calibration)) {
+				for (const auto& comp : chip.comparators) {
+					if (UART4_receive_settings()) break;
+					buffer_blue_calib[comp.address] = convert_8_16(a_, b_);
+				}
+				update_cursor(chip);
+			}
+		}
+	}
+	calib_data_new = true;
+}
+
+// порог d клавиши под курсором — текущее синее значение
+void calib_set_threshold(const dot d) {
+	const auto& comp = searcher_addr_in_cursor(cursor);
+	if (!comp.is_active) {
+		return;
+	}
+	sender(command::set_comp_value, comp.number_chip, comp.number_comparator, d, buffer_blue_calib[comp.address]);
+	(d == dot::red ? buffer_red : buffer_green)[comp.address] = convert_8_16(a_, b_);
+	++calib_dirty;
+}
+
+// курсор на delta клавиш, если там есть компаратор
+void calib_cursor_move(const int32_t delta) {
+	const auto& comp = searcher_addr_in_cursor(cursor + delta);
+	if (comp.is_active) {
+		cursor += delta;
+	}
+}
+
+void calib_save() {
+	save_to_memory();
+	calib_dirty = 0;
+	debugg_fn(" calib saved "); // DEBUG
+}
+
+void calib_restore() {
+	read_on_memory();
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	LL_USART_DisableDMAReq_RX(UART5);
+	all_H7_to_g4();
+	LL_USART_EnableDMAReq_RX(UART5);
+	LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
+	calib_dirty = 0;
+	debugg_fn(" calib restored "); // DEBUG
+}
+
+// экран прошивки G4: шина стоит
+void bus_stop() {
+	LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+	LL_USART_DisableDMAReq_RX(UART5);
+	cur_disp = current_display::bootloader;
+}
+
+// с экранов калибровки и прошивки — обратно к игре
+void bus_resume() {
+	calib_leave();
+	cur_disp = current_display::main;
+	if (chip_state == chip_states::piano) {
+		all_H7_to_g4();
+		sync();
+	}
+}
+
+// Пересканировать G4 без перезагрузки H7. Пока идёт игра, шину на время опроса останавливает;
+// пороги — из RAM (несохранённые правки тоже), как после выхода из калибровки
+void chips_rescan() {
+	const bool playing = cur_disp != current_display::bootloader;
+	if (playing) {
+		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
+		LL_USART_DisableDMAReq_RX(UART5);
+	}
+	init_chips();
+	if (playing && chip_state == chip_states::piano) {
+		all_H7_to_g4();
+		sync();
 	}
 }
 
@@ -1006,6 +1083,13 @@ void g4_to_midi(const uint32_t p) {
 			uint8_t note_buff[] = { 0x80, note_, 64 };
 			midi_write(note_buff, 3);
 		}
+
+		if (rxB < 98) {
+			last_note = note_;
+			last_note_vel = (uint8_t)midi_hi_F;
+			last_note_t_us = (uint32_t)t_F;
+			last_note_seq = last_note_seq + 1;
+		}
 	}
 
 	if (rxB < 98) { // DEBUG
@@ -1176,7 +1260,7 @@ void pause(const uint32_t& p) {
 }
 
 void debugg_fn(const std::string& str) {
-	if (std::count(debugg.begin(), debugg.end(), '\n') >= 12) debugg.erase(0, debugg.find('\n') + 1); // окно 13 строк: уходит самая старая
+	if (std::count(debugg.begin(), debugg.end(), '\n') >= 29) debugg.erase(0, debugg.find('\n') + 1); // окно 30 строк (экран «Журнал»): уходит самая старая
 	if (!debugg.empty()) debugg += "\n";
 	debugg += std::to_string(debug_counter);
 	debugg += "        ";
@@ -1229,27 +1313,6 @@ void DMA2_Stream3_i2c(void) { // DMA touch - панели
 	// }
 }
 */
-
-void my_input_read(lv_indev_t* /*indev*/, lv_indev_data_t* data) { // имя параметра перекрывало глобальный indev
-	TouchPoints_HandleTypeDef TP = FT6336_GetTouchPoint(); // TD_STATUS и первая точка — одним чтением
-	if (TP.count > 0) {
-		data->point.x = TP.point1_x;
-		data->point.y = TP.point1_y;
-		data->state = LV_INDEV_STATE_PRESSED;
-	}
-	else {
-		data->state = LV_INDEV_STATE_RELEASED;
-	}
-}
-
-void roller_curve_changed(lv_event_t* e) {
-	curve_on_selected = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
-}
-
-// Роллеры OFF и LIFT: user_data — их curve_*_selected
-void roller_mode_changed(lv_event_t* e) {
-	*(volatile uint8_t*)lv_event_get_user_data(e) = lv_roller_get_selected((lv_obj_t*)lv_event_get_target(e));
-}
 
 // velocity OFF и LIFT по скорости d/t, без массы: t_fast → 127, t_slow → 1. Скорости у демпфера лишь 16:1 (LIFT),
 // и у ON-шного 127 · t_fast / t медленный конец не опускался бы ниже 8 — поэтому lin здесь от v_min, а не от нуля.
@@ -1354,252 +1417,6 @@ bool user_curve_save() {
 	SCB_EnableICache();
 	SCB_EnableDCache();
 	return ok;
-}
-
-// Экран кривых ON — кодом, как события роллеров: перегенерация screens.c его не сотрёт.
-// Шину и G4 не трогает (в отличие от экранов калибровки): ноты идут в MIDI и на нём
-void create_screen_curve() {
-	// вход — кнопка на главном экране, слева от «clear disp»
-	lv_obj_t* obj = lv_button_create(objects.d_main);
-	lv_obj_set_pos(obj, 7, 428);
-	lv_obj_set_size(obj, 72, 50);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
-	lv_obj_add_event_cb(obj, button_to_curve, LV_EVENT_RELEASED, NULL);
-	lv_obj_t* label = lv_label_create(obj);
-	lv_obj_center(label);
-	lv_label_set_text(label, "curve");
-
-	scr_curve = lv_obj_create(NULL);
-	lv_obj_clear_flag(scr_curve, LV_OBJ_FLAG_SCROLLABLE);
-
-	chart_curve = lv_chart_create(scr_curve);
-	lv_obj_set_pos(chart_curve, 5, 5);
-	lv_obj_set_size(chart_curve, 230, 225);
-	lv_chart_set_point_count(chart_curve, curve_points_count);
-	lv_chart_set_axis_range(chart_curve, LV_CHART_AXIS_PRIMARY_Y, 0, 127);
-	ser_curve = lv_chart_add_series(chart_curve, lv_color_hex(0x0dcaf3), LV_CHART_AXIS_PRIMARY_Y);
-	lv_chart_set_series_ext_y_array(chart_curve, ser_curve, curve_points);
-	lv_obj_set_style_size(chart_curve, 0, 0, LV_PART_INDICATOR); // без точек — только линия
-	lv_chart_set_div_line_count(chart_curve, 5, 0); // velocity 0, 32, 64, 95, 127
-	lv_obj_set_style_radius(chart_curve, 0, 0);
-
-	const char* axis[] = { "0.2 ms", "30 ms" };
-	const lv_align_t axis_align[] = { LV_ALIGN_OUT_BOTTOM_LEFT, LV_ALIGN_OUT_BOTTOM_RIGHT };
-	for (uint32_t i = 0; i < 2; ++i) {
-		obj = lv_label_create(scr_curve);
-		lv_obj_set_style_text_font(obj, &lv_font_montserrat_10, LV_PART_MAIN);
-		lv_label_set_text(obj, axis[i]);
-		lv_obj_align_to(obj, chart_curve, axis_align[i], 0, 2);
-	}
-	label_curve_info = lv_label_create(scr_curve); // под серединой графика, текст — в curve_screen_update
-	lv_obj_set_style_text_font(label_curve_info, &lv_font_montserrat_10, LV_PART_MAIN);
-	lv_obj_set_style_text_align(label_curve_info, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-	lv_obj_set_width(label_curve_info, 130);
-	lv_obj_align_to(label_curve_info, chart_curve, LV_ALIGN_OUT_BOTTOM_MID, 0, 2);
-
-	// копия objects.roller: тот же список, выбор — тот же curve_on_selected
-	roller_curve = lv_roller_create(scr_curve);
-	lv_obj_set_pos(roller_curve, 240, 5);
-	lv_obj_set_size(roller_curve, 75, 225);
-	lv_roller_set_options(roller_curve, lv_roller_get_options(objects.roller), LV_ROLLER_MODE_NORMAL);
-	lv_obj_set_style_text_font(roller_curve, &lv_font_montserrat_10, LV_PART_MAIN);
-	lv_obj_set_style_text_color(roller_curve, lv_color_hex(0xff127873), LV_PART_MAIN);
-	lv_obj_set_style_bg_color(roller_curve, lv_color_hex(0xff4e6475), LV_PART_SELECTED);
-	lv_obj_add_event_cb(roller_curve, roller_curve_copy_changed, LV_EVENT_VALUE_CHANGED, NULL);
-
-	slider_t_fast = curve_slider(258, user_t_fast_min, user_t_fast_max, user_curve.t_fast, &label_t_fast);
-	slider_t_slow = curve_slider(308, user_t_slow_min, user_t_slow_max, user_curve.t_slow, &label_t_slow);
-	slider_x0 = curve_slider(358, user_x0_min, user_x0_max, user_curve.x0, &label_x0);
-
-	obj = lv_button_create(scr_curve);
-	lv_obj_set_pos(obj, 2, 410);
-	lv_obj_set_size(obj, 145, 67);
-	lv_obj_set_style_radius(obj, 8, LV_PART_MAIN);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
-	lv_obj_add_event_cb(obj, button_curve_back, LV_EVENT_RELEASED, NULL);
-	label = lv_label_create(obj);
-	lv_obj_center(label);
-	lv_obj_set_style_text_color(label, lv_color_hex(0xff727272), LV_PART_MAIN);
-	lv_label_set_text(label, "<<<");
-
-	obj = lv_button_create(scr_curve);
-	lv_obj_set_pos(obj, 173, 410);
-	lv_obj_set_size(obj, 145, 67);
-	lv_obj_set_style_radius(obj, 8, LV_PART_MAIN);
-	lv_obj_set_style_bg_color(obj, lv_color_hex(0xff343638), LV_PART_MAIN);
-	lv_obj_add_event_cb(obj, button_curve_save, LV_EVENT_RELEASED, NULL);
-	label_curve_save = lv_label_create(obj);
-	lv_obj_center(label_curve_save);
-	lv_obj_set_style_text_color(label_curve_save, lv_color_hex(0xffeeab00), LV_PART_MAIN);
-	lv_label_set_text(label_curve_save, "save");
-
-	button_curve_reset = lv_button_create(scr_curve); // на месте save: save — у user, reset — у user lin и user log
-	lv_obj_set_pos(button_curve_reset, 173, 410);
-	lv_obj_set_size(button_curve_reset, 145, 67);
-	lv_obj_set_style_radius(button_curve_reset, 8, LV_PART_MAIN);
-	lv_obj_set_style_bg_color(button_curve_reset, lv_color_hex(0xff343638), LV_PART_MAIN);
-	lv_obj_add_event_cb(button_curve_reset, button_curve_reset_pressed, LV_EVENT_RELEASED, NULL);
-	label = lv_label_create(button_curve_reset);
-	lv_obj_center(label);
-	lv_obj_set_style_text_color(label, lv_color_hex(0xffeeab00), LV_PART_MAIN);
-	lv_label_set_text(label, "reset");
-
-	curve_screen_update();
-}
-
-// подпись в y, ползунок под ней
-lv_obj_t* curve_slider(const int32_t y, const int32_t min, const int32_t max, const float value, lv_obj_t** label) {
-	*label = lv_label_create(scr_curve);
-	lv_obj_set_pos(*label, 10, y);
-	lv_obj_t* obj = lv_slider_create(scr_curve);
-	lv_obj_set_pos(obj, 20, y + 24);
-	lv_obj_set_size(obj, 280, 12);
-	lv_slider_set_range(obj, min, max);
-	lv_slider_set_value(obj, (int32_t)value, LV_ANIM_OFF);
-	lv_obj_add_event_cb(obj, slider_curve_changed, LV_EVENT_VALUE_CHANGED, NULL);
-	return obj;
-}
-
-// График и ползунки — кривой, выбранной в роллере: user — все три и save, user lin и user log —
-// t_fast, t_slow и reset, остальные не правятся — только график
-void curve_screen_update() {
-	const uint32_t c = curve_on_selected;
-	const bool user = c == curve_user;
-	const bool lin = c == curve_user_lin;
-	const bool log = c == curve_user_log;
-	float t_fast = user_curve.t_fast;
-	float t_slow = user_curve.t_slow;
-	if (lin) {
-		t_fast = user_lin_t_fast;
-		t_slow = user_lin_t_slow;
-	}
-	if (log) {
-		t_fast = user_log_t_fast;
-		t_slow = user_log_t_slow;
-	}
-
-	lv_slider_set_value(slider_t_fast, (int32_t)t_fast, LV_ANIM_OFF); // событие не шлёт
-	lv_slider_set_value(slider_t_slow, (int32_t)t_slow, LV_ANIM_OFF);
-	lv_slider_set_value(slider_x0, (int32_t)user_curve.x0, LV_ANIM_OFF);
-	lv_obj_set_flag(slider_t_fast, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
-	lv_obj_set_flag(slider_t_slow, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
-	lv_obj_set_flag(label_t_slow, LV_OBJ_FLAG_HIDDEN, !(user || lin || log));
-	lv_obj_set_flag(slider_x0, LV_OBJ_FLAG_HIDDEN, !user);
-	lv_obj_set_flag(label_x0, LV_OBJ_FLAG_HIDDEN, !user);
-	lv_obj_set_flag(lv_obj_get_parent(label_curve_save), LV_OBJ_FLAG_HIDDEN, !user); // сохраняется только user
-	lv_obj_set_flag(button_curve_reset, LV_OBJ_FLAG_HIDDEN, !(lin || log));
-
-	if (user || lin || log) {
-		lv_label_set_text_fmt(label_t_fast, "127 at t = %d us", (int)t_fast);
-	}
-	else {
-		lv_label_set_text(label_t_fast, "fixed curve");
-	}
-	lv_label_set_text_fmt(label_t_slow, "1 at t = %d us", (int)t_slow);
-	lv_label_set_text_fmt(label_x0, "bend x0 = %d us", (int)user_curve.x0);
-	lv_label_set_text_fmt(label_curve_info, "t (log),  2 ms -> %d", (int)LV_CLAMP(1.0f, on_vel(c, 2000.0f), 127.0f));
-
-	for (uint32_t i = 0; i < curve_points_count; ++i) {
-		const float t = curve_t_min * powf(curve_t_max / curve_t_min, (float)i / (curve_points_count - 1));
-		curve_points[i] = (int32_t)LV_CLAMP(1.0f, on_vel(c, t), 127.0f);
-	}
-	lv_chart_refresh(chart_curve);
-}
-
-void button_to_curve(lv_event_t* e) {
-	lv_roller_set_selected(roller_curve, curve_on_selected, LV_ANIM_OFF);
-	curve_screen_update();
-	lv_screen_load(scr_curve);
-}
-
-void button_off(lv_event_t* e) {
-	request_power_off();
-}
-
-// копия роллера ON: выбор сразу звучит и уходит в роллер главного экрана
-void roller_curve_copy_changed(lv_event_t* e) {
-	curve_on_selected = lv_roller_get_selected(roller_curve);
-	lv_roller_set_selected(objects.roller, curve_on_selected, LV_ANIM_OFF);
-	curve_screen_update();
-}
-
-void button_curve_back(lv_event_t* e) {
-	loadScreen(SCREEN_ID_D_MAIN);
-}
-
-void button_curve_save(lv_event_t* e) {
-	lv_label_set_text(label_curve_save, user_curve_save() ? "saved" : "flash error");
-}
-
-// выбранную user lin или user log — к vel_t_fast / vel_t_slow, как при старте
-void button_curve_reset_pressed(lv_event_t* e) {
-	if (curve_on_selected == curve_user_lin) {
-		user_lin_t_fast = vel_t_fast;
-		user_lin_t_slow = vel_t_slow;
-	}
-	else if (curve_on_selected == curve_user_log) {
-		user_log_t_fast = vel_t_fast;
-		user_log_t_slow = vel_t_slow;
-	}
-	curve_screen_update();
-}
-
-// ползунки правят кривую, выбранную в роллере (скрытые у неё не используются)
-void slider_curve_changed(lv_event_t* e) {
-	const float t_fast = (float)lv_slider_get_value(slider_t_fast);
-	const float t_slow = (float)lv_slider_get_value(slider_t_slow);
-	if (curve_on_selected == curve_user) {
-		user_curve.t_fast = t_fast;
-		user_curve.t_slow = t_slow;
-		user_curve.x0 = (float)lv_slider_get_value(slider_x0);
-		user_curve_set();
-		lv_label_set_text(label_curve_save, "save");
-	}
-	else if (curve_on_selected == curve_user_lin) {
-		user_lin_t_fast = t_fast;
-		user_lin_t_slow = t_slow;
-	}
-	else if (curve_on_selected == curve_user_log) {
-		user_log_t_fast = t_fast;
-		user_log_t_slow = t_slow;
-	}
-	curve_screen_update();
-}
-
-void DMA2_Stream1_TransferComplete() { // DMA дисплея
-	// Проверка флага Transfer Complete
-	if (LL_DMA_IsActiveFlag_TC1(DMA2)) {
-		LL_DMA_ClearFlag_TC1(DMA2);
-	}
-
-	// Проверка флага Transfer Error
-	if (LL_DMA_IsActiveFlag_TE1(DMA2)) {
-		LL_DMA_ClearFlag_TE1(DMA2);
-		lcd_dma_errors = lcd_dma_errors + 1; // поток остановлен аппаратно; flush_ready ниже — LVGL не зависнет
-	}
-
-	// Проверка флага Half Transfer (если нужно)
-	if (LL_DMA_IsActiveFlag_HT1(DMA2)) {
-		LL_DMA_ClearFlag_HT1(DMA2);
-	}
-
-	// TC = последний байт попал в FIFO SPI, а не ушёл в линию. Без ожидания следующий
-	// flush_cb опустит DC, и хвост FIFO (до 16 байт, ~1.4 мкс) дисплей примет как команды.
-	while (!LL_SPI_IsActiveFlag_TXC(SPI3)) {
-	};
-
-	lcd_dma_busy = false;
-	lv_display_flush_ready(disp);
-}
-
-void my_flush_cb(lv_display_t* disp, const lv_area_t* area, uint8_t* color_p) {
-	LCD_SetWindows(area->x1, area->y1, area->x2, area->y2);
-	const int32_t height = area->y2 - area->y1 + 1;
-	const int32_t width = area->x2 - area->x1 + 1;
-	const int32_t wh_ = width * height * BYTES_PER_PIXEL; // кусок сплошной: строки без выравнивания (static_assert в piano_h7.hpp)
-	SCB_CleanDCache_by_Addr((uint32_t*)color_p, wh_); // DMA читает RAM: выгрузить из кэша только отрисованный кусок
-	lcd_dma_busy = true;
-	Send_DMA_Data8(color_p, wh_);
 }
 
 void Read_uint32(uint32_t Address, volatile uint32_t* pData, uint32_t Size) {
@@ -2001,333 +1818,3 @@ const comparator& searcher_addr_in_cursor(const uint32_t& c) {
 		return default_comparator;
 	}
 }
-
-void set_cursor_piont_on(const comparator& comp) {
-	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
-	sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
-	sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
-	n_chip = std::to_string(comp.number_chip);
-	n_comp = std::to_string(comp.number_comparator);
-}
-
-void set_cursor_piont_off(const comparator& comp) {
-	cursor_string = std::to_string(cursor);
-	lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
-	sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
-	sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
-	n_chip = std::to_string(comp.number_chip);
-	n_comp = std::to_string(comp.number_comparator);
-}
-
-// LVGL ACTIONS
-#ifdef __cplusplus
-extern "C" {
-
-	// to dispays
-	void action_to_main_disp(lv_event_t* e) {
-		LL_USART_RequestRxDataFlush(UART5); // TODO это дожно быть здесь? (сбрасывает uart если какие-то данные предварительно были посланы из g4)
-		pause(2);
-
-		if (!vChips.empty()) {
-			if (cur_disp == current_display::on) {
-				for (const auto& chip : vChips) {
-					if (chip.typ == typeAction::on) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
-					}
-					else if (chip.typ == typeAction::off) {
-						sender(command::unmute, chip.number_chip, 0, dot::green, 0);
-					}
-				}
-			}
-
-			if (cur_disp == current_display::off) {
-				for (const auto& chip : vChips) {
-					if (chip.typ == typeAction::off) {
-						sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::stop_calibration);
-					}
-					else if (chip.typ == typeAction::on) {
-						sender(command::unmute, chip.number_chip, 0, dot::green, 0);
-					}
-				}
-
-			}
-		}
-
-		cur_disp = current_display::main;
-		loadScreen(SCREEN_ID_D_MAIN);
-
-		if (chip_state == chip_states::piano) {
-			all_H7_to_g4();
-			sync();
-		}
-	}
-
-	void action_to_disp_calibration_on(lv_event_t* e) {
-		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-		LL_USART_DisableDMAReq_RX(UART5);
-		cur_disp = current_display::on;
-		cur_chart = objects.chart_on;
-		loadScreen(SCREEN_ID_D_CHART_CALIB_ON);
-		all_g4_to_H7();
-		if (!vChips.empty()) {
-			cursor = vChips.front().comparators.front().cursor;
-			lv_chart_set_cursor_point(objects.chart_on, cursor_on_vert, ser_on_blue, cursor);
-			read_comp_setting(typeAction::on);
-
-			for (const auto& chip : vChips) {
-				if (chip.typ == typeAction::on) {
-					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
-				}
-				else if (chip.typ == typeAction::off) {
-					sender(command::mute, chip.number_chip, 0, dot::green, 0);
-				}
-			}
-		}
-	}
-
-	void action_to_disp_calibration_off(lv_event_t* e) {
-		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-		LL_USART_DisableDMAReq_RX(UART5);
-		cur_disp = current_display::off;
-		cur_chart = objects.chart_off;
-		loadScreen(SCREEN_ID_D_CHART_CALIB_OFF);
-		if (!vChips.empty()) {
-			all_g4_to_H7();
-			cursor = vChips.back().comparators.back().cursor;
-			lv_chart_set_cursor_point(objects.chart_off, cursor_off_vert, ser_off_blue, cursor);
-			read_comp_setting(typeAction::off);
-
-			for (const auto& chip : vChips) {
-				if (chip.typ == typeAction::off) {
-					sender(command::all_calib, chip.number_chip, 0, dot::green, (uint32_t)subcommand::start_calibration);
-				}
-				else if (chip.typ == typeAction::on) {
-					sender(command::mute, chip.number_chip, 0, dot::green, 0);
-				}
-			}
-		}
-	}
-
-	void action_to_disp_flash(lv_event_t* e) {
-		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-		LL_USART_DisableDMAReq_RX(UART5);
-		cur_disp = current_display::bootloader;
-		loadScreen(SCREEN_ID_D_FLASH);
-	}
-
-	// buttons
-	void action__echo_g4s(lv_event_t* e) {
-		init_chips();
-	}
-
-	void action_h7_g4(lv_event_t* e) {
-		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_FOR_FIRMWARE_G4, ADDRESS_G4_MAIN_FIRMWARE);
-	}
-
-	void action_jump(lv_event_t* e) {
-		jump_g4s_to_adress(ADDRESS_G4_MAIN_FIRMWARE, chip_states::piano);
-	}
-
-	void action_boot_1_flash_boot_2(lv_event_t* e) {
-		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_G4_FOR_BOOTLOADER_v2, ADDRESS_G4_BOOTLOADER_v2);
-	}
-
-	void action_in_boot_jump_to_boot_2(lv_event_t* e) {
-		jump_g4s_to_adress(ADDRESS_G4_BOOTLOADER_v2, chip_states::boot2);
-	}
-
-	void action_boot_2_flash_boot_1(lv_event_t* e) {
-		data_from_H7_to_g4(ADDRESS_H7_MAIN_FIRMWARE_FOR_G4, COUNT_PAGE_G4_FOR_BOOTLOADER, ADDRESS_G4_BOOTLOADER);
-	}
-
-	void action_reset_bootloader_g4(lv_event_t* e) {
-		reset_bootloaders();
-	}
-
-	void action_reset_main_to_bootloader(lv_event_t* e) {
-		reset_main_to_bootloader();
-	}
-
-	void action_calib_sensor_on_green(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
-		buffer_green[comp.address] = convert_8_16(a_, b_);
-		sensor_on_1_data_string = std::to_string(buffer_green[comp.address]);
-	}
-
-	void action_calib_sensor_on_red(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_blue_calib[comp.address]);
-		buffer_red[comp.address] = convert_8_16(a_, b_);
-		sensor_on_2_data_string = std::to_string(buffer_red[comp.address]);
-	}
-
-	void action_calib_sensor_off_green(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::green, buffer_blue_calib[comp.address]);
-		buffer_green[comp.address] = convert_8_16(a_, b_);
-		sensor_off_1_data_string = std::to_string(buffer_green[comp.address]);
-	}
-
-	void action_calib_sensor_off_red(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor((uint32_t)cursor);
-		sender(command::set_comp_value, comp.number_chip, comp.number_comparator, dot::red, buffer_blue_calib[comp.address]);
-		buffer_red[comp.address] = convert_8_16(a_, b_);
-		sensor_off_2_data_string = std::to_string(buffer_red[comp.address]);
-	}
-
-	void action_cursor_minus(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor(cursor - 1);
-		if (comp.is_active) {
-			cursor -= 1;
-			set_cursor_piont_on(comp);
-			set_cursor_piont_off(comp);
-		}
-	}
-
-	void action_cursor_plus(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor(cursor + 1);
-		if (comp.is_active) {
-			cursor += 1;
-			set_cursor_piont_on(comp);
-			set_cursor_piont_off(comp);
-		}
-	}
-
-	void action_cursor_minus_7(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor(cursor - 7);
-		if (comp.is_active) {
-			cursor -= 7;
-			set_cursor_piont_on(comp);
-			set_cursor_piont_off(comp);
-		}
-	}
-
-	void action_cursor_plus_7(lv_event_t* e) {
-		const auto& comp = searcher_addr_in_cursor(cursor + 7);
-		if (comp.is_active) {
-			cursor += 7;
-			set_cursor_piont_on(comp);
-			set_cursor_piont_off(comp);
-		}
-	}
-
-	void action_save_calibration(lv_event_t* e) {
-		save_to_memory();
-		debugg_fn(" calib saved "); // DEBUG
-	}
-
-	void action_restore_calibration(lv_event_t* e) {
-		read_on_memory();
-		LL_TIM_DisableCounter(TIM1);  // PWM - tim clk
-		LL_USART_DisableDMAReq_RX(UART5);
-		all_H7_to_g4();
-		LL_USART_EnableDMAReq_RX(UART5);
-		LL_TIM_EnableCounter(TIM1);  // PWM - tim clk
-		debugg_fn(" calib restored "); // DEBUG
-	}
-
-	void action_jump_to_dfu(lv_event_t* e) {
-		SCB_DisableDCache();
-		SCB_DisableICache();
-		SCB_CleanInvalidateDCache();
-
-		extern int* _bflag;
-		uint32_t* dfu_boot_flag;
-		dfu_boot_flag = (uint32_t*)(&_bflag);
-		*dfu_boot_flag = 0xDEADBEEF;
-
-		pause(200);
-		NVIC_SystemReset();
-	}
-
-	void action_piano_off(lv_event_t* e) {
-		to_sleep();
-	}
-
-	void action_clear_disp(lv_event_t* e) {
-		debugg_clear();
-	}
-
-		// LVGL VARS
-	const char* get_var_debugg() {
-		return debugg.c_str();
-	}
-	void set_var_debugg(const char* value) {
-		debugg = value;
-	}
-
-	const char* get_var_cursor_string() {
-		return cursor_string.c_str();
-	}
-	void set_var_cursor_string(const char* value) {
-		cursor_string = value;
-	}
-
-	const char* get_var_chart_calib_online() {
-		return chart_calib_online.c_str();
-	}
-	void set_var_chart_calib_online(const char* value) {
-		chart_calib_online = value;
-	}
-
-	const char* get_var_l() {
-		return l.c_str();
-	}
-
-	void set_var_l(const char* value) {
-		l = value;
-	}
-	const char* get_var_r() {
-		return r.c_str();
-	}
-
-	void set_var_r(const char* value) {
-		r = value;
-	}
-
-	const char* get_var_sensor_on_1_data_string() {
-		return sensor_on_1_data_string.c_str();
-	}
-	void set_var_sensor_on_1_data_string(const char* value) {
-		sensor_on_1_data_string = value;
-	}
-
-	const char* get_var_sensor_on_2_data_string() {
-		return sensor_on_2_data_string.c_str();
-	}
-	void set_var_sensor_on_2_data_string(const char* value) {
-		sensor_on_2_data_string = value;
-	}
-
-	const char* get_var_sensor_off_1_data_string() {
-		return sensor_off_1_data_string.c_str();
-	}
-	void set_var_sensor_off_1_data_string(const char* value) {
-		sensor_off_1_data_string = value;
-	}
-
-	const char* get_var_sensor_off_2_data_string() {
-		return sensor_off_2_data_string.c_str();
-	}
-	void set_var_sensor_off_2_data_string(const char* value) {
-		sensor_off_2_data_string = value;
-	}
-
-	const char* get_var_n_chip() {
-		return n_chip.c_str();
-	}
-	void set_var_n_chip(const char* value) {
-		n_chip = value;
-	}
-
-	const char* get_var_n_comp() {
-		return n_comp.c_str();
-	}
-	void set_var_n_comp(const char* value) {
-		n_comp = value;
-	}
-
-}
-#endif // extern "C"

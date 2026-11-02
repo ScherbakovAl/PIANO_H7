@@ -7,31 +7,38 @@
 extern "C" {
 #endif
 
-extern void action_save_calibration(lv_event_t * e);
+extern void action_to_log(lv_event_t * e);
+extern void action_to_curve(lv_event_t * e);
+extern void action_to_calib(lv_event_t * e);
+extern void action_to_service(lv_event_t * e);
+extern void action_power_off(lv_event_t * e);
+extern void action_to_main(lv_event_t * e);
+extern void action_curve_save(lv_event_t * e);
+extern void action_curve_reset(lv_event_t * e);
+extern void action_curve_tab(lv_event_t * e);
+extern void action_curve_roller_changed(lv_event_t * e);
+extern void action_curve_step(lv_event_t * e);
+extern void action_curve_slider_changed(lv_event_t * e);
+extern void action_curve_mode(lv_event_t * e);
+extern void action_calib_back(lv_event_t * e);
+extern void action_calib_tab(lv_event_t * e);
+extern void action_calib_save(lv_event_t * e);
+extern void action_calib_chart_pressed(lv_event_t * e);
+extern void action_calib_step(lv_event_t * e);
+extern void action_calib_follow(lv_event_t * e);
+extern void action_calib_set(lv_event_t * e);
+extern void action_rescan(lv_event_t * e);
+extern void action_to_flash(lv_event_t * e);
+extern void action_toggle_last_note(lv_event_t * e);
 extern void action_restore_calibration(lv_event_t * e);
 extern void action_jump_to_dfu(lv_event_t * e);
-extern void action_to_disp_flash(lv_event_t * e);
-extern void action_to_disp_calibration_on(lv_event_t * e);
-extern void action_to_disp_calibration_off(lv_event_t * e);
-extern void action_to_main_disp(lv_event_t * e);
-extern void action__echo_g4s(lv_event_t * e);
-extern void action_reset_bootloader_g4(lv_event_t * e);
-extern void action_reset_main_to_bootloader(lv_event_t * e);
-extern void action_h7_g4(lv_event_t * e);
-extern void action_jump(lv_event_t * e);
-extern void action_calib_sensor_on_green(lv_event_t * e);
-extern void action_calib_sensor_on_red(lv_event_t * e);
-extern void action_calib_sensor_off_green(lv_event_t * e);
-extern void action_calib_sensor_off_red(lv_event_t * e);
-extern void action_cursor_minus(lv_event_t * e);
-extern void action_cursor_plus(lv_event_t * e);
-extern void action_cursor_minus_7(lv_event_t * e);
-extern void action_cursor_plus_7(lv_event_t * e);
-extern void action_piano_off(lv_event_t * e);
-extern void action_clear_disp(lv_event_t * e);
-extern void action_boot_1_flash_boot_2(lv_event_t * e);
-extern void action_in_boot_jump_to_boot_2(lv_event_t * e);
-extern void action_boot_2_flash_boot_1(lv_event_t * e);
+extern void action_reboot(lv_event_t * e);
+extern void action_flash_back(lv_event_t * e);
+extern void action_flash_step(lv_event_t * e);
+extern void action_flash_boot_toggle(lv_event_t * e);
+extern void action_flash_boot(lv_event_t * e);
+extern void action_log_back(lv_event_t * e);
+extern void action_clear_log(lv_event_t * e);
 
 
 #ifdef __cplusplus
