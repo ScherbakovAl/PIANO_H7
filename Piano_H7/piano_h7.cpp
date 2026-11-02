@@ -116,6 +116,8 @@ std::string debugg;
 // };
 
 
+static void chips_start();
+
 void to_sleep() {
 
 	LL_mDelay(200);
@@ -151,6 +153,11 @@ void init() {
 
 	init_buffers();
 	init_midi_speeds();
+	chips_start();
+}
+
+// опрос G4 и запуск шины — при старте H7 и когда G4 получили питание позже (g4_power_wait)
+static void chips_start() {
 	init_chips();
 
 	if (chip_state == chip_states::none) {
@@ -207,7 +214,7 @@ void init_LL() {
 
 }
 
-void init_chips() {
+void init_chips(const bool quiet) {
 
 	LL_USART_RequestRxDataFlush(UART5);
 
@@ -299,7 +306,26 @@ void init_chips() {
 
 	strOut += " = " + std::to_string((counter_on + counter_off) / count_comparators);
 	strOut += stat;
-	debugg_fn(strOut);
+	if (!quiet) {
+		debugg_fn(strOut);
+	}
+}
+
+// Питание G4 включает компьютер, когда H7 появился на USB (Smart Switches, «питание по USB-устройству»),
+// и G4 отвечают через секунды после старта H7. Пока их нет и идёт игра — опрос раз в 0,5 с, без записи в журнал.
+// Полный опрос с пустой шиной — около 1,5 мс
+static void g4_power_wait() {
+	static uint32_t tick = 0;
+	if (chip_state != chip_states::none || (cur_disp != current_display::none && cur_disp != current_display::main)
+		|| HAL_GetTick() - tick < 500) {
+		return;
+	}
+	tick = HAL_GetTick();
+	init_chips(true);
+	if (chip_state != chip_states::none) {
+		LL_mDelay(300); // питание у G4 общее, но загружаются они не одновременно — дождаться остальных
+		chips_start();
+	}
 }
 
 void init_buffers() {
@@ -472,6 +498,7 @@ void h7() {
 		}
 
 		gui_tick();
+		g4_power_wait();
 
 		if (noise_count != noise_shown) {
 			noise_shown = noise_count;
